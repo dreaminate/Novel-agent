@@ -1,0 +1,5 @@
+# Bilingual-pair consistency record: Git blob hash of each side at the last
+# confirmed-consistent state. Both languages carry equal authority. After editing
+# either side, update its counterpart and recompute both hashes.
+2026-08-22-novel-authoring-agent-foundation.md: 16a038d09d7f482d279106c939ed3a2522fb8c9e
+2026-08-22-novel-authoring-agent-foundation.zh.md: 61a58bd358557c11c415ebd517424446a9084a91

@@ -1,0 +1,3 @@
+- insert:
+    - id: novel-planning
+      name: '@novel-agent/novel-planning'

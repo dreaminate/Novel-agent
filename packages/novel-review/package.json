@@ -1,0 +1,51 @@
+{
+  "name": "@novel-agent/novel-review",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "UNLICENSED",
+  "description": "Review-owned anchored draft execution and role Skills over native Canon, Planning, Writing and Memory services.",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "cordis.patch.yml",
+    "lib/index.js",
+    "lib/index.d.ts"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --root ../.. packages/novel-project/tests/novel-project.spec.ts packages/novel-project/tests/novel-project-result-packet-remote.integration.spec.ts"
+  },
+  "dependencies": {
+    "@deepseek-ai/cordis": "4.0.2",
+    "@deepseek-ai/dsh-agent": "0.1.2-rc.1",
+    "@deepseek-ai/dsh-skill": "0.1.2-rc.1",
+    "@deepseek-ai/dsh-subagent": "0.1.2-rc.1",
+    "@deepseek-ai/dsh-system-prompt": "0.1.2-rc.1",
+    "@deepseek-ai/dsh-util-values": "0.1.2-rc.1",
+    "@deepseek-ai/dsh-workspace": "0.1.2-rc.1",
+    "diff": "9.0.0",
+    "zod": "4.4.3"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/dsh-tools": "0.1.2-rc.1",
+    "@novel-agent/novel-project": "workspace:*",
+    "@novel-agent/novel-planning": "workspace:*",
+    "@novel-agent/novel-writing": "workspace:*",
+    "@novel-agent/novel-memory": "workspace:*"
+  },
+  "devDependencies": { "@deepseek-ai/dsh-tools": "0.1.2-rc.1" }
+}

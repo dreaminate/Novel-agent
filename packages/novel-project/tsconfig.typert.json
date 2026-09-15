@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "noEmit": true,
+    "paths": {
+      "@deepseek-ai/dsh-typert-protocol": ["./build/typert-protocol.meta.d.ts"]
+    }
+  },
+  "include": [
+    "src/index.ts",
+    "src/result-packet-schema.ts",
+    "src/types.ts",
+    "build/typert-protocol.meta.d.ts"
+  ]
+}

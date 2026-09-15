@@ -1,0 +1,5 @@
+# Self-mounting domain plugin. Generic surfaces and their host provider rows
+# remain owned by the selected DSH Profile.
+- insert:
+    - id: novel-project
+      name: '@novel-agent/novel-project'

@@ -1,0 +1,3 @@
+- insert:
+    - id: novel-writing
+      name: '@novel-agent/novel-writing'

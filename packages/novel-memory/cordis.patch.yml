@@ -1,0 +1,3 @@
+- insert:
+    - id: novel-memory
+      name: '@novel-agent/novel-memory'

@@ -1,0 +1,7 @@
+{
+  "extends": "./tsconfig.base.json",
+  "files": [],
+  "references": [
+    { "path": "./packages/novel-project/tsconfig.typert.json" }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "name": "@novel-agent/novel-memory",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "UNLICENSED",
+  "description": "Memory-owned revision retrieval, Chinese search, ledgers, lifecycle evidence, chapter context and native index Jobs.",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "cordis.patch.yml",
+    "lib/index.js",
+    "lib/index.d.ts",
+    "lib/relationships.js",
+    "lib/relationships.d.ts",
+    "lib/control-pack.js",
+    "lib/control-pack.d.ts",
+    "lib/graph.js",
+    "lib/graph.d.ts",
+    "lib/retrieval.js",
+    "lib/retrieval.d.ts"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --root ../.. packages/novel-project/tests/novel-project.spec.ts packages/novel-project/tests/novel-project-result-packet-remote.integration.spec.ts"
+  },
+  "dependencies": {
+    "@deepseek-ai/cordis": "4.0.2",
+    "@deepseek-ai/dsh-agent": "0.1.2-rc.1",
+    "@deepseek-ai/dsh-jobs": "0.1.2-rc.1",
+    "@deepseek-ai/dsh-session": "0.1.2-rc.1",
+    "@deepseek-ai/dsh-skill": "0.1.2-rc.1",
+    "@deepseek-ai/dsh-system-prompt": "0.1.2-rc.1",
+    "@deepseek-ai/dsh-util-values": "0.1.2-rc.1",
+    "@deepseek-ai/dsh-workspace": "0.1.2-rc.1",
+    "@node-rs/jieba": "2.0.2",
+    "minisearch": "7.2.0",
+    "zod": "4.4.3"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/dsh-tools": "0.1.2-rc.1",
+    "@novel-agent/novel-project": "workspace:*",
+    "@novel-agent/novel-planning": "workspace:*",
+    "@novel-agent/novel-writing": "workspace:*"
+  },
+  "devDependencies": { "@deepseek-ai/dsh-tools": "0.1.2-rc.1" }
+}

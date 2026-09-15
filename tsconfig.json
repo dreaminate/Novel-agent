@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.base.json",
+  "files": [],
+  "references": [
+    { "path": "./packages/novel-project" },
+    { "path": "./packages/novel-planning" },
+    { "path": "./packages/novel-writing" },
+    { "path": "./packages/novel-memory" },
+    { "path": "./packages/novel-review" }
+  ]
+}

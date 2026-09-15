@@ -1,0 +1,27 @@
+packages:
+  - packages/novel-project
+  - packages/novel-planning
+  - packages/novel-writing
+  - packages/novel-memory
+  - packages/novel-review
+
+# Native providers used by the retained plugin run their published build steps.
+# Values must be booleans. pnpm 11's createAllowBuildFunction switches on
+# `value`: only `true` and `false` cases exist and there is no default branch,
+# so any other value (including a placeholder string) is silently dropped and
+# the entry has no effect at all.
+allowBuilds:
+  '@deepseek-ai/dsh-subprocess-local': true
+  # Absent from the current dependency graph; denied explicitly.
+  '@google/genai': false
+  esbuild: true
+  # Resolves @koromix/koffi-win32-x64, which ships the prebuilt binary.
+  # Installation is documented as --ignore-scripts and no Koffi install script ran.
+  koffi: false
+  # Absent from the current dependency graph; denied explicitly.
+  protobufjs: false
+
+minimumReleaseAge: 1440
+
+patchedDependencies:
+  '@deepseek-ai/dsh-session@0.1.2-rc.1': patches/@deepseek-ai__dsh-session@0.1.2-rc.1.patch

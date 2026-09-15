@@ -1,0 +1,150 @@
+diff --git a/lib/index.js b/lib/index.js
+index 46fd18ca5cbcc4d5436bd31153ea54418f8c0867..ccaa9d7257e02611a48edfc6a2c6dac3a3ca0b3b 100644
+--- a/lib/index.js
++++ b/lib/index.js
+@@ -911,7 +911,7 @@ function decodeStorageRecord(value) {
+ * composition-dependent. The rationale is in
+ * `.agents/notes/implemented/architecture/2026-08-30-retain-ignorable-external-session-events.md`.
+ */
+-const KNOWN_SESSION_EVENT_TYPES = new Set([
++const KNOWN_SESSION_EVENT_TYPES = globalThis[Symbol.for("@deepseek-ai/dsh-session/known-session-event-types")] ??= new Set([
+ 	"agent-preset/selected",
+ 	"agent/inbox/spliced",
+ 	"approval/asked",
+@@ -1375,7 +1375,9 @@ var Session = class Session {
+ 	*
+ 	* @param type - The event type (key of {@link SessionEventMap}).
+ 	* @param data - The event payload; must be JSON-serializable.
+-	* @param opts - Surface metadata: `surfaceOp` controls how the event enters
++	* @param opts - Log-only events may opt into `{ ignorable: true }` when an unknown
++	*   reader can omit the event without changing required reconstruction.
++	*   For surface events, `surfaceOp` controls how the event enters
+ 	*   the ordered surface; `sourceEventSeqs` lists the seq numbers of earlier
+ 	*   events this one derives from. REQUIRED for
+ 	*   {@link SurfaceEventType} events (every message-producing event must
+@@ -1418,7 +1420,8 @@ var Session = class Session {
+ 			seq: SessionSeq(this.log.length),
+ 			time: Date.now(),
+ 			data: dataSnapshot,
+-			...surfaceMetadataSnapshot
++			...surfaceMetadataSnapshot,
++			...!isSurfaceEligibleType(type) && surfaceOpts?.ignorable === true ? { ignorable: true } : {}
+ 		});
+ 		this.surfaceManager.validateNext(event);
+ 		if (entry !== void 0) entry.appending = true;
+@@ -1543,6 +1546,10 @@ var SessionForkError = class extends Error {
+ var SessionStore = class extends Service {
+ 	store = /* @__PURE__ */ new Map();
+ 	counter = 0;
++	/** Local extension: declare a log-only event type understood by this Host before reading its persisted logs. */
++	registerLogEventType(type) {
++		KNOWN_SESSION_EVENT_TYPES.add(type);
++	}
+ 	constructor(ctx) {
+ 		super(ctx, "sessions");
+ 		ctx.inject(["typert"], (typeCtx) => {
+diff --git a/lib/types/index.d.ts b/lib/types/index.d.ts
+index 9d08c9d0e92228ccdfb201b99e94d6580faa122f..92f422f1b88d68338fd0a2dbe6aa4a23a36ddfb8 100644
+--- a/lib/types/index.d.ts
++++ b/lib/types/index.d.ts
+@@ -23,6 +23,10 @@ export type { SessionSurface, SurfaceFoldReplacement, SurfaceFoldResult } from '
+ export { deriveEventMessage, foldSurface, isAppendSurfaceEvent, isReplacementSurfaceEvent, isSurfaceEvent, isSurfaceEligibleType } from './surface.ts';
+ export { canonicalHeader, foldRequestHeader, headerEquals } from './request-header.ts';
+ export { KNOWN_SESSION_EVENT_TYPES } from './known-event-types.ts';
++/** Explicit compatibility intent for a log-only event whose omission is safe for an unknown reader. */
++export interface LogEventIntent {
++    readonly ignorable: true;
++}
+ declare module '@deepseek-ai/cordis' {
+     interface Context {
+         sessions: SessionStore;
+@@ -205,7 +209,9 @@ export declare class Session {
+      *
+      * @param type - The event type (key of {@link SessionEventMap}).
+      * @param data - The event payload; must be JSON-serializable.
+-     * @param opts - Surface metadata: `surfaceOp` controls how the event enters
++     * @param opts - Log-only events may opt into `{ ignorable: true }` when an unknown
++     *   reader can omit the event without changing required reconstruction.
++     *   For surface events, `surfaceOp` controls how the event enters
+      *   the ordered surface; `sourceEventSeqs` lists the seq numbers of earlier
+      *   events this one derives from. REQUIRED for
+      *   {@link SurfaceEventType} events (every message-producing event must
+@@ -230,7 +236,7 @@ export declare class Session {
+      *   append reentered while this acceptance/publication boundary is open also
+      *   rejects before the log changes.
+      */
+-    append<T extends SessionEventType>(type: T, data: SessionEventMap[T], ...opts: T extends SurfaceEventType ? [opts: SurfaceIntent] : []): SessionEvent<T>;
++    append<T extends SessionEventType>(type: T, data: SessionEventMap[T], ...opts: T extends SurfaceEventType ? [opts: SurfaceIntent] : [intent?: LogEventIntent]): SessionEvent<T>;
+     /** Cached fold of the request-header events — see {@link requestHeader}. */
+     private headerFold;
+     /** Log position (events consumed) the header fold has reached. */
+@@ -311,6 +317,11 @@ export declare class SessionForkError extends Error {
+ export declare class SessionStore extends Service {
+     private store;
+     private counter;
++    /**
++     * Declare a log-only event type understood by the loaded Host extension before its logs are read.
++     * The declaration lasts for this process; payloads and required/ignorable intent remain unchanged.
++     */
++    registerLogEventType<T extends Exclude<SessionEventType, SurfaceEventType>>(type: T): void;
+     constructor(ctx: Context);
+     /**
+      * Create a session owned by the calling fiber: disposing that fiber stops
+diff --git a/lib/types/index.js b/lib/types/index.js
+index 84415427c68f24850bf3b21b0f0670c62c2094ee..ce9b449a50396557783713e3fdd484c3b2d5de1e 100644
+--- a/lib/types/index.js
++++ b/lib/types/index.js
+@@ -11,8 +11,9 @@ import { brandString } from '@deepseek-ai/dsh-brand';
+ import { deepFreeze, snapshotJsonValue } from '@deepseek-ai/dsh-util-values';
+ import { scopeOf, scopeTarget } from '@deepseek-ai/dsh-scope';
+ import { SESSION_FORMAT_VERSION, SessionLogOffset, SessionSeq } from "./types.js";
+-import { deriveEventMessage, SurfaceManager } from "./surface.js";
++import { deriveEventMessage, isSurfaceEligibleType, SurfaceManager } from "./surface.js";
+ import { foldRequestHeader } from "./request-header.js";
++import { KNOWN_SESSION_EVENT_TYPES } from "./known-event-types.js";
+ export * from "./types.js";
+ export { SessionPreparation } from "./preparation.js";
+ export { interruptedTurnClosers, TOOL_NOT_STARTED, TOOL_OUTCOME_UNKNOWN } from "./repair.js";
+@@ -503,7 +504,9 @@ export class Session {
+      *
+      * @param type - The event type (key of {@link SessionEventMap}).
+      * @param data - The event payload; must be JSON-serializable.
+-     * @param opts - Surface metadata: `surfaceOp` controls how the event enters
++     * @param opts - Log-only events may opt into `{ ignorable: true }` when an unknown
++     *   reader can omit the event without changing required reconstruction.
++     *   For surface events, `surfaceOp` controls how the event enters
+      *   the ordered surface; `sourceEventSeqs` lists the seq numbers of earlier
+      *   events this one derives from. REQUIRED for
+      *   {@link SurfaceEventType} events (every message-producing event must
+@@ -553,6 +556,7 @@ export class Session {
+             time: Date.now(),
+             data: dataSnapshot,
+             ...surfaceMetadataSnapshot,
++            ...!isSurfaceEligibleType(type) && surfaceOpts?.ignorable === true ? { ignorable: true } : {},
+         });
+         this.surfaceManager.validateNext(event);
+         if (entry !== undefined)
+@@ -694,6 +698,10 @@ export class SessionForkError extends Error {
+ export class SessionStore extends Service {
+     store = new Map();
+     counter = 0;
++    /** Local extension: declare a log-only event type understood by this Host before reading its persisted logs. */
++    registerLogEventType(type) {
++        KNOWN_SESSION_EVENT_TYPES.add(type);
++    }
+     constructor(ctx) {
+         super(ctx, 'sessions');
+         ctx.inject(['typert'], (typeCtx) => {
+diff --git a/lib/types/known-event-types.js b/lib/types/known-event-types.js
+index 28a72730157faa82c5def094987a0deb43371b53..af7fe6f67ac3658b84b87a1d4c8869892aaaf249 100644
+--- a/lib/types/known-event-types.js
++++ b/lib/types/known-event-types.js
+@@ -18,7 +18,7 @@
+  * composition-dependent. The rationale is in
+  * `.agents/notes/implemented/architecture/2026-08-30-retain-ignorable-external-session-events.md`.
+  */
+-export const KNOWN_SESSION_EVENT_TYPES = new Set([
++export const KNOWN_SESSION_EVENT_TYPES = globalThis[Symbol.for("@deepseek-ai/dsh-session/known-session-event-types")] ??= new Set([
+     'agent-preset/selected',
+     'agent/inbox/spliced',
+     'approval/asked',

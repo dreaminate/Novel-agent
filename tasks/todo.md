@@ -1,5 +1,15 @@
 # Execution checklist
 
+## Public repository publish and clone verification, 2026-09-15
+
+**Status:** `done`; evidence in [repository publish](repository-publish-2026-09-15.md).
+
+- [x] Committed the working tree as the initial import and pushed `main` to `dreaminate/Novel-agent` (public, per user confirmation): `47f2cc4`, `0f09e8f`, `3563ef6`.
+- [x] Fixed the CRLF-sensitive `product-boundary` assertion that made a fresh clone fail; current suite is 284/284 green in both the origin checkout and a clone.
+- [x] Added `scripts/install-plugins.ps1` and README steps so a second machine can clone, build, pack and install; the script writes the authorized `patchedDependencies` entry (and `autoInstallPeers: false`) into the selected profile, reinstalls, and verifies the patch marker plus all five plugin packages.
+- [x] Verified from the public repo: fresh clone → install → build → 284 tests → pack → script install into a fresh isolated DSH_HOME → real host boot with empty stderr.
+- [ ] Decide (user) whether to keep the repo public with historical machine paths and the `UNLICENSED` package license, and whether to stop the leftover host process (PID 15440, started 20:44, not part of this task).
+
 ## Front-end redesign brief for OpenDesign, 2026-09-15
 
 **Status:** `done` (design artifact only; no product code changed).

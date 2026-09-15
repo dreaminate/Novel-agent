@@ -121,7 +121,7 @@ describe('novel-agent product boundary', () => {
     expect(bundlePatch).not.toContain('@deepseek-ai/dsh-web-app')
     expect(bundlePatch).not.toContain('dsh-better-sidebar')
     expect(bundlePatch).not.toContain('@xmoon76/dsh-pi-tui')
-    expect(bundlePatch.match(/^\s*- id:/gm)).toEqual(['    - id:'])
+    expect(bundlePatch.match(/^[ \t]*- id:/gm)).toEqual(['    - id:'])
     expect(bundlePatch).toContain("name: '@novel-agent/novel-project'")
 
     const readme = readFileSync(join(workspaceRoot, 'README.md'), 'utf8')

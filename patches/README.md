@@ -10,7 +10,7 @@
 
 ## 安装范围
 
-根 `pnpm-workspace.yaml` 已登记 `patchedDependencies`，在本仓库运行 `corepack pnpm install` 会应用补丁。`pnpm patch-commit` 只是生成依赖补丁，不是 Git 提交。
+根 `pnpm-workspace.yaml` 已登记 `patchedDependencies`，在本仓库运行 `corepack pnpm install` 会应用补丁。`pnpm patch-commit` 只是生成依赖补丁，不是 Git 提交。新机器上的 Profile 安装（`dsh plugin --profile <名称> add`）由 [`scripts/install-plugins.ps1`](../scripts/install-plugins.ps1) 自动把本补丁写入该 Profile 的 `pnpm-workspace.yaml` 并校验；CLI/Host 自己的安装仍需按本节手动配置。
 
 **实际运行 DSH 的 Host 和 selected Profile 也必须应用同一补丁。** 只修改 novel-agent 的开发依赖，不会修复另一个原样安装的 CLI 或 Desktop。两处 pnpm workspace 配置都使用：
 

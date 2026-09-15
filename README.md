@@ -181,19 +181,23 @@ dsh plugin --profile web add `
 
 ### 在另一台电脑上安装
 
-新机器克隆仓库后，`scripts/install-plugins.ps1` 把上面的步骤合成一条命令：
-安装依赖、构建、打包到 `%TEMP%\novel-agent-packages`，再对该 Profile 执行
-`dsh plugin add`。前置条件是 Node 与 corepack（版本见根 `package.json`），并且
-实际运行该 Profile 的 DSH CLI/Host 已按 [补丁说明](patches/README.md) 应用
-Session 补丁——未打补丁的 Host 无法加载这些插件。需要隔离 Home 时先设置
-`$env:DSH_HOME`，并让 `dsh` 指向同一已打补丁的 CLI：
+新机器克隆仓库后，`scripts/install-plugins.ps1` 完成整套安装：`corepack pnpm install`、
+`corepack pnpm build`、打包到 `%TEMP%\novel-agent-packages`、给所选 Profile 的
+`pnpm-workspace.yaml` 写入授权的 `dsh-session` 补丁路径（并保留
+`autoInstallPeers: false`）后执行 `dsh plugin --profile <名称> add`，最后校验 Profile
+内的 `dsh-session` 带补丁、五个插件包齐全。前置条件是 Node 与 corepack（版本见根
+`package.json`），并且**实际运行该 Profile 的 DSH CLI/Host 也必须已按
+[补丁说明](patches/README.md) 应用同一补丁**——本脚本能配置 Profile，但不能修改
+CLI 安装本身。脚本要求显式指定隔离的 `DSH_HOME`，不会写默认 Home：
 
 ```powershell
 corepack enable
+$env:DSH_HOME = 'D:\dsh-homes\dev'
 powershell -ExecutionPolicy Bypass -File scripts/install-plugins.ps1 -Profile web
 ```
 
-脚本只写入 `%TEMP%` 与目标 Profile，不改动仓库内 `packages/*/lib` 以外的源码。
+脚本只写入 `%TEMP%`、`$DSH_HOME` 与仓库内构建产物；安装完成后用同一已打补丁的 CLI
+启动该 Profile 即可。
 必要的小说前端由 `novel-project` 通过 DSH 既有 `conversation.view` Slot 提供。
 Better Sidebar 自带终端、Side Chat、文件、Git、Diff 和布局保持原样；novel-agent
 不再注册第二份 Canon 摘要 tab。

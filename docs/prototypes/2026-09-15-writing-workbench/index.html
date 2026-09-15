@@ -874,6 +874,130 @@ svg.ic.lg{ width:22px; height:22px; }
 .sb-note .pe-title{ font-size:var(--fs-14); color:var(--ink); font-weight:600; }
 .sb-note .pe-text{ font-size:var(--fs-13); color:var(--ink-2); line-height:1.7; }
 
+/* ============ 关系史：版本树（决策树式）+ 关系思维导图 ============ */
+.relhist-layout{ display:grid; grid-template-columns:292px minmax(0,1fr); gap:22px; align-items:start; }
+.ver-tree{ position:relative; display:grid; gap:10px; padding-left:26px; }
+.ver-node{
+  position:relative; width:100%; display:grid; gap:6px; text-align:left; cursor:pointer;
+  padding:10px 12px; border:1px solid var(--line); border-radius:var(--radius-sm);
+  background:var(--paper-2); color:var(--ink-2); box-shadow:var(--shadow-1); font:inherit;
+  transition:border-color var(--t-fast) var(--ease), transform var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
+}
+.ver-node::before{ content:""; position:absolute; left:-18px; top:0; bottom:-10px; width:2px; background:var(--line); border-radius:1px; }
+.ver-node:first-child::before{ top:15px; }
+.ver-node:last-child::before{ bottom:auto; height:15px; }
+.ver-node::after{
+  content:""; position:absolute; left:-22px; top:15px; width:10px; height:10px; border-radius:50%;
+  background:var(--paper-2); border:2px solid var(--ink-3); box-sizing:border-box;
+}
+.ver-node:hover{ border-color:var(--line-2); transform:translateY(-1px); box-shadow:var(--shadow-2); }
+.ver-node.on{ border-color:var(--cinnabar); }
+.ver-node.on::after{ border-color:var(--cinnabar); background:var(--cinnabar); }
+.ver-node.pending{ border-style:dashed; }
+.ver-node.pending::after{ border-style:dashed; }
+.ver-node.dim{ opacity:.55; }
+.ver-head{ display:flex; align-items:center; gap:8px; }
+.ver-num{ font-family:var(--font-mono); font-size:var(--fs-13); font-weight:600; color:var(--ink); }
+.ver-node.on .ver-num{ color:var(--cinnabar); }
+.ver-chapter{ font-size:var(--fs-12); color:var(--ink-2); line-height:1.5; }
+.ver-note{ font-size:var(--fs-12); color:var(--ink-3); line-height:1.6; }
+.rel-stage{ display:grid; gap:14px; align-content:start; }
+.rel-stage-head{ display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; }
+.rel-stage-title{ font-family:var(--font-serif); font-size:var(--fs-18); color:var(--ink); font-weight:600; }
+.rel-strip{ display:grid; gap:8px; padding:12px 13px; border:1px dashed var(--line-2); border-radius:var(--radius); background:var(--paper-3); }
+.rel-strip-list{ display:flex; flex-wrap:wrap; gap:8px; }
+.rel-strip-item{ display:inline-flex; align-items:center; gap:6px; padding:5px 9px; border-radius:999px; border:1px solid var(--line); background:var(--paper-2); font-size:var(--fs-12); color:var(--ink-2); }
+.rel-strip-item.changed{ border-color:var(--cinnabar); color:var(--ink); }
+.mb-note{ font-size:var(--fs-12); color:var(--cinnabar); }
+
+/* 思维导图（树式） */
+.mind{ display:grid; gap:0; }
+.mind-hub{
+  display:grid; gap:3px; justify-self:start; padding:10px 16px;
+  border:1px solid var(--line-2); border-radius:var(--radius); background:var(--paper-2); box-shadow:var(--shadow-1);
+}
+.mind-hub .mh-title{ font-family:var(--font-serif); font-size:var(--fs-14); color:var(--ink); font-weight:600; }
+.mind-hub .mh-sub{ font-size:var(--fs-12); color:var(--ink-3); }
+.mind-tree{ position:relative; display:grid; gap:0; padding-left:30px; margin-top:16px; }
+.mind-tree-item{
+  position:relative; display:grid; gap:8px; align-content:start; margin-bottom:12px;
+  padding:12px 13px; border:1px solid var(--line); border-radius:var(--radius);
+  background:var(--paper-2); box-shadow:var(--shadow-1); font:inherit; text-align:left; color:inherit;
+}
+.mind-tree-item:last-child{ margin-bottom:0; }
+.mind-tree-item::before{ content:""; position:absolute; left:-22px; top:0; bottom:-12px; width:2px; background:var(--line); }
+.mind-tree-item:first-child::before{ top:-16px; }
+.mind-tree-item:last-child::before{ bottom:auto; height:26px; }
+.mind-tree-item:first-child:last-child::before{ top:-16px; height:42px; }
+.mind-tree-item::after{ content:""; position:absolute; left:-22px; top:26px; width:22px; height:2px; background:var(--line); }
+.mind-tree-item.changed{ border-color:var(--cinnabar); }
+.mind-tree-item.changed::before,.mind-tree-item.changed::after{ background:var(--cinnabar); }
+.mind-tree-item[role="button"]{ cursor:pointer; }
+.mind-tree-item[role="button"]:hover{ border-color:var(--line-2); box-shadow:var(--shadow-2); }
+
+/* ============ 人物弧线与情绪：卡片 + 思维导图 ============ */
+.arc-grid{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+.arc-v-card{ text-align:left; cursor:pointer; font:inherit; color:inherit; }
+.arc-v-head{ display:flex; align-items:center; gap:10px; }
+.arc-v-name{ font-family:var(--font-serif); font-size:var(--fs-15); font-weight:600; color:var(--ink); }
+.arc-v-arc{ display:flex; align-items:center; gap:8px; font-size:var(--fs-13); color:var(--ink); line-height:1.6; }
+.arc-v-arc .ar{ color:var(--cinnabar); font-family:var(--font-mono); flex:none; }
+.arc-v-foot{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.emotion-grid{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+.emotion-row{
+  display:flex; align-items:center; gap:9px; width:100%; padding:9px 11px; text-align:left; cursor:pointer; font:inherit;
+  border:1px solid var(--line); border-radius:var(--radius-sm); background:var(--paper-2);
+  transition:border-color var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
+}
+.emotion-row:hover{ border-color:var(--line-2); box-shadow:var(--shadow-1); }
+.emotion-dot{ width:9px; height:9px; border-radius:50%; flex:none; }
+.emotion-name{ display:block; font-size:var(--fs-13); color:var(--ink); font-weight:500; }
+.emotion-text{ display:block; font-size:var(--fs-12); color:var(--ink-3); }
+.milestones{ display:grid; }
+.ms-item{ position:relative; padding:0 0 14px 16px; border-left:1px solid var(--line-2); }
+.ms-item:last-child{ border-left-color:transparent; padding-bottom:0; }
+.ms-item::before{ content:""; position:absolute; left:-4.5px; top:4px; width:8px; height:8px; border-radius:50%; background:var(--paper-2); border:2px solid var(--cinnabar); box-sizing:border-box; }
+.ms-ch{ font-size:var(--fs-12); color:var(--ink-3); font-family:var(--font-mono); }
+.ms-text{ font-size:var(--fs-13); color:var(--ink-2); line-height:1.65; }
+
+/* ============ 全幅视图：合同 / 债务 / 记忆 / 世界观 ============ */
+.contract-layout{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:22px; align-items:start; }
+.doc{ display:grid; gap:14px; }
+.doc-head{ display:grid; gap:6px; padding-bottom:12px; border-bottom:1px solid var(--line); }
+.doc-title{ font-family:var(--font-serif); font-size:var(--fs-22); color:var(--ink); font-weight:600; }
+.doc-sub{ font-size:var(--fs-12); color:var(--ink-3); }
+.doc-clause{ display:grid; gap:6px; }
+.doc-clause .dc-label{ font-size:12px; letter-spacing:.1em; color:var(--ink-3); font-weight:600; }
+.doc-clause ul{ margin:0; padding-left:18px; display:grid; gap:4px; font-size:var(--fs-13); color:var(--ink); line-height:1.7; }
+.check-list{ display:grid; gap:8px; }
+.check-item{
+  display:flex; align-items:flex-start; gap:9px; padding:10px 12px;
+  border:1px solid var(--line); border-radius:var(--radius-sm); background:var(--paper-2);
+  font-size:var(--fs-13); color:var(--ink-2); line-height:1.65;
+}
+.check-item .ic{ margin-top:2px; }
+.check-item.ok .ic{ color:var(--green); }
+.check-item.warn .ic{ color:var(--amber); }
+.check-item b{ color:var(--ink); font-weight:600; }
+.check-item .muted-note{ display:block; }
+.stat-strip{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+.stat{ display:grid; gap:2px; padding:12px 14px; border:1px solid var(--line); border-radius:var(--radius); background:var(--paper-2); box-shadow:var(--shadow-1); }
+.stat .st-num{ font-family:var(--font-mono); font-size:var(--fs-22); color:var(--ink); font-weight:600; }
+.stat .st-cap{ font-size:var(--fs-12); color:var(--ink-3); }
+.debt-row{ display:grid; gap:7px; margin-bottom:14px; }
+.debt-row:last-child{ margin-bottom:0; }
+.debt-track{ position:relative; display:grid; grid-template-columns:repeat(6,1fr); gap:3px; height:10px; }
+.debt-cell{ border-radius:3px; background:var(--paper-3); border:1px solid var(--line); }
+.debt-bar{ position:absolute; top:0; bottom:0; border-radius:3px; background:var(--cinnabar); opacity:.75; }
+.debt-bar.warn{ background:var(--amber); }
+.debt-bar.info{ background:var(--blue); }
+.debt-ticks{ display:grid; grid-template-columns:repeat(6,1fr); gap:3px; font-size:10px; color:var(--ink-3); font-family:var(--font-mono); text-align:center; }
+.mem-layout{ display:grid; gap:14px; max-width:920px; }
+.mem-band{ display:flex; align-items:center; gap:10px; }
+.mb-track{ position:relative; flex:1 1 auto; height:8px; border-radius:4px; background:var(--paper-3); border:1px solid var(--line); overflow:hidden; }
+.mb-fill{ position:absolute; top:0; bottom:0; left:0; background:var(--green); opacity:.65; }
+.world-layout{ display:grid; gap:14px; max-width:1100px; }
+
 </style>
 </head>
 <body>
@@ -1050,6 +1174,97 @@ svg.ic.lg{ width:22px; height:22px; }
                       </div>
                     </div>
                     <div class="page-body"><div class="tl" id="timeline"></div></div>
+                  </div>
+                </section>
+
+                <section class="view" data-view="relhist" id="view-relhist" aria-label="关系史">
+                  <div class="page">
+                    <div class="page-head">
+                      <div>
+                        <div class="page-title">关系史</div>
+                        <div class="page-sub">每接受一章，都在这棵树上留下一个分支 · 选中版本看当次的关系变化</div>
+                      </div>
+                      <div class="page-spacer"></div>
+                      <span class="chip info" id="relhist-ver-chip">当前 R5</span>
+                    </div>
+                    <div class="page-body">
+                      <div class="relhist-layout">
+                        <div class="ver-tree" id="ver-tree" aria-label="版本树"></div>
+                        <div class="rel-stage" id="rel-stage"></div>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                <section class="view" data-view="arcs" id="view-arcs" aria-label="人物弧线与情绪">
+                  <div class="page">
+                    <div class="page-head">
+                      <div>
+                        <div class="page-title">人物弧线与情绪</div>
+                        <div class="page-sub" id="arcs-sub">6 位主要人物 · 来自已接受版本 R5</div>
+                      </div>
+                      <div class="page-spacer"></div>
+                      <div class="seg" id="arcs-mode" role="group" aria-label="展现形式">
+                        <button type="button" class="on" data-mode="cards">卡片</button>
+                        <button type="button" data-mode="mind">思维导图</button>
+                      </div>
+                    </div>
+                    <div class="page-body">
+                      <div id="arcs-cards"></div>
+                      <div id="arcs-mind" hidden></div>
+                    </div>
+                  </div>
+                </section>
+
+                <section class="view" data-view="contract" id="view-contract" aria-label="本章合同">
+                  <div class="page">
+                    <div class="page-head">
+                      <div>
+                        <div class="page-title">本章合同</div>
+                        <div class="page-sub" id="contract-sub">来自第 6 章叙事单元 · 卷二</div>
+                      </div>
+                      <div class="page-spacer"></div>
+                      <button class="btn sm" type="button" id="contract-ask"><svg class="ic sm" aria-hidden="true"><use href="#i-spark"/></svg>让 AI 按合同检查本章</button>
+                    </div>
+                    <div class="page-body"><div id="contract-body"></div></div>
+                  </div>
+                </section>
+
+                <section class="view" data-view="debts" id="view-debts" aria-label="未收束债务">
+                  <div class="page">
+                    <div class="page-head">
+                      <div>
+                        <div class="page-title">未收束债务</div>
+                        <div class="page-sub" id="debts-sub">3 笔未收束 · 来自已接受版本 R5</div>
+                      </div>
+                      <div class="page-spacer"></div>
+                      <span class="chip warn" id="debts-chip">2 笔临期</span>
+                    </div>
+                    <div class="page-body"><div id="debts-body"></div></div>
+                  </div>
+                </section>
+
+                <section class="view" data-view="memory" id="view-memory" aria-label="写作记忆">
+                  <div class="page">
+                    <div class="page-head">
+                      <div>
+                        <div class="page-title">写作记忆</div>
+                        <div class="page-sub" id="memory-sub">3 条摘要 · 基于 R5，最新</div>
+                      </div>
+                    </div>
+                    <div class="page-body"><div id="memory-body"></div></div>
+                  </div>
+                </section>
+
+                <section class="view" data-view="world" id="view-world" aria-label="世界观与连续性">
+                  <div class="page">
+                    <div class="page-head">
+                      <div>
+                        <div class="page-title">世界观与连续性</div>
+                        <div class="page-sub" id="world-sub">5 地点 · 3 物件 · 4 项连续性检查</div>
+                      </div>
+                    </div>
+                    <div class="page-body"><div id="world-body"></div></div>
                   </div>
                 </section>
 
@@ -1287,34 +1502,38 @@ var CHARS = [
 ];
 
 var RELS = [
-  { id:'r1', a:'chen-mo', b:'lin-wan',
+  { id:'r1', a:'chen-mo', b:'lin-wan', from:'R2',
     ab:{ text:'信任上升，但隐瞒了货单', trust:3, conflict:1 },
     ba:{ text:'欣赏其执拗，防备被利用', trust:2, conflict:2 },
     debt:'是否公开录音笔', hot:true },
-  { id:'r2', a:'chen-mo', b:'gu-xue',
+  { id:'r2', a:'chen-mo', b:'gu-xue', from:'R4',
     ab:{ text:'旧友信赖与埋怨并存', trust:3, conflict:3 },
     ba:{ text:'想帮，但不能违规', trust:3, conflict:2 },
     debt:'专案组即将结案', hot:false },
-  { id:'r3', a:'chen-mo', b:'zhou-tie',
+  { id:'r3', a:'chen-mo', b:'zhou-tie', from:'R2',
     ab:{ text:'施压与试探', trust:1, conflict:4 },
     ba:{ text:'恐惧，想借陈默脱身', trust:2, conflict:3 },
     debt:'', hot:false },
-  { id:'r4', a:'su-ming', b:'kong-ling',
+  { id:'r4', a:'su-ming', b:'kong-ling', from:'R2',
     ab:{ text:'互相利用，随时翻脸', trust:2, conflict:3 },
     ba:{ text:'互相利用，随时翻脸', trust:2, conflict:3 },
     debt:'KC-0413 那批货', hot:false },
-  { id:'r5', a:'bai-hua', b:'zhao-xiaoman',
+  { id:'r5', a:'bai-hua', b:'zhao-xiaoman', from:'R4',
     ab:{ text:'保护（暗债：因黑仔之死）', trust:4, conflict:1 },
     ba:{ text:'依赖与怀疑', trust:3, conflict:2 },
     debt:'黑仔之死', hot:false },
-  { id:'r6', a:'lin-wan', b:'su-man',
+  { id:'r6', a:'lin-wan', b:'su-man', from:'R3',
     ab:{ text:'学姐学妹，理念冲突：慢挖', trust:4, conflict:2 },
     ba:{ text:'想直接曝光，嫌林晚太慢', trust:3, conflict:3 },
     debt:'曝光时机', hot:false },
-  { id:'r7', a:'chen-mo', b:'chen-wu',
+  { id:'r7', a:'chen-mo', b:'chen-wu', from:'R1',
     ab:{ text:'愧疚：失踪前一夜的争吵', trust:5, conflict:1 },
     ba:{ text:'依赖', trust:5, conflict:0 },
-    debt:'失踪前一夜的争吵', hot:false }
+    debt:'失踪前一夜的争吵', hot:false },
+  { id:'r8', a:'chen-mo', b:'bai-hua', from:'R6',
+    ab:{ text:'开始试探性信任：钥匙在手，话没说完', trust:2, conflict:2 },
+    ba:{ text:'观望：把钥匙递出去，但没说为什么', trust:2, conflict:1 },
+    debt:'黑仔之死的暗债', hot:true }
 ];
 
 var CHAPTERS = [
@@ -1366,6 +1585,15 @@ var CHAPTER_CONTRACT = {
     { label:'禁止矛盾', items:['陈默左臂伤口未愈（第 4 章）','白桦此时不能暴露身份'] },
     { label:'长度范围', value:'2,400–2,800 字' },
     { label:'接受标准', value:'章末留下通道尽头的悬念' }
+  ],
+  checks:[
+    { label:'视角', text:'第三人称限知 · 陈默', status:'warn', note:'结尾一句混入了林晚的心理活动（审阅问题 · 低）' },
+    { label:'故事时间', text:'第 41 天 · 夜', status:'ok', note:'与第 5 章结尾相接' },
+    { label:'必须出现', text:'地下通道 · 白桦的钥匙 · 陈雾的录音笔线索', status:'ok', note:'三项都已出现' },
+    { label:'禁止矛盾', text:'陈默左臂伤口未愈', status:'warn', note:'动作描写中被忽略（审阅问题 · 高）' },
+    { label:'禁止矛盾', text:'白桦此时不能暴露身份', status:'ok', note:'没有越过这条线' },
+    { label:'长度', text:'2,400–2,800 字', status:'ok', note:'约 2,800 字 · 达标' },
+    { label:'接受标准', text:'章末留下通道尽头的悬念', status:'ok', note:'结尾的「水响」成立' }
   ]
 };
 
@@ -1388,9 +1616,9 @@ var PROPOSAL = {
 };
 
 var MEMORY = [
-  { id:'m1', text:'第 5 章结尾：陈默与顾雪在灯塔礁分道。', src:'第 5 章正文', fresh:'基于 R5，最新' },
-  { id:'m2', text:'关系状态 R5：陈默 ↔ 林晚 信任上升。', src:'关系状态', fresh:'基于 R5，最新' },
-  { id:'m3', text:'伏笔 P2 状态：铅封被人为调换。', src:'伏笔状态', fresh:'基于 R5，最新' }
+  { id:'m1', text:'第 5 章结尾：陈默与顾雪在灯塔礁分道。', src:'第 5 章正文', fresh:'基于 R5，最新', ver:'R5', since:'第 5 章接受时写入' },
+  { id:'m2', text:'关系状态：陈默 ↔ 林晚 信任上升。', src:'关系状态', fresh:'基于 R5，最新', ver:'R3', since:'临时同盟、信任 +1 时更新' },
+  { id:'m3', text:'伏笔 P2 状态：铅封被人为调换。', src:'伏笔状态', fresh:'基于 R5，最新', ver:'R4', since:'铅封被确认动过时写入' }
 ];
 
 var TIMELINE = [
@@ -1402,9 +1630,9 @@ var TIMELINE = [
 ];
 
 var DEBTS = [
-  { id:'d1', title:'陈雾录音笔下落未明', text:'已 5 章未推进，最近一次提及在第 1 章。', level:'warn', levelLabel:'临期', related:'陈雾 · 陈默' },
-  { id:'d2', title:'黑仔求救短信时间戳无解释', text:'02:41 这个时间点还没有任何解释。', level:'warn', levelLabel:'临期', related:'黑仔 · 赵小满' },
-  { id:'d3', title:'陈默对林晚隐瞒货单', text:'关系债：一旦被林晚发现，同盟可能破裂。', level:'info', levelLabel:'关系债', related:'陈默 · 林晚' }
+  { id:'d1', title:'陈雾录音笔下落未明', text:'已 5 章未推进，最近一次提及在第 1 章。', level:'warn', levelLabel:'临期', related:'陈雾 · 陈默', ch:1, age:5, kind:'物件债' },
+  { id:'d2', title:'黑仔求救短信时间戳无解释', text:'02:41 这个时间点还没有任何解释。', level:'warn', levelLabel:'临期', related:'黑仔 · 赵小满', ch:3, age:3, kind:'伏笔债' },
+  { id:'d3', title:'陈默对林晚隐瞒货单', text:'关系债：一旦被林晚发现，同盟可能破裂。', level:'info', levelLabel:'关系债', related:'陈默 · 林晚', ch:2, age:4, kind:'关系债' }
 ];
 
 var FORESHADOW = [
@@ -1426,12 +1654,51 @@ var ARCS = [
 ];
 
 var REL_HISTORY = [
-  { ver:'R1', text:'陈默 ↔ 陈雾：失踪前一夜的争吵被写入回忆——愧疚的起点。' },
-  { ver:'R2', text:'陈默 ↔ 周铁山：第一次施压，关系从「工头与调度员」变成「猫和老鼠」。' },
-  { ver:'R3', text:'陈默 ↔ 林晚：达成临时同盟，信任 +1；陈默隐瞒了货单。' },
-  { ver:'R4', text:'白桦 ↔ 赵小满：保护关系确立，暗债来自黑仔之死。' },
-  { ver:'R5', text:'陈默 ↔ 顾雪：灯塔礁分道，两难加深。' },
-  { ver:'R6', text:'陈默 ↔ 白桦：信任 +1（待审提案）。', pending:true }
+  { ver:'R1', chapter:'第 1 章《夜航调度室的半张货单》', short:'夜航调度室的半张货单',
+    summary:'立项：18 人物 · 4 势力 · 5 地点 · 开篇三章',
+    items:[
+      { rel:'r7', note:'愧疚的起点：失踪前一夜的争吵被写入回忆', dirs:[
+        { d:'ab', text:'愧疚：觉得是自己逼走了妹妹', trust:5, conflict:2 },
+        { d:'ba', text:'依赖（回忆里的妹妹）', trust:5, conflict:0 } ] } ] },
+  { ver:'R2', chapter:'第 2 章《第七码头的第一次会面》', short:'第七码头的第一次会面',
+    summary:'林晚登场；陈默开始逐个逼问码头的人',
+    items:[
+      { rel:'r1', note:'第一次会面：没有接她递来的名片', dirs:[
+        { d:'ab', text:'警惕：知道她是记者，什么也没说', trust:1, conflict:2 },
+        { d:'ba', text:'职业性的关注：这个调度员知道得太多', trust:1, conflict:1 } ] },
+      { rel:'r3', note:'第一次施压：从工头嘴里撬出一句话', dirs:[
+        { d:'ab', text:'施压与试探', trust:1, conflict:3 },
+        { d:'ba', text:'恐惧：不想惹上这个人', trust:1, conflict:3 } ] } ] },
+  { ver:'R3', chapter:'第 3 章《沉船酒吧的试探》', short:'沉船酒吧的试探',
+    summary:'孔令奇察觉货单外流；黑仔的短信出现',
+    items:[
+      { rel:'r1', note:'达成临时同盟，信任 +1；陈默隐瞒了货单', dirs:[
+        { d:'ab', text:'信任上升，但隐瞒了货单', trust:3, conflict:1 },
+        { d:'ba', text:'欣赏其执拗，防备被利用', trust:2, conflict:2 } ] },
+      { rel:'r6', note:'报社争执：慢挖还是直接曝光', dirs:[
+        { d:'ab', text:'主张慢挖，压着苏曼的稿子', trust:4, conflict:2 },
+        { d:'ba', text:'嫌林晚太慢，想直接曝光', trust:3, conflict:3 } ] } ] },
+  { ver:'R4', chapter:'第 4 章《3 号冷库的铅封》', short:'3 号冷库的铅封',
+    summary:'白桦正面登场；顾雪开始私下递消息',
+    items:[
+      { rel:'r5', note:'保护关系确立，暗债来自黑仔之死', dirs:[
+        { d:'ab', text:'保护：把钥匙短暂交给赵小满', trust:4, conflict:1 },
+        { d:'ba', text:'依赖与怀疑', trust:3, conflict:2 } ] },
+      { rel:'r2', note:'私下把冷库排查结果递给陈默', dirs:[
+        { d:'ab', text:'旧友信赖与埋怨并存', trust:3, conflict:3 },
+        { d:'ba', text:'想帮，但不能违规', trust:3, conflict:2 } ] } ] },
+  { ver:'R5', chapter:'第 5 章《灯塔礁的夜航灯》', short:'灯塔礁的夜航灯',
+    summary:'夜航灯异常被确认；专案组结案压力逼近',
+    items:[
+      { rel:'r2', note:'灯塔礁分道，两难加深', dirs:[
+        { d:'ab', text:'旧友信赖与埋怨并存', trust:3, conflict:4 },
+        { d:'ba', text:'想帮，但不能违规；结案期限已定', trust:3, conflict:3 } ] } ] },
+  { ver:'R6', chapter:'第 6 章《冷库之下的通道》（待审）', short:'冷库之下的通道',
+    summary:'提案：钥匙转交，陈默与白桦之间第一次出现信任',
+    items:[
+      { rel:'r8', note:'信任 +1（待审提案）', dirs:[
+        { d:'ab', text:'开始试探性信任：钥匙在手，话没说完', trust:2, conflict:2 },
+        { d:'ba', text:'观望：把钥匙递出去，但没说为什么', trust:2, conflict:1 } ] } ] }
 ];
 
 var WORLD = {
@@ -1493,14 +1760,14 @@ var DIAG = {
 
 var SCREENS = [
   { id:'map',      label:'地图',       tab:'wb',   view:'map' },
-  { id:'contract', label:'本章合同',   tab:'wb',   view:'map', drawer:'contract' },
+  { id:'contract', label:'本章合同',   tab:'wb',   view:'contract' },
   { id:'board',    label:'伏笔板',     tab:'wb',   view:'board' },
-  { id:'debts',    label:'未收束债务', tab:'wb',   view:'map', drawer:'debts' },
-  { id:'arcs',     label:'人物弧线',   tab:'wb',   view:'map', drawer:'arcs' },
-  { id:'relhist',  label:'关系史',     tab:'wb',   view:'map', drawer:'relhist' },
+  { id:'debts',    label:'未收束债务', tab:'wb',   view:'debts' },
+  { id:'arcs',     label:'人物弧线',   tab:'wb',   view:'arcs' },
+  { id:'relhist',  label:'关系史',     tab:'wb',   view:'relhist' },
   { id:'timeline', label:'时间线',     tab:'wb',   view:'timeline' },
-  { id:'memory',   label:'写作记忆',   tab:'wb',   view:'map', drawer:'memory' },
-  { id:'world',    label:'世界观',     tab:'wb',   view:'map', drawer:'world' },
+  { id:'memory',   label:'写作记忆',   tab:'wb',   view:'memory' },
+  { id:'world',    label:'世界观',     tab:'wb',   view:'world' },
   { id:'profile',  label:'人物档案',   tab:'wb',   view:'map', drawer:'profile', char:'chen-mo' },
   { id:'proposal', label:'提案审阅',   tab:'wb',   view:'proposal' },
   { id:'reading',  label:'正文阅读',   tab:'wb',   view:'reading' },
@@ -1510,7 +1777,7 @@ var SCREENS = [
   { id:'diag',     label:'诊断模式',   tab:'wb',   view:'diag', diag:true },
   { id:'empty',    label:'空项目',     tab:'wb',   view:'empty' },
   { id:'loading',  label:'加载中',     tab:'wb',   view:'loading' },
-  { id:'plugin',   label:'缺插件',     tab:'wb',   view:'map', drawer:'contract', missing:true },
+  { id:'plugin',   label:'缺插件',     tab:'wb',   view:'contract', missing:true },
   { id:'narrow',   label:'窄窗 1280',  tab:'wb',   view:'map', narrow:true },
   { id:'expired',  label:'过期提案',   tab:'chat', expired:true }
 ];
@@ -1547,7 +1814,8 @@ var state = {
   changes:[], issues:[],
   selected:null, pinned:{}, expanded:{}, layout:'faction', volume:'all', search:'',
   zoom:1, panX:0, panY:0, _pos:null,
-  drawer:null, drawerChar:null, toolOpen:true, readCh:6, readHl:null, ctxOpen:false
+  drawer:null, drawerChar:null, toolOpen:true, readCh:6, readHl:null, ctxOpen:false,
+  relVer:null, arcMode:'cards'
 };
 var CLUSTERS_FACTION = { none:{x:492,y:346}, press:{x:190,y:150}, bureau:{x:178,y:498}, port:{x:812,y:154}, river:{x:816,y:496} };
 var CLUSTERS_PLACE = { pier7:{x:492,y:346}, oldtown:{x:186,y:158}, cold3:{x:816,y:158}, reef:{x:822,y:498}, bar:{x:172,y:500} };
@@ -1560,6 +1828,7 @@ function resetState(){
   state.selected = null; state.pinned = {}; state.expanded = {}; state.layout = 'faction'; state.volume = 'all'; state.search = '';
   state.zoom = 1; state.panX = 0; state.panY = 0; state._pos = null;
   state.drawer = null; state.drawerChar = null; state.toolOpen = true; state.readCh = 6; state.readHl = null; state.ctxOpen = false;
+  state.relVer = null; state.arcMode = 'cards';
 }
 
 /* ---------- 基础反馈 ---------- */
@@ -1661,18 +1930,18 @@ function renderNav(){
     '<div class="nc-meta">' + stChip + chip('2,800 字') + '</div>' +
     '<div class="progress' + (state.accepted ? ' ok' : '') + '"><i style="width:100%"></i></div>' +
     '</div>';
-  html += navItem('contract', 'doc', '本章合同', state.drawer === 'contract');
+  html += navItem('contract', 'doc', '本章合同', state.view === 'contract');
   html += '</div>';
   html += '<div class="nav-group"><div class="nav-title">故事状态</div>';
   html += navItem('board', 'layers', '伏笔与线索板', state.view === 'board', chip('6', 'sm'));
-  html += navItem('debts', 'alert', '未收束债务', state.drawer === 'debts', chip('3', 'sm'));
-  html += navItem('arcs', 'users', '人物弧线与情绪', state.drawer === 'arcs');
-  html += navItem('relhist', 'link', '关系史', state.drawer === 'relhist');
+  html += navItem('debts', 'alert', '未收束债务', state.view === 'debts', chip('3', 'sm'));
+  html += navItem('arcs', 'users', '人物弧线与情绪', state.view === 'arcs');
+  html += navItem('relhist', 'link', '关系史', state.view === 'relhist');
   html += navItem('timeline', 'clock', '时间线', state.view === 'timeline');
   html += '</div>';
   html += '<div class="nav-group"><div class="nav-title">记忆与设定</div>';
-  html += navItem('memory', 'book', '写作记忆', state.drawer === 'memory');
-  html += navItem('world', 'map', '世界观与连续性', state.drawer === 'world');
+  html += navItem('memory', 'book', '写作记忆', state.view === 'memory');
+  html += navItem('world', 'map', '世界观与连续性', state.view === 'world');
   html += '</div>';
   html += '<div class="nav-group"><div class="nav-title">推演</div>';
   html += navItem('sim', 'eye', '读者体验模拟', false);
@@ -1692,6 +1961,12 @@ function renderHead(){
     map:      ['故事地图', '18 人物 · 4 势力 · 第 41 天'],
     board:    ['伏笔与线索板', '6 项 · 来自已接受版本 ' + state.version],
     timeline: ['时间线', '故事内时间 · 第 0 天至第 41 天'],
+    relhist:  ['关系史', '版本树 · 每次接受留下一个分支'],
+    arcs:     ['人物弧线与情绪', '卡片 / 思维导图 · 来自已接受版本 ' + state.version],
+    contract: ['本章合同', '条款 · 与第 6 章草稿逐条对照'],
+    debts:    ['未收束债务', '从埋下到当下的跨度'],
+    memory:   ['写作记忆', 'AI 记得什么 · 来源与新鲜度'],
+    world:    ['世界观与连续性', '地点 · 物件 · 连续性检查'],
     sandbox:  ['沙盒推演', 'MiroFish · 未连接'],
     diag:     ['诊断模式', '原始账本只读视图'],
     proposal: ['提案审阅', '第 6 章 · R5 → R6'],
@@ -1845,6 +2120,7 @@ function edgeDimmed(r){
 function renderEdges(pos){
   var html = '';
   RELS.forEach(function(r){
+    if (!relAvailable(r)) return;
     var p1 = pos[r.a], p2 = pos[r.b];
     if (!p1 || !p2) return;
     var hot = state.selected === r.a || state.selected === r.b;
@@ -1987,36 +2263,17 @@ function relRowHtml(c, r){
 function renderDrawer(){
   if (!state.drawer) return;
   var d = dom.drawer;
-  var titles = { contract:'本章合同', profile:'人物档案', debts:'未收束债务', arcs:'人物弧线与情绪', relhist:'关系史', memory:'写作记忆', world:'世界观与连续性' };
+  var titles = { profile:'人物档案', arc:'人物弧线' };
   var head = '<div class="drawer-title">' + esc(titles[state.drawer] || '详情') + '</div>';
   var sub = '';
   var body = '', foot = '';
-
-  if (state.drawer === 'contract'){
-    sub = '来自第 6 章叙事单元 · 卷二';
-    if (state.missing){
-      body = '<div class="plugin-err">' +
-        '<div class="pe-head">' + icon('alert') + '<div><div class="pe-title">未安装小说规划插件</div><div class="pe-text">本章合同暂不可用。安装「小说规划」插件后，合同会自动出现在这里；页面其他部分不受影响。</div></div></div>' +
-        '<div class="card-actions"><button class="btn sm" type="button" id="plugin-retry">' + icon('refresh', 'sm') + '重试</button></div>' +
-        '</div>';
-    } else {
-      var rows = CHAPTER_CONTRACT.rows.map(function(row){
-        if (row.items){
-          return '<div class="contract-block"><div class="cb-label">' + esc(row.label) + '</div><ul>' + row.items.map(function(t){ return '<li>' + esc(t) + '</li>'; }).join('') + '</ul></div>';
-        }
-        return '<div class="contract-block"><div class="cb-label">' + esc(row.label) + '</div><div class="card-text">' + esc(row.value) + '</div></div>';
-      }).join('');
-      body = '<div class="card-text">' + esc(CHAPTER_CONTRACT.unit) + '</div><div class="contract-list">' + rows + '</div>';
-      foot = '<button class="btn" type="button" id="contract-ask">' + icon('spark', 'sm') + '让 AI 按合同检查本章</button>';
-    }
-  }
 
   if (state.drawer === 'profile'){
     var c = byId(state.drawerChar || 'chen-mo');
     var f = factionById(c.faction);
     head = '<div class="seal" style="background:' + f.color + '" aria-hidden="true">' + esc(c.name.slice(0, 1)) + '</div><div><div class="drawer-title">' + esc(c.name) + '</div><div class="drawer-sub">' + esc(c.role) + '</div></div>';
     sub = c.unknown ? '所属势力：未知（双面身份）' : '所属势力：' + f.name;
-    var rels = RELS.filter(function(r){ return r.a === c.id || r.b === c.id; });
+    var rels = RELS.filter(function(r){ return (r.a === c.id || r.b === c.id) && relAvailable(r); });
     var apps = c.apps.map(function(a){
       var ch = chapterByNum(a.ch);
       return '<button class="rel-row" type="button" data-app-ch="' + a.ch + '"><div class="rel-head"><span class="rel-name">第 ' + a.ch + ' 章 · ' + esc(ch ? ch.title : '') + '</span>' + (ch && ch.status === 'pending' ? chip('待审', 'sm accent') : '') + '</div><div class="card-text">' + esc(a.note) + '</div></button>';
@@ -2036,54 +2293,26 @@ function renderDrawer(){
     foot = '<button class="btn primary" type="button" id="profile-continue">' + icon('spark', 'sm') + '让 AI 从这个人物继续写</button>';
   }
 
-  if (state.drawer === 'debts'){
-    sub = '3 条 · 来自已接受版本 ' + state.version;
-    var debtCh = { d1:1, d2:3, d3:1 };
-    body = '<div class="list">' + DEBTS.map(function(d){
-      return '<div class="card"><div class="card-meta">' + chip(d.levelLabel, d.level === 'warn' ? 'warn' : 'info') + chip(d.related, 'sm') + '</div>' +
-        '<div class="card-title">' + esc(d.title) + '</div><div class="card-text">' + esc(d.text) + '</div>' +
-        '<div class="card-actions"><button class="btn sm" type="button" data-app-ch="' + debtCh[d.id] + '">' + icon('book', 'sm') + '查看出处</button></div></div>';
-    }).join('') + '</div>';
-  }
-
-  if (state.drawer === 'arcs'){
-    sub = '主要人物 · 来自已接受版本 ' + state.version;
-    body = '<div class="arc-list">' + ARCS.map(function(a){
-      var c = byId(a.id);
-      return '<div class="card arc-card"><div class="arc-head"><span class="seal" style="width:32px;height:32px;font-size:15px;background:' + factionById(c.faction).color + '">' + esc(c.name.slice(0, 1)) + '</span><span class="arc-name">' + esc(c.name) + '</span><div class="page-spacer"></div>' + chip(c.emotion, 'sm') + '</div>' +
-        '<div class="arc-from-to"><span>' + esc(a.from) + '</span><span class="ar">→</span><span>' + esc(a.to) + '</span></div>' +
-        '<div class="card-actions">' + a.chs.map(function(n){ return '<button class="chip" type="button" data-app-ch="' + n + '">第 ' + n + ' 章</button>'; }).join('') + '</div></div>';
-    }).join('') + '</div>';
-  }
-
-  if (state.drawer === 'relhist'){
-    sub = '关系变化 · 按版本排列';
-    body = '<div class="list">' + REL_HISTORY.map(function(r){
-      return '<div class="card rel-hist-row"><div class="rh-head">' + chip(r.ver, r.pending ? 'accent' : 'info') + (r.pending ? chip('待审', 'sm') : '') + '</div><div class="rh-text">' + esc(r.text) + '</div></div>';
-    }).join('') + '</div>';
-  }
-
-  if (state.drawer === 'memory'){
-    sub = 'AI 记得什么 · 3 条摘要';
-    body = '<div class="list">' + MEMORY.map(function(m){
-      return '<div class="card mem-card"><div class="card-text">' + esc(m.text) + '</div><div class="mem-foot">' + chip(m.src, 'sm') + chip(m.fresh, 'ok sm') + '</div></div>';
-    }).join('') + '</div><div class="card-text">写作记忆由系统自动维护，作者不能直接编辑；如需纠正，在对话里说明即可。</div>';
-  }
-
-  if (state.drawer === 'world'){
-    sub = '5 地点 · 3 物件 · 连续性检查';
-    var places = WORLD.places.map(function(p){
-      return '<div class="wc-item">' + icon(p.status === 'ok' ? 'check' : 'alert', 'sm') + '<span><b>' + esc(p.name) + '</b> — ' + esc(p.note) + '</span><div class="page-spacer"></div>' + chip(p.statusLabel, p.status === 'ok' ? 'ok sm' : 'warn sm') + '</div>';
+  if (state.drawer === 'arc'){
+    var ca = byId(state.drawerChar || 'chen-mo');
+    var arcDef = null;
+    ARCS.forEach(function(x){ if (x.id === ca.id) arcDef = x; });
+    var fa = factionById(ca.faction);
+    head = '<div class="seal" style="background:' + fa.color + '" aria-hidden="true">' + esc(ca.name.slice(0, 1)) + '</div><div><div class="drawer-title">' + esc(ca.name) + ' · 弧线</div><div class="drawer-sub">' + esc(ca.role) + '</div></div>';
+    sub = '当前情绪：' + ca.emotion;
+    var arcBlock = arcDef
+      ? '<div class="card"><div class="arc-from-to"><span>' + esc(arcDef.from) + '</span><span class="ar">→</span><span>' + esc(arcDef.to) + '</span></div><div class="arc-note">' + esc(ca.arc.note) + '</div></div>'
+      : '<div class="card"><div class="card-text">这位人物还没有被记录弧线，当前情绪是「' + esc(ca.emotion) + '」。</div></div>';
+    var msHtml = ca.apps.map(function(x){
+      var chx = chapterByNum(x.ch);
+      return '<div class="ms-item"><div class="ms-ch">第 ' + x.ch + ' 章' + (chx && chx.status === 'pending' ? ' · 待审' : '') + '</div><div class="ms-text">' + esc(x.note) + '</div></div>';
     }).join('');
-    var objs = WORLD.objects.map(function(o){
-      return '<div class="wc-item">' + icon(o.status === 'ok' ? 'check' : 'alert', 'sm') + '<span><b>' + esc(o.name) + '</b> — ' + esc(o.note) + '</span><div class="page-spacer"></div>' + chip(o.statusLabel, o.status === 'ok' ? 'ok sm' : 'warn sm') + '</div>';
-    }).join('');
-    var cont = WORLD.continuity.map(function(x){
-      return '<div class="wc-item">' + icon(x.status === 'ok' ? 'check' : 'alert', 'sm') + '<span><b>' + esc(x.text) + '</b><br><span class="muted-note">' + esc(x.note) + '</span></span><div class="page-spacer"></div>' + chip(x.statusLabel, x.status === 'ok' ? 'ok sm' : 'warn sm') + '</div>';
-    }).join('');
-    body = '<div class="section-title">地点</div><div class="card world-card"><div class="wc-list">' + places + '</div></div>' +
-      '<div class="section-title">物件</div><div class="card world-card"><div class="wc-list">' + objs + '</div></div>' +
-      '<div class="section-title">连续性检查</div><div class="card world-card"><div class="wc-list">' + cont + '</div></div>';
+    var caRels = RELS.filter(function(r){ return (r.a === ca.id || r.b === ca.id) && relAvailable(r); });
+    body = '<div class="section-title">人物弧线</div>' + arcBlock +
+      '<div class="section-title">弧线里程碑</div><div class="milestones">' + msHtml + '</div>' +
+      '<div class="section-title">关系（双向各自独立）</div>' +
+      '<div class="list">' + caRels.map(function(r){ return relRowHtml(ca, r); }).join('') + '</div>';
+    foot = '<button class="btn primary" type="button" id="arc-continue">' + icon('spark', 'sm') + '让 AI 沿着这条弧线继续写</button>';
   }
 
   d.innerHTML = '<div class="drawer-head">' + head + '<div class="page-spacer"></div>' + (sub ? '<div class="drawer-sub">' + esc(sub) + '</div>' : '') + '<button class="btn ghost sm drawer-close" type="button" aria-label="关闭">' + icon('x', 'sm') + '</button></div>' +
@@ -2384,6 +2613,241 @@ function renderDiag(){
     '<h4>模拟器原始输出</h4><pre>' + esc(DIAG.sim[0]) + '</pre>';
 }
 
+/* ---------- 本章合同（全幅） ---------- */
+function renderContract(){
+  var box = $('#contract-body'); if (!box) return;
+  var sub = $('#contract-sub');
+  if (state.missing){
+    if (sub) sub.textContent = '依赖的领域插件未安装';
+    box.innerHTML = '<div class="plugin-err">' +
+      '<div class="pe-head">' + icon('alert') + '<div><div class="pe-title">未安装小说规划插件</div><div class="pe-text">本章合同暂不可用。安装「小说规划」插件后，合同会自动出现在这里；页面其他部分不受影响。</div></div></div>' +
+      '<div class="card-actions"><button class="btn sm" type="button" id="plugin-retry">' + icon('refresh', 'sm') + '重试</button></div>' +
+      '</div>';
+    return;
+  }
+  if (sub) sub.textContent = '来自第 6 章叙事单元 · 卷二 · 与第 6 章草稿逐条对照';
+  var clauses = CHAPTER_CONTRACT.rows.map(function(row){
+    if (row.items){
+      return '<div class="doc-clause"><div class="dc-label">' + esc(row.label) + '</div><ul>' + row.items.map(function(t){ return '<li>' + esc(t) + '</li>'; }).join('') + '</ul></div>';
+    }
+    return '<div class="doc-clause"><div class="dc-label">' + esc(row.label) + '</div><div class="card-text">' + esc(row.value) + '</div></div>';
+  }).join('');
+  var checks = CHAPTER_CONTRACT.checks.map(function(c){
+    return '<div class="check-item ' + (c.status === 'ok' ? 'ok' : 'warn') + '">' + icon(c.status === 'ok' ? 'check' : 'alert', 'sm') +
+      '<div class="od-fill"><b>' + esc(c.label) + '：' + esc(c.text) + '</b><span class="muted-note">' + esc(c.note) + '</span></div></div>';
+  }).join('');
+  box.innerHTML = '<div class="contract-layout">' +
+    '<div class="doc"><div class="doc-head"><div class="doc-title">本章合同</div><div class="doc-sub">' + esc(CHAPTER_CONTRACT.unit) + ' · 作者语言的任务清单</div></div>' + clauses + '</div>' +
+    '<div><div class="section-title">对照检查 · 第 6 章草稿</div><div class="check-list">' + checks + '</div>' +
+    '<div class="card" style="margin-top:14px"><div class="card-text">两条待处理项来自提案的审阅问题；接受本章之前，可以先让 AI 按合同改写。</div></div></div>' +
+    '</div>';
+}
+
+/* ---------- 未收束债务（全幅） ---------- */
+function renderDebts(){
+  var box = $('#debts-body'); if (!box) return;
+  var oldest = 0;
+  DEBTS.forEach(function(d){ if (d.age > oldest) oldest = d.age; });
+  var urgent = DEBTS.filter(function(d){ return d.level === 'warn'; }).length;
+  var sub = $('#debts-sub');
+  if (sub) sub.textContent = DEBTS.length + ' 笔未收束 · 来自已接受版本 ' + state.version;
+  var chipEl = $('#debts-chip');
+  if (chipEl) chipEl.textContent = urgent + ' 笔临期';
+  var tracks = DEBTS.map(function(d){
+    var left = ((d.ch - 1) / 6 * 100).toFixed(2);
+    var cls = d.level === 'warn' ? ' warn' : (d.level === 'info' ? ' info' : '');
+    return '<div class="debt-row">' +
+      '<div class="rel-head"><span class="rel-name">' + esc(d.title) + '</span>' + chip(d.kind, 'sm') + chip('已 ' + d.age + ' 章未推进', 'sm') + '</div>' +
+      '<div class="debt-track"><i class="debt-cell"></i><i class="debt-cell"></i><i class="debt-cell"></i><i class="debt-cell"></i><i class="debt-cell"></i><i class="debt-cell"></i>' +
+      '<span class="debt-bar' + cls + '" style="left:' + left + '%;right:0"></span></div>' +
+      '<div class="debt-ticks"><span>第 1 章</span><span>第 2 章</span><span>第 3 章</span><span>第 4 章</span><span>第 5 章</span><span>第 6 章 · 当下</span></div>' +
+      '</div>';
+  }).join('');
+  var cards = DEBTS.map(function(d){
+    return '<div class="card"><div class="card-meta">' + chip(d.levelLabel, d.level === 'warn' ? 'warn' : 'info') + chip(d.related, 'sm') + '</div>' +
+      '<div class="card-title">' + esc(d.title) + '</div><div class="card-text">' + esc(d.text) + '</div>' +
+      '<div class="card-actions"><button class="btn sm" type="button" data-app-ch="' + d.ch + '">' + icon('book', 'sm') + '查看出处</button>' +
+      '<button class="btn ghost sm" type="button" data-debt-next="' + d.id + '">' + icon('pen', 'sm') + '在下一章处理</button></div></div>';
+  }).join('');
+  box.innerHTML = '<div class="list">' +
+    '<div class="stat-strip">' +
+      '<div class="stat"><span class="st-num">' + DEBTS.length + '</span><span class="st-cap">未收束债务</span></div>' +
+      '<div class="stat"><span class="st-num">' + oldest + ' 章</span><span class="st-cap">最久未推进</span></div>' +
+      '<div class="stat"><span class="st-num">' + urgent + '</span><span class="st-cap">临期提醒</span></div>' +
+    '</div>' +
+    '<div class="card"><div class="section-title">债务跨度 · 从埋下到当下（第 41 天）</div>' + tracks + '</div>' +
+    cards +
+    '</div>';
+}
+
+/* ---------- 写作记忆（全幅） ---------- */
+function renderMemory(){
+  var box = $('#memory-body'); if (!box) return;
+  var sub = $('#memory-sub');
+  if (sub) sub.textContent = MEMORY.length + ' 条摘要 · 基于 ' + state.version + '，最新';
+  var bands = MEMORY.map(function(m){
+    var w = (verIndex(m.ver) / 6 * 100).toFixed(2);
+    return '<div class="debt-row">' +
+      '<div class="rel-head"><span class="rel-name">' + esc(m.src) + '</span>' + chip(m.ver, 'info sm') + '<div class="page-spacer"></div><span class="muted-note">' + esc(m.since) + '</span></div>' +
+      '<div class="mem-band"><span class="mb-track"><span class="mb-fill" style="width:' + w + '%"></span></span><span class="muted-note">' + esc(m.fresh) + '</span></div>' +
+      '</div>';
+  }).join('');
+  var cards = MEMORY.map(function(m){
+    return '<div class="card mem-card"><div class="card-text">' + esc(m.text) + '</div><div class="mem-foot">' + chip(m.src, 'sm') + chip(m.fresh, 'ok sm') + '</div></div>';
+  }).join('');
+  box.innerHTML = '<div class="mem-layout">' +
+    '<div class="card"><div class="section-title">记忆生效范围 · 从写入版本到当下</div>' + bands + '</div>' +
+    cards +
+    '<div class="card"><div class="card-text">写作记忆由系统自动维护，作者不能直接编辑；如需纠正，在对话里说明即可。接受新的版本后，记忆会自动更新到最新。</div></div>' +
+    '</div>';
+}
+
+/* ---------- 世界观与连续性（全幅） ---------- */
+function renderWorld(){
+  var box = $('#world-body'); if (!box) return;
+  var sub = $('#world-sub');
+  if (sub) sub.textContent = WORLD.places.length + ' 地点 · ' + WORLD.objects.length + ' 物件 · ' + WORLD.continuity.length + ' 项连续性检查 · 来自 ' + state.version;
+  var checks = WORLD.continuity.map(function(x){
+    return '<div class="check-item ' + (x.status === 'ok' ? 'ok' : 'warn') + '">' + icon(x.status === 'ok' ? 'check' : 'alert', 'sm') +
+      '<div class="od-fill"><b>' + esc(x.text) + '</b><span class="muted-note">' + esc(x.note) + '</span></div>' + chip(x.statusLabel, x.status === 'ok' ? 'ok sm' : 'warn sm') + '</div>';
+  }).join('');
+  var places = WORLD.places.map(function(p){
+    return '<div class="card"><div class="rel-head"><span class="rel-name">' + esc(p.name) + '</span><div class="page-spacer"></div>' + chip(p.statusLabel, p.status === 'ok' ? 'ok sm' : 'warn sm') + '</div><div class="card-text">' + esc(p.note) + '</div></div>';
+  }).join('');
+  var objs = WORLD.objects.map(function(o){
+    return '<div class="card"><div class="rel-head"><span class="rel-name">' + esc(o.name) + '</span><div class="page-spacer"></div>' + chip(o.statusLabel, o.status === 'ok' ? 'ok sm' : 'warn sm') + '</div><div class="card-text">' + esc(o.note) + '</div></div>';
+  }).join('');
+  box.innerHTML = '<div class="world-layout">' +
+    '<div class="section-title">连续性检查</div><div class="check-list">' + checks + '</div>' +
+    '<div class="section-title">地点</div><div class="grid-3">' + places + '</div>' +
+    '<div class="section-title">物件</div><div class="grid-3">' + objs + '</div>' +
+    '</div>';
+}
+
+/* ---------- 关系史：版本树 + 关系思维导图 ---------- */
+function verIndex(v){
+  var n = parseInt(String(v).replace(/[^0-9]/g, ''), 10);
+  return isNaN(n) ? 0 : n;
+}
+function relAvailableAt(r, ver){
+  return verIndex(r.from || 'R1') <= verIndex(ver);
+}
+function relAvailable(r){
+  return relAvailableAt(r, state.version);
+}
+function verStatus(v){
+  var vi = verIndex(v), cur = verIndex(state.version);
+  if (vi === cur) return { key:'current', label:'当前' };
+  if (vi < cur) return { key:'archived', label:'已归档' };
+  if (v === 'R6' && !state.accepted) return state.expired ? { key:'expired', label:'已过期' } : { key:'pending', label:'待审' };
+  return { key:'inactive', label:'已停用' };
+}
+function toneColor(tone){
+  if (tone === 'tense') return 'var(--amber)';
+  if (tone === 'dark') return 'var(--red)';
+  if (tone === 'calm') return 'var(--green)';
+  return 'var(--ink-3)';
+}
+function renderRelHistory(){
+  var tree = $('#ver-tree'), stage = $('#rel-stage');
+  if (!tree || !stage) return;
+  var sel = state.relVer || state.version;
+  var treeHtml = '';
+  REL_HISTORY.forEach(function(v){
+    var st = verStatus(v.ver);
+    var cls = 'ver-node' + (v.ver === sel ? ' on' : '') + (st.key === 'pending' ? ' pending' : '') + (st.key === 'archived' || st.key === 'inactive' || st.key === 'expired' ? ' dim' : '');
+    var stChip = st.key === 'current' ? chip('当前', 'accent sm') : (st.key === 'pending' ? chip('待审', 'warn sm') : (st.key === 'expired' ? chip('已过期', 'err sm') : chip(st.label, 'sm')));
+    treeHtml += '<button class="' + cls + '" type="button" data-ver="' + v.ver + '" aria-pressed="' + (v.ver === sel) + '">' +
+      '<div class="ver-head"><span class="ver-num">' + esc(v.ver) + '</span>' + stChip +
+      '<div class="page-spacer"></div><span class="ver-note">' + v.items.length + ' 条变化</span></div>' +
+      '<div class="ver-chapter">' + esc(v.chapter) + '</div>' +
+      '<div class="ver-note">' + esc(v.summary) + '</div>' +
+      '</button>';
+  });
+  tree.innerHTML = treeHtml;
+
+  var entry = null;
+  REL_HISTORY.forEach(function(v){ if (v.ver === sel) entry = v; });
+  if (!entry) entry = REL_HISTORY[REL_HISTORY.length - 1];
+  var est = verStatus(entry.ver);
+  var changedIds = {};
+  entry.items.forEach(function(it){ changedIds[it.rel] = true; });
+  var branches = entry.items.map(function(it){
+    var r = relById(it.rel);
+    if (!r) return '';
+    var A = byId(r.a), B = byId(r.b);
+    var dirs = it.dirs.map(function(d){
+      var from = d.d === 'ab' ? A : B;
+      var to = d.d === 'ab' ? B : A;
+      return '<div class="rel-dir"><span class="arrow">→</span><span><b>' + esc(from.name) + ' → ' + esc(to.name) + '</b>：' + esc(d.text) + '</span></div>' +
+        '<div class="rel-dir"><span class="arrow">·</span><span>信任 ' + meter(d.trust, 5, false) + ' 冲突 ' + meter(d.conflict, 5, true) + '</span></div>';
+    }).join('');
+    return '<article class="mind-tree-item changed" role="button" tabindex="0" data-profile-char="' + r.a + '" aria-label="查看' + esc(A.name) + '的人物档案">' +
+      '<div class="rel-head"><span class="rel-name">' + esc(A.name + ' ↔ ' + B.name) + '</span>' + chip('本版本变化', 'accent sm') +
+      '<div class="page-spacer"></div>' + icon('user', 'sm') + '</div>' +
+      dirs +
+      '<div class="mb-note">' + esc(it.note) + '</div>' +
+      '</article>';
+  }).join('');
+  var available = RELS.filter(function(r){ return relAvailableAt(r, entry.ver); });
+  var strip = available.map(function(r){
+    var A = byId(r.a), B = byId(r.b);
+    return '<span class="rel-strip-item' + (changedIds[r.id] ? ' changed' : '') + '">' + esc(A.name + ' ↔ ' + B.name) + (changedIds[r.id] ? ' · 有变化' : '') + '</span>';
+  }).join('');
+  stage.innerHTML = '<div class="rel-stage-head">' +
+      '<div class="rel-stage-title">' + esc(entry.ver + ' · ' + entry.chapter) + '</div>' +
+      (est.key === 'current' ? chip('当前版本', 'accent') : (est.key === 'pending' ? chip('待审提案', 'warn') : (est.key === 'expired' ? chip('已过期', 'err') : chip(est.label)))) +
+      '<div class="rel-stage-sub">' + entry.items.length + ' 条关系变化 · 共 ' + available.length + ' 条已存在关系</div>' +
+    '</div>' +
+    '<div class="mind"><div class="mind-hub"><span class="mh-title">' + esc(entry.ver + ' · ' + entry.short) + '</span><span class="mh-sub">' + esc(entry.summary) + '</span></div>' +
+    '<div class="mind-tree">' + branches + '</div></div>' +
+    '<div class="rel-strip"><div class="section-title">该版本已存在的关系</div><div class="rel-strip-list">' + strip + '</div></div>';
+  var chipEl = $('#relhist-ver-chip');
+  if (chipEl) chipEl.textContent = '当前 ' + state.version;
+}
+
+/* ---------- 人物弧线与情绪：卡片 / 思维导图 ---------- */
+function renderArcs(){
+  var cards = $('#arcs-cards'), mind = $('#arcs-mind');
+  if (!cards || !mind) return;
+  var mode = state.arcMode || 'cards';
+  var sub = $('#arcs-sub');
+  if (sub) sub.textContent = ARCS.length + ' 位主要人物 · 来自已接受版本 ' + state.version;
+  cards.hidden = mode !== 'cards';
+  mind.hidden = mode !== 'mind';
+  $$('#arcs-mode [data-mode]').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-mode') === mode); });
+
+  var cardsHtml = '<div class="arc-grid">' + ARCS.map(function(a){
+    var c = byId(a.id);
+    return '<button class="card arc-v-card" type="button" data-arc-char="' + a.id + '">' +
+      '<div class="arc-v-head"><span class="seal" style="width:34px;height:34px;font-size:15px;background:' + factionById(c.faction).color + '">' + esc(c.name.slice(0, 1)) + '</span><span class="arc-v-name">' + esc(c.name) + '</span><div class="page-spacer"></div>' + chip(c.emotion, 'sm') + '</div>' +
+      '<div class="arc-v-arc"><span>' + esc(a.from) + '</span><span class="ar">→</span><span>' + esc(a.to) + '</span></div>' +
+      '<div class="arc-v-foot">' + a.chs.map(function(n){ return chip('第 ' + n + ' 章', 'sm'); }).join('') + '</div>' +
+      '</button>';
+  }).join('') + '</div>';
+  var others = CHARS.filter(function(c){
+    var hit = false;
+    ARCS.forEach(function(a){ if (a.id === c.id) hit = true; });
+    return !hit;
+  });
+  cardsHtml += '<div class="section-title" style="margin-top:18px">其余人物 · 情绪一览</div>' +
+    '<div class="emotion-grid">' + others.map(function(c){
+      return '<button class="emotion-row" type="button" data-arc-char="' + c.id + '"><span class="emotion-dot" style="background:' + toneColor(c.tone) + '"></span><span class="od-fill"><span class="emotion-name">' + esc(c.name) + '</span><span class="emotion-text">' + esc(c.emotion) + '</span></span></button>';
+    }).join('') + '</div>';
+  cards.innerHTML = cardsHtml;
+
+  var branches = ARCS.map(function(a){
+    var c = byId(a.id);
+    return '<article class="mind-tree-item" role="button" tabindex="0" data-arc-char="' + a.id + '" aria-label="查看' + esc(c.name) + '的弧线详情">' +
+      '<div class="rel-head"><span class="arc-v-name">' + esc(c.name) + '</span>' + chip(c.emotion, 'sm') +
+      '<div class="page-spacer"></div>' + icon('chev-r', 'sm') + '</div>' +
+      '<div class="arc-v-arc"><span>' + esc(a.from) + '</span><span class="ar">→</span><span>' + esc(a.to) + '</span></div>' +
+      '<div class="arc-v-foot">' + a.chs.map(function(n){ return chip('第 ' + n + ' 章', 'sm'); }).join('') + '</div>' +
+      '</article>';
+  }).join('');
+  mind.innerHTML = '<div class="mind"><div class="mind-hub"><span class="mh-title">《雾港夜航：第七码头》</span><span class="mh-sub">第 41 天 · 当下 · ' + esc(state.version) + '</span></div><div class="mind-tree">' + branches + '</div></div>';
+}
+
 /* ---------- 弹层流程 ---------- */
 function openImpactModal(){
   var accepted = state.changes.filter(function(c){ return c.decision === 'accept'; });
@@ -2402,9 +2866,10 @@ function confirmAccept(){
   state.accepted = true;
   state.expired = false;
   state.version = 'R6';
+  state.relVer = null;
   state.selected = 'chen-mo';
   renderAll();
-  toast('已接受为 R6 · 陈默 ↔ 白桦 的信任关系已更新', 'check');
+  toast('已接受为 R6 · 陈默 ↔ 白桦 的信任关系已加入关系史', 'check');
 }
 function askRollback(ver){
   openModal('<div class="modal-head"><div class="modal-title">回滚到 ' + esc(ver) + '？</div><div class="muted-note">回滚会停用 ' + esc(ver) + ' 之后的所有变更；已接受的正文会保留在历史里。</div></div>' +
@@ -2416,6 +2881,7 @@ function confirmRollback(ver){
   state.version = ver;
   state.accepted = false;
   state.expired = true;
+  state.relVer = null;
   state.selected = null;
   renderAll();
   toast('已回滚到 ' + ver + '，第 6 章提案已过期', 'history');
@@ -2484,6 +2950,7 @@ function applyScreen(id){
   if (cfg.drawer === 'profile') state.drawerChar = cfg.char || 'chen-mo';
   if (cfg.drawer === 'profile') state.selected = cfg.char || 'chen-mo';
   if (cfg.view === 'reading' && !state.readHl) state.readCh = 6;
+  state.relVer = null;
   var pop = $('#settings-pop'); if (pop) pop.remove();
   renderAll();
 }
@@ -2495,7 +2962,9 @@ function renderAll(){
   setTab(state.tab);
   setView(state.view);
   renderNav(); renderHead(); renderCtx();
-  renderMap(); renderBoard(); renderTimeline(); renderSandbox(); renderDiag();
+  renderMap(); renderBoard(); renderTimeline(); renderRelHistory(); renderArcs();
+  renderContract(); renderDebts(); renderMemory(); renderWorld();
+  renderSandbox(); renderDiag();
   renderProposal(); renderReading(); renderHistory(); renderChat();
   syncDrawer();
   syncChips();
@@ -2503,11 +2972,18 @@ function renderAll(){
 }
 function syncDrawer(){
   if (state.drawer){
+    var wasHidden = dom.drawer.hidden;
     dom.drawer.hidden = false;
     dom.drawer.setAttribute('aria-hidden', 'false');
     dom.scrim.hidden = false;
     renderDrawer();
-    window.requestAnimationFrame(function(){ dom.drawer.classList.add('on'); });
+    window.requestAnimationFrame(function(){
+      dom.drawer.classList.add('on');
+      if (wasHidden){
+        var f = $('.drawer-close', dom.drawer);
+        if (f && f.focus) f.focus();
+      }
+    });
   } else {
     dom.drawer.classList.remove('on');
     dom.scrim.hidden = true;
@@ -2658,6 +3134,27 @@ function onViewClick(e){
     renderMap();
     return;
   }
+  el = e.target.closest('#arcs-mode [data-mode]');
+  if (el){ state.arcMode = el.getAttribute('data-mode'); renderArcs(); return; }
+  el = e.target.closest('[data-ver]');
+  if (el){
+    state.relVer = el.getAttribute('data-ver');
+    renderRelHistory();
+    var vb = $('[data-ver="' + state.relVer + '"]');
+    if (vb) vb.focus();
+    return;
+  }
+  el = e.target.closest('[data-arc-char]');
+  if (el){ state.drawer = 'arc'; state.drawerChar = el.getAttribute('data-arc-char'); renderAll(); return; }
+  el = e.target.closest('[data-profile-char]');
+  if (el){
+    var pcId = el.getAttribute('data-profile-char');
+    state.drawer = 'profile';
+    state.drawerChar = pcId;
+    state.selected = pcId;
+    renderAll();
+    return;
+  }
   el = e.target.closest('#board-filter [data-f]');
   if (el){
     state.boardFilter = el.getAttribute('data-f');
@@ -2684,7 +3181,33 @@ function onViewClick(e){
   if (e.target.closest('#pr-defer')){ toast('已暂不处理，提案仍在待审列表里'); return; }
   if (e.target.closest('#hist-back')){ applyScreen('map'); return; }
   if (e.target.closest('#hist-to-proposal')){ applyScreen('proposal'); return; }
-  if (e.target.closest('#read-to-contract')){ state.view = 'map'; state.drawer = 'contract'; renderAll(); return; }
+  if (e.target.closest('#read-to-contract')){ state.view = 'contract'; state.drawer = null; renderAll(); return; }
+  if (e.target.closest('#plugin-retry')){
+    var pb = $('#plugin-retry');
+    if (pb){ pb.classList.add('is-loading'); pb.innerHTML = '<span class="spinner"></span>正在重试…'; }
+    window.setTimeout(function(){ toast('仍未检测到「小说规划」插件'); renderAll(); }, 1000);
+    return;
+  }
+  if (e.target.closest('#contract-ask')){
+    state.tab = 'chat';
+    renderAll();
+    setComposer('按本章合同检查第 6 章草稿：视角、故事时间、必须出现的地下通道与钥匙、陈默的左臂伤、长度 2,400–2,800 字。');
+    toast('已把检查指令放进输入框', 'doc');
+    return;
+  }
+  el = e.target.closest('[data-debt-next]');
+  if (el){
+    var dId = el.getAttribute('data-debt-next');
+    var dObj = null;
+    DEBTS.forEach(function(x){ if (x.id === dId) dObj = x; });
+    if (dObj){
+      state.tab = 'chat';
+      renderAll();
+      setComposer('写第 7 章时把「' + dObj.title + '」推进一点：' + dObj.text + '视角仍是陈默。');
+      toast('已把处理指令放进输入框', 'pen');
+    }
+    return;
+  }
   if (e.target.closest('#empty-start')){ startKickoff(); return; }
   if (e.target.closest('#sb-connect') || e.target.closest('#sb-connect2')){ openConnectGuide(); return; }
   if (e.target.closest('#diag-off')){ state.diag = false; applyScreen('map'); toast('已关闭诊断模式'); return; }
@@ -2833,6 +3356,12 @@ function bind(){
   });
   dom.wbView.addEventListener('click', onViewClick);
   dom.wbView.addEventListener('input', onViewInput);
+  dom.wbView.addEventListener('keydown', function(e){
+    if ((e.key === 'Enter' || e.key === ' ') && e.target && e.target.getAttribute && e.target.getAttribute('role') === 'button'){
+      e.preventDefault();
+      e.target.click();
+    }
+  });
   dom.paneChat.addEventListener('click', onChatClick);
   dom.drawer.addEventListener('click', onDrawerClick);
   dom.drawer.addEventListener('keydown', function(e){
@@ -2904,18 +3433,6 @@ function bind(){
 }
 function onDrawerClick(e){
   if (e.target.closest('.drawer-close')){ state.drawer = null; renderAll(); return; }
-  if (e.target.closest('#plugin-retry')){
-    var b = $('#plugin-retry');
-    if (b){
-      b.classList.add('is-loading');
-      b.innerHTML = '<span class="spinner"></span>正在重试…';
-    }
-    window.setTimeout(function(){
-      toast('仍未检测到「小说规划」插件');
-      renderAll();
-    }, 1000);
-    return;
-  }
   if (e.target.closest('#profile-continue')){
     var c = byId(state.drawerChar || 'chen-mo');
     state.drawer = null;
@@ -2925,12 +3442,13 @@ function onDrawerClick(e){
     toast('已把指令放进输入框', 'pen');
     return;
   }
-  if (e.target.closest('#contract-ask')){
+  if (e.target.closest('#arc-continue')){
+    var ca2 = byId(state.drawerChar || 'chen-mo');
     state.drawer = null;
     state.tab = 'chat';
     renderAll();
-    setComposer('按本章合同检查第 6 章草稿：视角、故事时间、必须出现的地下通道与钥匙、陈默的左臂伤、长度 2,400–2,800 字。');
-    toast('已把检查指令放进输入框', 'doc');
+    setComposer('沿着' + ca2.name + '的弧线继续写：' + ca2.arc.to + '。');
+    toast('已把指令放进输入框', 'pen');
     return;
   }
   var rel = e.target.closest('[data-rel-char]');
@@ -2945,12 +3463,12 @@ function onDrawerClick(e){
   if (app){ openReader(parseInt(app.getAttribute('data-app-ch'), 10), null); return; }
 }
 function navAction(key){
-  if (key === 'contract'){ state.drawer = 'contract'; renderAll(); return; }
-  if (key === 'debts'){ state.drawer = 'debts'; renderAll(); return; }
-  if (key === 'arcs'){ state.drawer = 'arcs'; renderAll(); return; }
-  if (key === 'relhist'){ state.drawer = 'relhist'; renderAll(); return; }
-  if (key === 'memory'){ state.drawer = 'memory'; renderAll(); return; }
-  if (key === 'world'){ state.drawer = 'world'; renderAll(); return; }
+  if (key === 'contract'){ state.drawer = null; state.view = 'contract'; renderAll(); return; }
+  if (key === 'debts'){ state.drawer = null; state.view = 'debts'; renderAll(); return; }
+  if (key === 'arcs'){ state.drawer = null; state.view = 'arcs'; renderAll(); return; }
+  if (key === 'relhist'){ state.drawer = null; state.view = 'relhist'; renderAll(); return; }
+  if (key === 'memory'){ state.drawer = null; state.view = 'memory'; renderAll(); return; }
+  if (key === 'world'){ state.drawer = null; state.view = 'world'; renderAll(); return; }
   if (key === 'board'){ state.drawer = null; state.view = 'board'; renderAll(); return; }
   if (key === 'timeline'){ state.drawer = null; state.view = 'timeline'; renderAll(); return; }
   if (key === 'sandbox' || key === 'sim'){ state.drawer = null; state.view = 'sandbox'; renderAll(); return; }

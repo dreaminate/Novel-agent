@@ -5,25 +5,26 @@ OpenDesign（`nexu-io/open-design`，本地桌面 app）按
 
 | 文件 | 说明 |
 | --- | --- |
-| `index.html` | 单文件可点击原型（180 KB，内嵌 CSS/JS，无外部资源），模拟宿主窗口并在屏幕间切换 |
-| `design-tokens.md` | 设计 token 表与组件清单：日/夜两套语义色、字阶、势力色、宿主外壳中性灰 |
+| `index.html` | 单文件可点击原型（212 KB，内嵌 CSS/JS，无外部资源），模拟宿主窗口并在屏幕间切换 |
+| `design-tokens.md` | 设计 token 表与组件清单（13 KB）：日/夜两套语义色、字阶、势力色、宿主外壳中性灰 |
 
 **来源：** OpenDesign 项目 `ca16c8f8-48a1-40d1-8abd-5dd38bf3f948`（数据目录
-`%APPDATA%\Open Design\namespaces\release-stable-win\data\projects\`）。
+`%APPDATA%\Open Design\namespaces\release-stable-win\data\projects\`），当前为作者迭代后的
+第 3 版（`.file-versions/0003-…`，2026-09-15 22:55）。
 
-- `index.html` SHA256：`572afeeed21c395b9cbbf40181fdba7bd0c9e28062396e76b71c1d6073e367ad`
-- `design-tokens.md` SHA256：`ba2093b10ed0c5b8bda435892c73088ddc85b448b71870862aa9b2d547f253ad`
+- `index.html` SHA256：`5b8682c43f1476c1133ebf83db5ea1a5201b363dd732752ba6ec09b26ddea2b4`
+- `design-tokens.md` SHA256：`56f6b886eeea911c80030f6b0195571d8441e4d2c9bfc5e0b92dfdedca7f8bd5`
 
-## 已做的自动检查（2026-09-15）
+## 已做的自动检查（2026-09-15，第 3 版复检）
 
-- 无外部网络引用（唯一 `http://` 是 SVG 命名空间）；无外部字体/CDN/图片。
-- 简体中文界面；未发现 lorem / TODO / 占位文案（唯一 `placeholder` 是输入框属性）。
+- 无任何网络引用（无外部字体/CDN/图片，`http(s)://` 零命中）。
+- 简体中文界面；未发现 lorem / TODO / 占位文案（`placeholder` 只是输入框属性）。
 - 关键界面文案均存在：故事地图、人物档案（当前状态/情绪/人物弧线/出场章节）、
   提案审阅（将写入的设定变更/审阅问题/预览影响/接受本章）、伏笔与线索板、
   时间线、写作记忆、连续性检查、沙盒推演（含「沙盒侧车未连接」态）、
   开发者诊断、版本历史（回滚到此版本）、夜间/白天切换、窄窗 1280、
   「未安装小说规划插件」缺插件态、「故事还没有开始」空项目态。
-- 结构：单 `<style>` + 单 `<script>`、16 个内联 SVG、77 个按钮。
+- 结构：单 `<style>` + 单 `<script>`、17 个内联 SVG、83 个按钮、95 个中文界面标签。
 
 ## 未验证（需要人眼）
 

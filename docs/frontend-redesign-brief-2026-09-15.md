@@ -318,6 +318,9 @@
 
 ## 使用说明（给 zhanyi）
 
+**原型已产出**：`docs/prototypes/2026-09-15-writing-workbench/`（`index.html` 可点击原型
++ `design-tokens.md` token 表；来源、SHA256 与自动检查见该目录 `README.md`）。
+
 1. 打开 OpenDesign → Home → artifact 类型选 **Prototype（web）** → 把「粘贴区 1」整段贴进 brief 输入框；若长度受限，按分隔线拆成 3 条消息依次发送（1 → 2 → 3）。
 2. 建议把工作目录设为单独的空目录（例如 `D:\Work\01_Projects\My-Projects\Original\novel-agent-design`），不要指向本仓库，避免设计 agent 直接改产品代码。
 3. 设计系统：如果 OpenDesign 要求选一个 `DESIGN.md`，选择最接近「editorial / paper / serif」的系统，或在 follow-up 里让它忽略自带系统、完全按本 Brief 第 3 节的 token 规范执行。

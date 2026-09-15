@@ -1,5 +1,13 @@
 # Execution checklist
 
+## Writing-workbench prototype imported, 2026-09-15
+
+**Status:** `implemented-unverified` for the design artifact; visual and interaction acceptance still needs the author's eyes.
+
+- [x] Imported the OpenDesign prototype into [docs/prototypes/2026-09-15-writing-workbench](../docs/prototypes/2026-09-15-writing-workbench/README.md): `index.html` + `design-tokens.md`, with source, SHA256 and automated checks recorded.
+- [x] Automated checks green: no external resources, Simplified Chinese copy, key screens and boundary states present, no lorem/TODO.
+- [ ] Author opens the prototype and runs the brief's appendix C checklist; failures go back to OpenDesign, then this directory is replaced and re-hashed.
+
 ## Public repository publish and clone verification, 2026-09-15
 
 **Status:** `done`; evidence in [repository publish](repository-publish-2026-09-15.md).

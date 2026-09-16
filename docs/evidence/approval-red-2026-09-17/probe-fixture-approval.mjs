@@ -16,9 +16,15 @@ import { fileURLToPath } from 'node:url'
 
 const root = fileURLToPath(new URL('../../..', import.meta.url))
 const argv = process.argv.slice(2)
-const outDir = argv.find(a => !a.startsWith('--')) ?? join(tmpdir(), 'approval-fixture')
+const outDir = argv.find(a => !a.startsWith('--') && !/^https?:/.test(a)) ?? join(tmpdir(), 'approval-fixture')
 const answerAt = argv.indexOf('--answer')
 const answer = answerAt >= 0 ? argv[answerAt + 1] : null
+const urlAt = argv.indexOf('--url')
+const urlArg = urlAt >= 0 ? argv[urlAt + 1] : null
+/** Match either our frame or the shipped one, so the same probe serves the differential. */
+const readyExpr =
+  `document.querySelector('[data-novel-workbench="frame"]') !== null` +
+  ` || document.querySelector('[data-slot="conversation.composer"]') !== null`
 const chromePath = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 const debugPort = 9445
 const sleep = ms => new Promise(r => setTimeout(r, ms))
@@ -86,7 +92,7 @@ const DUMP = `(() => {
   }
 })()`
 
-const hostUrl = readFileSync(join(root, '.novel-agent/run/host.url'), 'utf8').trim()
+const hostUrl = urlArg ?? readFileSync(join(root, '.novel-agent/run/host.url'), 'utf8').trim()
 // The token URL answers 303 to a bare `/`, which would drop the query, so the
 // fixture switch has to be a second navigation once the auth cookie is set.
 const fixtureUrl = `${new URL(hostUrl).origin}/?fixture=1`
@@ -119,23 +125,31 @@ try {
   await session.send('Page.enable')
   await session.send('Runtime.enable')
   await session.send('Page.navigate', { url: hostUrl })
-  await session.until(`document.querySelector('[data-novel-workbench="frame"]') !== null`)
+  await session.until(readyExpr)
   await session.send('Page.navigate', { url: fixtureUrl })
-  await session.until(`document.querySelector('[data-novel-workbench="frame"]') !== null`)
+  await session.until(readyExpr)
   // The fixture emits its pending approval right after `ready`.
   await sleep(3000)
 
   // Select the fixture session before the first emission is consumed: ui-approval
   // and ui-user-questions both scope to `sid("fx-alpha")`, and an unclaimed
   // waterfall invocation at stream-open time may never be re-delivered.
-  await session.until(`document.querySelector('[data-novel-rail="nav"]') !== null`)
-  await sleep(1500)
+  await session.until(readyExpr)
+  // Wait for the session list itself: the composer renders before the sidebar,
+  // so clicking too early silently selects nothing.
+  await session.until(
+    `Array.from(document.querySelectorAll('*')).some(n => (n.textContent || '').trim() === 'Fixture 历史会话')`,
+    20000,
+  )
   const selected = await session.evaluate(`(() => {
-    const nodes = Array.from(document.querySelectorAll('button, [role=button]'))
-    const hit = nodes.find(n => /Fixture|历史会话|fx-/.test((n.textContent || '').trim()))
-    if (hit === undefined) return null
-    hit.click()
-    return (hit.textContent || '').trim()
+    // Prefer the innermost exact match so we click the row, not a wrapper.
+    const exact = Array.from(document.querySelectorAll('*'))
+      .filter(n => (n.textContent || '').trim() === 'Fixture 历史会话')
+    if (exact.length === 0) return null
+    const target = exact[exact.length - 1]
+    const clickable = target.closest('button,[role=button],a,[role=option],[role=treeitem]') ?? target
+    clickable.click()
+    return (clickable.textContent || '').trim()
   })()`)
   await sleep(4000)
 

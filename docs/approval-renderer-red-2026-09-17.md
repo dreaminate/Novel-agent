@@ -243,3 +243,59 @@ node docs/evidence/approval-red-2026-09-17/probe-fixture-approval.mjs /tmp/appro
 3. 如果 fixture 路径确认是它自己的 artifact，再上**真实审批**（需要模型）做终局确认。
 
 **在 1–3 出结果之前，不得把本条当成「官方审批在我们 frame 里坏了」。**
+
+---
+
+## 8. 差分实验（2026-09-17 续）：差异不在我们的 frame 里
+
+§7.4 第 ① 步的正确做法不是给我们自己的代码加探针，而是**做差分**：官方 `web` profile 里
+`ui-approval` 同样在场，但**完全没有我们的 frame 与 patch**。同一个 fixture、同一个会话、
+同一份探针代码，两边跑一遍即可判定。
+
+```bash
+# 起第二个宿主：官方 web profile，同一个 DSH_HOME，另开端口，不碰用户全局 ~/.dsh
+NOVEL_AGENT_DEV_HOME="$PWD/.novel-agent/web-run" DSH_HOME="$PWD/.novel-agent/dsh-home" \
+  DSH_PROFILE=web DSH_PORT=4790 scripts/dev-host.sh start
+
+WEBURL=$(cat "$PWD/.novel-agent/web-run/run/host.url")
+node docs/evidence/approval-red-2026-09-17/probe-fixture-approval.mjs /tmp/web-fixture --url "$WEBURL"
+# 收尾
+NOVEL_AGENT_DEV_HOME="$PWD/.novel-agent/web-run" DSH_HOME="$PWD/.novel-agent/dsh-home" \
+  DSH_PROFILE=web DSH_PORT=4790 scripts/dev-host.sh stop
+```
+
+产物：`docs/evidence/approval-red-2026-09-17/web-fixture-summary.json`、`web-fixture-before.png`。
+
+| 观测（fixture 打开、会话已选） | 我们的 novel frame | 官方 web frame |
+| --- | --- | --- |
+| frame 渲染 | 是（`data-novel-workbench="frame"`） | 是（无我们的 frame，`hasFrame=false`） |
+| 会话已选中 | 是（`Fixture 历史会话`） | 是（`等待回答 / Fixture 历史会话`） |
+| **官方 user-questions 待答面板** | **渲染** | **渲染** |
+| **官方审批面板** | **没有** | **没有** |
+| `approvalishNodes` | 0 | 0 |
+
+### 8.1 结论：§7.2 的差异是 fixture 的性质，不是我们的缺陷
+
+**两边行为完全一致。** 官方 web frame 里没有任何我方代码参与，审批面板同样不出现。
+所以不能把 §7.2 那条不对称归因到我们的 frame、patch 或座位安排上。
+
+**据此撤回 §7.3 那条线索的「可能是我们坏了」那一读法。** 更可能的解释是 fixture 路径本身
+不产生一个可被认领的 `PendingApproval`（例如它在客户端认领之前就被判定，或这条 fixture 的
+审批走的是与 questions 不同的认领条件）。
+
+### 8.2 由此得到的硬结论
+
+**fixture 这条捷径无法回答「官方审批面板在我们 frame 里能不能画出来」。**
+它能证明的只有「官方 pending 交互的座位在我们 frame 里是通的」（questions 已证），
+**审批那一条必须走真实审批**。
+
+### 8.3 §7.4 三步的结账
+
+| 步骤 | 状态 |
+| --- | --- |
+| ① 确认 `ui-approval` 的 `apply()` 有没有跑 | **不再需要**：差分显示即使跑起来，fixture 下两边都不画，问题不在 apply |
+| ② 对比两条瀑布的投递/认领差异 | **已由差分替代**：差异与我们的 frame 无关，深挖 fixture 内部对本次目标没有收益 |
+| ③ 确认 fixture 不是 artifact 之后上真实审批 | **③ 的前半已确认：它是 artifact。** 因此真实审批成为唯一剩下的路径 |
+
+**成本提示：** 真实审批需要一次带工具调用的**真实模型会话**（会产生模型调用费用），
+是本计划里第一个真正消耗模型额度的动作。这一步不免费。

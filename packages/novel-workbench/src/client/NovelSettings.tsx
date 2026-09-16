@@ -233,6 +233,56 @@ export function NovelSettings(): ReactNode {
           '行距越大，读长段越松快；1.85 是原型的默认值。',
         ),
       ),
+      createElement(
+        'div',
+        { className: 'setting' },
+        createElement('div', { className: 'setting-label' }, '句子续写'),
+        createElement(
+          'div',
+          { className: 'seg', role: 'group' },
+          [[true, '开'], [false, '关']].map(([value, label]) => createElement(
+            'button',
+            {
+              key: String(value),
+              type: 'button',
+              'data-novel-settings-completion': String(value),
+              'aria-pressed': settings.completionEnabled === value ? 'true' : 'false',
+              onClick: () => { workbenchActions.setCompletionEnabled(value as boolean) },
+            },
+            label as string,
+          )),
+        ),
+        createElement(
+          'div',
+          { className: 'setting-note' },
+          '停笔一会儿，在光标处给一句灰色的续写建议；Tab 采纳，Esc 丢掉。它只是建议，不会自己写进稿子。',
+        ),
+      ),
+      createElement(
+        'div',
+        { className: 'setting' },
+        createElement('div', { className: 'setting-label' }, '续写等待'),
+        createElement(
+          'div',
+          { className: 'seg', role: 'group' },
+          [600, 900, 1500].map(delay => createElement(
+            'button',
+            {
+              key: delay,
+              type: 'button',
+              'data-novel-settings-completion-delay': String(delay),
+              'aria-pressed': settings.completionDelayMs === delay ? 'true' : 'false',
+              onClick: () => { workbenchActions.setCompletionDelayMs(delay) },
+            },
+            `${(delay / 1000).toFixed(1)} 秒`,
+          )),
+        ),
+        createElement(
+          'div',
+          { className: 'setting-note' },
+          '等得越久越不容易打扰你，但也越像在等它。',
+        ),
+      ),
     ),
   )
 }

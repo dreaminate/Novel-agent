@@ -674,6 +674,8 @@ export function NovelCanvas(props: NovelCanvasProps): ReactNode {
           sessionId={sessionId}
           revision={acceptedRevision}
           submitChapterProposal={props.submitChapterProposal}
+          completionEnabled={state.settings.completionEnabled}
+          completionDelayMs={state.settings.completionDelayMs}
         />
       </Shell>
     )

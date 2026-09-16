@@ -16,11 +16,12 @@
  * blank-line paragraphs, so saving serializes back to that shape.
  */
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import { EditorContent, useEditor } from '@tiptap/react'
+import { EditorContent, useEditor, type Editor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import type { WorkspaceId } from '@deepseek-ai/dsh-api-workspace-controller/client'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import { countCharacters } from './novel-copy.js'
+import { COMPLETION_PLUGIN_KEY, NovelCompletion, completionInsertion, shouldAskForCompletion } from './novel-completion.js'
 import type { ChapterDraft, ChapterDraftSave, ChapterIdentity } from './chapter-files.js'
 
 /** How long the author has to stop typing before a save goes out. */
@@ -53,6 +54,11 @@ const EDITOR_CSS = `
   color: hsl(var(--text-000));
 }
 .novel-editor-reading p { margin: 0 0 .86em; }
+/*
+ * The ghost text. It is a decoration, not the author's text: grey, marked
+ * aria-hidden, and gone the instant it is refused.
+ */
+.novel-ghost { color: hsl(var(--text-200) / .65); pointer-events: none; }
 .novel-editor-toggle { display: flex; gap: 6px; }
 .novel-editor-toggle .btn.on { border-color: hsl(var(--accent-brand)); color: hsl(var(--accent-text)); }
 .novel-editor-confirm {
@@ -97,6 +103,14 @@ export interface NovelEditorProps {
     revision: number,
     chars: number,
   ) => Promise<void>
+  /** Whether a pause asks for a continuation, and how long a pause has to be. */
+  readonly completionEnabled: boolean
+  readonly completionDelayMs: number
+  /**
+   * The continuation seam. Absent means the feature is off rather than broken —
+   * the mechanism runs without it and simply never gets an answer.
+   */
+  readonly requestCompletion?: (before: string) => Promise<string | undefined>
 }
 
 /** ProseMirror blocks back to the file's shape: blank line between paragraphs. */
@@ -129,16 +143,106 @@ export function NovelEditor(props: NovelEditorProps): ReactNode {
   const chapterRef = useRef<ChapterIdentity | undefined>(chapter)
   chapterRef.current = chapter
 
-  const extensions = useMemo(() => [StarterKit], [])
+  // The suggestion lives in a ref, not state: the ghost is painted by a
+  // ProseMirror decoration, so a React render is neither how it appears nor how
+  // it is cleared.
+  const suggestionRef = useRef<string | undefined>(undefined)
+  const editRef = useRef<Editor | null>(null)
+  const pause = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+
+  /** Paint whatever the suggestion ref currently says. */
+  const repaint = (): void => {
+    const live = editRef.current
+    if (live === null) return
+    live.view.dispatch(live.state.tr.setMeta(COMPLETION_PLUGIN_KEY, Date.now()))
+  }
+
+  const dropSuggestion = (): void => {
+    if (suggestionRef.current === undefined) return
+    suggestionRef.current = undefined
+    repaint()
+  }
+
+  const keepSuggestion = (text: string): void => {
+    suggestionRef.current = text
+    repaint()
+  }
+
+  /**
+   * Start the pause clock. Composition cancels it outright rather than letting it
+   * fire: a suggestion appearing inside an IME's composing region corrupts what
+   * the author is typing.
+   */
+  const scheduleCompletion = (live: Editor | null): void => {
+    if (pause.current !== undefined) clearTimeout(pause.current)
+    pause.current = undefined
+    if (live === null || props.requestCompletion === undefined) return
+    if (!shouldAskForCompletion({
+      enabled: props.completionEnabled,
+      composing: live.view.composing,
+      showing: suggestionRef.current !== undefined,
+      tail: tailBeforeCaret(live),
+    })) return
+    pause.current = setTimeout(() => {
+      pause.current = undefined
+      const current = editRef.current
+      if (current === null || current.view.composing) return
+      const before = tailBeforeCaret(current)
+      if (before.trim() === '') return
+      // A continuation is a nicety: a failed request stays silent and simply
+      // shows nothing, because interrupting the author to report it would cost
+      // more than the suggestion was worth.
+      void props.requestCompletion?.(before).then(
+        text => {
+          const still = editRef.current
+          if (still === null || still.view.composing) return
+          if (tailBeforeCaret(still) !== before) return
+          if (text !== undefined && text !== '') keepSuggestion(text)
+        },
+        () => {},
+      )
+    }, props.completionDelayMs)
+  }
+
+  /** Tab accepts, Esc drops. Neither is a document edit until Tab. */
+  const handleKey = (event: KeyboardEvent): boolean => {
+    if (suggestionRef.current === undefined) return false
+    if (event.key === 'Tab') {
+      const live = editRef.current
+      const before = live === null ? '' : tailBeforeCaret(live)
+      const insert = completionInsertion(suggestionRef.current, before)
+      dropSuggestion()
+      if (insert !== '' && live !== null) live.chain().insertContent(insert).run()
+      return true
+    }
+    if (event.key === 'Escape') {
+      dropSuggestion()
+      return true
+    }
+    return false
+  }
+
+  const extensions = useMemo(
+    () => [StarterKit, NovelCompletion.configure({ suggestion: () => suggestionRef.current })],
+    [],
+  )
   const editor = useEditor({
     extensions,
     content: '',
+    editorProps: {
+      handleKeyDown: (_view, event) => handleKey(event),
+    },
     onUpdate: ({ editor: live }) => {
       setChars(countCharacters(live.getText()))
       setStatus('dirty')
       scheduleSave(live)
+      // A suggestion only ever describes the text it was asked for, so any edit
+      // invalidates it — and composition must not see one at all.
+      dropSuggestion()
+      scheduleCompletion(live)
     },
   })
+  editRef.current = editor
 
   const scheduleSave = useCallback((live: { getText(options: { blockSeparator: string }): string }) => {
     if (timer.current !== undefined) clearTimeout(timer.current)
@@ -388,6 +492,12 @@ function escapeHtml(text: string): string {
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
+}
+
+/** The prose from the start of the document to the caret. */
+function tailBeforeCaret(editor: Editor): string {
+  const { from } = editor.state.selection
+  return editor.state.doc.textBetween(0, from, '\n')
 }
 
 /** The draft's paragraphs, for the reading state. */

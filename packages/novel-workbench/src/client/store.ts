@@ -36,6 +36,10 @@ export interface WorkbenchSettings {
   readonly readingIndent: number
   /** Reading line height as a multiple of the body size (1.6 / 1.85 / 2.1). */
   readonly readingLeading: number
+  /** Whether a pause asks the model for a sentence-level continuation. */
+  readonly completionEnabled: boolean
+  /** How long the author has to stop typing before that request goes out. */
+  readonly completionDelayMs: number
 }
 
 /** Live width of the seat the frame renders into. */
@@ -160,7 +164,16 @@ const DEFAULT_STATE: WorkbenchState = {
   advanced: false,
   advancedGroup: 'core',
   theme: 'auto',
-  settings: { readingSize: 17, readingMeasure: 40, readingIndent: 2, readingLeading: 1.85 },
+  settings: {
+    readingSize: 17,
+    readingMeasure: 40,
+    readingIndent: 2,
+    readingLeading: 1.85,
+    // On, but not eager: a 900ms pause is the author stopping to think, which is
+    // the moment a continuation is welcome and the moment it is least in the way.
+    completionEnabled: true,
+    completionDelayMs: 900,
+  },
   settingsOpen: false,
   personFileId: undefined,
   lastSubmission: undefined,
@@ -299,6 +312,19 @@ export const workbenchActions = {
     const next = Math.min(2.1, Math.max(1.6, readingLeading))
     if (state.settings.readingLeading === next) return
     publish({ ...state, settings: { ...state.settings, readingLeading: next } })
+  },
+
+  /** Turn the pause-triggered continuation on or off. */
+  setCompletionEnabled(completionEnabled: boolean): void {
+    if (state.settings.completionEnabled === completionEnabled) return
+    publish({ ...state, settings: { ...state.settings, completionEnabled } })
+  },
+
+  /** How long a pause has to last before a continuation is asked for. */
+  setCompletionDelayMs(completionDelayMs: number): void {
+    const next = Math.min(2000, Math.max(300, Math.round(completionDelayMs)))
+    if (state.settings.completionDelayMs === next) return
+    publish({ ...state, settings: { ...state.settings, completionDelayMs: next } })
   },
 
   /** Open one person's 人物档案 drawer. */

@@ -740,13 +740,49 @@ HEAD `02a48d8` —— 即本计划写的 `8926e31` **加本计划文件本身的
 
 ### Phase 4 — 补全与续写
 
-- [ ] **I4.1 句级补全（幽灵文本）** — 目标：停顿后在光标处出灰字，Tab 接受、Esc 丢弃。
+- [x] **I4.1a 句级补全的机制（不含模型接缝）** — 目标：停顿出灰字、Tab 接受、Esc 丢弃、组字期绝不触发
+  （原 I4.1 的前半，2026-09-17 按 §0 拆出）。
   - 文件：`packages/novel-workbench/src/client/novel-completion.ts`（新）、`NovelEditor.tsx`、
-    `novel-workbench-completion.spec.ts`（新）
-  - 要求：ProseMirror decoration 实现；**中文输入法组字期间绝不触发、不干扰 composition**；
-    触发延迟与开关进设置；请求走已有模型 seam（不新建 provider）；失败静默不打扰作者；
-    接受后只改草稿文件，不碰 Canon。
-  - 验证：spec 覆盖触发/接受/丢弃/组字期抑制；真机手写时出现灰字并能 Tab 接受。
+    `NovelSettings.tsx`、`store.ts`、`novel-workbench-completion.spec.ts`（新）
+
+  > **✅ 已完成（2026-09-17）。机制全部落地并有 11 条断言；模型接缝留给 I4.1b。**
+  >
+  > **为什么拆：查实客户端拿不到生成能力。** `dsh-llm` **确实**带一个客户端可用的 remote
+  > （`typert.remote-client`），但它只暴露**发现类**方法 —— `listProviders` / `discoverModels` /
+  > `listConfigurableProviders`，**没有生成**。所以真实的续写必须新增宿主方法调用 `ctx.llm.stream`
+  > （和 `readChapterFile` 同一条路），而且**每次停顿都是一次模型调用**（成本与体验都要掂量）。
+  > 这两件事属于另一个增量。
+  >
+  > **机制（本轮）：**
+  > - **用 ProseMirror decoration 画，不改文档**（`novel-completion.ts`）：建议不是作者的文字，
+  >   在被接受之前不能进文档、不能进 undo、不能进草稿文件。widget 上带 `aria-hidden`，
+  >   所以读屏软件也不会把它当成正文。
+  > - **组字期绝不触发**：策略函数 `shouldAskForCompletion` 把 `composing` 作为一票否决，
+  >   任何编辑都会先丢掉过期建议；组件把 `view.composing` 传进去。中文输入法里冒出灰字会破坏
+  >   组字区 —— 这是作者会立刻发现、且不会原谅的失败。
+  > - **Tab 接受 / Esc 丢弃**：走 `editorProps.handleKeyDown`；接受才真正插入文本并随即走自动保存。
+  > - **接缝可注入**：`requestCompletion` 缺失时功能是「关着」而不是「坏了」——机制照跑，只是永远没答案。
+  > - **失败静默**：请求失败不弹任何东西。为了一条可有可无的建议打断作者，代价比建议本身大。
+  > - 设置面板新增「句子续写」（开/关）与「续写等待」（0.6 / 0.9 / 1.5 秒），默认开、900ms。
+  >
+  > **🐛 单测当场抓到一个真缺陷：** 我原来的"该不该补空格"规则会把空格插到**两个汉字之间**
+  > （`他说` + `他合上门。` → `他说 他合上门。`）。规则改成**只有两侧都是拉丁字母/数字才补空格** ——
+  > 中文不加空格，标点前也不加。
+  >
+  > **一个断言口径的教训：** 我一开始用 `.ProseMirror` 的 `textContent` 断言"建议不在文档里"，
+  > 但 **widget 是 DOM 里的节点**，textContent 当然包含它。改为：**Esc 之后正文与原文一字不差** ——
+  > 如果建议真进过文档，丢掉它就会留下痕迹。这才是"它不是正文"的证明。
+  >
+  > **未做、不许当已验证：** **没有**接真实模型接缝，**没有**真机看到过灰字。计划原本的
+  > 「真机手写时出现灰字并能 Tab 接受」**没有完成**，归 I4.1b。
+  > - 门禁：**364 tests**（新增 11）、lint 0、typecheck 0、`diff --check` 0、rebuild + smoke **exit 0**。
+
+- [ ] **I4.1b 句级补全的模型接缝** — 目标：把 `requestCompletion` 接到真实模型，真机看到灰字。
+  - 文件：`packages/novel-project/src/`（宿主方法，走 `ctx.llm.stream`）、`novel-data.ts`、`index.tsx`、spec
+  - 前置：I4.1a 已绿（机制与策略都有断言）。
+  - 要求：宿主方法只在**当前工作区**范围内请求续写；提示只要"接下这一句"，不要改写已有文字；
+    返回空/超时/失败一律让机制**静默无建议**；**绝不写 Canon**。
+  - 验证：真机手写时出现灰字并能 Tab 接受；请求失败时不打扰作者。
 
 - [ ] **I4.2 段级续写面板** — 目标：参考应用那种「情节灵感 → 生成 → 采用」。
   - 文件：`packages/novel-workbench/src/client/ContinueWritingPanel.tsx`（新）、spec（新）

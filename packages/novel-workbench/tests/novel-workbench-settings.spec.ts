@@ -33,7 +33,10 @@ describe('novel-mode settings sheet', () => {
     // transcript is rendered by the shipped conversation surface, not here.
     expect(sheet?.querySelector('[data-novel-settings-activity]')).toBeNull()
     expect(Object.keys(getWorkbenchState().settings))
-      .toEqual(['readingSize', 'readingMeasure', 'readingIndent', 'readingLeading'])
+      .toEqual([
+        'readingSize', 'readingMeasure', 'readingIndent', 'readingLeading',
+        'completionEnabled', 'completionDelayMs',
+      ])
 
     await act(async () => {
       sheet?.querySelector<HTMLButtonElement>('[data-novel-settings-size="18"]')?.click()
@@ -53,6 +56,16 @@ describe('novel-mode settings sheet', () => {
     // Honoured by the editor's reading state, which is why they may be offered.
     expect(getWorkbenchState().settings.readingIndent).toBe(0)
     expect(getWorkbenchState().settings.readingLeading).toBe(2.1)
+
+    // And these by the editor's completion mechanism, off the same reason.
+    await act(async () => {
+      sheet?.querySelector<HTMLButtonElement>('[data-novel-settings-completion="false"]')?.click()
+    })
+    await act(async () => {
+      sheet?.querySelector<HTMLButtonElement>('[data-novel-settings-completion-delay="1500"]')?.click()
+    })
+    expect(getWorkbenchState().settings.completionEnabled).toBe(false)
+    expect(getWorkbenchState().settings.completionDelayMs).toBe(1500)
 
     await act(async () => {
       sheet?.querySelector<HTMLButtonElement>('[data-novel-settings-close]')?.click()

@@ -19,6 +19,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } fro
 import { EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import type { WorkspaceId } from '@deepseek-ai/dsh-api-workspace-controller/client'
+import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import { countCharacters } from './novel-copy.js'
 import type { ChapterDraft, ChapterDraftSave, ChapterIdentity } from './chapter-files.js'
 
@@ -54,6 +55,17 @@ const EDITOR_CSS = `
 .novel-editor-reading p { margin: 0 0 .86em; }
 .novel-editor-toggle { display: flex; gap: 6px; }
 .novel-editor-toggle .btn.on { border-color: hsl(var(--accent-brand)); color: hsl(var(--accent-text)); }
+.novel-editor-confirm {
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid hsl(var(--accent-brand) / .5);
+  border-radius: 10px;
+  background: hsl(var(--accent-brand) / .08);
+  font-family: var(--font-ui); font-size: 13px; line-height: 1.7;
+  color: hsl(var(--text-100));
+}
+.novel-editor-confirm p { margin: 0; }
+.novel-editor-confirm-note { color: hsl(var(--text-200)); font-size: 12px; }
 `
 
 /** Everything the writing surface needs. */
@@ -74,6 +86,17 @@ export interface NovelEditorProps {
   /** First-line indent in em and line height, both from the settings sheet. */
   readonly readingIndent: number
   readonly readingLeading: number
+  /** The thread the proposal request is sent into; absent before one is chosen. */
+  readonly sessionId: SessionId | undefined
+  /** Accepted revision the proposal will be made against. */
+  readonly revision: number | undefined
+  /** Ask the agent to file this chapter's draft as a proposal. */
+  readonly submitChapterProposal: (
+    sessionId: SessionId,
+    chapter: ChapterIdentity,
+    revision: number,
+    chars: number,
+  ) => Promise<void>
 }
 
 /** ProseMirror blocks back to the file's shape: blank line between paragraphs. */
@@ -90,6 +113,14 @@ export function NovelEditor(props: NovelEditorProps): ReactNode {
   const [chars, setChars] = useState(0)
   /** Writing or reading: one document, two states — not two screens. */
   const [mode, setMode] = useState<'write' | 'read'>('write')
+  /**
+   * Submitting is the one action here whose effect can reach Canon, so it is two
+   * steps: the author sees exactly what will be proposed, and against which
+   * revision, before anything is sent.
+   */
+  const [confirming, setConfirming] = useState(false)
+  const [submitState, setSubmitState] = useState<'idle' | 'sending' | 'sent'>('idle')
+  const [submitProblem, setSubmitProblem] = useState<string | undefined>(undefined)
 
   // Refs, not state: the debounce timer and the newest version must be readable
   // from the timer callback without re-registering it on every keystroke.
@@ -148,6 +179,54 @@ export function NovelEditor(props: NovelEditorProps): ReactNode {
   useEffect(() => () => {
     if (timer.current !== undefined) clearTimeout(timer.current)
   }, [])
+
+  /** Save right now, cancelling the debounce: submitting must not race the file. */
+  const flush = useCallback(async (): Promise<void> => {
+    if (timer.current !== undefined) {
+      clearTimeout(timer.current)
+      timer.current = undefined
+    }
+    const target = chapterRef.current
+    if (editor === null || editor === undefined || workId === undefined || target === undefined) return
+    const result = await saveChapterDraft(workId, target, serialize(editor), versionRef.current)
+    if (result.state === 'saved') {
+      versionRef.current = result.version
+      setProblem(undefined)
+      setConflict(undefined)
+      setStatus('clean')
+      return
+    }
+    if (result.state === 'conflict') {
+      setConflict(result.message)
+      setStatus('failed')
+      return
+    }
+    setProblem(result.message)
+    setStatus('failed')
+  }, [editor, saveChapterDraft, workId])
+
+  const submit = useCallback(async (): Promise<void> => {
+    const target = chapterRef.current
+    const sessionId = props.sessionId
+    const revision = props.revision
+    if (workId === undefined || target === undefined) return
+    if (sessionId === undefined || revision === undefined) {
+      setSubmitProblem('还没有选定线程，先在左栏开一条线再提交。')
+      return
+    }
+    setSubmitState('sending')
+    setSubmitProblem(undefined)
+    // The agent is asked to read the file, so the file has to be current first.
+    await flush()
+    try {
+      await props.submitChapterProposal(sessionId, target, revision, chars)
+      setSubmitState('sent')
+      setConfirming(false)
+    } catch (error) {
+      setSubmitProblem(error instanceof Error ? error.message : String(error))
+      setSubmitState('idle')
+    }
+  }, [chars, flush, props, workId])
 
   const load = useCallback((target: ChapterIdentity) => {
     if (workId === undefined) return
@@ -224,7 +303,55 @@ export function NovelEditor(props: NovelEditorProps): ReactNode {
         </span>
         {conflict !== undefined && <span className="novel-editor-state" role="alert">{conflict}</span>}
         <span className="novel-editor-count" data-novel-editor-count={chars}>{`${String(chars)} 字`}</span>
+        {chars > 0 && submitState !== 'sent' && (
+          <button
+            type="button"
+            className="btn sm"
+            data-novel-editor-submit="true"
+            onClick={() => { setConfirming(true); setSubmitState('idle'); setSubmitProblem(undefined) }}
+          >
+            提交本章
+          </button>
+        )}
+        {submitState === 'sent' && (
+          <span className="novel-editor-state" data-novel-editor-submitted="true">已交给 AI 起草提案</span>
+        )}
       </div>
+      {confirming && (
+        // The one action here that can reach Canon gets said out loud first.
+        <div className="novel-editor-confirm" data-novel-editor-confirm="true">
+          <p>
+            {`把第${String(chapter.number)}章《${chapter.title}》的草稿（${String(chars)} 字）作为一份提案提交，`}
+            {`和已接受版本 R${String(props.revision ?? 0)} 对齐。`}
+          </p>
+          <p className="novel-editor-confirm-note">
+            草稿先存盘，再由 AI 读它、产出提案放进提案收件箱。
+            Canon 不会因为这一步改变 —— 只有你在审阅里逐条接受，它才动。
+          </p>
+          {submitProblem !== undefined && (
+            <p className="novel-editor-state" role="alert">{submitProblem}</p>
+          )}
+          <div className="novel-editor-toggle">
+            <button
+              type="button"
+              className="btn sm"
+              data-novel-editor-confirm-cancel="true"
+              onClick={() => { setConfirming(false) }}
+            >
+              先不提交
+            </button>
+            <button
+              type="button"
+              className="btn primary sm"
+              data-novel-editor-confirm-submit="true"
+              disabled={submitState === 'sending'}
+              onClick={() => { void submit() }}
+            >
+              {submitState === 'sending' ? '正在提交…' : '提交成提案'}
+            </button>
+          </div>
+        </div>
+      )}
       {mode === 'read' ? (
         // Reading is the same text, set as a manuscript: the author should not
         // have to read their own chapter in the editor's voice.

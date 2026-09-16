@@ -63,14 +63,14 @@ const TRANSCRIPT_CSS = `
  * already went wrong. The detail is what it acted on — a path, a pattern, or the
  * model's own short description of the command.
  */
-function toolLine(entry: TranscriptEntry): string {
+function toolLine(entry: TranscriptEntry): { readonly lead: string, readonly detail: string | undefined } {
   const phrase = toolPhrase(entry.text)
   const lead = entry.state === 'running'
     ? `正在${phrase}…`
     : entry.state === 'failed'
       ? `${phrase}时出错`
       : `已${phrase}`
-  return entry.detail === undefined ? lead : `${lead} · ${entry.detail}`
+  return { lead, detail: entry.detail }
 }
 
 /** Everything the transcript needs: the lines, already reduced. */
@@ -101,7 +101,26 @@ export function NovelTranscript(props: NovelTranscriptProps): ReactNode {
               ...(entry.streaming === true ? { 'data-novel-transcript-streaming': 'true' } : {}),
             },
             entry.kind === 'tool'
-              ? createElement('p', { className: 'novel-transcript-tool' }, toolLine(entry))
+              // Phrase and detail are separate nodes on purpose: the phrase is
+              // ours and must stay in the author's language, while the detail can
+              // be the model's own sentence — which may name a tool, and that is
+              // the model talking, not our rendering.
+              ? createElement(
+                  'p',
+                  { className: 'novel-transcript-tool' },
+                  createElement(
+                    'span',
+                    { 'data-novel-transcript-tool-phrase': 'true' },
+                    toolLine(entry).lead,
+                  ),
+                  toolLine(entry).detail === undefined
+                    ? null
+                    : createElement(
+                        'span',
+                        { 'data-novel-transcript-tool-detail': 'true' },
+                        ` · ${toolLine(entry).detail as string}`,
+                      ),
+                )
               : createElement(
                   'p',
                   {

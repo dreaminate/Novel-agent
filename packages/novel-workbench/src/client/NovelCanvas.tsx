@@ -378,6 +378,10 @@ export function NovelCanvas(props: NovelCanvasProps): ReactNode {
         setEditorChapter(
           chapter === undefined ? undefined : { number: chapter.number, title: chapter.title },
         )
+        // 提交本章 proposes against the accepted revision, and this read is where
+        // the writing surface learns it. (The simulation view reads it too, but
+        // only when it is showing.)
+        setAcceptedRevision(outline.revision)
       },
       () => {
         if (live) setEditorChapter(undefined)
@@ -667,6 +671,9 @@ export function NovelCanvas(props: NovelCanvasProps): ReactNode {
           readingMeasure={state.settings.readingMeasure}
           readingIndent={state.settings.readingIndent}
           readingLeading={state.settings.readingLeading}
+          sessionId={sessionId}
+          revision={acceptedRevision}
+          submitChapterProposal={props.submitChapterProposal}
         />
       </Shell>
     )

@@ -651,7 +651,39 @@ HEAD `02a48d8` —— 即本计划写的 `8926e31` **加本计划文件本身的
     默认落地页改为编辑器（无选中章节时要给体面的空态，不能是白屏）。
   - 验证：spec 绿；真机两态都对；原 `read` 画布不再出现在视图段；新建会话的落地页是编辑器且不空。
 
-- [ ] **I3.3 提交本章 → 提案** — 目标：手稿经作者确认后进入 Canon 事务。
+- [x] **I3.3 提交本章 → 提案** — 目标：手稿经作者确认后进入 Canon 事务。
+
+  > **✅ 已完成（2026-09-17）。真机走通了「手写 → 提交 → 收件箱出现提案」，且 Canon 一动没动。**
+  >
+  > **查实：客户端根本没法自己file提案。** `@Remote` 方法清单里没有任何"提交 packet"的入口；
+  > 唯一路径是 **`propose_novel_result_packet` 这个 Agent 工具**（它要 calling agent 来定 provenance 与 cwd）。
+  > 所以「提交本章」只能是：**把请求发进当前线程，让 Agent 去做**。这与计划写的「走既有
+  > `propose_novel_result_packet` 路径」一致。
+  >
+  > **实现：**
+  > - `chapter-files.ts` 新增 `proposalRequest(chapter, revision, chars)`：一句话写清**草稿文件、
+  >   章号章名与字数、expectedRevision**，并明写边界「只产出提案……**不要直接改动 Canon**」。
+  >   这是产品里唯一一句其效果能触达 Canon 的话，所以它写死且可单测。
+  > - face 新增 `submitChapterProposal`，复用与 `resend` 同一套会话提交通路
+  >   （`binding().session.beginSubmission` + `prompt`），**不新建投递机制**。
+  > - 编辑器加「提交本章」→ **两步**：先出一张确认卡（章节 / 字数 / 对齐版本 R5 / 边界那句话），
+  >   确认后才提交；提交前**先把草稿存盘**（Agent 要去读那个文件，不能赛跑）。
+  >
+  > **🐛 过程中修掉的两个真问题：**
+  > ① **`acceptedRevision` 只在「推演」视图加载过** —— 编辑器里它是 undefined，确认卡会显示 R0、
+  >   提交会被"还没选定线程"挡住。改为在编辑器自己的 outline 读取里一并取回。
+  > ② **I2.2 的"工具行不许泄漏工具名"检查本身太宽**，而且被放宽了两次才做对：先是扫**整条** transcript
+  >   （作者自己在消息里写了工具名就会被误报），改成只扫工具行后**仍然误报** —— 因为工具行的
+  >   `detail` 可以是**模型自己写的句子**，它当然可能提到工具名。最终把「短语」与「细节」拆成两个节点
+  >   （`data-novel-transcript-tool-phrase` / `-detail`），检查只扫短语。**不变量本身没变，是检查口径错了。**
+  >
+  > **真机验证（探针 `docs/evidence/editor-2026-09-17/probe-submit-proposal.mjs`，会花一次模型额度）：**
+  > 写入 23 字 → 确认卡逐字显示「把第1章《开篇章》的草稿（23 字）作为一份提案提交，和已接受版本 R5 对齐。」
+  > → 确认 → **收件箱提案数 0 → 1**（producer `novel-prose-writer`，packet `tiangege-ch0`）；
+  > **acceptedRevision 仍是 5** —— Canon 没被这一步碰过，这正是边界的设计保证。
+  > 探针草稿文件已删；**那份提案留在收件箱里**（它是功能的可见证据，点「丢弃」即可清掉）。
+  > 另：smoke 里 `review` 这一屏这次是 **rendered** 而不是 skipped —— 因为有提案可审了。
+  > - 门禁：**352 tests**、lint 0、typecheck 0、`diff --check` 0、rebuild + smoke **exit 0**。
   - 文件：`NovelEditor.tsx`、`novel-data.ts`、spec
   - 要求：点「提交本章」把当前章节文件内容作为 Result Packet 草稿提交（走既有
     `propose_novel_result_packet` 路径与提案收件箱）；失败不污染 Canon；提交前显示将产生的影响。

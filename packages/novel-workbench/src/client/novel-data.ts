@@ -34,6 +34,7 @@ import type { WorkspaceView } from '@deepseek-ai/dsh-api-workspace-controller/cl
 import {
   chapterDraftPath,
   draftFromRead,
+  proposalRequest,
   saveResultFromWrite,
   type ChapterDraft,
   type ChapterDraftSave,
@@ -151,6 +152,17 @@ export interface NovelWorkFace {
     text: string,
     version: string,
   ) => Promise<ChapterDraftSave>
+  /**
+   * Ask the session's agent to file one chapter's draft as a proposal. The
+   * client cannot file a Result Packet itself; the draft reaches Canon only
+   * through the proposal this produces.
+   */
+  readonly submitChapterProposal: (
+    sessionId: SessionId,
+    chapter: ChapterIdentity,
+    revision: number,
+    chars: number,
+  ) => Promise<void>
   /**
    * Character count of one chapter's accepted manuscript, or `undefined` while
    * Canon holds no accepted text for it.
@@ -1400,6 +1412,25 @@ export function createNovelWorkFace(deps: NovelFaceDeps): NovelWorkFace {
       const handle = session.beginSubmission({ mode: 'queue', text, images: [] })
       const result = await session.prompt([{ type: 'text', text }], 'queue', undefined, handle.requestId)
       if (!result.ok) throw new Error(`重发失败：${result.error.message}`)
+    },
+    /**
+     * Ask the current session's agent to file one chapter's draft as a proposal.
+     *
+     * The client cannot file a Result Packet itself — the only path is the
+     * `propose_novel_result_packet` tool, which needs a calling agent — so this
+     * sends the request into the thread and lets the agent do it. I3.3's whole
+     * boundary rests on that: the draft reaches Canon only through a proposal the
+     * author then reviews, never through this call.
+     */
+    async submitChapterProposal(sessionId, chapter, revision, chars) {
+      const session = deps.sessions.binding(sessionId)?.session
+      if (session === undefined) {
+        throw new Error('这条线程在 Host 上没有可用的会话绑定，没法把草稿提交成提案。')
+      }
+      const text = proposalRequest(chapter, revision, chars)
+      const handle = session.beginSubmission({ mode: 'queue', text, images: [] })
+      const result = await session.prompt([{ type: 'text', text }], 'queue', undefined, handle.requestId)
+      if (!result.ok) throw new Error(`提交失败：${result.error.message}`)
     },
   }
 }

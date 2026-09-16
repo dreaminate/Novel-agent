@@ -48,6 +48,31 @@ export type ChapterDraftSave =
   | { readonly state: 'failed'; readonly message: string }
 
 /**
+ * What 提交本章 asks the agent to do.
+ *
+ * This is the one sentence in the product whose effect can reach Canon, so it
+ * is deliberately explicit: which file, which revision it is proposed against,
+ * and the boundary — a proposal, never a direct write. The author's click on the
+ * confirmation is the authorization; the sentence is what that authorization
+ * turns into.
+ */
+export function proposalRequest(
+  chapter: ChapterIdentity,
+  revision: number,
+  chars: number,
+): string {
+  return [
+    '请把这一章的草稿作为一份 Result Packet 提案提交，用 propose_novel_result_packet。',
+    '',
+    `- 草稿文件：${chapterDraftPath(chapter)}（就在工作区根目录，直接读这个文件）`,
+    `- 章节：第${String(chapter.number)}章《${chapter.title}》，${String(chars)} 字`,
+    `- expectedRevision：${String(revision)}`,
+    '',
+    '只产出提案、放进提案收件箱等作者审阅：不要直接改动 Canon，也不要顺手改别的章节。',
+  ].join('\n')
+}
+
+/**
  * Translate one read.
  * @param read - the host's answer.
  * @returns what the editor shows.

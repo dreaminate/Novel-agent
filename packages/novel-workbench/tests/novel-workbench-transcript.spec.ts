@@ -173,6 +173,11 @@ describe('NovelTranscript', () => {
     expect(text).not.toContain('propose_novel_result_packet')
     expect(text).not.toContain('running')
     expect(text).not.toContain('done')
+    // The phrase is its own node so it can be checked without the detail, which
+    // may be the model's own sentence and is allowed to name things.
+    expect(container.querySelectorAll('[data-novel-transcript-tool-phrase]')).toHaveLength(3)
+    expect(container.querySelector('[data-novel-transcript-tool-phrase]')?.textContent)
+      .toBe('已整理成提案')
 
     await act(async () => { root.unmount() })
     container.remove()

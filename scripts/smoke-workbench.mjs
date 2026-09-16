@@ -412,11 +412,19 @@ async function sweepThread(session) {
         if (seat === null) return null
         const text = seat.innerText ?? ''
         // The transcript must speak the author's language: a tool's own name
-        // reaching the page is the regression this screen exists to catch.
+        // reaching a *tool line* is the regression this screen exists to catch.
+        // Scoped to tool lines on purpose — the author may legitimately type an
+        // identifier into their own message, and that is not our rendering.
+        // The phrase is ours and must stay in the author's language. The detail
+        // is excluded because it can be the model's own sentence, which may name
+        // a tool — that is the model talking, not our rendering.
+        const toolText = Array.from(
+          seat.querySelectorAll('[data-novel-transcript-entry="tool"] [data-novel-transcript-tool-phrase]'),
+        ).map(node => node.innerText ?? '').join('\\n')
         const leaks = ['propose_novel_result_packet','retrieve_novel_context','rebuild_novel_index',
           'simulate_novel_story_world','simulate_novel_reader_response','todo_write','subagent_fork',
           'web_search','web_fetch','read_image','propose_novel_import','publish_novel_manuscript']
-          .filter(name => text.includes(name))
+          .filter(name => toolText.includes(name))
         return {
           entries: seat.querySelectorAll('[data-novel-transcript-entry]').length,
           tools: seat.querySelectorAll('[data-novel-transcript-entry="tool"]').length,

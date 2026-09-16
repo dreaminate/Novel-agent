@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   chapterDraftPath,
   draftFromRead,
+  proposalRequest,
   saveResultFromWrite,
   type ChapterDraft,
   type ChapterDraftSave,
@@ -69,5 +70,19 @@ describe('saving a draft', () => {
     const saved = saveResultFromWrite({ state: 'unwritable', reason: '没有权限读写这个文件。' })
     expect(saved.state).toBe('failed')
     expect(saved.state === 'failed' ? saved.message : '').toContain('权限')
+  })
+})
+
+describe('the chapter proposal request', () => {
+  it('names the file, the revision, and the boundary the agent must respect', () => {
+    const text = proposalRequest({ number: 2, title: '旧瓦' }, 7, 1200)
+
+    expect(text).toContain('第2章《旧瓦》.草稿.md')
+    expect(text).toContain('propose_novel_result_packet')
+    expect(text).toContain('expectedRevision：7')
+    expect(text).toContain('1200 字')
+    // The boundary is the whole reason this sentence exists: the draft reaches
+    // Canon through a proposal the author reviews, never through this request.
+    expect(text).toContain('不要直接改动 Canon')
   })
 })

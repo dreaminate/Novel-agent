@@ -180,8 +180,31 @@ HEAD `02a48d8` —— 即本计划写的 `8926e31` **加本计划文件本身的
   >   I1.2 / I1.3 已按此重写（I1.2 改为「真机验证官方面板」，I1.3 改为「修复用路径缺陷」）；
   >   决定 5 那一行也已改写。若要走 ③ 自研，会与 §2「不建第二套 …审批…」直接冲突，需要用户明确豁免。
   >
-  > **I1.1 仍未完成**（真实审批那一次实验没跑）。**下一个待办就是它**：在隔离 profile 里驱动一次
-  > 真正需要审批的真实操作，然后按重写后的 I1.2 四条断言验证。
+  > **I1.1 仍未完成。**
+  >
+  > **2026-09-17 续：找到一条不需要模型的 RED 入口。** `dsh-client-connection` 的客户端 fixture
+  > **只由 URL `?fixture=1` 打开**，打开后会吐出**真实的 pending `approval/request` 瀑布**
+  > （`agentId: fx-alpha`，reason「fixture 常驻审批（可答：批准/拒绝后消失）」）。
+  > 复跑：`node docs/evidence/approval-red-2026-09-17/probe-fixture-approval.mjs /tmp/approval-fixture`。
+  > （坑：token URL 会 303 到裸 `/` 把 query 丢掉，必须先拿 cookie 再二次导航。探针已处理。）
+  >
+  > **观测（3 次运行一致，两种选会话顺序都试过）：** 我们的 frame 给官方 pending 交互留的座位**是通的** ——
+  > 官方 `user-questions` 的待答面板确实渲染进了 `conversation.composer`（「偏好 / 你现在更想招哪类… 1/3」）；
+  > **但官方审批面板没有出现**（`approvalDetailSlot=false`、`approvalishNodes=0`）。
+  > 两条瀑布的 `agentId` **完全相同**，所以不是会话作用域造成的；6 条 console 报错全是 fixture 未实现的
+  > `dynamicCordisRunner/*`，没有一条与 approval 或插件应用失败有关。
+  >
+  > **这是一条可复现但未解释的差异，不是缺陷结论。** 未排除的替代解释：fixture 先自行决定了那条审批、
+  > 两个包 `registerPendingInteraction` 的竞争顺序不同、或 `ui-approval` 的
+  > `select: pendingInteraction instanceof PendingApproval` 在这条路径上取不到值。边界见证据 §7.3。
+  >
+  > **本轮没有花模型额度**，用的也是官方自己的开发 fixture —— 所以它回答的是**UI 那一半**，
+  > **不是**原 RED 要求的「真实操作」。真实审批（带工具调用的真实会话）仍未跑。
+  >
+  > **下一轮从这里接着做**（证据 §7.4）：① 确认 `ui-approval` 的 `apply()` 到底有没有跑起来
+  > （看它的 locale 命名空间/槽注册，而不是只看模块被 fetch）；② 对比两条瀑布在 fixture 下的
+  > **投递顺序与认领**差异，定位在「没投递」还是「投递了没人认领」；③ 确认 fixture 不是 artifact 之后，
+  > 才上需要模型的真实审批做终局确认。**在 ①–③ 出结果前，不得把本条当成「官方审批在我们 frame 里坏了」。**
 
 - [ ] **I1.2 GREEN：真机验证官方审批面板** — 目标：证明「复用路径可用」，而不是假设它可用。
   - 前置：I1.1 的剩余部分（真机驱动一次真实审批）。

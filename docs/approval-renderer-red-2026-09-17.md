@@ -173,3 +173,73 @@ BASE=${US%%/\?*}
 curl -s -b $J "$BASE/plugins/??@deepseek-ai/dsh-client-ui-approval/client.js&rev=d7ab0d02e937c5a6-19" \
   -o /tmp/ui-approval-client.js && wc -c /tmp/ui-approval-client.js
 ```
+
+---
+
+## 7. 续（2026-09-17）：用官方 fixture 做无模型 RED
+
+### 7.1 方法：一个 URL 开关就能造出真的 pending 审批
+
+`dsh-client-connection` 的客户端半边自带一套内存 fixture，**只由 URL query 决定**：
+
+```js
+const fixtureRpc = pageLocation !== undefined &&
+  new URLSearchParams(pageLocation.search).has("fixture")
+  ? createFixtureConnectionRpc() : void 0
+```
+
+只要页面 URL 带 `fixture`（值不是 `empty`），整个连接层就换成内存世界，并在事件流打开时吐出**真实的
+pending 瀑布调用**：
+
+```js
+const approvalInvocation = () => ({ type: "waterfall", event: "approval/request",
+  eventId: "fx-interaction-approval", agentId: sid("fx-alpha"),
+  request: { toolName: "dangerous_tool", reason: "fixture 常驻审批（可答：批准/拒绝后消失）" } })
+const questionInvocation = () => ({ type: "waterfall", event: "user-questions/request",
+  eventId: "fx-interaction-question", agentId: sid("fx-alpha"), request: { questions: fixtureQuestions } })
+```
+
+**这就给了「不需要模型、不需要真实工具调用」的 pending 审批**，是验证审批 UI 的最便宜入口。
+
+> ⚠️ **坑：** token URL 会 **303 到裸 `/`**，`fixture` 会被丢掉。必须先导航一次 token URL 拿到 cookie，
+> 再导航到 `http://127.0.0.1:4780/?fixture=1`。探针已经这么做。
+
+### 7.2 观测结果（可复现，3 次运行）
+
+复现：
+
+```bash
+node docs/evidence/approval-red-2026-09-17/probe-fixture-approval.mjs /tmp/approval-fixture
+```
+
+产物：`docs/evidence/approval-red-2026-09-17/fixture-summary.json`、`fixture-before.png`。
+
+| 观测 | 结果 |
+| --- | --- |
+| frame 是否渲染 | 是 |
+| fixture 是否真的生效 | 是（作品名变 `fixture`，线程 4 条，报错都指向未实现的 fixture RPC） |
+| 选中 fixture 会话后，**官方 user-questions 待答面板** | **渲染进 `conversation.composer`**（「偏好 / 你现在更想招哪类 Agent/Harness 候选人？…1/3」） |
+| **官方审批面板** | **没有出现**（`approvalDetailSlot=false`，`approvalishNodes=0`，正文里没有「常驻审批」） |
+| console 报错 | 6 条，**全部**是 fixture 未实现的 `dynamicCordisRunner/*`，**没有一条**和 approval / 插件应用失败有关 |
+
+**两者 agent 作用域完全相同**（都是 `sid("fx-alpha")`），所以差异不是会话作用域造成的；
+先选会话再加载、先加载再选会话两种顺序都试过，结果一致。
+
+### 7.3 这条证据的边界（重要）
+
+- **这不是「真实操作」**，是官方自己的开发 fixture。它回答的是**UI 那一半**：
+  「官方 pending 交互能不能画进我们的 frame」。
+- 它**证明**：我们的 frame 给官方 pending 交互留的座位是**通的**（questions 面板确实画出来了）。
+- 它**没有证明** `ui-approval` 坏了。目前只是一条**可复现但未解释**的差异，不是缺陷结论。
+  未排除的替代解释至少有：fixture 先自行决定了那条审批；两个包 `registerPendingInteraction`
+  的竞争顺序不同；`ui-approval` 的 `select` 判据 `instanceof PendingApproval` 在这个路径上取不到值。
+
+### 7.4 下一步诊断（下一轮从这里接着做）
+
+1. 在页面里直接看 `ui-approval` 的 `apply()` 有没有跑起来（它的 locale 命名空间 / 槽注册是否生效），
+   而不是只看模块有没有被 fetch。
+2. 把 `approval/request` 与 `user-questions/request` 两条瀑布在 fixture 下的**投递顺序与应答者**
+   对比出来，确定差异发生在「有没有投递」还是「投递了没人认领」。
+3. 如果 fixture 路径确认是它自己的 artifact，再上**真实审批**（需要模型）做终局确认。
+
+**在 1–3 出结果之前，不得把本条当成「官方审批在我们 frame 里坏了」。**

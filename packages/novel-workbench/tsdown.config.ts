@@ -2,7 +2,22 @@ import { defineConfig } from 'tsdown'
 import { createRequire } from 'node:module'
 
 const packageId = '@novel-agent/novel-workbench'
-const platformModules = new Set(['react', 'react/jsx-runtime'])
+
+/**
+ * Modules the DSH client module system already provides, so they must stay
+ * external. `react-dom` and `react-dom/client` belong here too: the official
+ * `dsh-client-ui-renderer` bundle requires all four by bare specifier, which
+ * only works if the loader's module table supplies them. Omitting them was
+ * harmless until the editor stack arrived, because nothing else in this bundle
+ * imported react-dom — `@tiptap/react` does, and it silently duplicated React
+ * DOM and its scheduler into `lib/client.js`.
+ */
+const platformModules = new Set([
+  'react',
+  'react/jsx-runtime',
+  'react-dom',
+  'react-dom/client',
+])
 
 /**
  * graphology imports the `events` package, which a browser bundle resolves to a

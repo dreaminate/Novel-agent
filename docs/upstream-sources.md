@@ -1,6 +1,6 @@
 # Upstream source and supply-chain ledger
 
-**Last evidence refresh:** 2026-09-09
+**Last evidence refresh:** 2026-09-17
 
 **Writing I/O:** [migration evidence](writing-io-migration-2026-09-09.md) moves existing
 import/publication and codec code into Writing. It reuses DSH Agent/FS/sandbox-policy/
@@ -178,6 +178,8 @@ covered by the Files/editor smoke.
 | `fflate@0.8.3` | [101arrowz/fflate](https://github.com/101arrowz/fflate); npm integrity `sha512-tbZNuJrLwGUp3zshBtdy4W+ORxZuIh8a5ilyIEQDC5rY1f3U20JMry0Ll3WBzU58EZKsEuJFXhb5gwv8CsPvgA==` | MIT, Copyright (c) 2026 Arjun Barrett | Host-only in-memory ZIP encoder for the minimal EPUB 3 container; no reader, downloader, UI or Canon ownership. |
 | `tance-mang/chinese-webnovel-skills` Skill methods | [commit `ecf552f6930e769d8bbf17818ad3d5a864a7a70b`](https://github.com/tance-mang/chinese-webnovel-skills/tree/ecf552f6930e769d8bbf17818ad3d5a864a7a70b), `skills/outline/SKILL.md`, `skills/world/SKILL.md`, `skills/trends/SKILL.md`, `skills/deconstruct/SKILL.md` and `skills/memory/SKILL.md` | MIT, Copyright (c) 2026 tance-mang | High-level planning methods are re-expressed in `novel-architect`; scoped/time/source-bearing observations and the single-sample limit are re-expressed in `novel-researcher`. `novel-writing-memory-organizer` adopts no upstream memory method or text: its reviewed file/snapshot/CLI/summary workflow is rejected in favor of existing accepted-revision Canon projections and strict Result Packet contracts. No upstream code, prompt text, template, example, file memory, CLI, model config or asset is included. |
 | `KKKKhazix/human-writing` research method | [commit `4fda173f3fef7fb808f3eba991eeb2528ea4b189`](https://github.com/KKKKhazix/human-writing/tree/4fda173f3fef7fb808f3eba991eeb2528ea4b189), `human-writing/SKILL.md` and `human-writing/references/reality.md`, `fiction.md`, `revision.md` | MIT, Copyright (c) 2026 Human Writing Skill contributors | Observable fact, attributed claim, inference and unknown/conflicting-evidence separation is re-expressed in the original `novel-researcher`. No upstream wording, example, script, prompt, runtime or asset is included. |
+| `sigma@3.0.3`, `graphology@0.26.0`, `graphology-layout@0.6.1`, `graphology-layout-forceatlas2@0.10.1` | [jacomyal/sigma.js](https://github.com/jacomyal/sigma.js) and [graphology/graphology](https://github.com/graphology/graphology); pinned in `packages/novel-workbench/package.json` | MIT (all four); no install lifecycle script | Browser-side story-map render and layout inside the workbench client bundle. The map is a derived projection and owns no Canon, proposal or authorization. Rejected alternative and measured bundle cost in [the frontend stack evaluation](open-source-evaluations/frontend-stack-2026-09-16.md). |
+| `@tiptap/react@3.31.3`, `@tiptap/starter-kit@3.31.3`, `@tiptap/pm@3.31.3` (+48 transitive) | [ueberdosis/tiptap](https://github.com/ueberdosis/tiptap); pinned exact in `packages/novel-workbench/package.json`; lockfile adds 51 packages, removes none | MIT (all 51 in the added closure); no install lifecycle script | Writing-editor surface inside the workbench client bundle. It produces draft text only — Canon changes still require an accepted Result Packet. Declared 2026-09-17 and **not yet imported** by any client module. Measured cost, composition and budget decision in [the editor stack evaluation](open-source-evaluations/editor-stack-2026-09-17.md). |
 
 The exact dependency evaluation, artifact hashes, runtime cost and current test
 boundary are recorded in
@@ -193,6 +195,9 @@ The exact adopted/rejected Skill boundary and DSH seam are recorded in
 The exact adopted research methods, rejected parallel tooling and current
 runtime proof are recorded in
 [the novel researcher method evaluation](open-source-evaluations/novel-researcher-methods.md).
+The exact editor-stack license closure, install-script audit, transitive
+versions and measured bundle cost are recorded in
+[the editor stack evaluation](open-source-evaluations/editor-stack-2026-09-17.md).
 
 ## Explicitly retired local foundation
 

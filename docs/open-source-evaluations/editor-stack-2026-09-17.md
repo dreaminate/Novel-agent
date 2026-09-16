@@ -3,30 +3,45 @@
 **触发：** `tasks/editor-first-frontend-2026-09-17.md` 决定 11「编辑器用 Tiptap / ProseMirror（MIT）富文本」，
 增量 I0.2 要求「引进前先做体积实测，否则不许引依赖」。
 
-**地位：** **选型证据 + 一份被阻断的引入。** 依赖**没有**装进本仓库，`package.json` / `pnpm-lock.yaml`
-**未被修改**。按计划 §5，本记录的结论触发「体积预算被突破 → 停下问人」，等待用户裁定后再决定是否引入。
+**地位：** 选型证据 + 一次**已完成的引入**。先按 §5 阻断，用户 2026-09-17 裁定「放宽预算、直接引入」后，
+`@tiptap/react` / `@tiptap/starter-kit` / `@tiptap/pm` 已写进
+`packages/novel-workbench/package.json`（精确 `3.31.3`），lockfile 新增 51 个包、移除 0 个。
+
+**⚠️ 本文件的孤立探针低估了真实成本约 2 倍 —— 原因已查明并修掉，见 §1 与 §5。**
+**下面 §2–§4 保留的是**裁定前**的探针证据，§5 起是引入后的真实测量与修正。**
 
 **测量环境：** macOS (darwin 25.6.0)，node `v24.14.1`，npm `11.16.0`，
 隔离探针 `/tmp/editor-stack-probe` 与 `/tmp/tsdown-probe`（均在仓库外，不污染仓库）。
-仓库 bundler：tsdown `0.22.2`（`packages/novel-workbench`）；对照 bundler：esbuild `0.25.12`（仓库根 devDependency）。
+仓库 bundler：tsdown `0.22.2`（rolldown `1.1.5`，`packages/novel-workbench`）；
+对照 bundler：esbuild `0.25.12`（仓库根 devDependency）。
 
 ---
 
 ## 1. 结论（先给判定）
 
-按计划原文的组合引入（`@tiptap/react` + `@tiptap/starter-kit` + `@tiptap/pm`），
-**workbench client bundle 会涨到当前 `lib/client.js` 的 2.48 倍（raw）/ 2.88 倍（gzip）**，
-突破计划 §5 写死的 2 倍预算。**判定：破。已按 §5 停下。**
+**已引入。真实增量 +914,423 B raw / +217,057 B gzip；引入后 `lib/client.js` = 1,559,851 B（2.42×）
+/ 340,653 B gzip（2.76×），在用户新定的 2,400,000 B raw 上限之内 → PASS。**
 
-三条独立测量互相印证，不是单一 bundler 的偏差：
+**但孤立探针当时给的是 +957,103 B，方向对、口径错。** 真实增量一度是 **+1,865,601 B（3.89×）**，
+因为 `@tiptap/react` 会 `import 'react-dom'`，而本仓库 `tsdown.config.ts` 的 `platformModules`
+**只外部化 `react` 与 `react/jsx-runtime`，漏了 `react-dom` 与 `react-dom/client`** ——
+于是 **react-dom + scheduler 被整个复制进 `lib/client.js`（约 900 KB）**，尽管宿主早就提供了它们。
+把这两个 id 补进 `platformModules` 之后，增量回落到 914,423 B，与探针预测（957,103 B）相差 5% 以内。
+**教训：孤立探针必须把外部化清单对齐真实构建，否则体积预测可以错一倍。**
+
+三条独立测量（修正后互相印证）：
 
 | 测量方式 | 增量 raw | 引入后 raw | 倍数 |
 | --- | --- | --- | --- |
-| tsdown 0.22.2（**与真实构建同配置**：cjs / browser / es2023 / react external / 不 minify） | 957,103 B | 1,602,531 B | **2.48×** |
-| esbuild 0.25.12（esm / 不 minify） | 848,633 B | 1,494,061 B | 2.31× |
-| esbuild 0.25.12（esm / minify） | 399,877 B | 1,045,305 B | 1.62× |
+| **仓库真实构建**（`pnpm --filter @novel-agent/novel-workbench build`，临时 import 后量，已还原） | **+914,423 B** | **1,559,851 B** | **2.42×** |
+| 仓库 tsdown 0.22.2 孤立对照（react **与 react-dom** external） | +957,103 B | 1,602,531 B | 2.48× |
+| esbuild 0.25.12（esm / 不 minify，react+react-dom external） | +848,633 B | 1,494,061 B | 2.31× |
 
-即使按对引入方最有利的 minify 口径，gzip 仍然破线（见 §5）。**换更小的配置也不够**：
+**口径说明（重要）：** 上面「未修 react-dom」的那次真实测量是 2,511,029 B（3.89×）；修掉之后才是 1,559,851 B。
+本文件早期版本写的 1,602,531 B 是**探针投影**，现在已被真实测量取代 —— 两者接近纯属巧合
+（投影少算了 react-dom，却也没算 StarterKit 的完整保留集）。
+
+按对引入方最有利的 minify 口径，gzip 仍会破原 2 倍线；**换更小的配置也不够**：
 去掉 StarterKit 的精简组合 raw 勉强过线（1.96×）但 gzip 仍破（2.22×）；只有退回裸 ProseMirror 才两项都过。
 
 ---
@@ -56,9 +71,12 @@ shasum -a 256 packages/novel-workbench/lib/client.js
 
 ## 3. GREEN：隔离体积实测
 
-`react` / `react-dom` / `react/jsx-runtime` 一律 external —— 依据
-`packages/novel-workbench/tsdown.config.ts` 的 `platformModules`（DSH 的 `PLATFORM_MODULES` 冻结 React，
-由宿主提供），与真实构建一致。
+`react` / `react-dom` / `react/jsx-runtime` 一律 external。
+
+> **⚠️ 这里犯过一个错，已修，记下来免得重犯：** 探针当时断言这与真实构建一致，
+> **其实不一致** —— `tsdown.config.ts` 的 `platformModules` 只外部化 `react` 与 `react/jsx-runtime`，
+> **没有 `react-dom`**。探针多外部化了一个 react-dom，于是把 `@tiptap/react` 触发的 react-dom 打包
+> 整段漏算了。**孤立探针的外部化清单必须逐项对齐真实构建配置，不能凭印象写。**
 
 ### 3.1 安装与版本（探针内）
 
@@ -173,10 +191,27 @@ node -e '...'   # 遍历 node_modules，打印 name/version/license/生命周期
 | pm-only（裸 ProseMirror） | 1,014,850 B | 1.57× | 216,011 B | 1.75× | 两项都过 |
 | trio（minify 口径，最宽松） | 1,045,305 B | 1.62× | 249,916 B | **2.02×** | raw 过，**gzip 仍破** |
 
-**结论：给引入方最有利的算法也过不了 gzip 那一关。** 按计划 §5 第 1 条
-「引入编辑器栈后 client bundle 超过当前 2 倍（体积预算被突破）」——**停下，把数字交用户决定。**
+**结论：按旧规则（当前 `client.js` 的 2 倍），给引入方最有利的算法也过不了 gzip 那一关。**
+这触发了计划 §5 第 1 条，loop 停下并把数字交给用户。
 
-### 供决策的选项（按对计划改动量从小到大）
+### 裁定结果（2026-09-17）
+
+用户选择**放宽预算、直接引入**。计划里的「2 倍当前」护栏已替换为**绝对上限 2,400,000 B raw**
+（理由与数字来源写进 `tasks/editor-first-frontend-2026-09-17.md` 的「体积护栏」一节）。
+
+引入后的**真实实测**：
+
+| 时点 | raw | gzip | 说明 |
+| --- | --- | --- | --- |
+| 基线 | 645,428 B | 123,596 B | sha256 `548d1124…` |
+| 首次真实构建（未修 `platformModules`） | 2,511,029 B | 523,098 B | **+1,865,601 B；react-dom + scheduler 被重复打包** |
+| 修掉 `platformModules` 后 | **1,559,851 B** | **340,653 B** | **+914,423 B / +217,057 B → 2.42×，PASS** |
+| 还原（移除临时 import 后重构建） | 645,428 B | 123,596 B | sha256 与基线**逐字节相同** |
+
+> 还原后的 sha 与基线一致，说明补 `platformModules` **不影响当前产物**（当前代码没有任何模块 import
+> react-dom），只影响将来 import react-dom 的构建。这同时也是一次「配置改动无副作用」的实证。
+
+### 裁定时的选项（历史记录，按对计划改动量从小到大）
 
 1. **放宽预算**：承认 2× 是自设护栏而非硬指标，把上限改成一个明确的数字写进计划。代价：单文件
    client.js 从 645 KB 涨到约 1.6 MB 未压缩，与「编辑器是主画布」的即时加载路径叠加。
@@ -191,12 +226,19 @@ node -e '...'   # 遍历 node_modules，打印 name/version/license/生命周期
    把 StarterKit 里用不到的（list / link / blockquote / code-block / horizontal-rule）全部拿掉，
    逼近 lean 或更低。与选项 3 同路，只是动机从「省体积」变成「首版就不需要」。
 
-**本轮没有做的事（不得当成已验证）：**
-- **没有**在真实仓库 `pnpm add`，**没有**产生 `pnpm-lock.yaml` diff，**没有**改 `package.json`；
-  因此 `THIRD_PARTY_NOTICES.md` 与 `docs/upstream-sources.md` **未更新** —— 依赖尚未引入，此时写入会误导。
-- **没有**跑 `packages/novel-workbench` 的真实 `tsdown` 构建做端到端体积确认（选项 2 需要）。
-- **没有**在任何真实浏览器里加载 Tiptap 编辑器；本记录只回答**体积与许可证**，不回答运行时可用性。
-- 隔离 Profile 的加载 smoke（`frontend-stack-2026-09-16.md` 要求的那条）**未做**。
+**引入后已完成 / 仍未做（不得当成已验证）：**
+- ✅ 已写进真实仓库 `packages/novel-workbench/package.json`（精确 `3.31.3`）并 `pnpm install`；
+  `pnpm-lock.yaml` 新增 51 个包、移除 0 个、未改动任何既有 resolution；`react`/`react-dom` 保持
+  `18.3.1`，**没有出现第二个 React 版本**。
+- ✅ `THIRD_PARTY_NOTICES.md` 与 `docs/upstream-sources.md` 已更新（依赖已实际引入，不再是空头记录）。
+- ✅ 端到端体积用**真实构建**实测（见上表），不再是探针投影。
+- ✅ 顺带修掉一个会导致体积翻倍的既有配置缺陷：`tsdown.config.ts` 的 `platformModules` 补上
+  `react-dom` 与 `react-dom/client`。证据：官方 `dsh-client-ui-renderer` 的 client bundle 里
+  `require("react-dom")` 与 `require("react-dom/client")` 都是**裸 require**，即由宿主模块表提供。
+- ❌ **没有**在任何真实浏览器里加载过 Tiptap 编辑器。本记录只回答**体积、许可证与打包**，
+  不回答运行时可用性 —— 那属于 I3.2 的验证范围。
+- ⚠️ 计划 §4.7 的 `scripts/dev-host.sh rebuild` + `scripts/smoke-workbench.mjs` 覆盖的是**现有**界面
+  （编辑器尚不存在），它验证的是这次配置改动没有弄坏已有 client bundle，不是编辑器的可用性。
 
 ---
 
@@ -221,4 +263,25 @@ $TSDOWN entry.ts --format cjs --platform browser --target es2023 --out-dir lib-t
   --no-dts --no-sourcemap --no-clean \
   --deps.never-bundle react --deps.never-bundle react/jsx-runtime --logLevel error
 wc -c < lib-trio/entry.cjs && gzip -9 -c lib-trio/entry.cjs | wc -c
+
+# 真实端到端测量（引入后做，权威口径）
+cd /Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent
+cp packages/novel-workbench/lib/client.js /tmp/client.js.orig        # 先备份产物
+# 在 packages/novel-workbench/src/client/index.tsx 末尾临时加：
+#   export { Editor, EditorContent, useEditor } from '@tiptap/react'
+#   export { default as StarterKit } from '@tiptap/starter-kit'
+#   export { EditorState } from '@tiptap/pm/state'
+#   export { EditorView } from '@tiptap/pm/view'
+#   export { Schema } from '@tiptap/pm/model'
+corepack pnpm --filter @novel-agent/novel-workbench build
+wc -c < packages/novel-workbench/lib/client.js                       # 1,559,851
+gzip -9 -c packages/novel-workbench/lib/client.js | wc -c            # 340,653
+# 还原并确认逐字节回到基线
+git checkout -- packages/novel-workbench/src/client/index.tsx
+corepack pnpm --filter @novel-agent/novel-workbench build
+shasum -a 256 packages/novel-workbench/lib/client.js                 # 548d1124…（与基线一致）
+
+# 确认 react-dom 由宿主模块表提供（而不是我们打进去）
+grep -rl 'require("react-dom")' node_modules/.pnpm --include=client.js
+# 输出含 @deepseek-ai/dsh-client-ui-renderer / -conversation / -chat 的 client.js
 ```

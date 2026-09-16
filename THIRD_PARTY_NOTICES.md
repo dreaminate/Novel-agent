@@ -343,3 +343,39 @@ Node built-in and fail to load in the client module system.
 All four are MIT. No upstream asset, font or paid licence is introduced; the
 measured bundle cost and the rejected alternative are recorded in
 `docs/open-source-evaluations/frontend-stack-2026-09-16.md`.
+
+## Novel-mode editor stack (2026-09-17)
+
+`@novel-agent/novel-workbench` declares the writing-editor stack as three direct
+dependencies, pinned exact in `packages/novel-workbench/package.json`. The
+lockfile gains 51 packages and removes none; no existing resolution changes.
+
+- `@tiptap/react@3.31.3` — React bindings for the editor.
+- `@tiptap/starter-kit@3.31.3` — the default Tiptap extension bundle.
+- `@tiptap/pm@3.31.3` — the ProseMirror re-export layer. It exports no bare
+  entry point, only subpaths (`@tiptap/pm/state`, `/view`, `/model`, ...).
+
+All 51 packages in the added closure are MIT. None declares a `preinstall`,
+`install` or `postinstall` script. The fifteen `prepare` scripts present in the
+tree are build helpers (`pm-buildhelper`, `rollup -c`) and do not run for
+registry installs. `react` and `react-dom` remain at the repository's pinned
+`18.3.1`: both sit inside `@tiptap/react`'s declared peer range and no second
+React version is resolved.
+
+This dependency is declared but **not yet imported by any client module**, so
+`lib/client.js` is unchanged by the addition (verified: the artifact still
+hashes to `548d1124…` and is 645,428 bytes). A temporary import under the real
+build measured the cost the editor will actually add: **645,428 → 1,559,851
+bytes (+914,423 raw, +217,057 gzip)**.
+
+Introducing it also exposed and fixed a bundle duplication: `tsdown.config.ts`
+previously treated only `react` and `react/jsx-runtime` as host-provided, so
+`@tiptap/react`'s `react-dom` import pulled React DOM and its scheduler into
+`lib/client.js`. The official `dsh-client-ui-renderer` bundle reaches all four
+by bare `require`, so `react-dom` and `react-dom/client` are host-provided too
+and are now external. Without that fix the same three dependencies cost
+2,511,029 bytes instead of 1,559,851.
+
+The full measurement, the bundle-budget decision it forced and the rejected
+alternatives are recorded in
+`docs/open-source-evaluations/editor-stack-2026-09-17.md`.

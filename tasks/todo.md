@@ -1,5 +1,37 @@
 # Execution checklist
 
+## Front-end wrap-up: settings honesty and story-map scale, 2026-09-17
+
+**Status:** `verified` live on the rebuilt Host for both changes; two prototype features deliberately
+not built, with reasons recorded.
+
+- [x] **设置 dropped a control it could never honor.** 「线程里的工具活动」only wrote to the client store —
+  the transcript is rendered by the *shipped* conversation surface and `node_modules/@deepseek-ai/` holds no
+  tool-activity switch to proxy, so the choice could be remembered and never applied. Removed together with
+  `WorkbenchSettings.showToolActivity` and `setShowToolActivity`; the sheet now offers exactly 主题 / 正文大小 /
+  阅读行宽. RED → GREEN in `novel-workbench-settings.spec.ts`, whose new assertion is the invariant: the sheet
+  must not carry a control the frame cannot deliver.
+- [x] **The sweep now guards that invariant**, not just this instance: `sweepSettings` opens the sheet, records
+  `unhonorableControl`, and fails the `settings` screen as `offers-unhonorable-control` if
+  `[data-novel-settings-activity]` ever comes back. It is the 16th screen in the sweep.
+- [x] **Story map scale: folding + search.** A character no accepted relationship line reaches is no longer an
+  unconnected dot: they fold into one `+N 位未连线人物` chip (names in its `title`, click to unfold). Live on the
+  real Canon it folds **3 of 7** people while the header keeps the accepted totals (`R5 · 7 个人物 · 3 条关系`),
+  so "what the graph draws" and "how many people Canon accepted" stay distinguishable. Search focuses by accepted
+  name or id through the same fade-and-card path a click uses, unfolds the cast first when the match lives there,
+  and says `没有匹配的人物。` when nothing matches. RED → GREEN in `novel-workbench-story-map.spec.ts` (2 new tests).
+- [x] **Not built, on purpose.** 按卷 / 弧筛选 needs volume/arc ownership on the nodes, which `NovelStoryMap`
+  does not carry — that is a projection gap, not a front-end gap, and a fake filter would be worse than none.
+  钉位 is pure UI state with no persistence home yet, so it first needs a decision on whether pins survive
+  reload; that is a design question, not wrap-up, and it is left open rather than half-built.
+- [x] Live re-verification on the rebuilt profile (`pid 63093`): 16 screens — **15 `rendered`, 1 honest
+  `skipped-no-proposal`**, zero console/page/request failures; the map reports `+3 位未连线人物` and the settings
+  sheet reports `unhonorableControl: false`. Record and sweep JSON refreshed.
+- [x] Gates: 324/324 tests (19 files, +2 for the new map behaviours), `typecheck`, `lint`, `git diff --check`.
+- [ ] Still open from the previous entry: the seven surfaces that need a write, another profile or a real
+  failing turn (`提案审阅`, `过期提案`, `接受设定·拒绝正文`, `人物档案抽屉`, `空项目`, `缺插件`, `AI 无输出`),
+  and any visual-fidelity review of the ported screens by the author.
+
 ## Front-end work landed as a reviewable delivery, 2026-09-17
 
 **Status:** `verified` for the record itself — the 2026-09-16 front end is committed in three slices,

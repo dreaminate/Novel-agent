@@ -240,6 +240,7 @@ async function main() {
     }
 
     report.screens.push(await sweepAdvanced(session))
+    report.screens.push(await sweepSettings(session))
     report.screens.push(await sweepProposal(session))
     report.screens.push(await sweepThread(session))
     report.screens.push(await sweepChapterRead(session))
@@ -293,7 +294,14 @@ async function sweepView(session, id, label) {
   if (id === 'map') await session.until(
     `document.querySelector('[data-novel-canvas="map"] canvas') !== null`)
   await sleep(settleMs)
-  return await record(session, id, label)
+  const screen = await record(session, id, label)
+  if (id === 'map') {
+    // How much of the accepted cast the map folded off the story web.
+    screen.folded = await session.evaluate(
+      `(() => { const node = document.querySelector('[data-novel-story-map-folded]')
+        return node === null ? null : node.innerText.trim() })()`)
+  }
+  return screen
 }
 
 /**
@@ -438,6 +446,29 @@ async function shot(session, id, label) {
   const file = join(outDir, `${id}.png`)
   writeFileSync(file, Buffer.from(shot.data, 'base64'))
   return { view: id, label, state: 'rendered', head: '', screenshot: file }
+}
+
+/**
+ * 设置 is a sheet over the frame. It must offer only choices the frame applies:
+ * the transcript belongs to the shipped conversation surface, so a tool-activity
+ * switch here would be a control with no effect, and its presence is a failure.
+ */
+async function sweepSettings(session) {
+  const opened = await session.evaluate(
+    `(() => { const node = document.querySelector('[data-novel-settings-open="true"]')
+      if (node === null) return 'missing'; node.click(); return 'ok' })()`)
+  if (opened !== 'ok') return { view: 'settings', label: '设置', state: 'control-missing', head: '' }
+  if (!await session.until(`document.querySelector('[data-novel-settings]') !== null`)) {
+    return { view: 'settings', label: '设置', state: 'sheet-missing', head: '' }
+  }
+  await sleep(settleMs)
+  const screen = await record(session, 'settings', '设置', '[data-novel-settings]')
+  screen.unhonorableControl = await session.evaluate(
+    `document.querySelector('[data-novel-settings-activity]') !== null`)
+  if (screen.unhonorableControl) screen.state = 'offers-unhonorable-control'
+  await session.evaluate(`document.querySelector('[data-novel-settings-close]').click()`)
+  await sleep(200)
+  return screen
 }
 
 /** Capture one rendered surface: its head, its visible text and a screenshot. */

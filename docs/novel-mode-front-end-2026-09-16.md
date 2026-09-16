@@ -25,7 +25,8 @@ node scripts/smoke-workbench.mjs                # 输出到 .novel-agent/run/swe
 
 | 屏幕 | 画布标记 / 入口 | 实现 | 覆盖测试 | 本轮真机证据 |
 | --- | --- | --- | --- | --- |
-| ① 工作台（故事地图 + 三段左栏 + 右栏 + 底部输入） | `[data-novel-workbench=frame]`、`[data-novel-rail=nav]` | `WorkbenchFrame.tsx`、`NovelRail.tsx`、`StoryMapView.tsx` | `novel-workbench-shell.spec.ts`、`novel-workbench-rail.spec.ts`、`novel-workbench-story-map.spec.ts` | `rendered`；rail 段 `works / threads / views`，视图入口 9 个；地图头 `故事地图`，正文 `R5 · 7 个人物 · 3 条关系 · 无势力`（sigma 已画出 accepted 人物） |
+| ① 工作台（故事地图 + 三段左栏 + 右栏 + 底部输入） | `[data-novel-workbench=frame]`、`[data-novel-rail=nav]` | `WorkbenchFrame.tsx`、`NovelRail.tsx`、`StoryMapView.tsx` | `novel-workbench-shell.spec.ts`、`novel-workbench-rail.spec.ts`、`novel-workbench-story-map.spec.ts` | `rendered`；rail 段 `works / threads / views`，视图入口 9 个；地图头 `故事地图`，正文 `R5 · 7 个人物 · 3 条关系`，并折叠 `+3 位未连线人物`（sigma 已画出 accepted 人物，头部报的是总数） |
+| ①b 故事地图的规模化 | `[data-novel-story-map-search]`、`[data-novel-story-map-folded]` | `StoryMapView.tsx` | `novel-workbench-story-map.spec.ts` | `rendered`；真实 Canon 上折叠 3 人；搜索命中会选中并淡出其余节点，命中被折叠的人物时先展开折叠cast；无匹配时报 `没有匹配的人物。` |
 | ② 提案审阅 | `[data-novel-proposal]` → `[data-novel-canvas=review]` | `ProposalReviewView.tsx` | `novel-workbench-review.spec.ts` | `skipped-no-proposal`：当前工作区没有待决提案，见 §2 |
 | ③ 过期提案 | 同上（`review` 画布的过期态） | `ProposalReviewView.tsx` | `novel-workbench-review.spec.ts` | 同上，本轮无待决提案可走到该态 |
 | ④ 接受设定·拒绝正文 | 同上（接受路径） | `ProposalReviewView.tsx` | `novel-workbench-review.spec.ts` | 该路径会写 Canon，只读扫描不覆盖，见 §2 |
@@ -40,9 +41,10 @@ node scripts/smoke-workbench.mjs                # 输出到 .novel-agent/run/swe
 | ⑬ 进阶面 | `[data-novel-advanced-item]` → `[data-novel-canvas=advanced]` | `AdvancedView.tsx` | `novel-workbench-advanced.spec.ts`、`novel-workbench-advanced-panels.spec.ts` | `rendered`；内核读出真实 `workspaceId` / 目录 / `R5` / 线程 id；插件清单、Agent preset、Cordis 树、任务、Subagent、原始 Canon 六段俱在 |
 | ⑭ 夜间关键屏 | `[data-novel-workbench=frame][data-nw-theme=night]` | `NovelTopbar.tsx`、`theme-presenter.ts`、`workbench-css.ts` | `novel-workbench-shell.spec.ts` | `rendered`；点「夜间」后 frame 背景实测 `rgb(48, 48, 46)` |
 | ⑮ 窄窗 1280 | `Emulation.setDeviceMetricsOverride(1280×900)` | `workbench-css.ts` | `novel-workbench-shell.spec.ts` | `rendered`；`viewport 1280 / documentWidth 1280`（无横向滚动）、frame 1280、rail 247 |
-| ⑯ 空项目 / 缺插件 / AI 无输出 | `[data-novel-rail-gap]`、`MissingPluginCard.tsx`、条带失败态 | `NovelWelcome.tsx`、`MissingPluginCard.tsx`、`index.tsx` | `novel-workbench-adopt.spec.ts`、`novel-workbench-contexts.spec.ts`、`novel-workbench-failure.spec.ts` | 需要别的部署条件才能走到，见 §2 |
+| ⑯ 设置 | `[data-novel-settings-open]` → `[data-novel-settings]` | `NovelSettings.tsx` | `novel-workbench-settings.spec.ts` | `rendered`；实测 `unhonorableControl: false`，面板只剩主题 / 正文大小 / 阅读行宽三项，能兑现的选择才出现在这里 |
+| ⑰ 空项目 / 缺插件 / AI 无输出 | `[data-novel-rail-gap]`、`MissingPluginCard.tsx`、条带失败态 | `NovelWelcome.tsx`、`MissingPluginCard.tsx`、`index.tsx` | `novel-workbench-adopt.spec.ts`、`novel-workbench-contexts.spec.ts`、`novel-workbench-failure.spec.ts` | 需要别的部署条件才能走到，见 §2 |
 
-本轮扫描 14 个屏幕 `rendered`、1 个如实跳过、**浏览器 console / page / request 报错均为 0**。
+本轮扫描 15 个屏幕 `rendered`、1 个如实跳过、**浏览器 console / page / request 报错均为 0**。
 
 ## 2. 覆盖边界：扫描做到的和做不到的
 
@@ -87,13 +89,35 @@ lockfile 会记住解析到的 `file:` 路径——临时目录一被清理，pr
 
 ## 5. 门禁
 
-- `corepack pnpm test` — **322 passed / 19 files**
+- `corepack pnpm test` — **324 passed / 19 files**
 - `corepack pnpm typecheck`（`tsc -b`）— 通过
 - `corepack pnpm lint`（oxlint `--deny-warnings`）— 通过
 - `git diff --check` — clean
 - `node scripts/port-prototype-css.mjs --check` — `workbench-css.ts matches the prototype`
 
-## 6. 未验证 / 未覆盖
+## 6. 收尾增量 — 2026-09-17
+
+三件事，都在同一轮真机扫描里复核。
+
+1. **设置：删掉一个无法兑现的控制。** 面板原来提供「线程里的工具活动」，但它只把选择写进 client store：
+   渲染 transcript 的是**官方会话面**，`node_modules/@deepseek-ai/` 里也没有任何工具活动开关可供代理，
+   所以这个控制在 novel-agent 这边永远不会有作用。留一个按了不动的开关比没有开关更糟，因此连同
+   `WorkbenchSettings.showToolActivity`、`setShowToolActivity` 一起删除；面板现在只保留主题 / 正文大小 /
+   阅读行宽三项，并保留一句注释说明为什么四选三。扫描脚本现在把这类控制当成失败：
+   `[data-novel-settings-activity]` 若再次出现，`settings` 屏会以 `offers-unhonorable-control` 退出 1。
+
+2. **故事地图规模化：折叠边缘人物 + 搜索定位。** 没有**任何**关系线的人物不再各画一个孤立点，而是折成
+   一枚 `+N 位未连线人物` chip（`title` 列出姓名，点击展开）；真实 Canon 上折叠了 **3 / 7** 人，头部仍报
+   accepted 总数 `R5 · 7 个人物 · 3 条关系`，所以「地图画了什么」与「Canon 接受了几个人」不会被混为一谈。
+   搜索框按 accepted 名字/id 定位：命中即选中并沿用点击的淡出路径，命中落在折叠cast里时先展开再选中，
+   无匹配时明说 `没有匹配的人物。`。
+
+3. **未做的两项，以及原因。** 原型里的「按卷 / 弧筛选」需要节点带卷/弧归属，而 `NovelStoryMap` 只从
+   Canon 实体与关系投影拿到姓名、势力、关系债务——这是投影数据的缺口，不是前端缺口，故不做假筛选。
+   「钉位」是纯 UI 瞬时状态（store 不持久化），要落地得先定「重载后钉位是否保留」，属于设计问题而非收尾，
+   一并留给下一轮。
+
+## 7. 未验证 / 未覆盖
 
 - 提案审阅、过期提案、接受设定·拒绝正文、人物档案抽屉、空项目、缺插件、AI 无输出这七屏**本轮没有
   重跑真机**（原因见 §2），它们的状态仍是各自旧记录里的 `verified`，不是本次扫描的结论。

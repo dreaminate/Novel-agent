@@ -6,9 +6,10 @@
       "label": "故事地图",
       "state": "rendered",
       "head": "故事地图",
-      "bodyChars": 60,
-      "body": "故事地图\n人物、关系与进度一眼看清 · 点节点看摘要，双击开档案\n故事地图\nR5 · 7 个人物 · 3 条关系\n无势力",
-      "screenshot": "/Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/.novel-agent/run/sweep/map.png"
+      "bodyChars": 70,
+      "body": "故事地图\n人物、关系与进度一眼看清 · 点节点看摘要，双击开档案\n故事地图\nR5 · 7 个人物 · 3 条关系\n+3 位未连线人物\n无势力",
+      "screenshot": "/Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/.novel-agent/run/sweep/map.png",
+      "folded": "+3 位未连线人物"
     },
     {
       "view": "clues",
@@ -99,6 +100,16 @@
         "canon",
         "log"
       ]
+    },
+    {
+      "view": "settings",
+      "label": "设置",
+      "state": "rendered",
+      "head": "设置",
+      "bodyChars": 106,
+      "body": "设置\n完成\n主题\n跟随系统\n日间\n夜间\n正文大小\n16 px\n17 px\n18 px\n正文阅读按这个字号排版，行高保持 1.85。\n阅读行宽\n34 字\n40 字\n行宽越窄，眼睛回扫越省力；40 字是原型的默认值。",
+      "screenshot": "/Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/.novel-agent/run/sweep/settings.png",
+      "unhonorableControl": false
     },
     {
       "view": "review",

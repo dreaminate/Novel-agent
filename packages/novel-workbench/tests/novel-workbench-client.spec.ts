@@ -68,7 +68,6 @@ describe('novel-workbench root occupant', () => {
     expect(entry?.options.locale).toBe('common')
     expect(Object.keys(entry?.options.children ?? {}).sort()).toEqual([
       'conversation',
-      'details',
       'novel.canvas',
       'novel.thread.header',
       'novel.thread.notice',
@@ -76,9 +75,12 @@ describe('novel-workbench root occupant', () => {
       'shell.overlay',
       'sidebar',
     ])
-    // One input only. The frame declares no composer seat of its own: the
-    // composer belongs to the shipped conversation surface, and a second bar
-    // here is how the author ends up typing into the wrong one.
+    // No context column seat: 当前章 lives in the editor's own head now, and the
+    // right-hand column is the conversation rather than "details". The frame also
+    // declares no composer of its own — the composer belongs to the shipped
+    // conversation surface, and a second bar is how the author ends up typing
+    // into the wrong one.
+    expect(Object.keys(entry?.options.children ?? {})).not.toContain('details')
     expect(Object.keys(entry?.options.children ?? {})).not.toContain('novel.composer')
     expect(typeof ctx.get('layout')?.openDetails).toBe('function')
 

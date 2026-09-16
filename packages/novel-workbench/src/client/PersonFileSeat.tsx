@@ -53,6 +53,6 @@ export function PersonFileSeat(props: PersonFileSeatProps): ReactNode {
   return createElement(PersonFileDrawer, {
     file,
     onClose: () => { workbenchActions.closePersonFile() },
-    onContinueFrom: () => { workbenchActions.setView('thread') },
+    onContinueFrom: () => { workbenchActions.openDetails() },
   })
 }

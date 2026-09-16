@@ -426,7 +426,7 @@ export function NovelCanvas(props: NovelCanvasProps): ReactNode {
   // for the shipped composer's picker to get started.
   if (workId === undefined) {
     return (
-      <Shell view={state.view === 'thread' ? 'map' : state.view} tools={null}>
+      <Shell view={state.view} tools={null}>
         <style>{CANVAS_CSS}</style>
         <NovelWelcome
           adoptWork={path => props.adoptWork(path)}
@@ -443,7 +443,7 @@ export function NovelCanvas(props: NovelCanvasProps): ReactNode {
   const gap = error === undefined ? undefined : missingDomainPlugin(error)
   if (gap !== undefined) {
     return (
-      <Shell view={state.view === 'thread' ? 'map' : state.view} tools={null}>
+      <Shell view={state.view} tools={null}>
         <style>{CANVAS_CSS}</style>
         <MissingPluginCard
           gap={gap}
@@ -514,7 +514,7 @@ export function NovelCanvas(props: NovelCanvasProps): ReactNode {
           <CastView
             board={cast}
             onOpenPerson={openPerson}
-            onContinueFrom={() => { workbenchActions.setView('thread') }}
+            onContinueFrom={() => { workbenchActions.openDetails() }}
           />
         )}
       </Shell>
@@ -566,7 +566,7 @@ export function NovelCanvas(props: NovelCanvasProps): ReactNode {
           <MemoryView
             memory={memory}
             onOpenClues={() => { workbenchActions.setView('clues') }}
-            onOpenThread={() => { workbenchActions.setView('thread') }}
+            onOpenThread={() => { workbenchActions.openDetails() }}
           />
         )}
       </Shell>
@@ -584,7 +584,7 @@ export function NovelCanvas(props: NovelCanvasProps): ReactNode {
         {acceptedRevision !== undefined && (
           <SimulationView
             revision={acceptedRevision}
-            onOpenThread={() => { workbenchActions.setView('thread') }}
+            onOpenThread={() => { workbenchActions.openDetails() }}
           />
         )}
       </Shell>

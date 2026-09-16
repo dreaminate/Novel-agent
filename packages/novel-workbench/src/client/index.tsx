@@ -29,7 +29,6 @@ import { createNovelWorkFace } from './novel-data.js'
 import { createNovelReferenceSource } from './novel-input-source.js'
 import { NovelCanvas } from './NovelCanvas.js'
 import { NovelRail } from './NovelRail.js'
-import { NovelSide } from './NovelSide.js'
 import { NovelSettings } from './NovelSettings.js'
 import { PersonFileSeat } from './PersonFileSeat.js'
 import { NovelThreadHeader } from './NovelThreadHeader.js'
@@ -157,7 +156,6 @@ export function apply(ctx: ClientContext): () => void {
       'novel.thread.header': { kind: 'single', scope: 'session-maybe' },
       'novel.thread.notice': { kind: 'single', scope: 'session-maybe' },
       'novel.canvas': { kind: 'single', scope: 'session-maybe' },
-      details: { kind: 'single', scope: 'session' },
       'shell.overlay': { kind: 'list', scope: 'root' },
     },
   }, WorkbenchFrame)
@@ -285,10 +283,6 @@ export function apply(ctx: ClientContext): () => void {
         name: 'novel.canvas',
         inject: () => face,
       }, NovelCanvas)), 'novel-mode canvas')
-      surfaceCtx.effect(() => surfaceCtx.slots.inject('details', () => surfaceCtx.slots.register({
-        name: 'details',
-        inject: () => face,
-      }, NovelSide)), 'novel-mode context column')
       // There is no novel composer row. The composer belongs to the shipped
       // conversation surface, which owns the input machine, the slash and at
       // menus, the model / permission / plan controls and the approval panel.

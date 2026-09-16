@@ -30,7 +30,6 @@ export type WorkbenchFrameProps = PropsRenderSlots<
   | 'novel.thread.header'
   | 'novel.thread.notice'
   | 'novel.canvas'
-  | 'details'
   | 'shell.overlay'
 >
 
@@ -40,7 +39,15 @@ export type WorkbenchFrameProps = PropsRenderSlots<
  * Everything the prototype drew lives in the ported stylesheet.
  */
 const FRAME_CSS = `
+/*
+ * The prototype's grid is three fixed tracks. A collapsed column has to give its
+ * track back, or the editor keeps paying for a column that is not there — which
+ * is what "收起对话后正文拿到全宽" means literally. Driving both side tracks from
+ * variables keeps the four combinations from needing four rules.
+ */
 [data-novel-workbench="frame"] {
+  --nw-rail: 248px;
+  --nw-side: 296px;
   height: 100vh;
   width: 100%;
   border: none;
@@ -48,6 +55,13 @@ const FRAME_CSS = `
   box-shadow: none;
   font-family: var(--font-ui);
   color: hsl(var(--text-000));
+  grid-template-columns: var(--nw-rail) minmax(0, 1fr) var(--nw-side);
+}
+[data-novel-workbench="frame"][data-novel-workbench-sidebar="collapsed"] {
+  --nw-rail: 56px;
+}
+[data-novel-workbench="frame"][data-novel-workbench-details="collapsed"] {
+  --nw-side: 0px;
 }
 [data-novel-workbench="frame"] .seat {
   display: contents;
@@ -57,7 +71,6 @@ const FRAME_CSS = `
  * reading. The shipped conversation surface is left mounted because it still
  * owns what the novel mode has not replaced yet — the composer, the input
  * menus, the approval panel — so only its own transcript region is hidden.
- * I2.4 stops rendering that surface once the replacement covers all of it.
  */
 [data-novel-workbench="frame"] [data-slot="conversation.session"] {
   display: none;
@@ -66,9 +79,9 @@ const FRAME_CSS = `
 
 /** The novel-mode frame: topbar / rail / canvas / side / composer, all seats declared. */
 export function WorkbenchFrame(props: WorkbenchFrameProps): ReactNode {
-  const { panels, theme, view, sessionId, transcript } = useWorkbenchState()
-  const sideOpen = panels.details > 0 && sessionId !== undefined
-  const threads = view === 'thread'
+  const { panels, theme, sessionId, transcript } = useWorkbenchState()
+  /** The conversation column: open when a session exists and the column is out. */
+  const conversationOpen = panels.details > 0 && sessionId !== undefined
   const threadProps = sessionId === undefined ? { 'data-novel-thread': 'idle' } : {}
 
   return createElement(
@@ -77,6 +90,7 @@ export function WorkbenchFrame(props: WorkbenchFrameProps): ReactNode {
       'data-novel-workbench': 'frame',
       'data-nw-theme': theme,
       'data-novel-workbench-sidebar': panels.sidebar === 0 ? 'collapsed' : 'expanded',
+      'data-novel-workbench-details': panels.details === 0 ? 'collapsed' : 'expanded',
       className: 'app',
     },
     createElement(WorkbenchStyleSheet, { key: 'css' }),
@@ -97,48 +111,42 @@ export function WorkbenchFrame(props: WorkbenchFrameProps): ReactNode {
     createElement(
       'main',
       { key: 'main', className: 'main', 'data-novel-shell': 'main' },
+      // The canvas is always the main column now. 线程 is not a view any more:
+      // the conversation is the right-hand column, so the author writes in the
+      // editor and talks beside it instead of leaving one to reach the other.
       createElement(
         'div',
-        {
-          key: 'conversation',
-          className: 'seat',
-          'data-novel-conversation-seat': 'true',
-          hidden: !threads,
-        },
-        props.renderSlot('novel.thread.header', threadProps),
-        createElement(
-          'div',
-          { key: 'transcript', className: 'seat', 'data-novel-transcript-seat': 'true' },
-          createElement(NovelTranscript, { entries: transcript }),
-          props.renderSlot('novel.thread.notice', threadProps),
-        ),
-        // The shipped conversation surface stays: it owns the composer, and the
-        // composer is where the slash and at menus, the model and permission
-        // controls, plan mode, attachments and the approval panel all live. None
-        // of that is reachable any other way — the input seams are closed to
-        // plugins — so the frame keeps it and only hides its transcript, which
-        // NovelTranscript above replaces.
-        props.renderSlot('conversation', threadProps),
+        { key: 'canvas', className: 'seat', 'data-novel-canvas-seat': 'true' },
+        props.renderSlot('novel.canvas', threadProps),
       ),
-      threads
-        ? null
-        : createElement(
-            'div',
-            { key: 'canvas', className: 'seat', 'data-novel-canvas-seat': 'true' },
-            props.renderSlot('novel.canvas', threadProps),
-          ),
     ),
-    sideOpen
+    conversationOpen
       ? createElement(
           'aside',
-          { key: 'side', className: 'side', 'data-novel-shell': 'right' },
-          props.SessionProvider === undefined
-            ? props.renderSlot('details', { sessionId: sessionId as never })
-            : createElement(
-                props.SessionProvider,
-                { sessionId } as never,
-                props.renderSlot('details', { sessionId: sessionId as never }),
-              ),
+          {
+            key: 'conversation',
+            className: 'side',
+            'data-novel-shell': 'right',
+            'data-novel-conversation-column': 'true',
+          },
+          createElement(
+            'div',
+            { className: 'seat', 'data-novel-conversation-seat': 'true' },
+            props.renderSlot('novel.thread.header', threadProps),
+            createElement(
+              'div',
+              { key: 'transcript', className: 'seat', 'data-novel-transcript-seat': 'true' },
+              createElement(NovelTranscript, { entries: transcript }),
+              props.renderSlot('novel.thread.notice', threadProps),
+            ),
+            // The shipped conversation surface stays: it owns the composer, and
+            // the composer is where the slash and at menus, the model and
+            // permission controls, plan mode, attachments and the approval panel
+            // all live. None of that is reachable any other way — the input seams
+            // are closed to plugins — so the frame keeps it and only hides its
+            // transcript, which NovelTranscript above replaces.
+            props.renderSlot('conversation', threadProps),
+          ),
         )
       : null,
     props.renderSlot('shell.overlay', {}),

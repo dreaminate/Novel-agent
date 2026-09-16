@@ -394,7 +394,7 @@ async function sweepThread(session) {
   await session.until(`document.querySelector('[data-novel-thread]') !== null`)
   const rows = await session.evaluate(
     `Array.from(document.querySelectorAll('[data-novel-thread]')).map(node => node.getAttribute('data-novel-thread'))`)
-  if (rows.length === 0) return { view: 'thread', label: '线程对话流', state: 'skipped-no-thread', head: '' }
+  if (rows.length === 0) return { view: 'thread', label: '对话列', state: 'skipped-no-thread', head: '' }
 
   // Walk the list until a thread actually carries prose. The first row is often
   // a brand-new thread, and the point of this screen is to see the frame set real
@@ -435,9 +435,13 @@ async function sweepThread(session) {
         } })()`)
     if (transcript !== null && transcript.entries > 0) break
   }
-  if (transcript === null) return { view: 'thread', label: '线程对话流', state: 'transcript-seat-missing', head: '' }
+  if (transcript === null) return { view: 'thread', label: '对话列', state: 'transcript-seat-missing', head: '' }
 
-  const screen = await record(session, 'thread', '线程对话流', '[data-novel-conversation-seat="true"]')
+  // 线程 is the right-hand column now, not a view: the seat renders inside it and
+  // the column is what collapses to give the editor the full width.
+  const screen = await record(session, 'thread', '对话列', '[data-novel-conversation-column]')
+  screen.isColumn = await session.evaluate(`document.querySelector('[data-novel-conversation-column]') !== null`)
+  if (!screen.isColumn) screen.state = 'conversation-column-missing'
   screen.transcript = transcript
   // An empty transcript across every reachable thread is the failure this screen
   // exists to catch: the frame renders, but it is not rendering the conversation.

@@ -164,7 +164,7 @@ export function NovelRail(props: NovelRailProps): ReactNode {
             title: summary.title,
             onClick: () => {
               props.openThread(summary.id)
-              workbenchActions.setView('thread')
+              workbenchActions.openDetails()
             },
           },
           railIcon(THREAD_ICON),
@@ -180,7 +180,7 @@ export function NovelRail(props: NovelRailProps): ReactNode {
               if (workId !== undefined) props.newThread(workId)
               workbenchActions.requestNewThread()
               // The author asked to talk, so the conversation gets the column.
-              workbenchActions.setView('thread')
+              workbenchActions.openDetails()
             },
           },
           railIcon(PLUS_ICON),

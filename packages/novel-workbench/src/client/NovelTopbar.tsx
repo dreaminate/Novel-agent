@@ -125,6 +125,18 @@ export function NovelTopbar(props: NovelTopbarProps): ReactNode {
         },
         '左栏',
       ),
+      createElement(
+        'button',
+        {
+          type: 'button',
+          className: 'btn sm',
+          'data-novel-topbar-details': 'true',
+          title: '收起或展开对话',
+          'aria-pressed': state.panels.details === 0 ? 'true' : 'false',
+          onClick: () => { actions.toggleDetails() },
+        },
+        '对话',
+      ),
     ),
   ]
 }

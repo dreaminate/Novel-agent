@@ -258,7 +258,7 @@ export function ProposalReviewView(props: ProposalReviewViewProps): ReactNode {
           type="button"
           data-novel-review-later=""
           disabled={props.busy}
-          onClick={() => { workbenchActions.setView('thread') }}
+          onClick={() => { workbenchActions.openDetails() }}
         >
           暂不处理
         </button>

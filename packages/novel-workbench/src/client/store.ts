@@ -46,7 +46,6 @@ export interface WorkbenchWindow {
 
 /** Every canvas the workbench can show in the main column. */
 export type WorkbenchViewId =
-  | 'thread'
   | 'editor'
   | 'map'
   | 'review'
@@ -237,7 +236,7 @@ export const workbenchActions = {
     publish({
       ...state,
       advanced,
-      view: advanced ? 'thread' : state.view,
+      view: advanced ? 'advanced' : 'editor',
     })
   },
 

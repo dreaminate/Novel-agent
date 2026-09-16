@@ -206,4 +206,126 @@ describe('novel-mode story map', () => {
     await act(async () => { root.unmount() })
     expect(sigmaMock.instances[0]?.killed).toBe(true)
   })
+
+  it('folds the cast no relationship line reaches, and unfolds it on request', async () => {
+    const { NovelCanvas } = await import('../src/client/NovelCanvas.js') as {
+      NovelCanvas: (props: Record<string, unknown>) => unknown
+    }
+    const { workbenchActions } = await import('../src/client/store.js') as {
+      workbenchActions: { setView(view: string): void }
+    }
+    workbenchActions.setView('map')
+
+    const loadStoryMap = vi.fn(async () => ({
+      revision: 5,
+      nodes: [
+        { id: 'chen-mo', label: '陈默', group: '港务局', debts: 1 },
+        { id: 'zhou-yan', label: '周砚', group: '雾灯帮', debts: 0 },
+        { id: 'solo', label: '码头看门人', group: undefined, debts: 0 },
+      ],
+      edges: [{ id: 'line-1', source: 'chen-mo', target: 'zhou-yan', label: '旧同僚', turns: 1 }],
+    }))
+
+    const container = document.createElement('div')
+    document.body.append(container)
+    const root = createRoot(container)
+    await act(async () => {
+      root.render(createElement(NovelCanvas as never, {
+        sessionId: 's-6',
+        useWorkspaces: (selector: (value: unknown) => unknown) => selector({ items: works }),
+        useSessions: (selector: (value: unknown) => unknown) => selector({
+          jobsBySession: {},
+          subagentsByParent: {},
+        }),
+        loadOutline: vi.fn(),
+        loadStoryMap,
+        openThread: vi.fn(),
+        newThread: vi.fn(),
+      } as never))
+    })
+    await act(async () => {})
+
+    const before = sigmaMock.instances.length
+    // The accepted totals stay in the header; the graph draws the story web, and
+    // a character no line reaches is one chip instead of an unconnected dot.
+    expect(container.querySelector('.nw-map-meta')?.textContent).toContain('3 个人物')
+    expect(sigmaMock.instances[before - 1]?.graph.order).toBe(2)
+    const chip = container.querySelector('[data-novel-story-map-folded]')
+    expect(chip?.textContent).toContain('+1')
+    expect(chip?.getAttribute('title')).toContain('码头看门人')
+
+    await act(async () => {
+      container.querySelector<HTMLButtonElement>('[data-novel-story-map-folded]')?.click()
+    })
+    await act(async () => {})
+    expect(sigmaMock.instances[sigmaMock.instances.length - 1]?.graph.order).toBe(3)
+    expect(container.querySelector('[data-novel-story-map-folded]')).toBeNull()
+
+    await act(async () => { root.unmount() })
+  })
+
+  it('focuses a character by name, unfolding the cast when the match is folded', async () => {
+    const { NovelCanvas } = await import('../src/client/NovelCanvas.js') as {
+      NovelCanvas: (props: Record<string, unknown>) => unknown
+    }
+    const { workbenchActions } = await import('../src/client/store.js') as {
+      workbenchActions: { setView(view: string): void }
+    }
+    workbenchActions.setView('map')
+
+    const loadStoryMap = vi.fn(async () => ({
+      revision: 5,
+      nodes: [
+        { id: 'chen-mo', label: '陈默', group: '港务局', debts: 1 },
+        { id: 'zhou-yan', label: '周砚', group: '雾灯帮', debts: 0 },
+        { id: 'solo', label: '码头看门人', group: undefined, debts: 0 },
+      ],
+      edges: [{ id: 'line-1', source: 'chen-mo', target: 'zhou-yan', label: '旧同僚', turns: 1 }],
+    }))
+
+    const container = document.createElement('div')
+    document.body.append(container)
+    const root = createRoot(container)
+    await act(async () => {
+      root.render(createElement(NovelCanvas as never, {
+        sessionId: 's-6',
+        useWorkspaces: (selector: (value: unknown) => unknown) => selector({ items: works }),
+        useSessions: (selector: (value: unknown) => unknown) => selector({
+          jobsBySession: {},
+          subagentsByParent: {},
+        }),
+        loadOutline: vi.fn(),
+        loadStoryMap,
+        openThread: vi.fn(),
+        newThread: vi.fn(),
+      } as never))
+    })
+    await act(async () => {})
+
+    const type = async (value: string): Promise<void> => {
+      await act(async () => {
+        const input = container.querySelector('[data-novel-story-map-search]') as HTMLInputElement
+        const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set
+        setter?.call(input, value)
+        input.dispatchEvent(new Event('input', { bubbles: true }))
+      })
+      await act(async () => {})
+    }
+
+    await type('周砚')
+    expect(container.querySelector('[data-novel-story-map-selection]')?.getAttribute('data-novel-story-map-selection')).toBe('zhou-yan')
+
+    // A folded character is off the graph, so focusing one has to bring the
+    // folded cast back before the author can see who they searched for.
+    await type('看门')
+    expect(container.querySelector('[data-novel-story-map-folded]')).toBeNull()
+    expect(sigmaMock.instances[sigmaMock.instances.length - 1]?.graph.order).toBe(3)
+    expect(container.querySelector('[data-novel-story-map-selection]')?.getAttribute('data-novel-story-map-selection')).toBe('solo')
+
+    await type('没有这个人')
+    expect(container.querySelector('[data-novel-story-map-nomatch]')).not.toBeNull()
+    expect(container.querySelector('[data-novel-story-map-selection]')).toBeNull()
+
+    await act(async () => { root.unmount() })
+  })
 })

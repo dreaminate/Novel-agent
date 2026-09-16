@@ -4,8 +4,9 @@
  *
  * The view owns no facts: the nodes and edges arrive already mapped from Canon by
  * the novel data face. What lives here is presentation — layout, colour by
- * faction, and the selection reducer that fades everything but the chosen
- * character's neighbourhood.
+ * faction, folding the cast no accepted line reaches, name search, and the
+ * selection reducer that fades everything but the chosen character's
+ * neighbourhood.
  */
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { UndirectedGraph } from 'graphology'
@@ -38,6 +39,38 @@ const MAP_CSS = `
   display: flex;
   align-items: baseline;
   gap: 10px;
+}
+[data-novel-story-map] .nw-map-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+[data-novel-story-map] .nw-map-search input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 5px 10px;
+  border: 1px solid hsl(var(--border-100));
+  border-radius: 8px;
+  background: hsl(var(--bg-000));
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+}
+[data-novel-story-map] .nw-map-folded {
+  align-self: flex-start;
+  padding: 3px 10px;
+  border: 1px dashed hsl(var(--border-100));
+  border-radius: 999px;
+  background: transparent;
+  color: hsl(var(--text-200));
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+[data-novel-story-map] .nw-map-nomatch {
+  margin: 0;
+  font-size: 12px;
+  color: hsl(var(--text-200));
 }
 [data-novel-story-map] .nw-map-title { margin: 0; font-size: 16px; font-weight: 600; }
 [data-novel-story-map] .nw-map-meta { font-size: 12px; color: hsl(var(--text-200)); font-variant-numeric: tabular-nums; }
@@ -94,12 +127,24 @@ export function StoryMapView({ map, onOpenPerson }: StoryMapViewProps): ReactNod
   const host = useRef<HTMLDivElement | null>(null)
   const renderer = useRef<Sigma | null>(null)
   const [selected, setSelected] = useState<string | undefined>(undefined)
+  const [search, setSearch] = useState('')
+  const [showEdgeCast, setShowEdgeCast] = useState(false)
   const colours = useMemo(() => groupColours(map), [map])
+  const edgeCast = useMemo(() => castNoLineReaches(map), [map])
+  const matches = useMemo(() => searchMatches(map, search), [map, search])
+  // The graph draws the story web. A character no accepted line reaches is one
+  // chip until the author asks for them — or searches for one of them.
+  const visible = useMemo(
+    () => (showEdgeCast || edgeCast.length === 0
+      ? map.nodes
+      : map.nodes.filter(node => !edgeCast.some(entry => entry.id === node.id))),
+    [map, edgeCast, showEdgeCast],
+  )
 
   useEffect(() => {
     const element = host.current
     if (element === null) return
-    const graph = buildGraph(map, colours)
+    const graph = buildGraph({ ...map, nodes: visible }, colours)
     // forceAtlas2 expands whatever coordinates the graph already has, and sigma
     // refuses nodes without numeric x/y, so seed a deterministic ring first.
     circular.assign(graph)
@@ -119,7 +164,21 @@ export function StoryMapView({ map, onOpenPerson }: StoryMapViewProps): ReactNod
       renderer.current = null
       instance.kill()
     }
-  }, [map, colours, onOpenPerson])
+  }, [map, visible, colours, onOpenPerson])
+
+  // Search is focus, not filtering: the match becomes the selection, which is the
+  // same fade-and-card path a click uses.
+  useEffect(() => {
+    if (search.trim() === '') {
+      setSelected(undefined)
+      return
+    }
+    const first = matches[0]
+    setSelected(first?.id)
+    // A folded character is off the graph, so focusing one has to bring the
+    // folded cast back before the author can see who they searched for.
+    if (first !== undefined && edgeCast.some(entry => entry.id === first.id)) setShowEdgeCast(true)
+  }, [search, matches, edgeCast])
 
   useEffect(() => {
     const instance = renderer.current
@@ -160,6 +219,19 @@ export function StoryMapView({ map, onOpenPerson }: StoryMapViewProps): ReactNod
         ? <p className="nw-map-empty">还没有人物与关系设定</p>
         : (
             <>
+              <div className="nw-map-search">
+                <input
+                  type="search"
+                  data-novel-story-map-search=""
+                  aria-label="按名字定位人物"
+                  placeholder="按名字定位人物"
+                  value={search}
+                  onChange={event => { setSearch(event.target.value) }}
+                />
+                {search.trim() !== '' && (
+                  <span className="nw-map-meta">{`${String(matches.length)} 处匹配`}</span>
+                )}
+              </div>
               <div className="nw-map-stage">
                 <div className="nw-map-canvas" ref={host} data-novel-story-map-canvas="" />
                 {chosen !== undefined && (
@@ -172,6 +244,22 @@ export function StoryMapView({ map, onOpenPerson }: StoryMapViewProps): ReactNod
                   </div>
                 )}
               </div>
+              {search.trim() !== '' && matches.length === 0 && (
+                <p className="nw-map-nomatch" data-novel-story-map-nomatch="">
+                  没有匹配的人物。
+                </p>
+              )}
+              {edgeCast.length > 0 && !showEdgeCast && (
+                <button
+                  type="button"
+                  className="nw-map-folded"
+                  data-novel-story-map-folded=""
+                  title={edgeCast.map(entry => entry.label).join('、')}
+                  onClick={() => { setShowEdgeCast(true) }}
+                >
+                  {`+${String(edgeCast.length)} 位未连线人物`}
+                </button>
+              )}
               <div className="nw-map-legend">
                 {[...colours].map(([group, colour]) => (
                   <span key={group}>
@@ -184,6 +272,31 @@ export function StoryMapView({ map, onOpenPerson }: StoryMapViewProps): ReactNod
           )}
     </div>
   )
+}
+
+/**
+ * The accepted cast no relationship line reaches. Folding them keeps a long
+ * cast readable: at forty named characters an unconnected dot carries no
+ * information, while the count tells the author how much cast is still off the
+ * story web.
+ */
+function castNoLineReaches(map: NovelStoryMap): readonly { readonly id: string; readonly label: string }[] {
+  const reached = new Set<string>()
+  for (const edge of map.edges) {
+    reached.add(edge.source)
+    reached.add(edge.target)
+  }
+  return map.nodes
+    .filter(node => !reached.has(node.id))
+    .map(node => ({ id: node.id, label: node.label }))
+}
+
+/** Characters whose accepted name or id carries the query. */
+function searchMatches(map: NovelStoryMap, query: string): NovelStoryMap['nodes'] {
+  const needle = query.trim().toLowerCase()
+  if (needle === '') return []
+  return map.nodes.filter(node =>
+    node.label.toLowerCase().includes(needle) || node.id.toLowerCase().includes(needle))
 }
 
 function buildGraph(map: NovelStoryMap, colours: ReadonlyMap<string, string>): UndirectedGraph {

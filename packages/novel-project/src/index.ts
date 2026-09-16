@@ -7,6 +7,12 @@ import {
   type Session,
 } from '@deepseek-ai/dsh-session'
 import type { SubagentResult, SubagentRun } from '@deepseek-ai/dsh-subagent'
+import { FsError, FsVersion, type FsWriteIntent } from '@deepseek-ai/dsh-fs'
+import type {} from '@deepseek-ai/dsh-sandbox-policy'
+import type {
+  NovelChapterFileRead,
+  NovelChapterFileWrite,
+} from './types.js'
 import type {} from '@deepseek-ai/dsh-system-prompt'
 import {
   defineDomain,
@@ -1087,6 +1093,29 @@ declare module '@deepseek-ai/dsh-session' {
 
 
 /**
+ * Author-facing reason for one filesystem failure.
+ *
+ * The editor shows this next to the draft, so it says what the author can act
+ * on — permission, sandbox mode, encoding — rather than echoing a host error.
+ * `FsError.code` is the closed vocabulary the fs service owns; anything else is
+ * either a plain `Error` from a lower layer or something we have no words for.
+ */
+function describeFsFailure(error: unknown): string {
+  if (!(error instanceof FsError)) {
+    return error instanceof Error && error.message !== '' ? error.message : '读写这个文件时出错了。'
+  }
+  switch (error.code) {
+    case 'FS_PERMISSION_DENIED': return '没有权限读写这个文件。'
+    case 'FS_SANDBOX_DENIED': return '当前的访问模式不允许读写这个位置。'
+    case 'FS_NOT_TEXT': return '这不是 UTF-8 文本，编辑器打不开。'
+    case 'FS_NOT_REGULAR_FILE': return '这个路径不是普通文件。'
+    case 'FS_TOO_LARGE': return '这个文件太大，编辑器没有打开它。'
+    case 'FS_NOT_FOUND': return '这个文件已经不在了。'
+    default: return '读写这个文件时出错了。'
+  }
+}
+
+/**
  * DSH-native authority for Novel Project state.
  *
  * Drafts, summaries, retrieval and graph consumers submit Result Packets;
@@ -1103,6 +1132,8 @@ export class NovelProjectService extends TypertRemoteService {
     'agents',
     'systemPrompt',
     'sessionProjections',
+    'fs',
+    'sandboxPolicy',
   ]
 
   private projects?: KvTable<DshWorkspaceId, NovelProjectRecord>
@@ -2651,6 +2682,76 @@ export class NovelProjectService extends TypertRemoteService {
   @Remote('open')
   remoteOpen(workspaceId: NovelWorkspaceId): Promise<NovelProject> {
     return this.open(this.requireWorkspace(workspaceId))
+  }
+
+  /**
+   * Read one chapter draft file out of a workspace.
+   *
+   * A chapter draft is the author's own file in their workdir — the medium the
+   * editor writes into before anything is ever proposed. This service is only
+   * the transport for it: reading a draft here advances nothing, and the version
+   * token it returns is what a later write guards against.
+   */
+  @Remote('readChapterFile')
+  async remoteReadChapterFile(
+    workspaceId: NovelWorkspaceId,
+    relativePath: string,
+  ): Promise<NovelChapterFileRead> {
+    const workspace = this.requireWorkspace(workspaceId)
+    let target
+    try {
+      target = await this.ctx.fs.resolve(relativePath, { cwd: workspace.path })
+    } catch (error) {
+      return { state: 'unreadable', reason: describeFsFailure(error) }
+    }
+    const info = await this.ctx.fs.stat(target)
+    if (info === undefined) return { state: 'missing' }
+    if (info.type !== 'file') return { state: 'unreadable', reason: '这个路径不是正文文件。' }
+    try {
+      return { state: 'ok', text: await this.ctx.fs.readText(target), version: String(info.version) }
+    } catch (error) {
+      return { state: 'unreadable', reason: describeFsFailure(error) }
+    }
+  }
+
+  /**
+   * Write one chapter draft file.
+   *
+   * `expectedVersion` is the token the read returned. A mismatch means the file
+   * moved under us — the author edited it in their own editor, or another window
+   * saved — so the write is refused rather than overwriting their work, and the
+   * caller gets the current version to re-read against. Nothing here advances
+   * Canon: only an accepted Result Packet does that.
+   */
+  @Remote('writeChapterFile')
+  async remoteWriteChapterFile(
+    workspaceId: NovelWorkspaceId,
+    relativePath: string,
+    text: string,
+    expectedVersion: string,
+  ): Promise<NovelChapterFileWrite> {
+    const workspace = this.requireWorkspace(workspaceId)
+    let target
+    try {
+      target = await this.ctx.fs.resolve(relativePath, { cwd: workspace.path })
+    } catch (error) {
+      return { state: 'unwritable', reason: describeFsFailure(error) }
+    }
+    const expected: FsWriteIntent | undefined = expectedVersion === ''
+      ? undefined
+      : { kind: 'replaceIfVersion', version: FsVersion(expectedVersion) }
+    try {
+      const outcome = await this.ctx.fs.writeText(target, text, expected, undefined, this.ctx.sandboxPolicy.resolve())
+      return { state: 'ok', version: String(outcome.version) }
+    } catch (error) {
+      if (error instanceof FsError && error.code === 'FS_STALE_VERSION') {
+        // The one failure the editor handles by re-reading, so it is a state and
+        // not a message. `stat` supplies the version to re-read against.
+        const current = await this.ctx.fs.stat(target).catch(() => undefined)
+        if (current !== undefined) return { state: 'conflict', version: String(current.version) }
+      }
+      return { state: 'unwritable', reason: describeFsFailure(error) }
+    }
   }
 
   /** Read the current project head without creating a project record. */

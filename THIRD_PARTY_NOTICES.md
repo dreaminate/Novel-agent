@@ -398,3 +398,18 @@ The consumer is `packages/novel-workbench/src/client/novel-input-source.ts`: one
 `@` trigger source adding a 人物与章节 group read from accepted Canon. It adds no
 input machine, no second queue and no rival menu — the shipped trigger pipeline
 owns detection, the menu, keyboard arbitration and the insertion itself.
+
+## Chapter draft files (2026-09-17)
+
+`@novel-agent/novel-project` declares two more DSH platform packages,
+`@deepseek-ai/dsh-fs@0.1.2-rc.1` and `@deepseek-ai/dsh-sandbox-policy@0.1.2-rc.1`,
+so the `novelProject` Remote can read and write the author's chapter draft files
+in a workspace workdir. Both are MIT, ship no `preinstall` / `install` /
+`postinstall` script, and are pinned to the same locked DSH version the
+`novel-writing` package already resolves them at. The lockfile gains no new
+resolution and removes none — the two entries simply take their alphabetical
+place in that package's importer block.
+
+These methods are a transport for the editor's draft medium only. A draft file
+is not Canon state and reading or writing one advances nothing; only an accepted
+Result Packet moves the accepted revision.

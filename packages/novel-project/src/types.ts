@@ -3173,3 +3173,29 @@ export interface NovelPendingProposal {
   /** The complete reviewable draft exactly as proposed; accepting it advances Canon. */
   readonly packet: NovelResultPacketDraft
 }
+
+/**
+ * Reading one chapter draft file out of a workspace.
+ *
+ * A chapter draft is a file in the author's own workdir, not Canon state: it is
+ * where prose is written before it is ever proposed. These states exist so the
+ * editor can say what went wrong in the author's language instead of surfacing a
+ * filesystem error, and so "the draft is gone" stays distinguishable from "the
+ * draft is there but unreadable".
+ */
+export type NovelChapterFileRead =
+  | { readonly state: 'ok'; readonly text: string; /** Freshness token for the next write. */ readonly version: string }
+  | { readonly state: 'missing' }
+  | { readonly state: 'unreadable'; readonly reason: string }
+
+/**
+ * Writing one chapter draft file.
+ *
+ * `conflict` is the case that matters: the file changed on disk since it was
+ * read (the author edited it in their own editor, or another window saved), so
+ * the write is refused rather than silently overwriting their work.
+ */
+export type NovelChapterFileWrite =
+  | { readonly state: 'ok'; readonly version: string }
+  | { readonly state: 'conflict'; readonly version: string }
+  | { readonly state: 'unwritable'; readonly reason: string }

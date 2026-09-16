@@ -526,10 +526,38 @@ HEAD `02a48d8` —— 即本计划写的 `8926e31` **加本计划文件本身的
 
 ### Phase 3 — 编辑器成为主工作面
 
-- [ ] **I3.1 章节文件模型** — 目标：正文以 workdir 里的章节文件为草稿载体。
-  - 文件：`packages/novel-workbench/src/client/chapter-files.ts`（新）、`novel-data.ts`（扩展）、spec（新）
-  - 要求：读写走 DSH 的 fs/workspace seam；文件缺失/权限/编码错误有明确人话态；不把草稿写进 Canon。
-  - 验证：spec 覆盖读写与失败态；真机能在 workdir 看到文件。
+- [x] **I3.1a 章节文件的宿主缝** — 目标：让客户端能读写 workdir 里的章节文件（原 I3.1 的前半，2026-09-17 按 §0 拆出）。
+  - 文件：`packages/novel-project/src/types.ts`（两个新公开类型）、`packages/novel-project/src/index.ts`
+    （两个 `@Remote` 方法 + 失败文案映射）、`packages/novel-project/package.json`（新增两个 DSH 平台依赖）
+  - **为什么先做宿主：** 查实客户端**没有任何通用 fs remote**（`dsh-client-ui-directory-picker-browse` 走的是
+    `ctx.uiWorkspace`，不是文件系统）。所以「读 workdir 文件」必须由宿主提供；而仓库已有现成范式 ——
+    `novel-writing` 就在用 `ctx.fs.resolve` + `readBytes`/`writeText` + `sandboxPolicy`。
+  - **做法：** 在既有的 `novelProject` remote 上**扩展**两个方法（不另起 namespace、不新增 transport，
+    符合 §2）：
+    - `readChapterFile(workspaceId, relativePath)` → `ok{text,version}` / `missing` / `unreadable{reason}`；
+    - `writeChapterFile(workspaceId, relativePath, text, expectedVersion)` → `ok{version}` / `conflict{version}` / `unwritable{reason}`。
+  - **两处刻意的设计：** ① **写用版本 CAS**（`FsWriteIntent.replaceIfVersion`）—— 版本不匹配说明文件在
+    编辑器之外被改过，宁可拒绝也不覆盖作者的改动；`conflict` 因此是一个**状态**而不是一句错误话。
+    ② **失败文案说作者能行动的事**（权限 / 访问模式 / 不是 UTF-8 / 太大 / 已不在），
+    `FsError.code` 是 fs 服务自己的封闭词表，不把宿主错误原样抛给作者。
+  - **边界：** 这两个方法只搬文件，**不碰 Canon** —— 只有被接受的 Result Packet 才推进 Canon。方法注释里写明了。
+  - **§2 开源门禁：** 新增 `@deepseek-ai/dsh-fs@0.1.2-rc.1` 与 `@deepseek-ai/dsh-sandbox-policy@0.1.2-rc.1`
+    （均 MIT、无安装脚本、锁定 DSH 版本、novel-writing 已在用）。lockfile **0 条新 resolution、0 删除**，
+    只是把这两条插进 novel-project importer 的字母序位置。
+  - **验证（本轮做到的部分）：** 342 tests 全绿、typecheck 0、lint 0、`git diff --check` 0；
+    `dev-host.sh rebuild` 成功、smoke **exit 0** —— 关键是证明**服务带着新增的两个 inject（`fs` /
+    `sandboxPolicy`）在 profile 里照常加载**，没有把插件整体弄挂。
+  - **未做、不许当已验证：** 两个方法的**行为**没有跑过 —— 没有读/写任何一个真实章节文件，
+    `conflict` 与各失败态也没被触发过。据实：目前只证明了它们**编译通过并且服务能加载**。
+    行为验证随 I3.1b 的真机步骤一起做。
+
+- [ ] **I3.1b 章节文件模型（客户端）** — 目标：正文以 workdir 里的章节文件为草稿载体，作者看得懂失败原因。
+  - 文件：`packages/novel-workbench/src/client/chapter-files.ts`（新）、`novel-data.ts`（face 扩展）、spec（新）
+  - 前置：I3.1a 已绿（宿主缝已就位并且服务能加载）。
+  - 要求：face 暴露 `loadChapterFile` / `saveChapterFile`；`chapter-files.ts` 把三种读态与三种写态
+    映射成编辑器要用的人话；**不把草稿写进 Canon**；冲突时提示「文件在别处被改过」并给出重新读取的路径。
+  - 验证：spec 覆盖读/写/缺失/冲突/不可读；**真机在 workdir 里真的看到写出的文件**，并验证版本 CAS
+    确实拦下了一次冲突写。
 
 - [ ] **I3.2 编辑器画布（含阅读模式）** — 目标：Tiptap 编辑器成为默认主画布，阅读并入同一文档。
   - 文件：`packages/novel-workbench/src/client/NovelEditor.tsx`（新）、`novel-copy.ts`、

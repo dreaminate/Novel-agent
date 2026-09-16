@@ -27,8 +27,6 @@ export interface WorkbenchSettings {
   readonly readingSize: number
   /** Reading line length in em, i.e. roughly characters per line (34 / 40). */
   readonly readingMeasure: number
-  /** Whether a thread shows the tool activity it ran. */
-  readonly showToolActivity: boolean
 }
 
 /** Live width of the seat the frame renders into. */
@@ -145,7 +143,7 @@ const DEFAULT_STATE: WorkbenchState = {
   advanced: false,
   advancedGroup: 'core',
   theme: 'auto',
-  settings: { readingSize: 17, readingMeasure: 40, showToolActivity: true },
+  settings: { readingSize: 17, readingMeasure: 40 },
   settingsOpen: false,
   personFileId: undefined,
   lastSubmission: undefined,
@@ -249,11 +247,6 @@ export const workbenchActions = {
     const next = Math.min(40, Math.max(34, Math.round(readingMeasure)))
     if (state.settings.readingMeasure === next) return
     publish({ ...state, settings: { ...state.settings, readingMeasure: next } })
-  },
-
-  setShowToolActivity(showToolActivity: boolean): void {
-    if (state.settings.showToolActivity === showToolActivity) return
-    publish({ ...state, settings: { ...state.settings, showToolActivity } })
   },
 
   /** Open one person's 人物档案 drawer. */

@@ -2,9 +2,12 @@
  * 设置: the sheet behind the topbar's 设置 button.
  *
  * The prototype keeps four author choices here — theme, 正文字号, 阅读行宽 and
- * whether threads show tool activity. The reading choices are not decoration:
- * the 正文阅读 canvas reads them from the same store, so what the author picks
- * here is what the text does.
+ * whether threads show tool activity. Only the first three are offered: the
+ * transcript belongs to the shipped conversation surface, so a 工具活动 switch
+ * could be remembered but never honored, and this sheet does not carry controls
+ * it cannot deliver. The reading choices are not decoration: the 正文阅读 canvas
+ * reads them from the same store, so what the author picks here is what the text
+ * does.
  */
 import { createElement, useEffect, type ReactNode } from 'react'
 import { useWorkbenchState, workbenchActions, type WorkbenchTheme } from './store.js'
@@ -178,34 +181,6 @@ export function NovelSettings(): ReactNode {
           'div',
           { className: 'setting-note' },
           '行宽越窄，眼睛回扫越省力；40 字是原型的默认值。',
-        ),
-      ),
-      createElement(
-        'div',
-        { className: 'setting' },
-        createElement('div', { className: 'setting-label' }, '线程里的工具活动'),
-        createElement(
-          'div',
-          { className: 'seg', role: 'group' },
-          [
-            { id: 'show', label: '显示', value: true },
-            { id: 'hide', label: '收起', value: false },
-          ].map(choice => createElement(
-            'button',
-            {
-              key: choice.id,
-              type: 'button',
-              'data-novel-settings-activity': choice.id,
-              'aria-pressed': settings.showToolActivity === choice.value ? 'true' : 'false',
-              onClick: () => { workbenchActions.setShowToolActivity(choice.value) },
-            },
-            choice.label,
-          )),
-        ),
-        createElement(
-          'div',
-          { className: 'setting-note' },
-          'AI 读过什么、跑过什么工具。线程里的工具活动目前由会话面渲染，这一项已记住选择、尚未生效。',
         ),
       ),
     ),

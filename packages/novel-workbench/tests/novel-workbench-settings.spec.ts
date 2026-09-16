@@ -7,13 +7,16 @@ import { NovelSettings } from '../src/client/NovelSettings.js'
 import { getWorkbenchState, resetWorkbench, workbenchActions } from '../src/client/store.js'
 
 /**
- * The prototype's 设置 sheet holds the choices an author makes once and expects
- * to keep: theme, 正文字号, 阅读行宽 and whether threads show tool activity. The
- * reading choices have to reach the reading canvas, so the sheet writes the same
- * store the canvas reads.
+ * The 设置 sheet holds the choices an author makes once and expects to keep:
+ * theme, 正文字号 and 阅读行宽. The reading choices have to reach the reading
+ * canvas, so the sheet writes the same store the canvas reads.
+ *
+ * The sheet offers nothing it cannot honor: the transcript belongs to the
+ * shipped conversation surface, so a 工具活动 switch here would be a control
+ * with no effect, and the sheet must not carry one.
  */
 describe('novel-mode settings sheet', () => {
-  it('offers the four author choices and writes them to the frame store', async () => {
+  it('offers only the choices the frame applies, and writes them to the frame store', async () => {
     resetWorkbench()
     workbenchActions.openSettings()
     const container = document.createElement('div')
@@ -26,19 +29,20 @@ describe('novel-mode settings sheet', () => {
     expect(sheet?.textContent).toContain('正文大小')
     expect(sheet?.textContent).toContain('阅读行宽')
 
+    // A control whose effect it cannot deliver is worse than no control: the
+    // transcript is rendered by the shipped conversation surface, not here.
+    expect(sheet?.querySelector('[data-novel-settings-activity]')).toBeNull()
+    expect(Object.keys(getWorkbenchState().settings)).toEqual(['readingSize', 'readingMeasure'])
+
     await act(async () => {
       sheet?.querySelector<HTMLButtonElement>('[data-novel-settings-size="18"]')?.click()
     })
     await act(async () => {
       sheet?.querySelector<HTMLButtonElement>('[data-novel-settings-measure="34"]')?.click()
     })
-    await act(async () => {
-      sheet?.querySelector<HTMLButtonElement>('[data-novel-settings-activity="hide"]')?.click()
-    })
 
     expect(getWorkbenchState().settings.readingSize).toBe(18)
     expect(getWorkbenchState().settings.readingMeasure).toBe(34)
-    expect(getWorkbenchState().settings.showToolActivity).toBe(false)
 
     await act(async () => {
       sheet?.querySelector<HTMLButtonElement>('[data-novel-settings-close]')?.click()

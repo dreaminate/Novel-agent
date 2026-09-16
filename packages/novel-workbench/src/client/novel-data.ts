@@ -31,6 +31,14 @@ import type {
 import type {} from '@deepseek-ai/dsh-host-plugin-inventory/remote'
 import type {} from '@deepseek-ai/dsh-cordis-host-runner/remote'
 import type { WorkspaceView } from '@deepseek-ai/dsh-api-workspace-controller/client'
+import {
+  chapterDraftPath,
+  draftFromRead,
+  saveResultFromWrite,
+  type ChapterDraft,
+  type ChapterDraftSave,
+  type ChapterIdentity,
+} from './chapter-files.js'
 import { countCharacters, describeDelta, dimensionLabel, kindLabel, severityLabel } from './novel-copy.js'
 
 /** Chapter badge the work tree shows. */
@@ -124,6 +132,25 @@ export interface NovelWorkFace {
   readonly discardProposal: (workspaceId: WorkspaceId, packetId: string) => Promise<void>
   /** Accepted revisions, newest first. */
   readonly loadHistory: (workspaceId: WorkspaceId) => Promise<readonly NovelRevisionRow[]>
+  /**
+   * Read one chapter's draft file out of the workdir. A draft is the author's
+   * own file, not Canon state — nothing here advances the accepted revision.
+   * Never throws: an unreadable draft is a state the editor shows.
+   */
+  readonly loadChapterDraft: (
+    workspaceId: WorkspaceId,
+    chapter: ChapterIdentity,
+  ) => Promise<ChapterDraft>
+  /**
+   * Write one chapter's draft file. `version` is the token the read returned; a
+   * mismatch comes back as a conflict rather than overwriting the author's work.
+   */
+  readonly saveChapterDraft: (
+    workspaceId: WorkspaceId,
+    chapter: ChapterIdentity,
+    text: string,
+    version: string,
+  ) => Promise<ChapterDraftSave>
   /**
    * Character count of one chapter's accepted manuscript, or `undefined` while
    * Canon holds no accepted text for it.
@@ -1282,6 +1309,26 @@ export function createNovelWorkFace(deps: NovelFaceDeps): NovelWorkFace {
     async discardProposal(workspaceId, packetId) {
       await unwrap(deps.project.discardProposal(workspaceId, packetId), '丢弃提案')
     },
+    async loadChapterDraft(workspaceId, chapter) {
+      try {
+        return draftFromRead(await unwrap(
+          deps.project.readChapterFile(workspaceId, chapterDraftPath(chapter)),
+          '读取章节草稿',
+        ))
+      } catch (error) {
+        return { state: 'unreadable', message: draftFailure(error) }
+      }
+    },
+    async saveChapterDraft(workspaceId, chapter, text, version) {
+      try {
+        return saveResultFromWrite(await unwrap(
+          deps.project.writeChapterFile(workspaceId, chapterDraftPath(chapter), text, version),
+          '保存章节草稿',
+        ))
+      } catch (error) {
+        return { state: 'failed', message: draftFailure(error) }
+      }
+    },
     async loadHistory(workspaceId) {
       const project = await unwrap(deps.project.open(workspaceId), '打开作品')
       const revisions: NovelRevisionRow[] = []
@@ -1465,6 +1512,13 @@ async function unwrap<T>(pending: Promise<RemoteResult<T>>, action: string): Pro
   const result = await pending
   if (!result.ok) throw new Error(`${action}失败：${result.error.message}`)
   return result.value
+}
+
+/** What to show when a draft read or write never reached the host at all. */
+function draftFailure(error: unknown): string {
+  return error instanceof Error && error.message !== ''
+    ? error.message
+    : '没能和宿主通信，章节草稿这次没有读/写成功。'
 }
 
 /**

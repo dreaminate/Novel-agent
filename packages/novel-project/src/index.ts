@@ -7,7 +7,7 @@ import {
   type Session,
 } from '@deepseek-ai/dsh-session'
 import type { SubagentResult, SubagentRun } from '@deepseek-ai/dsh-subagent'
-import { FsError, FsVersion, type FsWriteIntent } from '@deepseek-ai/dsh-fs'
+import { FsVersion, type FsWriteIntent } from '@deepseek-ai/dsh-fs'
 import type {} from '@deepseek-ai/dsh-sandbox-policy'
 import type {
   NovelChapterFileRead,
@@ -1093,6 +1093,21 @@ declare module '@deepseek-ai/dsh-session' {
 
 
 /**
+ * The filesystem service's own failure code, read structurally.
+ *
+ * Deliberately not `instanceof FsError`. The store can hold more than one
+ * `dsh-fs` copy, and the backend that throws is not necessarily the copy this
+ * module imported, so class identity is not a safe test here. The real-machine
+ * check found exactly that: a stale write reported itself as a generic failure
+ * because the identity check missed, and the author would have been told "读写
+ * 这个文件时出错了" instead of "文件在别处被改过了".
+ */
+function fsErrorCode(error: unknown): string | undefined {
+  const code = (error as { readonly code?: unknown } | null | undefined)?.code
+  return typeof code === 'string' ? code : undefined
+}
+
+/**
  * Author-facing reason for one filesystem failure.
  *
  * The editor shows this next to the draft, so it says what the author can act
@@ -1101,17 +1116,15 @@ declare module '@deepseek-ai/dsh-session' {
  * either a plain `Error` from a lower layer or something we have no words for.
  */
 function describeFsFailure(error: unknown): string {
-  if (!(error instanceof FsError)) {
-    return error instanceof Error && error.message !== '' ? error.message : '读写这个文件时出错了。'
-  }
-  switch (error.code) {
+  switch (fsErrorCode(error)) {
     case 'FS_PERMISSION_DENIED': return '没有权限读写这个文件。'
     case 'FS_SANDBOX_DENIED': return '当前的访问模式不允许读写这个位置。'
     case 'FS_NOT_TEXT': return '这不是 UTF-8 文本，编辑器打不开。'
     case 'FS_NOT_REGULAR_FILE': return '这个路径不是普通文件。'
     case 'FS_TOO_LARGE': return '这个文件太大，编辑器没有打开它。'
     case 'FS_NOT_FOUND': return '这个文件已经不在了。'
-    default: return '读写这个文件时出错了。'
+    default:
+      return error instanceof Error && error.message !== '' ? error.message : '读写这个文件时出错了。'
   }
 }
 
@@ -2744,7 +2757,7 @@ export class NovelProjectService extends TypertRemoteService {
       const outcome = await this.ctx.fs.writeText(target, text, expected, undefined, this.ctx.sandboxPolicy.resolve())
       return { state: 'ok', version: String(outcome.version) }
     } catch (error) {
-      if (error instanceof FsError && error.code === 'FS_STALE_VERSION') {
+      if (fsErrorCode(error) === 'FS_STALE_VERSION') {
         // The one failure the editor handles by re-reading, so it is a state and
         // not a message. `stat` supplies the version to re-read against.
         const current = await this.ctx.fs.stat(target).catch(() => undefined)

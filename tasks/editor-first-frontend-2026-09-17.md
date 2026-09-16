@@ -551,13 +551,44 @@ HEAD `02a48d8` —— 即本计划写的 `8926e31` **加本计划文件本身的
     `conflict` 与各失败态也没被触发过。据实：目前只证明了它们**编译通过并且服务能加载**。
     行为验证随 I3.1b 的真机步骤一起做。
 
-- [ ] **I3.1b 章节文件模型（客户端）** — 目标：正文以 workdir 里的章节文件为草稿载体，作者看得懂失败原因。
+- [x] **I3.1b 章节文件模型（客户端）** — 目标：正文以 workdir 里的章节文件为草稿载体，作者看得懂失败原因。
   - 文件：`packages/novel-workbench/src/client/chapter-files.ts`（新）、`novel-data.ts`（face 扩展）、spec（新）
   - 前置：I3.1a 已绿（宿主缝已就位并且服务能加载）。
   - 要求：face 暴露 `loadChapterFile` / `saveChapterFile`；`chapter-files.ts` 把三种读态与三种写态
     映射成编辑器要用的人话；**不把草稿写进 Canon**；冲突时提示「文件在别处被改过」并给出重新读取的路径。
   - 验证：spec 覆盖读/写/缺失/冲突/不可读；**真机在 workdir 里真的看到写出的文件**，并验证版本 CAS
     确实拦下了一次冲突写。
+
+  > **✅ 已完成（2026-09-17）。真机验证抓到并修掉了一个单测与类型检查都抓不到的缺陷。**
+  >
+  > **实现：** 新 `packages/novel-workbench/src/client/chapter-files.ts` —— 纯翻译层（无 IO，可单测）：
+  > `chapterDraftPath(chapter)` 定路径，`draftFromRead` / `saveResultFromWrite` 把宿主的六种状态映射成
+  > 编辑器能显示、能行动的状态（`loaded` / `new` / `unreadable`；`saved` / `conflict` / `failed`）。
+  > face（`novel-data.ts`）新增 `loadChapterDraft` / `saveChapterDraft`，**永不抛** —— 传输失败也变成状态。
+  > **路径放在 workdir 根**而不是子目录：查实 fs seam **不会创建父目录**，`drafts/…` 会在作者第一次打开
+  > 一个从未起草过的章节时失败。文件名带章号与章名（`第1章《开篇章》.草稿.md`），作者在自己的文件管理器里认得出来。
+  >
+  > **真机验证（走宿主 API 逐态跑完，不是推断）：**
+  > | 步骤 | 结果 |
+  > | --- | --- |
+  > | 读一个尚不存在的文件 | `{state:'missing'}` |
+  > | 写入（无版本） | `{state:'ok', version:…}`，**磁盘上真的出现了文件** |
+  > | 读回 | 文本与 version 都对 |
+  > | 用**过期 version** 写 | **`{state:'conflict', version:当前值}`**，且**旧内容未被覆盖** |
+  > | 用正确 version 写 | `{state:'ok'}`，磁盘内容更新为两段正文 |
+  > 真实路径：`/private/tmp/nw-workspace/天机阁主/第1章《开篇章》.草稿.md`。探针文件测完已删除。
+  >
+  > **🐛 真机验证抓到的缺陷（已修）：** 第一次跑时过期写返回的是 `unwritable` 而不是 `conflict`。
+  > 原因是**我用 `instanceof FsError` 判断错误类型**，而 pnpm store 里存在**不止一份 `dsh-fs`**，
+  > 抛错的 backend 与我 import 的不是同一个实例 —— **类身份判断失效**。后果是作者会看到
+  > 「读写这个文件时出错了」而不是「文件在别处被改过了」，**恰好把这套设计存在的理由弄丢了**。
+  > 改为**结构化读取 `.code`**（`fsErrorCode()`），不看实例。修完重跑，六态全对。
+  > 这类缺陷类型检查和单测都看不见 —— 只有把真东西跑起来才会露出来。
+  > （另：`novel-project` 的 `product-boundary.spec.ts` 把 typert 调用数钉在 15，现更新为 **17** 并写明理由；
+  > 该 spec 真正的不变量「每个调用都在 `novelProject` 单一 namespace 上」仍然成立。）
+  >
+  > **验证汇总：** 349 tests 全绿（新增 7 条 chapter-files 断言）、typecheck 0、lint 0、`git diff --check` 0、
+  > `dev-host.sh rebuild` + smoke **exit 0**。
 
 - [ ] **I3.2 编辑器画布（含阅读模式）** — 目标：Tiptap 编辑器成为默认主画布，阅读并入同一文档。
   - 文件：`packages/novel-workbench/src/client/NovelEditor.tsx`（新）、`novel-copy.ts`、

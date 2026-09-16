@@ -185,9 +185,12 @@ describe('novel-agent product boundary', () => {
     expect(TYPERT.package).toBe('@novel-agent/novel-project')
     expect(TYPERT.face).toBe('host')
     expect(novelProjectRemote.package).toBe('@novel-agent/novel-project')
-    // 15 since `chapterControlPack` joined the boundary: the 本章合同 canvas
-    // reads one Chapter's control pack through the same service namespace.
-    expect(TYPERT.invocations).toHaveLength(15)
+    // 17 since `readChapterFile`/`writeChapterFile` joined the boundary: the
+    // editor's chapter drafts are files in the author's workdir, and there is no
+    // fs Remote a client plugin can reach, so they ride this same namespace
+    // rather than a second transport. (15 before them, when `chapterControlPack`
+    // joined; the 本章合同 canvas reads one Chapter's control pack here too.)
+    expect(TYPERT.invocations).toHaveLength(17)
     for (const invocation of TYPERT.invocations) {
       expect(invocation.service).toBe('novelProject')
       expect(invocation.namespace).toBe(invocation.service)

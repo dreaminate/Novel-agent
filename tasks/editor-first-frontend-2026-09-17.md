@@ -362,12 +362,43 @@ HEAD `02a48d8` —— 即本计划写的 `8926e31` **加本计划文件本身的
   >   不会写 `lastSubmission`（那是我们 novel bar 提交时才记的），没有「上一句」可重试 —— 行为正确。
   >   重试动作本身由 spec 点击并断言 `resend` 被调用，覆盖在单测里。
 
-- [ ] **I2.3 `/` 与 `@` 候选菜单** — 目标：拆掉「请切到线程输入」的挡板，复用官方管道只换渲染。
-  - 文件：`NovelComposer.tsx`、`novel-workbench-composer.spec.ts`（扩展）
+- [ ] **I2.3 `/` 与 `@` 候选菜单** — 目标：拆掉「请切到线程输入」的挡板，复用官方管道只换渲染。  - 文件：`NovelComposer.tsx`、`novel-workbench-composer.spec.ts`（扩展）
   - 要求：`/` 列出官方全部命令（compact / export / feedback / goal / permission / plan / model）；
     `@` 在官方文件候选之外加一组「人物与章节」（来自 Canon）；候选数据来自官方触发管道，
     **不重建输入状态机**；键盘上下选、Enter 确认、Esc 取消。
   - 验证：spec 绿；真机敲 `/` 与 `@` 都能出候选并可用。
+
+  > **🛑 阻塞（2026-09-17，§5 类：本计划内部排序冲突，等用户裁定）。I2.3 与 I2.4 互相咬住了。**
+  >
+  > **查实的官方管道**（证据来自运行中的 DSH 安装，不在仓库 `node_modules` 里）：
+  > `@deepseek-ai/dsh-client-ui-input-trigger` 提供 `ctx.inputTriggers` 服务 + 每会话一个
+  > `InputTriggerController`（`track(draft, caret, guard, draftRev)` 喂草稿 / 读 `menu` / `pick` /
+  > `arbitrate` 键盘 / `hover`）。候选源由别的包注册：`/` 来自 `dsh-client-ui-commands`，
+  > `@` 文件来自 `dsh-client-ui-reference`，另有 `dsh-client-ui-skill`。
+  >
+  > **咬住的地方：** 选中一个候选不是"读数据"，而是**派发会话作用域的 `bail` 事件** ——
+  > `slash/input-begin-command` / `slash/input-insert-text` / `slash/input-insert-reference`
+  > （见 `InputTriggerController.execute`）。而 **`dsh-client-ui-conversation` 正在监听这三个事件并用它的
+  > composer shell 认领它们**（`actx.on("slash/input-insert-text", req => shell.insertText(...) ? true : void 0)`），
+  > 它**就是**输入状态机。而 I2.1 起我们一直**保留着**官方会话面（这正是 I2.4 前置要求的）。
+  >
+  > 于是：**我们的底栏可以只读地复用管道拿到候选（`track` + `menu`），但"选中"这一步的落点会被已经挂载的
+  > 官方 composer 抢走** —— 除非它自己的 CAS 失败（`span` 里带 `draftRev`，pick 时按草稿 revision 做 CAS）。
+  > 靠"隔壁组件 CAS 失败"来让我们赢，是一条**没有文档保证的隐式依赖**。
+  >
+  > **而 I2.4（线程视图不再渲染官方会话面）的前置又明写要求 I2.1–I2.3 先全绿** —— 所以不能简单地先做 I2.4。
+  > 这就是循环。
+  >
+  > **三条可行路线（要用户选）：**
+  > 1. **换序 + 复用官方草稿控制器**：让我们的底栏不再是自来一个 `useState` 草稿，而是**渲染官方输入机的
+  >    草稿状态**（会话作用域里那套 shell/draft），官方会话面则从"渲染"降级为"不可见服务"。这最贴合
+  >    「复用官方管道、只换渲染、不重建输入状态机」，但需要先确认那套 shell 是否能在不渲染的情况下存活。
+  > 2. **换序 + 我们持有草稿**：先做 I2.4（停渲染官方会话面），再由我们的底栏独占 `/` `@`，自己做薄薄一层
+  >    草稿与快捷键 —— 代价是「不重建输入状态机」这条要放宽（只重建"应用候选"这一层，候选仍来自官方源）。
+  > 3. **维持原序 + 接受隐式依赖**：我们调用管道并注册 `slash/input-*` 监听，赌官方 shell 的 CAS 会失败。
+  >    **不推荐**：今天的绿灯可能只是 CAS 恰好失败，官方改一行就变。
+  >
+  > **I2.3 未动工。** 本轮只做了查证，没有改代码、没有花模型额度。
 
 - [ ] **I2.4 停用官方会话面** — 目标：线程视图不再渲染官方 conversation seat；不可见服务照旧。
   - 文件：`packages/novel-workbench/cordis.patch.yml`、`index.tsx`、相关 spec

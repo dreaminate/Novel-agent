@@ -438,31 +438,30 @@ HEAD `02a48d8` —— 即本计划写的 `8926e31` **加本计划文件本身的
   >
   > **两条都能满足原计划，区别只在"底栏还是不是我们的输入框"。** 本轮不动工、不花模型额度，等用户定。
 
-- [ ] **I2.4 停用官方会话面（换序后先做）** — 目标：线程视图不再渲染官方 `conversation` 会话面，
-  但它的**服务照旧**，且**审批面板保住座位**。
-  - 文件：`WorkbenchFrame.tsx`、`index.tsx`、`packages/novel-workbench/cordis.patch.yml`、相关 spec
+- [ ] **I2.4 官方输入条住进我们的底栏** — 目标：底栏由官方输入条担任，`/` `@` 与模型 / 权限 / 计划 /
+  附件控件**一并回来**；线程视图不再有第二个输入框；审批面板保住座位。我们自己的 textarea 底栏退场。
+  - 文件：`WorkbenchFrame.tsx`、`index.tsx`、`NovelComposer.tsx`（退场）、相关 spec
   - 要求：
-    1. frame 不再渲染官方 `conversation` 座；官方输入机 / 草稿队列 / 流 / 审批服务继续作为
-       **不可见服务**跑（决策 6 的原意）。
-    2. **frame 自己声明并渲染 `conversation.composer`** —— 官方审批面板（I1 复用的那张）注册在这个槽上，
-       不渲染它审批就没了。**同时不声明、不渲染 `conversation.composer.bar`** —— 官方 InputBar 住在这里，
-       不渲染它就不会出现第二个输入框。
-    3. 我们的底栏**继续持有自己的草稿**（本轮裁定：官方草稿读不到也托管不了），提交仍走
-       `beginSubmission` + `prompt` 的官方通路，**不新建投递机制**。
-  - 前置（2026-09-17 已做）：shell 是**服务**不是渲染产物 ✅；官方**草稿读不到** ❌ → 所以不绑定，只停渲染。
-  - 验证：线程视图无官方启动页、无重复输入框；**审批仍能画出并应答**（回归跑一遍 I1.2 的四条断言，
-    这是 I1 决定的守门测试）；底栏草稿可见可编辑；提交与失败重试仍可用；smoke 全绿。
+    1. **frame 在 footer 的 `novel.composer` 座位渲染官方 `conversation.composer.bar`**（官方 InputBar），
+       取代现有 `NovelComposer` 的 textarea 条。**这是本轮裁定的核心：`/` `@` 与那批控件不必自研，
+       它们本来就在这条官方输入条里。**
+    2. **frame 不再渲染官方 `conversation` 会话座** —— 否则又冒出第二个输入框。
+    3. **frame 自己声明并渲染父槽 `conversation.composer`**（放在线程区）—— 官方审批面板（I1 复用那张）
+       注册在这个槽上，不渲染它就没了。**`.composer`（审批）与 `.composer.bar`（输入条）本来就是两个槽**，
+       这正是本条的解法。
+    4. **注意连带：** `NovelComposer` 退场会带走 `rememberSubmission`，而 I2.2 的失败重试条带
+       （`NovelThreadNotice`）靠 `lastSubmission` 才有「重试上一句」。要一并处理，**别把重试能力弄丢**。
+  - 验证：线程视图**只有一个**输入框；真机敲 `/` 与 `@` 出候选且可用；模型 / 权限控件可见；
+    **审批仍能画出并应答**（回归 I1.2 四条断言 —— 这是 I1 决定的守门测试）；失败重试仍可用；smoke 全绿。
 
-- [ ] **I2.5 `/` 与 `@` 候选菜单（原 I2.3，换序后做）** — 目标：拆掉「请切到线程输入」的挡板，
-  复用官方管道只换渲染。
-  - 文件：`NovelComposer.tsx`、`novel-workbench-composer.spec.ts`（扩展）
-  - 前置：I2.4 已绿（线程视图不再有官方输入框，候选菜单不会与官方 composer 抢位置）。
-    **落点本来就归我们**：按本轮裁定，选中的文本由我们自己插进底栏 textarea，
-    **不经过**官方的 `slash/input-*` 事件（那条路会被仍在挂载的官方 shell 认领，正是死锁的成因）。
-  - 要求：`/` 列出官方全部命令（compact / export / feedback / goal / permission / plan / model）；
-    `@` 在官方文件候选之外加一组「人物与章节」（来自 Canon）；候选数据来自官方触发管道
-    （`ctx.inputTriggers` 的 `track` / `menu`），**不重建输入状态机**；键盘上下选、Enter 确认、Esc 取消。
-  - 验证：spec 绿；真机敲 `/` 与 `@` 都能出候选并可用。
+- [ ] **I2.5 `@` 增加一组「人物与章节」** — 目标：在官方 `@` 候选之外，用**官方触发源机制**加一组来自 Canon
+  的人物与章节。`/` 那半不需要写代码 —— I2.4 让官方输入条回来之后，官方全部命令（compact / export /
+  feedback / goal / permission / plan / model）自然就在 `/` 里。
+  - 文件：新 `novel-input-source.ts`（一个 `InputTriggerSource` 注册）、`index.tsx`（挂到会话作用域）、spec
+  - 前置：I2.4 已绿（此时是官方输入条在驱动管道，我们只需要**注册一个源**）。
+  - 要求：用 `ctx.inputTriggers.registerSource(...)` 注册一个 `@` 源；候选来自 Canon（人物 / 章节）；
+    选中仍走官方 `insertReference` 通路 —— **不自己造插入**、**不重建输入状态机**。
+  - 验证：spec 绿；真机 `@` 里能看到「人物与章节」组，选中能插入。
 
 ### Phase 3 — 编辑器成为主工作面
 

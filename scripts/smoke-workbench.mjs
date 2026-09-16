@@ -347,15 +347,19 @@ async function sweepChapterRead(session) {
     `(() => { const node = document.querySelector('[data-novel-chapter-status="accepted"]')
         ?? document.querySelector('[data-novel-chapter]')
       return node === null ? null : node.getAttribute('data-novel-chapter') })()`)
-  if (chapter === null) return { view: 'read', label: '正文阅读', state: 'skipped-no-chapter', head: '' }
+  if (chapter === null) return { view: 'chapter', label: '章节 → 写作', state: 'skipped-no-chapter', head: '' }
   await session.evaluate(
     `(() => { const node = document.querySelector('[data-novel-chapter-status="accepted"]')
         ?? document.querySelector('[data-novel-chapter]'); node.click() })()`)
-  const painted = await session.until(`document.querySelector('[data-novel-canvas="read"]') !== null`)
-  if (!painted) return { view: 'read', label: '正文阅读', state: 'canvas-missing', head: '' }
+  // 正文阅读 was a canvas of its own and is the editor's reading state now, so a
+  // chapter click has to land on 写作. The reading state itself is checked by
+  // its own assertions rather than by a screen that no longer exists.
+  const painted = await session.until(`document.querySelector('[data-novel-canvas="editor"]') !== null`)
+  if (!painted) return { view: 'chapter', label: '章节 → 写作', state: 'editor-missing', head: '' }
   await sleep(settleMs)
-  const screen = await record(session, 'read', '正文阅读')
+  const screen = await record(session, 'chapter', '章节 → 写作')
   screen.chapter = chapter
+  screen.modes = await session.evaluate(`document.querySelectorAll('[data-novel-editor-mode]').length`)
   return screen
 }
 

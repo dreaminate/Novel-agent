@@ -16,7 +16,6 @@ import {
   type NovelRevisionRow,
   type NovelStoryMap,
   type NovelDiagnostics,
-  type NovelManuscriptText,
   type NovelClueBoard,
   type NovelDebtBoard,
   type NovelChapterContractView,
@@ -90,7 +89,6 @@ const VIEW_HEAD: Readonly<Record<string, { readonly title: string; readonly sub:
   simulation: { title: '推演', sub: '读者反应与人物压力实验 · 只作创作参考' },
   review: { title: '提案审阅', sub: '作者是决策者，AI 是稿手：逐条决定，再写入故事事实' },
   history: { title: '版本历史', sub: '每个已接受版本一句人话摘要 · 回滚会停用其后的变更' },
-  read: { title: '正文阅读', sub: '衬线 17px · 行高 1.85 · 行宽不超过 40 字' },
   editor: { title: '写作', sub: '这一章的草稿文件 · 自动保存到你自己的 workdir，接受后才进 Canon' },
   advanced: { title: '进阶面', sub: '内核 / Agent / 插件 / 任务 / 诊断 · 默认关闭，关闭后整组消失' },
 }
@@ -123,9 +121,7 @@ export function NovelCanvas(props: NovelCanvasProps): ReactNode {
   const [acceptedRevision, setAcceptedRevision] = useState<number | undefined>(undefined)
   const [timeline, setTimeline] = useState<NovelTimeline | undefined>(undefined)
   const [memory, setMemory] = useState<NovelMemoryBoard | undefined>(undefined)
-  const [manuscript, setManuscript] = useState<NovelManuscriptText | undefined>(undefined)
   /** True once the reading canvas has an answer for the chapter it opened. */
-  const [manuscriptLoaded, setManuscriptLoaded] = useState(false)
   const [deck, setDeck] = useState<NovelReviewDeck | undefined>(undefined)
   const [impact, setImpact] = useState<NovelReviewImpact | undefined>(undefined)
   const [history, setHistory] = useState<readonly NovelRevisionRow[]>([])
@@ -362,29 +358,6 @@ export function NovelCanvas(props: NovelCanvasProps): ReactNode {
     }
   }, [state.view, workId, loadDiagnostics, props.loadAdvancedPanels, state.revision])
 
-  useEffect(() => {
-    if (state.view !== 'read' || workId === undefined || state.chapterId === undefined) return
-    let live = true
-    setError(undefined)
-    setManuscript(undefined)
-    setManuscriptLoaded(false)
-    props.loadManuscriptText(workId, state.chapterId).then(
-      value => {
-        if (!live) return
-        setManuscript(value)
-        setManuscriptLoaded(true)
-      },
-      (failure: unknown) => {
-        if (!live) return
-        setError(message(failure))
-        setManuscriptLoaded(true)
-      },
-    )
-    return () => {
-      live = false
-    }
-  }, [state.view, state.chapterId, workId, props.loadManuscriptText, state.revision])
-
   /**
    * The writing surface names its draft file after the chapter, so it needs the
    * chapter's number and title rather than the id the tree carries. The outline
@@ -504,7 +477,7 @@ export function NovelCanvas(props: NovelCanvasProps): ReactNode {
             board={clues}
             // The anchor jumps into 正文阅读; which chapter it lands on arrives with
             // the chapter outline, so the jump is wired when that read lands.
-            onOpenAnchor={() => { workbenchActions.setView('read') }}
+            onOpenAnchor={() => { workbenchActions.setView('editor') }}
           />
         )}
       </Shell>
@@ -520,7 +493,7 @@ export function NovelCanvas(props: NovelCanvasProps): ReactNode {
         {debts !== undefined && (
           <DebtBoardView
             board={debts}
-            onOpenAnchor={() => { workbenchActions.setView('read') }}
+            onOpenAnchor={() => { workbenchActions.setView('editor') }}
           />
         )}
       </Shell>
@@ -556,7 +529,7 @@ export function NovelCanvas(props: NovelCanvasProps): ReactNode {
           <ChapterContractView
             contract={contract}
             onReview={() => { workbenchActions.setView('review') }}
-            onRead={() => { workbenchActions.setView('read') }}
+            onRead={() => { workbenchActions.setView('editor') }}
           />
         )}
       </Shell>
@@ -572,7 +545,7 @@ export function NovelCanvas(props: NovelCanvasProps): ReactNode {
         {timeline !== undefined && (
           <TimelineView
             timeline={timeline}
-            onOpenChapter={() => { workbenchActions.setView('read') }}
+            onOpenChapter={() => { workbenchActions.setView('editor') }}
           />
         )}
       </Shell>
@@ -692,41 +665,17 @@ export function NovelCanvas(props: NovelCanvasProps): ReactNode {
           saveChapterDraft={props.saveChapterDraft}
           readingSize={state.settings.readingSize}
           readingMeasure={state.settings.readingMeasure}
+          readingIndent={state.settings.readingIndent}
+          readingLeading={state.settings.readingLeading}
         />
       </Shell>
     )
   }
 
-  if (state.view === 'read') {
-    return (
-      <Shell view="read" tools={null}>
-        <style>{CANVAS_CSS}</style>
-        {error !== undefined && <p className="nw-canvas-error" role="alert">{error}</p>}
-        {error === undefined && manuscript === undefined && !manuscriptLoaded && (
-          <p className="nw-canvas-error">
-            {state.chapterId === undefined ? '先在左栏选择一章。' : '正在读取正文…'}
-          </p>
-        )}
-        {error === undefined && manuscript === undefined && manuscriptLoaded && (
-          <p className="nw-note">这一章还没有被接受的正文。提案被接受后，正文会出现在这里。</p>
-        )}
-        {manuscript !== undefined && (
-          <article
-            className="reading"
-            style={{
-              fontSize: `${String(state.settings.readingSize)}px`,
-              maxWidth: `${String(state.settings.readingMeasure)}em`,
-            }}
-          >
-            <h2>{manuscript.title}</h2>
-            {manuscript.text.split(/\n{2,}/).map((paragraph, index) => (
-              <p key={`${String(index)}-${paragraph.slice(0, 8)}`}>{paragraph.trim()}</p>
-            ))}
-          </article>
-        )}
-      </Shell>
-    )
-  }
+  // 正文阅读 used to be a canvas of its own. It is the editor's reading state
+  // now — one document in two states instead of two screens for one manuscript —
+  // so the entry is gone rather than hidden, and everything that used to open it
+  // opens 写作 instead.
 
   if (state.view === 'advanced') {
     return (

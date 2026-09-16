@@ -109,7 +109,7 @@ export function NovelSide(props: NovelSideProps): ReactNode {
                   {
                     type: 'button',
                     className: 'btn sm',
-                    onClick: () => { workbenchActions.setView('read') },
+                    onClick: () => { workbenchActions.setView('editor') },
                   },
                   '读正文',
                 ),

@@ -32,7 +32,8 @@ describe('novel-mode settings sheet', () => {
     // A control whose effect it cannot deliver is worse than no control: the
     // transcript is rendered by the shipped conversation surface, not here.
     expect(sheet?.querySelector('[data-novel-settings-activity]')).toBeNull()
-    expect(Object.keys(getWorkbenchState().settings)).toEqual(['readingSize', 'readingMeasure'])
+    expect(Object.keys(getWorkbenchState().settings))
+      .toEqual(['readingSize', 'readingMeasure', 'readingIndent', 'readingLeading'])
 
     await act(async () => {
       sheet?.querySelector<HTMLButtonElement>('[data-novel-settings-size="18"]')?.click()
@@ -40,9 +41,18 @@ describe('novel-mode settings sheet', () => {
     await act(async () => {
       sheet?.querySelector<HTMLButtonElement>('[data-novel-settings-measure="34"]')?.click()
     })
+    await act(async () => {
+      sheet?.querySelector<HTMLButtonElement>('[data-novel-settings-indent="0"]')?.click()
+    })
+    await act(async () => {
+      sheet?.querySelector<HTMLButtonElement>('[data-novel-settings-leading="2.1"]')?.click()
+    })
 
     expect(getWorkbenchState().settings.readingSize).toBe(18)
     expect(getWorkbenchState().settings.readingMeasure).toBe(34)
+    // Honoured by the editor's reading state, which is why they may be offered.
+    expect(getWorkbenchState().settings.readingIndent).toBe(0)
+    expect(getWorkbenchState().settings.readingLeading).toBe(2.1)
 
     await act(async () => {
       sheet?.querySelector<HTMLButtonElement>('[data-novel-settings-close]')?.click()

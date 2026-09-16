@@ -28,6 +28,14 @@ export interface WorkbenchSettings {
   readonly readingSize: number
   /** Reading line length in em, i.e. roughly characters per line (34 / 40). */
   readonly readingMeasure: number
+  /**
+   * First-line indent in em (0 = flush, 2 = the Chinese 段首缩进 two characters).
+   * A manuscript convention, so it belongs to the author's reading choices
+   * rather than to any one surface.
+   */
+  readonly readingIndent: number
+  /** Reading line height as a multiple of the body size (1.6 / 1.85 / 2.1). */
+  readonly readingLeading: number
 }
 
 /** Live width of the seat the frame renders into. */
@@ -50,7 +58,6 @@ export type WorkbenchViewId =
   | 'contract'
   | 'simulation'
   | 'history'
-  | 'read'
   | 'advanced'
 
 /** One entry of the left column's view segment. */
@@ -83,7 +90,6 @@ export const WORKBENCH_VIEWS: readonly WorkbenchViewEntry[] = [
   { id: 'simulation', label: '推演', icon: 'M8 2a6 6 0 106 6H8zM9 2v5h5', ready: true },
   { id: 'history', label: '版本历史', icon: 'M8 3v5l3 2M8 3a5 5 0 105 5', ready: true },
 ]
-
 /** The whole frame-visible UI state. */
 export interface WorkbenchState {
   readonly panels: WorkbenchPanels
@@ -147,14 +153,15 @@ function narrowAt(width: number): boolean {
 
 const DEFAULT_STATE: WorkbenchState = {
   panels: { sidebar: SIDEBAR_DEFAULT, details: DETAILS_DEFAULT },
-  // The prototype opens on the workbench, not on the conversation: the story map
-  // is the first screen and 线程 is one view the rail switches to.
-  view: 'map',
+  // The prototype opens on the workbench, not on the conversation. The landing
+  // is the editor now: an author opens the app to write, and the story map is
+  // one rail entry away.
+  view: 'editor',
   chapterId: undefined,
   advanced: false,
   advancedGroup: 'core',
   theme: 'auto',
-  settings: { readingSize: 17, readingMeasure: 40 },
+  settings: { readingSize: 17, readingMeasure: 40, readingIndent: 2, readingLeading: 1.85 },
   settingsOpen: false,
   personFileId: undefined,
   lastSubmission: undefined,
@@ -279,6 +286,20 @@ export const workbenchActions = {
     const next = Math.min(40, Math.max(34, Math.round(readingMeasure)))
     if (state.settings.readingMeasure === next) return
     publish({ ...state, settings: { ...state.settings, readingMeasure: next } })
+  },
+
+  /** First-line indent in em: flush or the Chinese two-character indent. */
+  setReadingIndent(readingIndent: number): void {
+    const next = readingIndent >= 1 ? 2 : 0
+    if (state.settings.readingIndent === next) return
+    publish({ ...state, settings: { ...state.settings, readingIndent: next } })
+  },
+
+  /** Reading line height, clamped to the three the sheet offers. */
+  setReadingLeading(readingLeading: number): void {
+    const next = Math.min(2.1, Math.max(1.6, readingLeading))
+    if (state.settings.readingLeading === next) return
+    publish({ ...state, settings: { ...state.settings, readingLeading: next } })
   },
 
   /** Open one person's 人物档案 drawer. */

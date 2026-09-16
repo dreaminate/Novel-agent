@@ -47,6 +47,13 @@ const EDITOR_CSS = `
 }
 .novel-editor-surface .ProseMirror p { margin: 0 0 .86em; }
 .novel-editor-surface .ProseMirror p:empty::after { content: '​'; }
+.novel-editor-reading {
+  font-family: var(--font-serif);
+  color: hsl(var(--text-000));
+}
+.novel-editor-reading p { margin: 0 0 .86em; }
+.novel-editor-toggle { display: flex; gap: 6px; }
+.novel-editor-toggle .btn.on { border-color: hsl(var(--accent-brand)); color: hsl(var(--accent-text)); }
 `
 
 /** Everything the writing surface needs. */
@@ -64,6 +71,9 @@ export interface NovelEditorProps {
   /** Reading measure/body size from the settings sheet. */
   readonly readingSize: number
   readonly readingMeasure: number
+  /** First-line indent in em and line height, both from the settings sheet. */
+  readonly readingIndent: number
+  readonly readingLeading: number
 }
 
 /** ProseMirror blocks back to the file's shape: blank line between paragraphs. */
@@ -78,6 +88,8 @@ export function NovelEditor(props: NovelEditorProps): ReactNode {
   const [problem, setProblem] = useState<string | undefined>(undefined)
   const [conflict, setConflict] = useState<string | undefined>(undefined)
   const [chars, setChars] = useState(0)
+  /** Writing or reading: one document, two states — not two screens. */
+  const [mode, setMode] = useState<'write' | 'read'>('write')
 
   // Refs, not state: the debounce timer and the newest version must be readable
   // from the timer callback without re-registering it on every keystroke.
@@ -184,6 +196,24 @@ export function NovelEditor(props: NovelEditorProps): ReactNode {
       <style>{EDITOR_CSS}</style>
       <div className="novel-editor-bar">
         <span>{`第${String(chapter.number)}章《${chapter.title}》`}</span>
+        <span className="novel-editor-toggle">
+          <button
+            type="button"
+            className={mode === 'write' ? 'btn sm on' : 'btn sm'}
+            data-novel-editor-mode="write"
+            onClick={() => { setMode('write') }}
+          >
+            写作
+          </button>
+          <button
+            type="button"
+            className={mode === 'read' ? 'btn sm on' : 'btn sm'}
+            data-novel-editor-mode="read"
+            onClick={() => { setMode('read') }}
+          >
+            阅读
+          </button>
+        </span>
         <span className="novel-editor-state" data-novel-editor-status={status}>
           {status === 'loading' ? '正在读取草稿…'
             : status === 'saving' ? '正在保存…'
@@ -195,12 +225,32 @@ export function NovelEditor(props: NovelEditorProps): ReactNode {
         {conflict !== undefined && <span className="novel-editor-state" role="alert">{conflict}</span>}
         <span className="novel-editor-count" data-novel-editor-count={chars}>{`${String(chars)} 字`}</span>
       </div>
-      <div
-        className="novel-editor-surface"
-        style={{ fontSize: `${String(props.readingSize)}px`, maxWidth: `${String(props.readingMeasure)}em` }}
-      >
-        <EditorContent editor={editor} />
-      </div>
+      {mode === 'read' ? (
+        // Reading is the same text, set as a manuscript: the author should not
+        // have to read their own chapter in the editor's voice.
+        <article
+          className="novel-editor-reading"
+          data-novel-editor-reading="true"
+          style={{
+            padding: '8px 2px 40px',
+            fontSize: `${String(props.readingSize)}px`,
+            lineHeight: props.readingLeading,
+            maxWidth: `${String(props.readingMeasure)}em`,
+            ...(props.readingIndent === 0 ? {} : { textIndent: `${String(props.readingIndent)}em` }),
+          }}
+        >
+          {readParagraphs(editor).map((paragraph, index) => (
+            <p key={`${String(index)}-${paragraph.slice(0, 8)}`}>{paragraph}</p>
+          ))}
+        </article>
+      ) : (
+        <div
+          className="novel-editor-surface"
+          style={{ fontSize: `${String(props.readingSize)}px`, maxWidth: `${String(props.readingMeasure)}em` }}
+        >
+          <EditorContent editor={editor} />
+        </div>
+      )}
     </div>
   )
 }
@@ -211,4 +261,14 @@ function escapeHtml(text: string): string {
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
+}
+
+/** The draft's paragraphs, for the reading state. */
+function readParagraphs(editor: { getText(options: { blockSeparator: string }): string } | null): readonly string[] {
+  if (editor === null) return []
+  return editor
+    .getText({ blockSeparator: '\n\n' })
+    .split(/\n+/)
+    .map(paragraph => paragraph.trim())
+    .filter(paragraph => paragraph !== '')
 }

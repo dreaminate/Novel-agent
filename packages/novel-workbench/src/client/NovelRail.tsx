@@ -307,7 +307,7 @@ function renderChapter(chapter: NovelWorkChapter, chapterId: string | undefined)
       title: `第 ${String(chapter.number)} 章 · ${chapter.title}`,
       onClick: () => {
         workbenchActions.openChapter(chapter.id)
-        workbenchActions.setView('read')
+        workbenchActions.setView('editor')
       },
     },
     createElement('span', { className: 'ord' }, String(chapter.number)),

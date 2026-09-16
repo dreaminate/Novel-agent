@@ -476,68 +476,10 @@ describe('novel-mode work tree', () => {
   })
 })
 
-describe('novel-mode reading canvas', () => {
-  it('names the empty state instead of loading a chapter that has no accepted text', async () => {
-    const { NovelCanvas } = await import('../src/client/NovelCanvas.js')
-    const { workbenchActions } = await import('../src/client/store.js')
-    workbenchActions.setCurrentSession('session-1' as never)
-    workbenchActions.openChapter('chapter-1')
-    workbenchActions.setView('read')
-
-    const container = document.createElement('div')
-    document.body.append(container)
-    const root = createRoot(container)
-    const work = { workspaceId: 'ws-1', path: '/books/x', title: '天机阁主', sessionIds: ['session-1'], createdAt: '', updatedAt: '' }
-    await act(async () => {
-      root.render(createElement(NovelCanvas as never, {
-        sessionId: 'session-1',
-        useWorkspaces: (selector: (value: unknown) => unknown) => selector({ items: [work] }),
-        useSessions: (selector: (value: unknown) => unknown) => selector({
-          current: 'session-1', ids: ['session-1'], byId: {}, jobsBySession: {}, subagentsByParent: {},
-        }),
-        loadManuscriptText: async () => undefined,
-      } as never))
-    })
-    await act(async () => {})
-
-    expect(container.textContent).toContain('这一章还没有被接受的正文')
-    await act(async () => { root.unmount() })
-  })
-
-  it('lays accepted text out with the size and measure the author chose', async () => {
-    const { NovelCanvas } = await import('../src/client/NovelCanvas.js')
-    const { workbenchActions } = await import('../src/client/store.js')
-    workbenchActions.setCurrentSession('session-2' as never)
-    workbenchActions.openChapter('chapter-2')
-    workbenchActions.setView('read')
-    workbenchActions.setReadingSize(18)
-    workbenchActions.setReadingMeasure(34)
-
-    const container = document.createElement('div')
-    document.body.append(container)
-    const root = createRoot(container)
-    const work = { workspaceId: 'ws-1', path: '/books/x', title: '天机阁主', sessionIds: ['session-2'], createdAt: '', updatedAt: '' }
-    await act(async () => {
-      root.render(createElement(NovelCanvas as never, {
-        sessionId: 'session-2',
-        useWorkspaces: (selector: (value: unknown) => unknown) => selector({ items: [work] }),
-        useSessions: (selector: (value: unknown) => unknown) => selector({
-          current: 'session-2', ids: ['session-2'], byId: {}, jobsBySession: {}, subagentsByParent: {},
-        }),
-        loadManuscriptText: async () => ({ unitId: 'chapter-2', title: '柳家登门退婚', text: '第一段。\n\n第二段。' }),
-      } as never))
-    })
-    await act(async () => {})
-
-    const article = container.querySelector('[data-novel-canvas="read"] .reading') as HTMLElement | null
-    expect(article).not.toBeNull()
-    expect(article?.style.fontSize).toBe('18px')
-    expect(article?.style.maxWidth).toBe('34em')
-    expect(article?.textContent).toContain('柳家登门退婚')
-    expect(article?.querySelectorAll('p')).toHaveLength(2)
-    await act(async () => { root.unmount() })
-  })
-})
+// 正文阅读 used to be a canvas of its own and had its coverage here. It is the
+// editor's reading state now — one document in two states — so those assertions
+// moved to `novel-workbench-editor.spec.ts` with the surface. The old entry is
+// gone rather than hidden: no view id, no rail entry, no head copy.
 
 describe('novel-mode missing-plugin boundary', () => {
   it('explains a missing domain plugin and offers a retry instead of a raw error', async () => {

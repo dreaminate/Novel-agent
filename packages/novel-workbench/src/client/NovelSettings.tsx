@@ -183,6 +183,56 @@ export function NovelSettings(): ReactNode {
           '行宽越窄，眼睛回扫越省力；40 字是原型的默认值。',
         ),
       ),
+      createElement(
+        'div',
+        { className: 'setting' },
+        createElement('div', { className: 'setting-label' }, '段首缩进'),
+        createElement(
+          'div',
+          { className: 'seg', role: 'group' },
+          [0, 2].map(indent => createElement(
+            'button',
+            {
+              key: indent,
+              type: 'button',
+              'data-novel-settings-indent': String(indent),
+              'aria-pressed': settings.readingIndent === indent ? 'true' : 'false',
+              onClick: () => { workbenchActions.setReadingIndent(indent) },
+            },
+            indent === 0 ? '顶格' : '缩进 2 字',
+          )),
+        ),
+        createElement(
+          'div',
+          { className: 'setting-note' },
+          '中文稿子的惯例是段首缩进两个字；顶格更像屏幕阅读。',
+        ),
+      ),
+      createElement(
+        'div',
+        { className: 'setting' },
+        createElement('div', { className: 'setting-label' }, '行高'),
+        createElement(
+          'div',
+          { className: 'seg', role: 'group' },
+          [1.6, 1.85, 2.1].map(leading => createElement(
+            'button',
+            {
+              key: leading,
+              type: 'button',
+              'data-novel-settings-leading': String(leading),
+              'aria-pressed': settings.readingLeading === leading ? 'true' : 'false',
+              onClick: () => { workbenchActions.setReadingLeading(leading) },
+            },
+            leading.toFixed(2).replace(/0$/, ''),
+          )),
+        ),
+        createElement(
+          'div',
+          { className: 'setting-note' },
+          '行距越大，读长段越松快；1.85 是原型的默认值。',
+        ),
+      ),
     ),
   )
 }

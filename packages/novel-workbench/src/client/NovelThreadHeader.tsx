@@ -6,7 +6,7 @@
  */
 import { useEffect, useState, type ReactNode } from 'react'
 import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
-import { workbenchActions } from './store.js'
+import { useWorkbenchState, workbenchActions } from './store.js'
 import { resolveCurrentWork, type NovelWorkFace } from './novel-data.js'
 
 /** Everything the thread header receives: the framework shares and the data face. */
@@ -19,22 +19,37 @@ const HEADER_CSS = `
   gap: 10px;
   flex: 0 0 auto;
   padding: 8px 16px;
-  border-bottom: 1px solid hsl(var(--nw-border-100));
-  background: hsl(var(--nw-bg-100));
+  border-bottom: 1px solid hsl(var(--border-100));
+  background: hsl(var(--bg-100));
   font-size: 12px;
-  color: hsl(var(--nw-text-200));
+  color: hsl(var(--text-200));
 }
-[data-novel-thread-header] .nw-thread-work { color: hsl(var(--nw-text-000)); font-weight: 600; }
+[data-novel-thread-header] .nw-thread-work { color: hsl(var(--text-000)); font-weight: 600; }
 [data-novel-thread-header] .nw-thread-version { font-variant-numeric: tabular-nums; }
 [data-novel-thread-header] .nw-thread-pending {
   margin-left: auto;
   padding: 2px 8px;
-  border: 1px solid hsl(var(--nw-accent) / .5);
+  border: 1px solid hsl(var(--accent-brand) / .5);
   border-radius: 999px;
-  background: hsl(var(--nw-accent) / .12);
-  color: hsl(var(--nw-accent));
+  background: hsl(var(--accent-brand) / .12);
+  color: hsl(var(--accent-text));
   font: inherit;
   cursor: pointer;
+}
+[data-novel-thread-header] .nw-thread-failure {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 auto;
+  min-width: 0;
+  margin-left: auto;
+}
+[data-novel-thread-header] .nw-thread-failure-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: hsl(var(--warn));
 }
 `
 
@@ -42,6 +57,25 @@ const HEADER_CSS = `
 export function NovelThreadHeader(props: NovelThreadHeaderProps): ReactNode {
   const works = props.useWorkspaces(snapshot => snapshot.items)
   const work = resolveCurrentWork(works, props.sessionId)
+  const state = useWorkbenchState()
+  /**
+   * A failed turn is a state the author has to see: the Host records it on the
+   * session snapshot, and without this strip the thread just goes quiet
+   * (the prototype's AI 无输出 boundary).
+   */
+  const failure = props.useSession(snapshot => (
+    snapshot.lastAgentError ?? snapshot.promptError?.error.message ?? undefined
+  ))
+  const submission = state.lastSubmission
+  const lastText = submission !== undefined && submission.sessionId === props.sessionId
+    ? submission.text
+    : undefined
+  /** A turn that ended in error lives in the session log, mirrored by the plugin. */
+  const mirrored = state.turnFailure
+  const turnFailure = mirrored !== undefined && mirrored.sessionId === props.sessionId
+    ? mirrored.message
+    : undefined
+  const problem = failure ?? turnFailure
   const workId = work?.workspaceId
   const { loadReviews } = props
   const [pending, setPending] = useState<number | undefined>(undefined)
@@ -66,6 +100,8 @@ export function NovelThreadHeader(props: NovelThreadHeaderProps): ReactNode {
   }, [workId, loadReviews])
 
   if (work === undefined) return null
+  const sessionId = props.sessionId
+  if (sessionId === undefined) return null
 
   return (
     <div data-novel-thread-header="" data-novel-thread-work={work.workspaceId}>
@@ -81,6 +117,24 @@ export function NovelThreadHeader(props: NovelThreadHeaderProps): ReactNode {
         >
           {`待审提案 ${String(pending)}`}
         </button>
+      )}
+      {problem !== undefined && (
+        <div className="nw-thread-failure" data-novel-thread-failure="" role="alert">
+          <span className="chip warn">上次生成失败</span>
+          <span className="nw-thread-failure-text" title={problem}>{problem}</span>
+          {lastText !== undefined && (
+            <button
+              type="button"
+              className="btn sm"
+              data-novel-thread-retry="true"
+              onClick={() => {
+                void props.resend(sessionId, lastText).catch(() => {})
+              }}
+            >
+              重试上一句
+            </button>
+          )}
+        </div>
       )}
     </div>
   )

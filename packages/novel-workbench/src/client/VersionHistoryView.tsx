@@ -22,37 +22,37 @@ const HISTORY_CSS = `
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
-  border: 1px solid hsl(var(--nw-border-100));
+  border: 1px solid hsl(var(--border-100));
   border-radius: 10px;
-  background: hsl(var(--nw-bg-000));
+  background: hsl(var(--bg-000));
 }
 [data-novel-history] .nw-badge {
   flex: 0 0 auto;
   min-width: 42px;
   padding: 3px 8px;
   border-radius: 999px;
-  background: hsl(var(--nw-bg-300));
-  color: hsl(var(--nw-text-200));
+  background: hsl(var(--bg-300));
+  color: hsl(var(--text-200));
   font-variant-numeric: tabular-nums;
   text-align: center;
 }
-[data-novel-history] .nw-row[data-current="true"] .nw-badge { background: hsl(var(--nw-accent) / .16); color: hsl(var(--nw-accent)); }
+[data-novel-history] .nw-row[data-current="true"] .nw-badge { background: hsl(var(--accent-brand) / .16); color: hsl(var(--accent-text)); }
 [data-novel-history] .nw-row-text { flex: 1 1 auto; min-width: 0; }
 [data-novel-history] .nw-row-title { display: block; }
-[data-novel-history] .nw-row-summary { font-size: 12px; color: hsl(var(--nw-text-200)); }
+[data-novel-history] .nw-row-summary { font-size: 12px; color: hsl(var(--text-200)); }
 [data-novel-history] button {
   padding: 4px 10px;
-  border: 1px solid hsl(var(--nw-border-100));
+  border: 1px solid hsl(var(--border-100));
   border-radius: 6px;
-  background: hsl(var(--nw-bg-000));
-  color: hsl(var(--nw-text-100));
+  background: hsl(var(--bg-000));
+  color: hsl(var(--text-100));
   font: inherit;
   cursor: pointer;
 }
-[data-novel-history] button:hover:not(:disabled) { background: hsl(var(--nw-bg-200)); }
+[data-novel-history] button:hover:not(:disabled) { background: hsl(var(--bg-200)); }
 [data-novel-history] button:disabled { opacity: .5; cursor: default; }
-[data-novel-history] .nw-empty { margin: 0; color: hsl(var(--nw-text-200)); }
-[data-novel-history] .nw-notice { font-size: 13px; color: hsl(var(--nw-accent)); }
+[data-novel-history] .nw-empty { margin: 0; color: hsl(var(--text-200)); }
+[data-novel-history] .nw-notice { font-size: 13px; color: hsl(var(--accent-text)); }
 `
 
 /** The version history screen. */
@@ -80,6 +80,9 @@ export function VersionHistoryView(props: VersionHistoryViewProps): ReactNode {
             : confirming === row.revision
               ? (
                   <>
+                    <span className="nw-row-summary" data-novel-history-warning={row.revision}>
+                      {`回滚会把故事事实退回 R${String(row.revision)}：R${String(row.revision + 1)} 到 R${String(props.headRevision)} 之间接受的正文与设定变更全部停用（不会被删除，历史里仍然查得到）。`}
+                    </span>
                     <button
                       type="button"
                       disabled={props.busy}

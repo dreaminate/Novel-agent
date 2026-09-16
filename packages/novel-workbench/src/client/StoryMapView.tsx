@@ -16,6 +16,8 @@ import type { NovelStoryMap } from './novel-data.js'
 
 export interface StoryMapViewProps {
   readonly map: NovelStoryMap
+  /** Open one person's 人物档案 (the prototype's double-click on a node). */
+  readonly onOpenPerson?: (id: string) => void
 }
 
 /** Faction palette: four colours plus the unaffiliated grey, both schemes legible. */
@@ -38,14 +40,14 @@ const MAP_CSS = `
   gap: 10px;
 }
 [data-novel-story-map] .nw-map-title { margin: 0; font-size: 16px; font-weight: 600; }
-[data-novel-story-map] .nw-map-meta { font-size: 12px; color: hsl(var(--nw-text-200)); font-variant-numeric: tabular-nums; }
+[data-novel-story-map] .nw-map-meta { font-size: 12px; color: hsl(var(--text-200)); font-variant-numeric: tabular-nums; }
 [data-novel-story-map] .nw-map-stage {
   position: relative;
   flex: 1 1 auto;
   min-height: 320px;
-  border: 1px solid hsl(var(--nw-border-100));
+  border: 1px solid hsl(var(--border-100));
   border-radius: 10px;
-  background: hsl(var(--nw-bg-000));
+  background: hsl(var(--bg-000));
   overflow: hidden;
 }
 [data-novel-story-map] .nw-map-canvas { position: absolute; inset: 0; }
@@ -54,7 +56,7 @@ const MAP_CSS = `
   flex-wrap: wrap;
   gap: 4px 14px;
   font-size: 12px;
-  color: hsl(var(--nw-text-200));
+  color: hsl(var(--text-200));
 }
 [data-novel-story-map] .nw-map-legend span { display: inline-flex; align-items: center; gap: 6px; }
 [data-novel-story-map] .nw-map-swatch {
@@ -68,11 +70,11 @@ const MAP_CSS = `
   left: 12px;
   bottom: 12px;
   padding: 8px 12px;
-  border: 1px solid hsl(var(--nw-border-100));
+  border: 1px solid hsl(var(--border-100));
   border-radius: 8px;
-  background: hsl(var(--nw-bg-000) / .94);
+  background: hsl(var(--bg-000) / .94);
   font-size: 12px;
-  color: hsl(var(--nw-text-100));
+  color: hsl(var(--text-100));
   max-width: 60%;
 }
 [data-novel-story-map] .nw-map-empty {
@@ -81,14 +83,14 @@ const MAP_CSS = `
   justify-content: center;
   flex: 1 1 auto;
   min-height: 320px;
-  border: 1px dashed hsl(var(--nw-border-100));
+  border: 1px dashed hsl(var(--border-100));
   border-radius: 10px;
-  color: hsl(var(--nw-text-200));
+  color: hsl(var(--text-200));
 }
 `
 
 /** The story map canvas. */
-export function StoryMapView({ map }: StoryMapViewProps): ReactNode {
+export function StoryMapView({ map, onOpenPerson }: StoryMapViewProps): ReactNode {
   const host = useRef<HTMLDivElement | null>(null)
   const renderer = useRef<Sigma | null>(null)
   const [selected, setSelected] = useState<string | undefined>(undefined)
@@ -110,13 +112,14 @@ export function StoryMapView({ map }: StoryMapViewProps): ReactNode {
       defaultEdgeType: 'line',
     })
     instance.on('clickNode', ({ node }) => { setSelected(node) })
+    instance.on('doubleClickNode', ({ node }) => { onOpenPerson?.(node) })
     instance.on('clickStage', () => { setSelected(undefined) })
     renderer.current = instance
     return () => {
       renderer.current = null
       instance.kill()
     }
-  }, [map, colours])
+  }, [map, colours, onOpenPerson])
 
   useEffect(() => {
     const instance = renderer.current

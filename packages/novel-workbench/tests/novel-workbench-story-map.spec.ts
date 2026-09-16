@@ -8,20 +8,28 @@ import { buildStoryMap } from '../src/client/novel-data.js'
 
 /** Renderer stand-in: sigma needs WebGL, the mapping and wiring do not. */
 const sigmaMock = vi.hoisted(() => ({
-  instances: [] as { graph: { order: number; size: number }; killed: boolean }[],
+  instances: [] as {
+    graph: { order: number; size: number }
+    killed: boolean
+    handlers: Map<string, (payload: { node: string }) => void>
+  }[],
 }))
 
 vi.mock('sigma', () => ({
   default: class {
     readonly graph: { order: number; size: number }
     killed = false
+    readonly handlers = new Map<string, (payload: { node: string }) => void>()
 
     constructor(graph: { order: number; size: number }) {
       this.graph = graph
       sigmaMock.instances.push(this)
     }
 
-    on(): void {}
+    /** Record the events the view subscribes to so a test can fire them. */
+    on(name: string, handler: (payload: { node: string }) => void): void {
+      this.handlers.set(name, handler)
+    }
 
     setSetting(): void {}
 
@@ -183,6 +191,17 @@ describe('novel-mode story map', () => {
     expect(sigmaMock.instances[0]?.graph.order).toBe(2)
     expect(sigmaMock.instances[0]?.graph.size).toBe(1)
     expect(container.querySelectorAll('.nw-map-swatch')).toHaveLength(2)
+
+    // The prototype opens 人物档案 by double-clicking a node; the view hands that
+    // node to the frame store, which is what the drawer seat reads.
+    const store = await import('../src/client/store.js')
+    const instance = sigmaMock.instances[0]
+    expect(instance?.handlers.has('doubleClickNode')).toBe(true)
+    await act(async () => {
+      instance?.handlers.get('doubleClickNode')?.({ node: 'chen-mo' })
+    })
+    expect(store.getWorkbenchState().personFileId).toBe('chen-mo')
+    store.workbenchActions.closePersonFile()
 
     await act(async () => { root.unmount() })
     expect(sigmaMock.instances[0]?.killed).toBe(true)

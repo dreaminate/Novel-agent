@@ -54,6 +54,12 @@ describe('novel-workbench root occupant', () => {
     const slots = new RootSlots()
     ctx.provide('slots', slots as never)
     ctx.provide('theme', { getTheme: () => themeSnapshot } as never)
+    // The frame mirrors the Session Controller's selection, so the feed has to
+    // exist before the root occupant installs.
+    ctx.provide('sessions', {
+      open: () => {},
+      list: { getSnapshot: () => ({ current: undefined }), subscribe: () => () => {} },
+    } as never)
 
     const dispose = apply(ctx as never)
     const entry = slots.entries()[0]
@@ -64,7 +70,9 @@ describe('novel-workbench root occupant', () => {
       'conversation',
       'details',
       'novel.canvas',
+      'novel.composer',
       'novel.thread.header',
+      'novel.topbar',
       'shell.overlay',
       'sidebar',
     ])

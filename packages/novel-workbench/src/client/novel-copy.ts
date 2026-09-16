@@ -117,6 +117,11 @@ export function describeDelta(delta: CanonDelta): string {
   return detail.length === 0 ? `更新${label}` : `更新${label}：${detail}`
 }
 
+/** Author-facing name for one Canon fact family. */
+export function kindLabel(kind: string): string {
+  return KIND_LABELS[kind] ?? kind
+}
+
 /** Severity label for one review issue. */
 export function severityLabel(severity: AnchoredIssue['severity']): string {
   return SEVERITY_LABELS[severity] ?? severity

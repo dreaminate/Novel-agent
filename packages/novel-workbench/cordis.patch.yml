@@ -1,8 +1,10 @@
 # Novel-mode front end: this bundle owns the browser surface. It disables the
-# shipped frame (ui-layout) and the shipped navigation column (ui-sidebar), then
-# registers its own root occupant, which declares the sidebar / novel.canvas /
-# conversation / details / shell.overlay seats. The novel left column and canvas
-# fill the first two; the remaining official occupants keep working underneath.
+# shipped frame (ui-layout), the shipped navigation column (ui-sidebar) and the
+# shipped 详情/会话信息 column (ui-chat), then registers its own root occupant,
+# which declares the sidebar / novel.topbar / conversation / novel.composer /
+# novel.canvas / details / shell.overlay seats. The novel navigation column, the
+# novel context column and the novel canvas fill three of them; the conversation
+# seat keeps the shipped conversation surface.
 #
 # Keep this list minimal: every disabled row is a DSH surface novel-agent now
 # has to render itself.
@@ -10,6 +12,9 @@
   disabled: true
 
 - id: ui-sidebar
+  disabled: true
+
+- id: ui-chat
   disabled: true
 
 - insert:

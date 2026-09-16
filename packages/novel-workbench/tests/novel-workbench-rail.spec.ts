@@ -116,7 +116,7 @@ const outline = {
   ],
 }
 
-describe('novel-workbench novel navigation', () => {
+describe('novel-workbench novel navigation rail', () => {
   it('takes the sidebar seat and renders the three work segments plus the advanced entry', async () => {
     const { apply } = await import('../src/client/index.js') as {
       apply: (ctx: Context) => () => void
@@ -126,9 +126,16 @@ describe('novel-workbench novel navigation', () => {
     const loadOutline = vi.fn(async () => outline)
     ctx.provide('slots', ledger as never)
     ctx.provide('theme', { getTheme: () => themeSnapshot } as never)
-    ctx.provide('sessions', { open: vi.fn() } as never)
+    ctx.provide('sessions', { open: vi.fn(), list: { getSnapshot: () => ({ current: undefined }), subscribe: () => () => {} } } as never)
     ctx.provide('uiWorkspace', { startSession: vi.fn(), archiveSession: vi.fn() } as never)
+    // The novel surfaces adopt folders through the Workspace Controller, so the
+    // service has to exist before they take their seats.
+    ctx.provide('workspaces', { create: vi.fn() } as never)
     ctx.provide('remote', {} as never)
+    // The advanced panels read the Host's plugin inventory and the dynamic
+    // Cordis inventory, so the surfaces fiber waits for both namespaces.
+    ctx.provide('remote.pluginInventory', { list: vi.fn() } as never)
+    ctx.provide('remote.dynamicCordisRunner', { inventory: vi.fn() } as never)
     ctx.provide('remote.novelProject', {
       open: vi.fn(async () => ({ ok: true, value: { acceptedRevision: 5 } })),
       pendingProposals: vi.fn(async () => ({ ok: true, value: [] })),
@@ -161,26 +168,78 @@ describe('novel-workbench novel navigation', () => {
     await act(async () => {})
 
     expect(loadOutline).toHaveBeenCalledWith('ws-mist')
-    expect(container.querySelector('[data-novel-sidebar="nav"]')).not.toBeNull()
+    const rail = container.querySelector('[data-novel-rail="nav"]')
+    expect(rail).not.toBeNull()
     expect(
-      [...container.querySelectorAll('[data-novel-sidebar-segment]')]
-        .map(node => node.getAttribute('data-novel-sidebar-segment')),
+      [...rail!.querySelectorAll('[data-novel-rail-segment]')]
+        .map(node => node.getAttribute('data-novel-rail-segment')),
     ).toEqual(['works', 'threads', 'views'])
-    expect(container.querySelector('[data-novel-work="ws-mist"]')?.textContent)
-      .toContain('雾港夜航')
-    expect(container.querySelector('[data-novel-chapter="chapter-6"]')?.textContent)
+    // The prototype's 作品 group is the chapter tree itself; the work title now
+    // lives in the topbar, so the rail only has to carry its volume/chapter count.
+    expect(rail!.querySelector('[data-novel-rail-segment="works"] .grp-head')?.textContent)
+      .toContain('1 卷 · 2 章')
+    expect(rail!.querySelector('[data-novel-chapter="chapter-6"]')?.textContent)
       .toContain('冷库之下的通道')
     expect(
-      container.querySelector('[data-novel-chapter="chapter-6"] [data-novel-chapter-status]')
+      rail!.querySelector('[data-novel-chapter="chapter-6"]')
         ?.getAttribute('data-novel-chapter-status'),
     ).toBe('pending')
     expect(
-      [...container.querySelectorAll('[data-novel-thread]')]
+      [...rail!.querySelectorAll('[data-novel-thread]')]
         .map(node => node.getAttribute('data-novel-thread')),
     ).toEqual(['s-6', 's-plan'])
-    expect(container.querySelectorAll('[data-novel-view]')).toHaveLength(9)
+    expect(rail!.querySelectorAll('[data-novel-view]')).toHaveLength(9)
     expect(container.querySelector('[data-novel-advanced-toggle]')).not.toBeNull()
 
+    await act(async () => { root.unmount() })
+    dispose()
+  })
+
+  it('names a missing domain plugin instead of echoing the Host error', async () => {
+    const { apply } = await import('../src/client/index.js') as {
+      apply: (ctx: Context) => () => void
+    }
+    const ctx = new Context()
+    const ledger = new SlotLedger()
+    const loadOutline = vi.fn(async () => {
+      throw new Error("打开作品失败：novel project has no 'planning/narrative' projector registered; install the domain plugin that registers it")
+    })
+    ctx.provide('slots', ledger as never)
+    ctx.provide('theme', { getTheme: () => themeSnapshot } as never)
+    ctx.provide('sessions', { open: vi.fn(), list: { getSnapshot: () => ({ current: undefined }), subscribe: () => () => {} } } as never)
+    ctx.provide('uiWorkspace', { startSession: vi.fn(), archiveSession: vi.fn() } as never)
+    ctx.provide('workspaces', { create: vi.fn() } as never)
+    ctx.provide('remote', {} as never)
+    // The advanced panels read the Host's plugin inventory and the dynamic
+    // Cordis inventory, so the surfaces fiber waits for both namespaces.
+    ctx.provide('remote.pluginInventory', { list: vi.fn() } as never)
+    ctx.provide('remote.dynamicCordisRunner', { inventory: vi.fn() } as never)
+    ctx.provide('remote.novelProject', { open: vi.fn(async () => ({ ok: true, value: { acceptedRevision: 0 } })) } as never)
+
+    const dispose = apply(ctx as never)
+    await new Promise(resolve => { setTimeout(resolve, 0) })
+    const entry = ledger.entries('sidebar')[0]
+    const container = document.createElement('div')
+    document.body.append(container)
+    const Sidebar = entry?.component as (props: Record<string, unknown>) => unknown
+    const root = createRoot(container)
+    await act(async () => {
+      root.render(createElement(Sidebar, {
+        collapsed: false,
+        width: 248,
+        useWorkspaces: (selector: (value: unknown) => unknown) => selector({ items: works }),
+        useSessions: (selector: (value: unknown) => unknown) => selector(sessions),
+        loadOutline,
+        openThread: vi.fn(),
+        newThread: vi.fn(),
+      } as never))
+    })
+    await act(async () => {})
+
+    const gap = container.querySelector('[data-novel-rail-gap="planning/narrative"]')
+    expect(gap).not.toBeNull()
+    expect(gap?.textContent).toContain('缺插件：未安装小说规划插件')
+    expect(gap?.textContent).not.toContain('projector registered')
     await act(async () => { root.unmount() })
     dispose()
   })

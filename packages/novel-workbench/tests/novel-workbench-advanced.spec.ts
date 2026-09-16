@@ -57,6 +57,9 @@ function faceStubs() {
     loadHistory: vi.fn(),
     rollbackTo: vi.fn(),
     loadDiagnostics: vi.fn(async () => diagnostics),
+    // The inventory-backed panels read the Host's plugin list and the dynamic
+    // Cordis inventory; this fixture answers with an empty deployment.
+    loadAdvancedPanels: vi.fn(async () => ({ plugins: [], presets: [], cordis: [] })),
     openThread: vi.fn(),
     newThread: vi.fn(),
   }
@@ -107,6 +110,13 @@ describe('novel-mode advanced surface', () => {
       root.render(createElement(NovelThreadHeader as never, {
         sessionId: 's-6',
         useWorkspaces: (selector: (value: unknown) => unknown) => selector({ items: works }),
+        // The strip reads the session snapshot for a failed turn; this fixture
+        // has no failure to report.
+        useSession: (selector: (value: unknown) => unknown) => selector({
+          lastAgentError: null,
+          promptError: null,
+          running: false,
+        }),
         loadReviews,
         loadOutline: vi.fn(),
         loadStoryMap: vi.fn(),

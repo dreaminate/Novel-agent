@@ -148,6 +148,31 @@ describe('novel-mode proposal review', () => {
     })
     await act(async () => {})
 
+    // The prototype confirms before writing: 接受本章 opens a sheet that spells
+    // out what the decision will write, and nothing reaches the Host until the
+    // author confirms it there.
+    expect(submitReview).not.toHaveBeenCalled()
+    const sheet = container.querySelector('[data-novel-review-confirm]')
+    expect(sheet).not.toBeNull()
+    expect(sheet?.textContent).toContain('确认接受本章？')
+    expect(sheet?.textContent).toContain('设定变更 1 条')
+
+    await act(async () => {
+      const back = sheet?.querySelector('[data-novel-review-confirm-back]')
+      expect(back).not.toBeNull()
+      ;(back as HTMLElement).click()
+    })
+    expect(container.querySelector('[data-novel-review-confirm]')).toBeNull()
+    expect(submitReview).not.toHaveBeenCalled()
+
+    await act(async () => {
+      (container.querySelector('[data-novel-review-accept]') as HTMLElement).click()
+    })
+    await act(async () => {
+      (container.querySelector('[data-novel-review-confirm-yes]') as HTMLElement).click()
+    })
+    await act(async () => {})
+
     expect(submitReview).toHaveBeenCalledTimes(1)
     const decisions = submitReview.mock.calls[0]?.[3] as readonly NovelResultItemDecision[]
     expect(decisions.find(decision => decision.itemType === 'issue')?.outcome).toBe('reject')

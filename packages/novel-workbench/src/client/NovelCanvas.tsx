@@ -6,7 +6,7 @@
 import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { NovelResultItemDecision } from '@novel-agent/novel-project/types'
-import { WORKBENCH_VIEWS, useWorkbenchState, workbenchActions } from './store.js'
+import { useWorkbenchState, workbenchActions } from './store.js'
 import {
   resolveCurrentWork,
   type NovelReviewDeck,
@@ -14,9 +14,26 @@ import {
   type NovelRevisionRow,
   type NovelStoryMap,
   type NovelDiagnostics,
+  type NovelManuscriptText,
+  type NovelClueBoard,
+  type NovelDebtBoard,
+  type NovelChapterContractView,
+  type NovelAdvancedPanels,
+  type NovelCastBoard,
+  type NovelMemoryBoard,
+  type NovelTimeline,
   type NovelWorkFace,
 } from './novel-data.js'
 import { AdvancedView } from './AdvancedView.js'
+import { CastView } from './CastView.js'
+import { ChapterContractView } from './ChapterContractView.js'
+import { ClueBoardView } from './ClueBoardView.js'
+import { DebtBoardView } from './DebtBoardView.js'
+import { MemoryView } from './MemoryView.js'
+import { MissingPluginCard, missingDomainPlugin } from './MissingPluginCard.js'
+import { NovelWelcome } from './NovelWelcome.js'
+import { SimulationView } from './SimulationView.js'
+import { TimelineView } from './TimelineView.js'
 import { ProposalReviewView } from './ProposalReviewView.js'
 import { StoryMapView } from './StoryMapView.js'
 import { VersionHistoryView } from './VersionHistoryView.js'
@@ -25,42 +42,55 @@ import { VersionHistoryView } from './VersionHistoryView.js'
 export type NovelCanvasProps = PropsRuntime<'novel.canvas'> & NovelWorkFace
 
 const CANVAS_CSS = `
-[data-novel-canvas] {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  flex: 1 1 auto;
-  min-width: 0;
-  min-height: 0;
-  overflow: auto;
-  padding: 24px 28px;
-  box-sizing: border-box;
-  background: hsl(var(--nw-bg-100));
-  color: hsl(var(--nw-text-000));
-}
-[data-novel-canvas] h1 {
-  margin: 0;
-  font-size: 20px;
-  font-weight: 600;
-}
-[data-novel-canvas] p { margin: 0; color: hsl(var(--nw-text-100)); }
 [data-novel-canvas] .nw-note {
   padding: 12px 16px;
-  border: 1px solid hsl(var(--nw-border-100));
+  border: 1px solid hsl(var(--border-100));
   border-radius: 10px;
-  background: hsl(var(--nw-bg-000));
+  background: hsl(var(--bg-000));
   font-size: 13px;
-  color: hsl(var(--nw-text-200));
+  color: hsl(var(--text-200));
 }
 [data-novel-canvas] .nw-canvas-error {
   padding: 12px 16px;
-  border: 1px solid hsl(var(--nw-border-100));
+  border: 1px solid hsl(var(--border-100));
   border-radius: 10px;
-  background: hsl(var(--nw-bg-000));
+  background: hsl(var(--bg-000));
   font-size: 13px;
-  color: hsl(var(--nw-text-100));
+  color: hsl(var(--text-100));
 }
+[data-novel-canvas] .reading {
+  max-width: var(--read-measure);
+  margin: 0 auto;
+  font-family: var(--font-serif);
+  font-size: var(--read-size);
+  line-height: var(--read-lh);
+  color: hsl(var(--text-000));
+}
+[data-novel-canvas] .reading h2 {
+  margin: 0 0 var(--s5);
+  font-size: var(--fs-20);
+  font-weight: 600;
+}
+[data-novel-canvas] .reading p { margin: 0 0 .86em; }
 `
+
+/** Head copy per canvas, in the prototype's wording. */
+const VIEW_HEAD: Readonly<Record<string, { readonly title: string; readonly sub: string }>> = {
+  // The prototype's exact head copy (its `HEAD` table), so a screen reads the same
+  // in the product as it does in the design.
+  map: { title: '故事地图', sub: '人物、关系与进度一眼看清 · 点节点看摘要，双击开档案' },
+  clues: { title: '伏笔与线索板', sub: '未收束的伏笔 / 线索 / 谜团 · 点证据锚点回到正文' },
+  debts: { title: '未收束债务', sub: '按「多久没推进」排序 · 临期项加提示色' },
+  cast: { title: '人物与关系', sub: '人物、势力与双向关系（每条两个方向各自独立）' },
+  timeline: { title: '时间线', sub: '故事内时间与章节交叉引用' },
+  memory: { title: '写作记忆', sub: 'AI 记得什么 · 来源与新鲜度' },
+  contract: { title: '本章合同', sub: '这一章要写成什么样，先和 AI 对齐' },
+  simulation: { title: '推演', sub: '读者反应与人物压力实验 · 只作创作参考' },
+  review: { title: '提案审阅', sub: '作者是决策者，AI 是稿手：逐条决定，再写入故事事实' },
+  history: { title: '版本历史', sub: '每个已接受版本一句人话摘要 · 回滚会停用其后的变更' },
+  read: { title: '正文阅读', sub: '衬线 17px · 行高 1.85 · 行宽不超过 40 字' },
+  advanced: { title: '进阶面', sub: '内核 / Agent / 插件 / 任务 / 诊断 · 默认关闭，关闭后整组消失' },
+}
 
 /** The novel canvas occupant. */
 export function NovelCanvas(props: NovelCanvasProps): ReactNode {
@@ -82,10 +112,22 @@ export function NovelCanvas(props: NovelCanvasProps): ReactNode {
   const jobs = props.useSessions(snapshot => snapshot.jobsBySession)
   const subagents = props.useSessions(snapshot => snapshot.subagentsByParent)
   const [map, setMap] = useState<NovelStoryMap | undefined>(undefined)
+  const [clues, setClues] = useState<NovelClueBoard | undefined>(undefined)
+  const [cast, setCast] = useState<NovelCastBoard | undefined>(undefined)
+  const [debts, setDebts] = useState<NovelDebtBoard | undefined>(undefined)
+  const [contract, setContract] = useState<NovelChapterContractView | undefined>(undefined)
+  /** Accepted revision an experiment would freeze; read from Novel Project. */
+  const [acceptedRevision, setAcceptedRevision] = useState<number | undefined>(undefined)
+  const [timeline, setTimeline] = useState<NovelTimeline | undefined>(undefined)
+  const [memory, setMemory] = useState<NovelMemoryBoard | undefined>(undefined)
+  const [manuscript, setManuscript] = useState<NovelManuscriptText | undefined>(undefined)
+  /** True once the reading canvas has an answer for the chapter it opened. */
+  const [manuscriptLoaded, setManuscriptLoaded] = useState(false)
   const [deck, setDeck] = useState<NovelReviewDeck | undefined>(undefined)
   const [impact, setImpact] = useState<NovelReviewImpact | undefined>(undefined)
   const [history, setHistory] = useState<readonly NovelRevisionRow[]>([])
   const [diagnostics, setDiagnostics] = useState<NovelDiagnostics | undefined>(undefined)
+  const [panels, setPanels] = useState<NovelAdvancedPanels | undefined>(undefined)
   const [busy, setBusy] = useState(false)
   const [notice, setNotice] = useState<string | undefined>(undefined)
   const [error, setError] = useState<string | undefined>(undefined)
@@ -108,6 +150,149 @@ export function NovelCanvas(props: NovelCanvasProps): ReactNode {
       live = false
     }
   }, [state.view, workId, loadStoryMap, state.revision])
+
+  useEffect(() => {
+    if (state.view !== 'clues' || workId === undefined) return
+    let live = true
+    setError(undefined)
+    setClues(undefined)
+    props.loadClues(workId).then(
+      value => {
+        if (live) setClues(value)
+      },
+      (failure: unknown) => {
+        if (!live) return
+        setError(message(failure))
+      },
+    )
+    return () => {
+      live = false
+    }
+  }, [state.view, workId, props.loadClues, state.revision])
+
+  useEffect(() => {
+    if (state.view !== 'cast' || workId === undefined) return
+    let live = true
+    setError(undefined)
+    setCast(undefined)
+    props.loadCast(workId).then(
+      value => {
+        if (live) setCast(value)
+      },
+      (failure: unknown) => {
+        if (live) setError(message(failure))
+      },
+    )
+    return () => {
+      live = false
+    }
+  }, [state.view, workId, props.loadCast, state.revision])
+
+  useEffect(() => {
+    if (state.view !== 'debts' || workId === undefined) return
+    let live = true
+    setError(undefined)
+    setDebts(undefined)
+    props.loadDebts(workId).then(
+      value => {
+        if (live) setDebts(value)
+      },
+      (failure: unknown) => {
+        if (!live) return
+        setError(message(failure))
+      },
+    )
+    return () => {
+      live = false
+    }
+  }, [state.view, workId, props.loadDebts, state.revision])
+
+  useEffect(() => {
+    if (state.view !== 'contract' || workId === undefined) return
+    let live = true
+    setError(undefined)
+    setContract(undefined)
+    // The sheet follows the chapter the author opened, and falls back to the one
+    // still waiting on a decision — that is the contract the AI is writing against.
+    props.loadOutline(workId).then(
+      outline => {
+        if (!live) return
+        const chapters = outline.groups.flatMap(group => group.chapters)
+        const chapterId = state.chapterId
+          ?? chapters.find(chapter => chapter.status === 'pending')?.id
+          ?? chapters.at(-1)?.id
+        if (chapterId === undefined) return
+        props.loadContract(workId, chapterId).then(
+          value => {
+            if (live) setContract(value)
+          },
+          (failure: unknown) => {
+            if (live) setError(message(failure))
+          },
+        )
+      },
+      (failure: unknown) => {
+        if (live) setError(message(failure))
+      },
+    )
+    return () => {
+      live = false
+    }
+  }, [state.view, state.chapterId, workId, props.loadOutline, props.loadContract, state.revision])
+
+  useEffect(() => {
+    if (state.view !== 'timeline' || workId === undefined) return
+    let live = true
+    setError(undefined)
+    setTimeline(undefined)
+    props.loadTimeline(workId).then(
+      value => {
+        if (live) setTimeline(value)
+      },
+      (failure: unknown) => {
+        if (live) setError(message(failure))
+      },
+    )
+    return () => {
+      live = false
+    }
+  }, [state.view, workId, props.loadTimeline, state.revision])
+
+  useEffect(() => {
+    if (state.view !== 'memory' || workId === undefined) return
+    let live = true
+    setError(undefined)
+    setMemory(undefined)
+    props.loadMemory(workId).then(
+      value => {
+        if (live) setMemory(value)
+      },
+      (failure: unknown) => {
+        if (live) setError(message(failure))
+      },
+    )
+    return () => {
+      live = false
+    }
+  }, [state.view, workId, props.loadMemory, state.revision])
+
+  useEffect(() => {
+    if (state.view !== 'simulation' || workId === undefined) return
+    let live = true
+    setError(undefined)
+    setAcceptedRevision(undefined)
+    props.loadOutline(workId).then(
+      outline => {
+        if (live) setAcceptedRevision(outline.revision)
+      },
+      (failure: unknown) => {
+        if (live) setError(message(failure))
+      },
+    )
+    return () => {
+      live = false
+    }
+  }, [state.view, workId, props.loadOutline, state.revision])
 
   useEffect(() => {
     if (state.view !== 'review' || workId === undefined) return
@@ -151,6 +336,14 @@ export function NovelCanvas(props: NovelCanvasProps): ReactNode {
     if (state.view !== 'advanced' || workId === undefined) return
     let live = true
     setError(undefined)
+    props.loadAdvancedPanels().then(
+      value => {
+        if (live) setPanels(value)
+      },
+      () => {
+        if (live) setPanels(undefined)
+      },
+    )
     loadDiagnostics(workId).then(
       value => {
         if (live) setDiagnostics(value)
@@ -162,7 +355,30 @@ export function NovelCanvas(props: NovelCanvasProps): ReactNode {
     return () => {
       live = false
     }
-  }, [state.view, workId, loadDiagnostics, state.revision])
+  }, [state.view, workId, loadDiagnostics, props.loadAdvancedPanels, state.revision])
+
+  useEffect(() => {
+    if (state.view !== 'read' || workId === undefined || state.chapterId === undefined) return
+    let live = true
+    setError(undefined)
+    setManuscript(undefined)
+    setManuscriptLoaded(false)
+    props.loadManuscriptText(workId, state.chapterId).then(
+      value => {
+        if (!live) return
+        setManuscript(value)
+        setManuscriptLoaded(true)
+      },
+      (failure: unknown) => {
+        if (!live) return
+        setError(message(failure))
+        setManuscriptLoaded(true)
+      },
+    )
+    return () => {
+      live = false
+    }
+  }, [state.view, state.chapterId, workId, props.loadManuscriptText, state.revision])
 
   const proposal = deck?.proposals.find(
     candidate => candidate.unitId !== undefined && candidate.unitId === state.chapterId,
@@ -176,6 +392,12 @@ export function NovelCanvas(props: NovelCanvasProps): ReactNode {
     )
   }, [sessionId, workId, proposal, previewReview])
 
+  // A stable identity: the story map re-creates its sigma renderer when this
+  // callback changes, so an inline arrow would rebuild the graph every render.
+  const openPerson = useCallback((id: string): void => {
+    workbenchActions.openPersonFile(id)
+  }, [])
+
   const run = async (action: () => Promise<string>): Promise<void> => {
     setBusy(true)
     setNotice(undefined)
@@ -188,20 +410,178 @@ export function NovelCanvas(props: NovelCanvasProps): ReactNode {
     }
   }
 
+  // No work yet: the canvas owns the first step, so an author never has to hunt
+  // for the shipped composer's picker to get started.
+  if (workId === undefined) {
+    return (
+      <Shell view={state.view === 'thread' ? 'map' : state.view} tools={null}>
+        <style>{CANVAS_CSS}</style>
+        <NovelWelcome
+          adoptWork={path => props.adoptWork(path)}
+          pickWorkDirectory={() => props.pickWorkDirectory()}
+          notice={error}
+          onAdopted={() => { workbenchActions.refresh() }}
+        />
+      </Shell>
+    )
+  }
+
+  // A missing domain plugin is a state, not a failure: the card names what the
+  // Host is missing and lets the author retry once it is installed.
+  const gap = error === undefined ? undefined : missingDomainPlugin(error)
+  if (gap !== undefined) {
+    return (
+      <Shell view={state.view === 'thread' ? 'map' : state.view} tools={null}>
+        <style>{CANVAS_CSS}</style>
+        <MissingPluginCard
+          gap={gap}
+          onRetry={() => { workbenchActions.refresh() }}
+          onBackToMap={() => { workbenchActions.setView('map') }}
+        />
+      </Shell>
+    )
+  }
+
   if (state.view === 'map') {
     return (
-      <section data-novel-canvas="map" aria-label="故事地图">
+      <Shell view="map" tools={null}>
         <style>{CANVAS_CSS}</style>
         {error !== undefined && <p className="nw-canvas-error" role="alert">{error}</p>}
         {error === undefined && map === undefined && <p className="nw-canvas-error">正在读取人物关系…</p>}
-        {map !== undefined && <StoryMapView map={map} />}
-      </section>
+        {map !== undefined && (
+          <StoryMapView
+            map={map}
+            onOpenPerson={openPerson}
+          />
+        )}
+      </Shell>
+    )
+  }
+
+  if (state.view === 'clues') {
+    return (
+      <Shell view="clues" tools={null}>
+        <style>{CANVAS_CSS}</style>
+        {error !== undefined && <p className="nw-canvas-error" role="alert">{error}</p>}
+        {error === undefined && clues === undefined && <p className="nw-canvas-error">正在读取伏笔与线索…</p>}
+        {clues !== undefined && (
+          <ClueBoardView
+            board={clues}
+            // The anchor jumps into 正文阅读; which chapter it lands on arrives with
+            // the chapter outline, so the jump is wired when that read lands.
+            onOpenAnchor={() => { workbenchActions.setView('read') }}
+          />
+        )}
+      </Shell>
+    )
+  }
+
+  if (state.view === 'debts') {
+    return (
+      <Shell view="debts" tools={null}>
+        <style>{CANVAS_CSS}</style>
+        {error !== undefined && <p className="nw-canvas-error" role="alert">{error}</p>}
+        {error === undefined && debts === undefined && <p className="nw-canvas-error">正在读取未收束债务…</p>}
+        {debts !== undefined && (
+          <DebtBoardView
+            board={debts}
+            onOpenAnchor={() => { workbenchActions.setView('read') }}
+          />
+        )}
+      </Shell>
+    )
+  }
+
+  if (state.view === 'cast') {
+    return (
+      <Shell view="cast" tools={null}>
+        <style>{CANVAS_CSS}</style>
+        {error !== undefined && <p className="nw-canvas-error" role="alert">{error}</p>}
+        {error === undefined && cast === undefined && <p className="nw-canvas-error">正在读取人物与关系…</p>}
+        {cast !== undefined && (
+          <CastView
+            board={cast}
+            onOpenPerson={openPerson}
+            onContinueFrom={() => { workbenchActions.setView('thread') }}
+          />
+        )}
+      </Shell>
+    )
+  }
+
+  if (state.view === 'contract') {
+    return (
+      <Shell view="contract" tools={null}>
+        <style>{CANVAS_CSS}</style>
+        {error !== undefined && <p className="nw-canvas-error" role="alert">{error}</p>}
+        {error === undefined && contract === undefined && (
+          <p className="nw-canvas-error">正在读取本章合同…</p>
+        )}
+        {contract !== undefined && (
+          <ChapterContractView
+            contract={contract}
+            onReview={() => { workbenchActions.setView('review') }}
+            onRead={() => { workbenchActions.setView('read') }}
+          />
+        )}
+      </Shell>
+    )
+  }
+
+  if (state.view === 'timeline') {
+    return (
+      <Shell view="timeline" tools={null}>
+        <style>{CANVAS_CSS}</style>
+        {error !== undefined && <p className="nw-canvas-error" role="alert">{error}</p>}
+        {error === undefined && timeline === undefined && <p className="nw-canvas-error">正在读取时间线…</p>}
+        {timeline !== undefined && (
+          <TimelineView
+            timeline={timeline}
+            onOpenChapter={() => { workbenchActions.setView('read') }}
+          />
+        )}
+      </Shell>
+    )
+  }
+
+  if (state.view === 'memory') {
+    return (
+      <Shell view="memory" tools={null}>
+        <style>{CANVAS_CSS}</style>
+        {error !== undefined && <p className="nw-canvas-error" role="alert">{error}</p>}
+        {error === undefined && memory === undefined && <p className="nw-canvas-error">正在读取写作记忆…</p>}
+        {memory !== undefined && (
+          <MemoryView
+            memory={memory}
+            onOpenClues={() => { workbenchActions.setView('clues') }}
+            onOpenThread={() => { workbenchActions.setView('thread') }}
+          />
+        )}
+      </Shell>
+    )
+  }
+
+  if (state.view === 'simulation') {
+    return (
+      <Shell view="simulation" tools={null}>
+        <style>{CANVAS_CSS}</style>
+        {error !== undefined && <p className="nw-canvas-error" role="alert">{error}</p>}
+        {error === undefined && acceptedRevision === undefined && (
+          <p className="nw-canvas-error">正在读取已接受版本…</p>
+        )}
+        {acceptedRevision !== undefined && (
+          <SimulationView
+            revision={acceptedRevision}
+            onOpenThread={() => { workbenchActions.setView('thread') }}
+          />
+        )}
+      </Shell>
     )
   }
 
   if (state.view === 'review') {
     return (
-      <section data-novel-canvas="review" aria-label="提案审阅">
+      <Shell view="review" tools={null}>
         <style>{CANVAS_CSS}</style>
         {error !== undefined && <p className="nw-canvas-error" role="alert">{error}</p>}
         {error === undefined && deck === undefined && <p className="nw-canvas-error">正在读取待审提案…</p>}
@@ -238,13 +618,13 @@ export function NovelCanvas(props: NovelCanvasProps): ReactNode {
             }}
           />
         )}
-      </section>
+      </Shell>
     )
   }
 
   if (state.view === 'history') {
     return (
-      <section data-novel-canvas="history" aria-label="版本历史">
+      <Shell view="history" tools={null}>
         <style>{CANVAS_CSS}</style>
         {error !== undefined && <p className="nw-canvas-error" role="alert">{error}</p>}
         <VersionHistoryView
@@ -262,13 +642,44 @@ export function NovelCanvas(props: NovelCanvasProps): ReactNode {
             })
           }}
         />
-      </section>
+      </Shell>
+    )
+  }
+
+  if (state.view === 'read') {
+    return (
+      <Shell view="read" tools={null}>
+        <style>{CANVAS_CSS}</style>
+        {error !== undefined && <p className="nw-canvas-error" role="alert">{error}</p>}
+        {error === undefined && manuscript === undefined && !manuscriptLoaded && (
+          <p className="nw-canvas-error">
+            {state.chapterId === undefined ? '先在左栏选择一章。' : '正在读取正文…'}
+          </p>
+        )}
+        {error === undefined && manuscript === undefined && manuscriptLoaded && (
+          <p className="nw-note">这一章还没有被接受的正文。提案被接受后，正文会出现在这里。</p>
+        )}
+        {manuscript !== undefined && (
+          <article
+            className="reading"
+            style={{
+              fontSize: `${String(state.settings.readingSize)}px`,
+              maxWidth: `${String(state.settings.readingMeasure)}em`,
+            }}
+          >
+            <h2>{manuscript.title}</h2>
+            {manuscript.text.split(/\n{2,}/).map((paragraph, index) => (
+              <p key={`${String(index)}-${paragraph.slice(0, 8)}`}>{paragraph.trim()}</p>
+            ))}
+          </article>
+        )}
+      </Shell>
     )
   }
 
   if (state.view === 'advanced') {
     return (
-      <section data-novel-canvas="advanced" aria-label="进阶">
+      <Shell view="advanced" tools={null}>
         <style>{CANVAS_CSS}</style>
         {error !== undefined && <p className="nw-canvas-error" role="alert">{error}</p>}
         <AdvancedView
@@ -276,19 +687,41 @@ export function NovelCanvas(props: NovelCanvasProps): ReactNode {
           jobs={jobs}
           subagents={subagents}
           diagnostics={diagnostics}
+          panels={panels}
+          onReload={() => { workbenchActions.refresh() }}
         />
-      </section>
+      </Shell>
     )
   }
 
-  const entry = WORKBENCH_VIEWS.find(candidate => candidate.id === state.view)
-  const title = entry?.label ?? '小说画布'
-
   return (
-    <section data-novel-canvas={state.view} aria-label={title}>
+    <Shell view={state.view} tools={null}>
       <style>{CANVAS_CSS}</style>
-      <h1>{title}</h1>
       <p className="nw-note">该画布由后续增量实现。</p>
+    </Shell>
+  )
+}
+
+/**
+ * The prototype's canvas skeleton: the head carries the title, the one-line
+ * summary and the canvas tools; the body scrolls the canvas itself.
+ */
+function Shell(props: {
+  readonly view: string
+  readonly tools: ReactNode
+  readonly children: ReactNode
+}): ReactNode {
+  const copy = VIEW_HEAD[props.view] ?? { title: props.view, sub: '' }
+  return (
+    <section data-novel-canvas={props.view} aria-label={copy.title} style={{ display: 'contents' }}>
+      <div className="main-head">
+        <div className="h-wrap">
+          <h1>{copy.title}</h1>
+          {copy.sub.length > 0 && <div className="sub">{copy.sub}</div>}
+        </div>
+        <div className="tools">{props.tools}</div>
+      </div>
+      <div className="main-body flush">{props.children}</div>
     </section>
   )
 }

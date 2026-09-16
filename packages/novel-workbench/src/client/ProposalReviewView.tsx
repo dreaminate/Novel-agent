@@ -7,7 +7,7 @@
  * asked of Novel Project through the impact preview, and nothing reaches Canon
  * until the author accepts.
  */
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { createElement, useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { NovelResultItemDecision } from '@novel-agent/novel-project/types'
 import { workbenchActions } from './store.js'
 import type { NovelReviewImpact, NovelReviewProposal } from './novel-data.js'
@@ -31,12 +31,12 @@ interface Staged {
 const REVIEW_CSS = `
 [data-novel-review] { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; gap: 14px; }
 [data-novel-review] .nw-review-head { display: flex; flex-direction: column; gap: 4px; }
-[data-novel-review] .nw-review-route { display: flex; align-items: baseline; gap: 8px; font-size: 13px; color: hsl(var(--nw-text-200)); font-variant-numeric: tabular-nums; }
+[data-novel-review] .nw-review-route { display: flex; align-items: baseline; gap: 8px; font-size: 13px; color: hsl(var(--text-200)); font-variant-numeric: tabular-nums; }
 [data-novel-review] h2 { margin: 0; font-size: 18px; }
 [data-novel-review] .nw-review-body { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 18px; flex: 1 1 auto; min-height: 0; }
 [data-novel-review] .nw-review-column { display: flex; flex-direction: column; gap: 12px; min-height: 0; overflow: auto; padding-right: 4px; }
-[data-novel-review] .nw-card { border: 1px solid hsl(var(--nw-border-100)); border-radius: 10px; background: hsl(var(--nw-bg-000)); padding: 14px 16px; }
-[data-novel-review] .nw-card h3 { margin: 0 0 8px; font-size: 13px; color: hsl(var(--nw-text-200)); font-weight: 600; }
+[data-novel-review] .nw-card { border: 1px solid hsl(var(--border-100)); border-radius: 10px; background: hsl(var(--bg-000)); padding: 14px 16px; }
+[data-novel-review] .nw-card h3 { margin: 0 0 8px; font-size: 13px; color: hsl(var(--text-200)); font-weight: 600; }
 [data-novel-review] .nw-manuscript {
   font-family: "Songti SC", "Source Han Serif SC", Georgia, serif;
   font-size: 16px;
@@ -44,41 +44,60 @@ const REVIEW_CSS = `
   white-space: pre-wrap;
   max-height: 46vh;
   overflow: auto;
-  color: hsl(var(--nw-text-000));
+  color: hsl(var(--text-000));
 }
-[data-novel-review] .nw-item { display: flex; gap: 10px; padding: 8px 0; border-top: 1px solid hsl(var(--nw-border-100)); }
+[data-novel-review] .nw-item { display: flex; gap: 10px; padding: 8px 0; border-top: 1px solid hsl(var(--border-100)); }
 [data-novel-review] .nw-item:first-of-type { border-top: none; }
 [data-novel-review] .nw-item-text { flex: 1 1 auto; min-width: 0; }
 [data-novel-review] .nw-item-actions { display: flex; gap: 6px; flex: 0 0 auto; }
 [data-novel-review] button {
   padding: 4px 10px;
-  border: 1px solid hsl(var(--nw-border-100));
+  border: 1px solid hsl(var(--border-100));
   border-radius: 6px;
-  background: hsl(var(--nw-bg-000));
-  color: hsl(var(--nw-text-100));
+  background: hsl(var(--bg-000));
+  color: hsl(var(--text-100));
   font: inherit;
   cursor: pointer;
 }
-[data-novel-review] button:hover:not(:disabled) { background: hsl(var(--nw-bg-200)); }
+[data-novel-review] button:hover:not(:disabled) { background: hsl(var(--bg-200)); }
 [data-novel-review] button:disabled { opacity: .5; cursor: default; }
 [data-novel-review] button[aria-pressed="true"] {
-  border-color: hsl(var(--nw-accent));
-  color: hsl(var(--nw-accent));
-  background: hsl(var(--nw-accent) / .10);
+  border-color: hsl(var(--accent-brand));
+  color: hsl(var(--accent-text));
+  background: hsl(var(--accent-brand) / .10);
 }
-[data-novel-review] .nw-primary { border-color: hsl(var(--nw-accent)); background: hsl(var(--nw-accent)); color: #fff; }
+[data-novel-review] .nw-primary { border-color: hsl(var(--accent-brand)); background: hsl(var(--accent-brand)); color: #fff; }
 [data-novel-review] .nw-primary:hover:not(:disabled) { filter: brightness(.95); }
-[data-novel-review] .nw-issue { display: flex; flex-direction: column; gap: 4px; padding: 8px 0; border-top: 1px solid hsl(var(--nw-border-100)); }
+[data-novel-review] .nw-issue { display: flex; flex-direction: column; gap: 4px; padding: 8px 0; border-top: 1px solid hsl(var(--border-100)); }
 [data-novel-review] .nw-issue:first-of-type { border-top: none; }
 [data-novel-review] .nw-issue-head { display: flex; align-items: baseline; gap: 8px; }
-[data-novel-review] .nw-severity { padding: 1px 6px; border-radius: 999px; font-size: 11px; background: hsl(var(--nw-bg-300)); color: hsl(var(--nw-text-200)); }
-[data-novel-review] .nw-severity[data-severity="critical"] { background: hsl(var(--nw-accent) / .18); color: hsl(var(--nw-accent)); }
-[data-novel-review] .nw-anchor { font-size: 12px; color: hsl(var(--nw-text-200)); }
-[data-novel-review] .nw-footer { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; border-top: 1px solid hsl(var(--nw-border-100)); padding-top: 12px; }
-[data-novel-review] .nw-impact { font-size: 13px; color: hsl(var(--nw-text-200)); }
-[data-novel-review] .nw-notice { font-size: 13px; color: hsl(var(--nw-accent)); }
-[data-novel-review] .nw-empty { margin: 0; color: hsl(var(--nw-text-200)); }
-[data-novel-review] .nw-stale { color: hsl(var(--nw-accent)); font-weight: 600; }
+[data-novel-review] .nw-severity { padding: 1px 6px; border-radius: 999px; font-size: 11px; background: hsl(var(--bg-300)); color: hsl(var(--text-200)); }
+[data-novel-review] .nw-severity[data-severity="critical"] { background: hsl(var(--accent-brand) / .18); color: hsl(var(--accent-text)); }
+[data-novel-review] .nw-anchor { font-size: 12px; color: hsl(var(--text-200)); }
+[data-novel-review] .nw-footer { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; border-top: 1px solid hsl(var(--border-100)); padding-top: 12px; }
+[data-novel-review] .nw-impact { font-size: 13px; color: hsl(var(--text-200)); }
+[data-novel-review] .nw-notice { font-size: 13px; color: hsl(var(--accent-text)); }
+[data-novel-review] .nw-empty { margin: 0; color: hsl(var(--text-200)); }
+[data-novel-review] .nw-stale { color: hsl(var(--accent-text)); font-weight: 600; }
+[data-novel-review] .nw-confirm {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: hsl(var(--text-000) / .18);
+}
+[data-novel-review] .nw-confirm-sheet {
+  width: min(520px, calc(100% - 48px));
+  background: hsl(var(--bg-000));
+  border: 1px solid hsl(var(--border-100));
+  border-radius: var(--r-card);
+  box-shadow: var(--sh-3);
+  padding: var(--s5);
+}
+[data-novel-review] .nw-confirm-sheet h3 { margin: 0 0 var(--s3); font-size: var(--fs-16); }
+[data-novel-review] .nw-confirm-foot { display: flex; gap: var(--s2); justify-content: flex-end; margin-top: var(--s4); }
 `
 
 /** The proposal review screen. */
@@ -86,6 +105,8 @@ export function ProposalReviewView(props: ProposalReviewViewProps): ReactNode {
   const { proposal } = props
   const stale = props.acceptedRevision !== proposal.expectedRevision
   const [staged, setStaged] = useState<ReadonlyMap<string, Staged>>(new Map())
+  /** The confirmation sheet is open; the Host is not called until it is confirmed. */
+  const [confirming, setConfirming] = useState(false)
 
   const base = useMemo(() => defaultDecisions(proposal), [proposal])
   const decisions = useMemo(() => applyStaged(base, staged), [base, staged])
@@ -229,7 +250,7 @@ export function ProposalReviewView(props: ProposalReviewViewProps): ReactNode {
           className="nw-primary"
           data-novel-review-accept=""
           disabled={props.busy}
-          onClick={() => { props.onAccept(decisions) }}
+          onClick={() => { setConfirming(true) }}
         >
           {props.busy ? '正在写入…' : '接受本章'}
         </button>
@@ -251,6 +272,63 @@ export function ProposalReviewView(props: ProposalReviewViewProps): ReactNode {
         </button>
         {props.notice !== undefined && <span className="nw-notice">{props.notice}</span>}
       </div>
+      {confirming && createElement(
+        'div',
+        {
+          className: 'nw-confirm',
+          'data-novel-review-confirm': 'true',
+          role: 'dialog',
+          'aria-modal': 'true',
+          onClick: (event: { target: unknown; currentTarget: unknown }) => {
+            if (event.target === event.currentTarget) setConfirming(false)
+          },
+        },
+        createElement(
+          'div',
+          { className: 'nw-confirm-sheet' },
+          createElement('h3', null, '确认接受本章？'),
+          createElement(
+            'div',
+            { className: 'nw-impact', style: { marginTop: '8px' } },
+            `R${String(proposal.expectedRevision)} → R${String(props.acceptedRevision + 1)}：`
+            + `${decisions.some(decision => decision.itemType === 'manuscript' && decision.outcome === 'accept') ? '正文 1 篇' : '正文 0 篇'}`
+            + ` · 设定变更 ${String(decisions.filter(decision => decision.itemType === 'delta' && decision.outcome === 'accept').length)} 条`
+            + ` · 未采纳建议 ${String(decisions.filter(decision => decision.itemType === 'issue' && decision.outcome === 'reject').length)} 条`,
+          ),
+          createElement(
+            'p',
+            { className: 'note', style: { marginTop: '12px' } },
+            '接受之后仍然可以回滚到上一版：回滚会停用这次写入的全部变更，历史里仍然查得到。',
+          ),
+          createElement(
+            'div',
+            { className: 'nw-confirm-foot' },
+            createElement(
+              'button',
+              {
+                type: 'button',
+                'data-novel-review-confirm-back': 'true',
+                onClick: () => { setConfirming(false) },
+              },
+              '返回调整',
+            ),
+            createElement(
+              'button',
+              {
+                type: 'button',
+                className: 'nw-primary',
+                'data-novel-review-confirm-yes': 'true',
+                disabled: props.busy,
+                onClick: () => {
+                  setConfirming(false)
+                  props.onAccept(decisions)
+                },
+              },
+              `确认接受 R${String(props.acceptedRevision + 1)}`,
+            ),
+          ),
+        ),
+      )}
     </div>
   )
 }

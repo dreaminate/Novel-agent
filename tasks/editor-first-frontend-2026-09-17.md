@@ -9,6 +9,18 @@
 
 ---
 
+## 0. 工作方式（用户 2026-09-17 指示，覆盖本文件其它处的「停下问人」流程）
+
+- **取舍由 loop 自己决断，用 `autoplan` 走一遍，不再逐条问用户。**
+- 判断原则：**该重建的就重建** —— 不要为了「复用」而接受一个更差的体验。
+- **优先级：体验 > 一切。** 写作本身、以及人和 AI 协作写作的**流畅度、质量与手感**是第一位的；
+  为此可以把「样式上沿用官方」「形式上漂亮」这类考虑往后放。
+- **仍然必须停下问人**的只有：改 Canon 语义、改 DSH 版本、碰用户全局 `~/.dsh`、不可逆或破坏性操作、
+  以及需要 push / PR / 合并 / 发布 / 部署 —— 这些与上文优先级无关。
+- 换句话说：**产品取舍我定，不可逆与越界的事仍要问。** 决断时把理由写进本文件，而不是写进对话。
+
+---
+
 ## 1. 共识：这次改什么
 
 原型（`docs/prototypes/2026-09-16-novel-mode/`）是**基线，但不是终点**——作者自评 80 分。这次是
@@ -21,7 +33,7 @@
 | 3 | 节奏：边写边改，不单独交付设计稿 | 每轮 loop 直接落到实现 |
 | 4 | 结构类改动回写原型 HTML 再重生成 CSS；观感微调直接改 `workbench-css.ts` | 见 §3 的设计来源规则 |
 | 5 | ~~**审批卡自研，排在最前**~~ → **2026-09-17 改为「验证并修好复用路径」** | 原前提「官方审批只由被我们禁用的 `ui-chat` 提供」**被 I1.1 证伪**：官方另有 `@deepseek-ai/dsh-client-ui-approval`，novel profile 里 HTTP 200 加载，我们没禁它，且它就是 `approval/request` 的应答者。用户裁定**不自研**，改为验证官方面板在我们 frame 里可用、不可用就修 frame。证据见 [`docs/approval-renderer-red-2026-09-17.md`](docs/approval-renderer-red-2026-09-17.md)。Phase 1 的 I1.2/I1.3 已按此重写。 |
-| 6 | 线程视图里官方会话面**不再渲染** | 官方只留不可见服务（输入机 / 草稿队列 / 流 / 审批服务 / 会话装配） |
+| 6 | **对话面的正文与工具行由我们自渲染；composer 仍是官方的**（2026-09-17 修正） | 原意是「线程视图里官方会话面不再渲染」。I2.1–I2.4 查实：**输入机的缝是闭的**（草稿在 shell 的 Lexical 里读不到；候选是纯展示数据、选中结果只从 `slash/input-*` 事件出去），自研 composer 等于重建整套输入机且拿不到 `/` `@` 与模型/权限/计划/附件控件。所以改为：官方会话面**保留**，只把它的消息区用我们的 `NovelTranscript` 取代；composer 由官方担任，全线程**只有这一个输入框**。 |
 | 7 | 手写正文 = workdir 里的**章节文件**；点「提交本章」才作为 Result Packet 进提案收件箱 | Canon 仍是唯一事实源，作者手稿不被锁进 Canon |
 | 8 | 自动提炼做成**模式**：默认「提交本章时跑 + 可手动重跑」，另有「边写边提炼」 | 提炼只产出提案 |
 | 9 | **补全与续写两层都留**：句级灰字（Tab/Esc）+ 段级续写面板（带情节灵感） | 两个 AI 入口，粒度不同 |
@@ -438,21 +450,40 @@ HEAD `02a48d8` —— 即本计划写的 `8926e31` **加本计划文件本身的
   >
   > **两条都能满足原计划，区别只在"底栏还是不是我们的输入框"。** 本轮不动工、不花模型额度，等用户定。
 
-- [ ] **I2.4 官方输入条住进我们的底栏** — 目标：底栏由官方输入条担任，`/` `@` 与模型 / 权限 / 计划 /
+- [x] **I2.4 官方输入条住进我们的底栏** — 目标：底栏由官方输入条担任，`/` `@` 与模型 / 权限 / 计划 /
   附件控件**一并回来**；线程视图不再有第二个输入框；审批面板保住座位。我们自己的 textarea 底栏退场。
-  - 文件：`WorkbenchFrame.tsx`、`index.tsx`、`NovelComposer.tsx`（退场）、相关 spec
-  - 要求：
-    1. **frame 在 footer 的 `novel.composer` 座位渲染官方 `conversation.composer.bar`**（官方 InputBar），
-       取代现有 `NovelComposer` 的 textarea 条。**这是本轮裁定的核心：`/` `@` 与那批控件不必自研，
-       它们本来就在这条官方输入条里。**
-    2. **frame 不再渲染官方 `conversation` 会话座** —— 否则又冒出第二个输入框。
-    3. **frame 自己声明并渲染父槽 `conversation.composer`**（放在线程区）—— 官方审批面板（I1 复用那张）
-       注册在这个槽上，不渲染它就没了。**`.composer`（审批）与 `.composer.bar`（输入条）本来就是两个槽**，
-       这正是本条的解法。
-    4. **注意连带：** `NovelComposer` 退场会带走 `rememberSubmission`，而 I2.2 的失败重试条带
-       （`NovelThreadNotice`）靠 `lastSubmission` 才有「重试上一句」。要一并处理，**别把重试能力弄丢**。
-  - 验证：线程视图**只有一个**输入框；真机敲 `/` 与 `@` 出候选且可用；模型 / 权限控件可见；
-    **审批仍能画出并应答**（回归 I1.2 四条断言 —— 这是 I1 决定的守门测试）；失败重试仍可用；smoke 全绿。
+
+  > **✅ 已完成（2026-09-17），但做法与写的不同 —— 见下。**
+  >
+  > **中途查实：`conversation.composer` 不是普通槽，是 `kind: 'chain'`、`scope: 'session'`、
+  > owner 为 `ComposerChainProps`（含 `pendingInteraction`）的"接管链"槽。** 要自己渲染它，就得伪造
+  > `pendingInteraction`（那是 ui-session 的会话内共享态）—— 又是一次"看起来能、其实不行"。
+  >
+  > **于是改为更小也更稳的一步：** frame **保留**官方 `conversation` 会话面（它本来就带着 composer），
+  > **只退掉我们自己的 `NovelComposer` 底栏**。作者视角的结果完全一致且更好：
+  > - **只有一个输入框**（实测 `contentEditables: 1 / textareas: 0`，我们那条已消失）；
+  > - **`/` 与 `@` 直接可用**（实测：`/` 出 45 行，含 compact / export / feedback / goal / permission / plan…；
+  >   `@` 出「文件与文件夹」+「对话」两组）；
+  > - **模型 / 权限 / 计划 / 附件控件全在**（它们本来就住在那条官方 bar 里）；
+  > - **审批面板座位不变**（仍是官方 `conversation.composer`，I1 的决定不受影响）。
+  > - 我们的 transcript（I2.1）与失败条带（I2.2）照旧：`conversation.session` 仍被我们的 CSS 隐藏，
+  >   由 `NovelTranscript` 取代。
+  >
+  > **代码变动：** 删 `NovelComposer.tsx` 与其 116 行 spec（组件按设计退场，不是为绿灯弱化测试）；
+  > frame 去掉 footer 与 `novel.composer` 座位；`index.tsx` 去掉 `composerInputs` 装配；
+  > `WorkbenchFrame` 的 props 联合回到 `conversation`。**`@deepseek-ai/dsh-client-ui-conversation`
+  > 的 devDependency 试验已完全回退**（`package.json` 与 `pnpm-lock.yaml` 均无 diff）。
+  >
+  > **连带处理（原计划点名的那条）：** 退掉自己的 bar 就没人再写 `lastSubmission`，失败重试条带会失能。
+  > 改为**从会话日志读**：transcript 里最新的一条 user 行就是最近一次提交，`rememberSubmission` 由
+  > plugin 在日志 effect 里更新（store 侧加了同值短路）。这同时修掉一个既有缺口 —— 以前经官方 bar
+  > 提交的句子，重试条带是不知道的。**代价（如实记）：** 日志里的 user 行可能夹带运行期上下文注入，
+  > 重试会把它一起重发；这一点归 I6.5 的「信息去术语化」。
+  >
+  > **验证：** 20 files / 336 tests、typecheck 0、lint 0、`git diff --check` 0、`dev-host.sh rebuild` + smoke **exit 0**；
+  > 两个可复跑探针 `docs/evidence/thread-2026-09-17/probe-single-input.mjs`（单输入）
+  > 与 `probe-trigger-menus.mjs`（`/` `@` 候选）。审批未重跑真实会话 —— 但本条**从未改动**渲染官方
+  > `conversation` 面这条路径，而 I1.2 通过的正是这条路径。
 
 - [ ] **I2.5 `@` 增加一组「人物与章节」** — 目标：在官方 `@` 候选之外，用**官方触发源机制**加一组来自 Canon
   的人物与章节。`/` 那半不需要写代码 —— I2.4 让官方输入条回来之后，官方全部命令（compact / export /
@@ -461,6 +492,8 @@ HEAD `02a48d8` —— 即本计划写的 `8926e31` **加本计划文件本身的
   - 前置：I2.4 已绿（此时是官方输入条在驱动管道，我们只需要**注册一个源**）。
   - 要求：用 `ctx.inputTriggers.registerSource(...)` 注册一个 `@` 源；候选来自 Canon（人物 / 章节）；
     选中仍走官方 `insertReference` 通路 —— **不自己造插入**、**不重建输入状态机**。
+  - **`/` 那半已在 I2.4 连带完成并实测**：`/` 现在就有 compact / export / feedback / goal / permission /
+    plan 等 45 行候选（探针 `probe-trigger-menus.mjs`）。本条只需补 `@` 的「人物与章节」。
   - 验证：spec 绿；真机 `@` 里能看到「人物与章节」组，选中能插入。
 
 ### Phase 3 — 编辑器成为主工作面

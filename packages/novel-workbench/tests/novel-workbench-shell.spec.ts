@@ -57,7 +57,7 @@ describe('novel-mode frame carries the prototype design language', () => {
     }
   })
 
-  it('renders the prototype shell: topbar, three sections and the composer dock', async () => {
+  it('renders the prototype shell: topbar and three sections, with no composer of its own', async () => {
     const container = document.createElement('div')
     document.body.append(container)
     const root = createRoot(container)
@@ -90,8 +90,12 @@ describe('novel-mode frame carries the prototype design language', () => {
     expect(frame?.querySelector('[data-novel-shell="left"]')).not.toBeNull()
     expect(frame?.querySelector('[data-novel-shell="main"]')).not.toBeNull()
     expect(frame?.querySelector('[data-novel-shell="right"]')).not.toBeNull()
-    expect(frame?.querySelector('[data-novel-composer]')).not.toBeNull()
-    expect(frame?.querySelector('[data-novel-composer]')).not.toBeNull()
+    // No composer dock belongs to the frame. The composer lives in the shipped
+    // conversation surface, which owns the input machine, the slash and at
+    // menus and the approval panel — none reachable from a plugin. A dock here
+    // would be a second input the author could type into without the model
+    // hearing it.
+    expect(frame?.querySelector('[data-novel-composer]')).toBeNull()
     await act(async () => { root.unmount() })
   })
 })

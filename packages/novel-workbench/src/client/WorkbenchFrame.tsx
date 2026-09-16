@@ -29,7 +29,6 @@ export type WorkbenchFrameProps = PropsRenderSlots<
   | 'conversation'
   | 'novel.thread.header'
   | 'novel.thread.notice'
-  | 'novel.composer'
   | 'novel.canvas'
   | 'details'
   | 'shell.overlay'
@@ -113,6 +112,12 @@ export function WorkbenchFrame(props: WorkbenchFrameProps): ReactNode {
           createElement(NovelTranscript, { entries: transcript }),
           props.renderSlot('novel.thread.notice', threadProps),
         ),
+        // The shipped conversation surface stays: it owns the composer, and the
+        // composer is where the slash and at menus, the model and permission
+        // controls, plan mode, attachments and the approval panel all live. None
+        // of that is reachable any other way — the input seams are closed to
+        // plugins — so the frame keeps it and only hides its transcript, which
+        // NovelTranscript above replaces.
         props.renderSlot('conversation', threadProps),
       ),
       threads
@@ -136,11 +141,6 @@ export function WorkbenchFrame(props: WorkbenchFrameProps): ReactNode {
               ),
         )
       : null,
-    createElement(
-      'footer',
-      { key: 'composer', className: 'composer', 'data-novel-composer': 'true' },
-      props.renderSlot('novel.composer', threadProps),
-    ),
     props.renderSlot('shell.overlay', {}),
   )
 }

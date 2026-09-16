@@ -70,13 +70,16 @@ describe('novel-workbench root occupant', () => {
       'conversation',
       'details',
       'novel.canvas',
-      'novel.composer',
       'novel.thread.header',
       'novel.thread.notice',
       'novel.topbar',
       'shell.overlay',
       'sidebar',
     ])
+    // One input only. The frame declares no composer seat of its own: the
+    // composer belongs to the shipped conversation surface, and a second bar
+    // here is how the author ends up typing into the wrong one.
+    expect(Object.keys(entry?.options.children ?? {})).not.toContain('novel.composer')
     expect(typeof ctx.get('layout')?.openDetails).toBe('function')
 
     const container = document.createElement('div')

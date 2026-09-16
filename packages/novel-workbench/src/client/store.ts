@@ -288,8 +288,16 @@ export const workbenchActions = {
     publish({ ...state, personFileId: undefined })
   },
 
-  /** Remember the sentence the novel bar just handed to a session. */
+  /**
+   * Remember the last sentence this session submitted.
+   *
+   * The composer belongs to the shipped conversation surface, which tells us
+   * nothing, so the plugin reads this out of the session log instead — the
+   * newest user line *is* the newest submission. Without it the failed-turn
+   * strip could never offer to resend the sentence that failed.
+   */
   rememberSubmission(sessionId: SessionId, text: string): void {
+    if (state.lastSubmission?.sessionId === sessionId && state.lastSubmission.text === text) return
     publish({ ...state, lastSubmission: { sessionId, text } })
   },
 

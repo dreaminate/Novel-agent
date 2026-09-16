@@ -28,7 +28,6 @@ import { createNovelWorkFace } from './novel-data.js'
 import { NovelCanvas } from './NovelCanvas.js'
 import { NovelRail } from './NovelRail.js'
 import { NovelSide } from './NovelSide.js'
-import { NovelComposer } from './NovelComposer.js'
 import { NovelSettings } from './NovelSettings.js'
 import { PersonFileSeat } from './PersonFileSeat.js'
 import { NovelThreadHeader } from './NovelThreadHeader.js'
@@ -88,15 +87,6 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
     'novel.topbar': {
       kind: 'single'
       scope: 'root'
-    }
-    /**
-     * The novel-mode composer dock — the frame's bottom row. The conversation
-     * surface owns the composer it renders above this row, so the row stays an
-     * empty seat until a novel surface needs it.
-     */
-    'novel.composer': {
-      kind: 'single'
-      scope: 'session-maybe'
     }
   }
 }
@@ -164,7 +154,6 @@ export function apply(ctx: ClientContext): () => void {
       conversation: { kind: 'single', scope: 'session-maybe' },
       'novel.thread.header': { kind: 'single', scope: 'session-maybe' },
       'novel.thread.notice': { kind: 'single', scope: 'session-maybe' },
-      'novel.composer': { kind: 'single', scope: 'session-maybe' },
       'novel.canvas': { kind: 'single', scope: 'session-maybe' },
       details: { kind: 'single', scope: 'session' },
       'shell.overlay': { kind: 'list', scope: 'root' },
@@ -209,7 +198,19 @@ export function apply(ctx: ClientContext): () => void {
       )
       // The transcript is a view of this same log, recomputed per append; the
       // store drops it when the result is unchanged.
-      workbenchActions.setTranscript(transcriptOf(entries))
+      const transcript = transcriptOf(entries)
+      workbenchActions.setTranscript(transcript)
+      // What the author last submitted, read off the log rather than captured
+      // from a composer this bundle no longer owns: the newest user line is the
+      // newest submission. The failed-turn strip resends exactly this sentence.
+      for (let at = transcript.length - 1; at >= 0; at -= 1) {
+        const line = transcript[at]
+        if (line === undefined) continue
+        if (line.kind === 'user') {
+          workbenchActions.rememberSubmission(sessionId as never, line.text)
+          break
+        }
+      }
     }
     stopFailureFollow = binding.eventSource.subscribe(read)
     read()
@@ -276,26 +277,14 @@ export function apply(ctx: ClientContext): () => void {
         name: 'details',
         inject: () => face,
       }, NovelSide)), 'novel-mode context column')
-      // The composer bar talks into whatever thread the frame is showing: it
-      // reads the session face and the thread's own title, never a second queue.
-      const composerInputs = () => {
-        const sessionId = getWorkbenchState().sessionId
-        const summary = sessionId === undefined
-          ? undefined
-          : surfaceCtx.sessions.list.getSnapshot().byId[sessionId]
-        const binding = sessionId === undefined ? undefined : surfaceCtx.sessions.binding(sessionId)
-        return {
-          // The list may not carry the row for a just-opened thread yet; the bar
-          // still has to say that it is talking into one.
-          threadLabel: summary?.title ?? (sessionId === undefined ? undefined : '当前线程'),
-          session: binding?.session,
-          onOpenThread: () => { workbenchActions.setView('thread') },
-        }
-      }
-      surfaceCtx.effect(() => surfaceCtx.slots.inject('novel.composer', () => surfaceCtx.slots.register({
-        name: 'novel.composer',
-        inject: composerInputs,
-      }, NovelComposer)), 'novel-mode composer row')
+      // There is no novel composer row. The composer belongs to the shipped
+      // conversation surface, which owns the input machine, the slash and at
+      // menus, the model / permission / plan controls and the approval panel.
+      // None of those are reachable from a plugin — the draft is unreadable and
+      // a pick's outcome never leaves the shipped events — so the frame renders
+      // that surface and adds nothing beside it. A second bar here would be a
+      // second input, and the one the author would be typing into would not be
+      // the one the model hears.
       // The 设置 sheet rides the frame's overlay seat: it sits above all three
       // columns and renders nothing while it is closed.
       surfaceCtx.effect(() => surfaceCtx.slots.inject('shell.overlay', () => surfaceCtx.slots.register({

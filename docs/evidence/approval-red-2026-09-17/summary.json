@@ -1,0 +1,45 @@
+{
+  "host": "http://127.0.0.1:4780",
+  "clientModulesFetched": 2,
+  "approvalModuleFetched": [
+    {
+      "url": "http://127.0.0.1:4780/plugins/??@deepseek-ai/dsh-typert-registry/client.js,@deepseek-ai/dsh-api-gateway/client.js,@deepseek-ai/dsh-session-log-export/client.js,@deepseek-ai/dsh-api-session-controller/client.js,@deepseek-ai/dsh-api-workspace-controller/client.js,@deepseek-ai/dsh-client-hmr/client.js,@deepseek-ai/dsh-client-connection/client.js,@deepseek-ai/dsh-api-remotes/client.js,@deepseek-ai/dsh-cordis-client-runner/client.js,@deepseek-ai/dsh-client-ui-theme/client.js,@deepseek-ai/dsh-client-locale/client.js,@deepseek-ai/dsh-client-ui-renderer/client.js,@deepseek-ai/dsh-client-ui-session/client.js,@deepseek-ai/dsh-client-ui-settings/client.js,@deepseek-ai/dsh-client-ui-settings-general/client.js,@deepseek-ai/dsh-client-ui-settings-models/client.js,@deepseek-ai/dsh-client-ui-settings-plugin-inventory/client.js,@deepseek-ai/dsh-client-ui-conversation/client.js,@deepseek-ai/dsh-client-ui-approval/client.js,@deepseek-ai/dsh-client-ui-brand-official/client.js,@deepseek-ai/dsh-client-ui-attachment/client.js,@deepseek-ai/dsh-client-ui-tool/client.js,@deepseek-ai/dsh-client-ui-cordis/client.js,@deepseek-ai/dsh-client-ui-workflow-run/client.js,@deepseek-ai/dsh-client-ui-deliverables/client.js,@deepseek-ai/dsh-client-ui-workspace/client.js,@deepseek-ai/dsh-client-ui-input-trigger/client.js,@deepseek-ai/dsh-client-ui-commands/client.js,@deepseek-ai/dsh-client-ui-skill/client.js,@deepseek-ai/dsh-client-ui-subagent/client.js,@deepseek-ai/dsh-client-ui-reference/client.js,@deepseek-ai/dsh-client-ui-jobs/client.js,@deepseek-ai/dsh-client-ui-goal/client.js,@deepseek-ai/dsh-client-ui-message-feedback/client.js,@deepseek-ai/dsh-client-ui-model-selection/client.js,@deepseek-ai/dsh-client-ui-permission-presets/client.js,@deepseek-ai/dsh-client-ui-agent-preset/client.js,@deepseek-ai/dsh-client-ui-settings-plugins/client.js,@deepseek-ai/dsh-client-ui-plan/client.js,@deepseek-ai/dsh-client-ui-user-questions/client.js,@deepseek-ai/dsh-client-ui-trajectory/client.js,@novel-agent/novel-project/client.js,@novel-agent/novel-workbench/client.js,@deepseek-ai/dsh-client-ui-directory-picker-native/client.js&rev=f47958a43041",
+      "status": 200
+    }
+  ],
+  "probe": {
+    "frame": true,
+    "conversationSeat": 30,
+    "mainRegionCount": 1,
+    "composerNodes": 4,
+    "approvalNodes": 0,
+    "slotsAttrs": [
+      "data-slot=root",
+      "data-slot=novel.topbar",
+      "data-slot=sidebar",
+      "data-slot=novel.thread.header",
+      "data-slot=conversation",
+      "data-slot=conversation.session.header",
+      "data-slot=conversation.session",
+      "data-slot=conversation.composer",
+      "data-slot=conversation.hero.brand.mark",
+      "data-slot=conversation.hero.workspace",
+      "data-slot=conversation.hero.workspace.directoryFlow",
+      "data-slot=conversation.hero.agentPreset",
+      "data-slot=conversation.input.dock",
+      "data-slot=conversation.composer.bar",
+      "data-slot=conversation.input.overlay",
+      "data-slot=conversation.input.attachments",
+      "data-slot=conversation.input.plan",
+      "data-slot=conversation.input.left",
+      "data-slot=conversation.input.right",
+      "data-slot=conversation.input.model",
+      "data-slot=novel.canvas",
+      "data-slot=details",
+      "data-slot=novel.composer",
+      "data-slot=shell.overlay"
+    ],
+    "bodyTextSample": "天机阁主\nR5\n第 1 章《开篇章》· 已接受\n进阶\n跟随系统\n日间\n夜间\n设置\n左栏\n作品\n1 卷 · 1 章\n卷一 · 第一卷：把主角拖进天机阁所在的博弈场，在认识规则…\n1 章\n1\n开篇章\n已接受\n线程\n17\n提交三条叙事债增量\n重新提交 R3 关系提案\n提交关系设定与第1章提案\n恢复\n只回复两个字：收到\n只回复两个字：收到\n收到确认\n提交天机阁状态提案\n请提交一份最小的待审提案（p\n收到\n天歌阁事实提案R1\n生成小说事实提案包\n补全 volume 层并重新提交结构包\n提交最小合法小说提案\n修订叙事单元层级提案\n《天机阁主》立项与章节合同\n新建线程\n视图\n故事地图\n伏笔与线索\n未收束债务\n人物与关系\n时间线\n写作记忆\n本章合同\n推演\n版本历史\n进阶\n关\n故事地图\n人物、关系与进度一眼看清 · 点节点看摘要，双击开档案\n故事地图\nR5 · 7 个人物 · 3 条关系\n+3 位未连线人物"
+  },
+  "consoleErrors": []
+}

@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // The browser half is bundled by tsdown, so it resolves the way a bundler
+    // does. NodeNext would read graphology's and forceatlas2's CommonJS-flavored
+    // type entries as namespace objects and reject their documented default
+    // imports.
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "composite": true,
+    "noEmit": false,
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "outDir": "../../node_modules/.cache/novel-workbench-client-types",
+    "tsBuildInfoFile": "../../node_modules/.cache/novel-workbench-client.tsbuildinfo"
+  },
+  "include": ["src/client/**/*.ts", "src/client/**/*.tsx"]
+}

@@ -28,7 +28,10 @@
 - 不 fork 或复制 Agent Loop，不添加 novel-agent 专用 Agent Loop 分支。
 - 不建立第二套 Agent、Session、Workspace、事件、审批、权限、设置、凭据、插件或 Remote/Gateway 体系。
 - `@novel-agent/novel-project` 保留为唯一 Canon、Result Packet、Revision 与接受/回滚核心；Planning、Writing、Memory、Review 和可选 MiroFish 按最终计划拆为领域插件，通过 DSH 原生 Service、SessionEventMap 与 Remote 联动。
-- 各领域插件的必要小说前端只贡献到 DSH 既有 `conversation.view`；通用 Workbench、Sidebar、TUI、Profile、Bundle 与 transport 继续复用上游。
+- **小说模式的前端层由 novel-agent 拥有（用户 2026-09-16 决定）**：`@novel-agent/novel-workbench` 作为
+  bundle 层注册 DSH 的 root occupant，自研全部可见面（左栏、主画布、右栏、底部输入、设置页、审批、
+  进阶面）；不 fork 上游包、不改 transport、不改宿主生命周期，Host 仍由 `dsh-base + dsh-web-app` 提供。
+  通用的 Sidebar/TUI/Profile/Bundle 行为继续复用上游。
 - 第三方组件只实现具体能力，必须包在可替换的 DSH seam 后；第三方状态不得成为产品事实来源。
 - `SessionEventMap` 与 DSH 事件溯源负责需要模型可见、审计、回放或跨重启恢复的事实。Client Runtime 只持有选择、hover、pane 尺寸、临时输入等纯 UI 瞬时状态。
 - Worktree 属于 Desktop/Profile/部署层；不得改变 Agent Team 共享 cwd 的 DSH 核心语义。
@@ -37,7 +40,12 @@
 
 - 产品 Desktop 宿主复用 `anywhere-labs/deepseek-harness-desktop`。最后完成验证的组合是 Release `v2.0.2`（tag commit `9d18856ddea4f20eb3ef8c88b0436921c6b19606`，MIT）；当前目标版本为 `v2.0.5`，尚未安装或验收，在完成隔离 smoke 之前不得写成已验证。novel-agent 不再拥有 Electron bootstrap、窗口、托盘、Profile Manager、原生 operator terminal、更新、市场或发行安装器。
 - 直接复用社区宿主的正常 DSH Host：`dsh-base + dsh-web-app + selected Profile`，以及它绑定 `127.0.0.1` 临时端口的 loopback HTTP/WebSocket carrier。不得恢复自建 `novel-agent://`、preload/IPC carrier、零端口断言或第二套 server/transport。
-- 复用 DSH Client Runtime、动态 client plugins 和 Slots；小说领域插件通过已发布 DSH seam 接入，其必要界面留在既有 `conversation.view`。
+- 复用 DSH Client Runtime、动态 client plugins 和 Slots；小说领域插件通过已发布 DSH seam 接入。
+  **可见面与不可见服务分界（H1）**：所有看得见的界面——包括 Cordis、插件、Agent preset、Jobs、
+  Subagent 与诊断面板——都由 novel-agent 自己渲染；不可见的客户端服务（会话装配、输入状态机、
+  草稿/队列、图片缓存、设置命名空间、theme runtime、传输与模块系统）继续复用官方实现，不重写。
+- 社区 Desktop 只跑 **compatibility 模式**：它作为独立 frame 叠加在官方 Web 表面之上；extended /
+  enhanced 模式会接管 root 与 `ui-layout` 行，与小说模式的 root occupant 互斥，不得同时宣称可用。
 - 不为社区宿主或 DSH 的正常窗口、终端、Profile、transport、设置、插件市场和生命周期行为写 novel-agent 补丁或重复实现。只有可复现的小说领域/Session 内能力缺口才进入本仓库。
 - Desktop 验收使用全新隔离 DSH_HOME/Profile 的真实安装、解析、启动和 UI smoke。不得修改用户全局 `.dsh`，也不得把上游宿主测试复制成本仓库产品实现。
 
@@ -46,7 +54,7 @@
 - 当前优先级是实现并组合全部真实可见功能。安全工作只做实际信任边界和上游运行所必需的最小部分；额外 hardening、安全专项和已退役 carrier 修复不得阻塞功能增量。
 - 对已由 DSH、社区 Desktop 或成熟社区插件提供的通用能力，直接原样复用；README 列明用户需要下载的插件和精确版本，novel-agent 不为这些通用表面再写 adapter、wrapper 或替代前端。遗留测试若只断言已退役的自建 Electron/IPC/Forge 路线，应在确认失效后删除，不得为保住旧测试恢复旧架构。
 - Web/Desktop 用户按需独立安装 `dsh-better-sidebar`、`@anweat/dsh-browser`、`dsh-web-search-pro` 和 `dsh-file-upload`；TUI 用户独立安装 `@xmoon76/dsh-pi-tui`；开发者可选安装 `dsh-git-worktree`。这些都是外部下载项，不进入 novel-agent 的依赖、聚合 Profile、Bundle 或安装器。兼容性声明必须来自全新隔离的当前目标版本 Profile（且已应用上文 DSH Session 补丁）的真实 install/load/UI 或 TUI smoke，README 和 peer range 不能替代运行证据。
-- novel-agent 不为 Better Sidebar 注册重复 tab/viewer，也不创建 Pi TUI extension 只显示状态。Result Packet、Canon 审阅与其他不可替代的小说交互由对应领域插件贡献到现有 `conversation.view`。卷、章、场景、人物、关系、情绪、伏笔、线索、时间线和结局进度仍经 Novel Project Canon 接受；领域投影与社区插件不得建立平行事实源。
+- novel-agent 不为 Better Sidebar 注册重复 tab/viewer，也不创建 Pi TUI extension 只显示状态。Result Packet、Canon 审阅与其他不可替代的小说交互由小说模式前端层（`@novel-agent/novel-workbench`）呈现。卷、章、场景、人物、关系、情绪、伏笔、线索、时间线和结局进度仍经 Novel Project Canon 接受；领域投影与社区插件不得建立平行事实源。
 - `dsh-mnemon`、`dsh-memento` 等记忆/检索插件只能作为可重建派生 Provider。社区任务板、Agent Teams、独立小说状态库、无兼容许可证或重复 workbench/TUI/transport 的插件不进入产品组合。
 
 ## 凭据和模型边界
@@ -79,7 +87,14 @@
 
 自行实现非 DSH 核心能力前，先查 DSH 社区目录和成熟开源候选。每项重要选型必须记录：仓库、精确版本/commit、许可证及资产授权、维护与 release 状态、Windows/社区宿主支持、API 稳定性、bundle/运行成本、可访问性、DSH seam、隔离的当前目标版本 Profile smoke 和采用/拒绝理由。
 
-优先顺序是：用户直接安装兼容的社区 DSH 插件并原样使用 → 在最终计划对应的领域插件内实现必要的小说事务或 `conversation.view` → 对仍缺失的通用能力记录所需下载项。通用 adapter、wrapper、vendor/fork 或自行实现需要用户另行明确改变产品边界；不得以“方便组合”为由创建。引入前审阅 install scripts、所有直接/传递许可证和 lockfile diff；禁止来源可疑、混淆、停更或带危险安装脚本的项目。
+优先顺序是：用户直接安装兼容的社区 DSH 插件并原样使用 → 在最终计划对应的领域插件内实现必要的小说事务，或由小说模式前端层（`@novel-agent/novel-workbench`）实现对应界面 → 对仍缺失的通用能力记录所需下载项。通用 adapter、wrapper、vendor/fork 或自行实现需要用户另行明确改变产品边界；不得以“方便组合”为由创建。引入前审阅 install scripts、所有直接/传递许可证和 lockfile diff；禁止来源可疑、混淆、停更或带危险安装脚本的项目。
+
+- **前端与交互能力优先复用开源实现（用户 2026-09-16 指示）**：关系图谱、分栏面板、
+  命令面板、虚拟列表、图标、图表、Markdown 渲染、diff 视图等，先上 GitHub 找成熟实现直接采用，
+  不在本仓库自造渲染与布局；只有找不到合适实现、或现有实现与 DSH seam、中文阅读体验冲突时才自研，
+  并在选型记录里写明理由。示例：关系图谱采用现有开源 WebGL 力导向实现
+  （候选 `sigma.js + graphology`、`react-force-graph`、Quartz 的 pixi 图谱），不自写力导向与渲染。
+  选型与证据记录在 [`docs/open-source-evaluations/frontend-stack-2026-09-16.md`](docs/open-source-evaluations/frontend-stack-2026-09-16.md)。
 
 采用后同步维护 `THIRD_PARTY_NOTICES.md`、`docs/upstream-sources.md` 和 `docs/open-source-evaluations/`。上游自带测试不能替代本仓库的 adapter、负例、集成和 E2E 测试。
 

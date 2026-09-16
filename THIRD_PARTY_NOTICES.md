@@ -323,3 +323,23 @@ the distribution model changes, update this file together with
 [`docs/upstream-sources.md`](docs/upstream-sources.md) and the relevant
 evaluation. Do not substitute the npm `dsh-plugin-desktop@2.0.0` package: it is
 not `v2.0.2` and carries DSH `0.1.0-rc.6`.
+
+## Novel-mode web front end (2026-09-16)
+
+`@novel-agent/novel-workbench` now ships the story map. It bundles three MIT
+packages into its `lib/client.js` (no install or postinstall lifecycle scripts;
+versions pinned in `packages/novel-workbench/package.json`):
+
+- `sigma@3.0.3` — WebGL graph renderer.
+- `graphology@0.26.0` — graph model; it declares `events@^3.3.0` (MIT) as its own
+  dependency.
+- `graphology-layout-forceatlas2@0.10.1` — force-directed layout, same project.
+
+The npm `events@3.3.0` implementation of `EventEmitter` is additionally aliased
+into the bundle (`packages/novel-workbench/tsdown.config.ts`): graphology imports
+`events`, and a CommonJS-format browser bundle would otherwise externalize the
+Node built-in and fail to load in the client module system.
+
+All four are MIT. No upstream asset, font or paid licence is introduced; the
+measured bundle cost and the rejected alternative are recorded in
+`docs/open-source-evaluations/frontend-stack-2026-09-16.md`.

@@ -69,7 +69,7 @@ if ($LASTEXITCODE -ne 0) { throw 'pnpm build failed' }
 
 Write-Host "[3/6] pack plugin tarballs into $OutputDir"
 New-Item -ItemType Directory -Path $OutputDir -Force | Out-Null
-$packages = @('novel-project', 'novel-planning', 'novel-writing', 'novel-memory', 'novel-review')
+$packages = @('novel-project', 'novel-planning', 'novel-writing', 'novel-memory', 'novel-review', 'novel-workbench')
 foreach ($name in $packages) {
   $tarball = Join-Path $OutputDir "novel-agent-$name-0.0.0.tgz"
   corepack pnpm --filter "@novel-agent/$name" pack --out $tarball
@@ -114,6 +114,15 @@ if (-not (Test-Path -LiteralPath $workspaceFile)) {
 if (-not (Test-Path -LiteralPath $workspaceFile)) { throw "profile workspace not found: $workspaceFile" }
 Add-ProfileWorkspaceSettings -workspaceFile $workspaceFile -patchKey $patchKey -patchPath $patchPath
 Write-Host "patchedDependencies written to $workspaceFile"
+
+# Re-packing keeps the tarball path and the 0.0.0 version, so pnpm treats the
+# spec as unchanged and keeps the previously installed copy. Drop the six
+# installed packages first (nothing else in the profile is touched), so every
+# rebuild actually lands in the running profile.
+foreach ($name in $packages) {
+  $installed = Join-Path $profileDir "node_modules/@novel-agent/$name"
+  if (Test-Path -LiteralPath $installed) { Remove-Item -LiteralPath $installed -Recurse -Force }
+}
 
 Write-Host "[5/6] $Dsh plugin --profile $Profile add <tarballs>"
 & $Dsh plugin --profile $Profile add @tarballs

@@ -20,6 +20,9 @@ importers:
       '@novel-agent/novel-review':
         specifier: workspace:*
         version: link:packages/novel-review
+      '@novel-agent/novel-workbench':
+        specifier: workspace:*
+        version: link:packages/novel-workbench
       '@novel-agent/novel-writing':
         specifier: workspace:*
         version: link:packages/novel-writing
@@ -354,6 +357,79 @@ importers:
         specifier: 0.1.2-rc.1
         version: 0.1.2-rc.1(2e4e2e5c91957d3dfb3bbb6a103e1779)
 
+  packages/novel-workbench:
+    dependencies:
+      '@deepseek-ai/cordis':
+        specifier: 4.0.2
+        version: 4.0.2(@deepseek-ai/cordis-plugin-include@1.0.7)(@deepseek-ai/cordis-plugin-loader@1.0.3)
+      '@deepseek-ai/dsh-api-remotes':
+        specifier: 0.1.2-rc.1
+        version: 0.1.2-rc.1(@deepseek-ai/cordis@4.0.2)(@deepseek-ai/dsh-scope@0.1.2-rc.1(@deepseek-ai/cordis@4.0.2)(@deepseek-ai/dsh-invariants@0.1.2-rc.1(@deepseek-ai/cordis@4.0.2)))
+      '@deepseek-ai/dsh-api-session-controller':
+        specifier: 0.1.2-rc.1
+        version: 0.1.2-rc.1(41e2d051a4cc1579c7ca22f1ad4c07af)
+      '@deepseek-ai/dsh-api-workspace-controller':
+        specifier: 0.1.2-rc.1
+        version: 0.1.2-rc.1(@deepseek-ai/cordis@4.0.2)(@deepseek-ai/dsh-api-gateway@0.1.2-rc.1(@deepseek-ai/cordis@4.0.2))(@deepseek-ai/dsh-client-connection@0.1.2-rc.1(@deepseek-ai/cordis@4.0.2)(@deepseek-ai/dsh-invariants@0.1.2-rc.1(@deepseek-ai/cordis@4.0.2)))(@deepseek-ai/dsh-host-directory-picker@0.1.2-rc.1(@deepseek-ai/cordis@4.0.2))(@deepseek-ai/dsh-session@0.1.2-rc.1(patch_hash=8c38458c088392c15dd34c99d60f4cc4fd47a70c1f602a7d6aac3b6d4a79b4f0)(@deepseek-ai/cordis@4.0.2)(@deepseek-ai/dsh-scope@0.1.2-rc.1(@deepseek-ai/cordis@4.0.2)(@deepseek-ai/dsh-invariants@0.1.2-rc.1(@deepseek-ai/cordis@4.0.2))))(@deepseek-ai/dsh-storage-domain@0.1.2-rc.1(@deepseek-ai/cordis@4.0.2)(@deepseek-ai/dsh-invariants@0.1.2-rc.1(@deepseek-ai/cordis@4.0.2))(@deepseek-ai/dsh-storage@0.1.2-rc.1(@deepseek-ai/cordis@4.0.2)))(@deepseek-ai/dsh-typert-protocol@0.1.2-rc.1(@deepseek-ai/cordis@4.0.2))(@deepseek-ai/dsh-workspace@0.1.2-rc.1(cfc0f882acf389cd95041e6efe51790e))
+      '@deepseek-ai/dsh-client-locale':
+        specifier: 0.1.2-rc.1
+        version: 0.1.2-rc.1(@deepseek-ai/cordis@4.0.2)
+      '@deepseek-ai/dsh-client-store':
+        specifier: 0.1.2-rc.1
+        version: 0.1.2-rc.1(@deepseek-ai/cordis@4.0.2)(@types/react@18.2.79)(react@18.3.1)
+      '@deepseek-ai/dsh-client-ui-renderer':
+        specifier: 0.1.2-rc.1
+        version: 0.1.2-rc.1(@deepseek-ai/cordis@4.0.2)(react@18.3.1)
+      '@deepseek-ai/dsh-client-ui-session':
+        specifier: 0.1.2-rc.1
+        version: 0.1.2-rc.1(@deepseek-ai/cordis@4.0.2)
+      '@deepseek-ai/dsh-client-ui-slots':
+        specifier: 0.1.2-rc.1
+        version: 0.1.2-rc.1(@deepseek-ai/cordis@4.0.2)
+      '@deepseek-ai/dsh-client-ui-theme':
+        specifier: 0.1.2-rc.1
+        version: 0.1.2-rc.1(@deepseek-ai/cordis@4.0.2)
+      '@deepseek-ai/dsh-client-ui-workspace':
+        specifier: 0.1.2-rc.1
+        version: 0.1.2-rc.1(@deepseek-ai/cordis@4.0.2)
+      '@deepseek-ai/dsh-session':
+        specifier: 0.1.2-rc.1
+        version: 0.1.2-rc.1(patch_hash=8c38458c088392c15dd34c99d60f4cc4fd47a70c1f602a7d6aac3b6d4a79b4f0)(@deepseek-ai/cordis@4.0.2)(@deepseek-ai/dsh-scope@0.1.2-rc.1(@deepseek-ai/cordis@4.0.2)(@deepseek-ai/dsh-invariants@0.1.2-rc.1(@deepseek-ai/cordis@4.0.2)))
+      '@deepseek-ai/dsh-typert-protocol':
+        specifier: 0.1.2-rc.1
+        version: 0.1.2-rc.1(@deepseek-ai/cordis@4.0.2)
+      events:
+        specifier: 3.3.0
+        version: 3.3.0
+      graphology:
+        specifier: 0.26.0
+        version: 0.26.0(graphology-types@0.24.8)
+      graphology-layout:
+        specifier: ^0.6.1
+        version: 0.6.1(graphology-types@0.24.8)
+      graphology-layout-forceatlas2:
+        specifier: ^0.10.1
+        version: 0.10.1(graphology-types@0.24.8)
+      react:
+        specifier: 18.3.1
+        version: 18.3.1
+      sigma:
+        specifier: 3.0.3
+        version: 3.0.3(graphology-types@0.24.8)
+    devDependencies:
+      '@deepseek-ai/dsh-client-ui-layout':
+        specifier: 0.1.2-rc.1
+        version: 0.1.2-rc.1(@deepseek-ai/cordis@4.0.2)
+      '@novel-agent/novel-project':
+        specifier: workspace:*
+        version: link:../novel-project
+      react-dom:
+        specifier: 18.3.1
+        version: 18.3.1(react@18.3.1)
+      tsdown:
+        specifier: 0.22.2
+        version: 0.22.2(tsx@4.22.4)(typescript@6.0.3)
+
   packages/novel-writing:
     dependencies:
       '@deepseek-ai/cordis':
@@ -672,6 +748,11 @@ packages:
     peerDependencies:
       '@deepseek-ai/cordis': ^4.0.2
 
+  '@deepseek-ai/dsh-client-locale@0.1.2-rc.1':
+    resolution: {integrity: sha512-p34i5WcZ0+b77RKEatGLc6Rh4OgJJmc15kWbBqtCtSI1BxpwZxjDzoNIMTTS3jDGUQqfEd9X7Js9D4uNJDUewg==}
+    peerDependencies:
+      '@deepseek-ai/cordis': ^4.0.2
+
   '@deepseek-ai/dsh-client-store@0.1.2-rc.1':
     resolution: {integrity: sha512-tDtAkfYb3URpASDP2fJFOZhGINtVVoUlQQqTSHtTF2L9N+7Tqij/PrSPXawBijBCkVdwaYsXdbzfLLjsh2SBqQ==}
     peerDependencies:
@@ -687,6 +768,11 @@ packages:
     peerDependencies:
       '@deepseek-ai/cordis': ^4.0.2
 
+  '@deepseek-ai/dsh-client-ui-layout@0.1.2-rc.1':
+    resolution: {integrity: sha512-hV/FMsJ/JjaCDxfaRH4+V2t7RauiQqo0vr5Ql0wi32dC4EYT/thhslu9TNCaHpm92SkOkgGFrlwmjYB+slq3FA==}
+    peerDependencies:
+      '@deepseek-ai/cordis': ^4.0.2
+
   '@deepseek-ai/dsh-client-ui-renderer@0.1.2-rc.1':
     resolution: {integrity: sha512-mG4aNL7dL57i6I6FLol3AWWp3g2C+EV3jYt2MZHzbfMcS0gQnEd/BSGH3T5DfNCQcOEIGqu0TQ0B3bxnJatmTA==}
     peerDependencies:
@@ -699,6 +785,11 @@ packages:
 
   '@deepseek-ai/dsh-client-ui-slots@0.1.2-rc.1':
     resolution: {integrity: sha512-wcqn8xwb87RjurSQ0zPoI4K9eYhDyoBjQqg4bByDq8CNynvayHoBPnNWfiAQ8ngyOPE20teL3DMS0gbcfCTqbA==}
+    peerDependencies:
+      '@deepseek-ai/cordis': ^4.0.2
+
+  '@deepseek-ai/dsh-client-ui-theme@0.1.2-rc.1':
+    resolution: {integrity: sha512-JqSxsN510rmJl14IKpcZcDmO7qOrr0ftY/anRhgzJ2gDsamUXlLraaUGpcLgGBnNRvWO7X5N22R8HKPUo4uLQQ==}
     peerDependencies:
       '@deepseek-ai/cordis': ^4.0.2
 
@@ -2460,6 +2551,10 @@ packages:
   estree-walker@3.0.3:
     resolution: {integrity: sha512-7RUKfXgSMMkzt6ZuXmqapOurLGPPfgj6l9uRZ7lRGolvk0y2yocc35LdcxKC5PQZdn2DMqioAQ2NoWcrTKmm6g==}
 
+  events@3.3.0:
+    resolution: {integrity: sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==}
+    engines: {node: '>=0.8.x'}
+
   expect-type@1.4.0:
     resolution: {integrity: sha512-KfYbmpRm0VbLjEvVa9yGwCi9GI34xvi7A/HXYWQO65CSD2u3MczUJSuwXKFIxlGsgBQizV9q5J9NHj4VG0n+pA==}
     engines: {node: '>=12.0.0'}
@@ -2484,6 +2579,29 @@ packages:
   get-tsconfig@5.0.0-beta.5:
     resolution: {integrity: sha512-/6gFNr0N04nob252sTQxyFLi3eKFRqIg1I87YcqAMT1i6SQrSF6KujUEQrtrjMV0H/eejTCltLdDSTEMzHbnsQ==}
     engines: {node: '>=20.20.0'}
+
+  graphology-layout-forceatlas2@0.10.1:
+    resolution: {integrity: sha512-ogzBeF1FvWzjkikrIFwxhlZXvD2+wlY54lqhsrWprcdPjopM2J9HoMweUmIgwaTvY4bUYVimpSsOdvDv1gPRFQ==}
+    peerDependencies:
+      graphology-types: '>=0.19.0'
+
+  graphology-layout@0.6.1:
+    resolution: {integrity: sha512-m9aMvbd0uDPffUCFPng5ibRkb2pmfNvdKjQWeZrf71RS1aOoat5874+DcyNfMeCT4aQguKC7Lj9eCbqZj/h8Ag==}
+    peerDependencies:
+      graphology-types: '>=0.19.0'
+
+  graphology-types@0.24.8:
+    resolution: {integrity: sha512-hDRKYXa8TsoZHjgEaysSRyPdT6uB78Ci8WnjgbStlQysz7xR52PInxNsmnB7IBOM1BhikxkNyCVEFgmPKnpx3Q==}
+
+  graphology-utils@2.5.2:
+    resolution: {integrity: sha512-ckHg8MXrXJkOARk56ZaSCM1g1Wihe2d6iTmz1enGOz4W/l831MBCKSayeFQfowgF8wd+PQ4rlch/56Vs/VZLDQ==}
+    peerDependencies:
+      graphology-types: '>=0.23.0'
+
+  graphology@0.26.0:
+    resolution: {integrity: sha512-8SSImzgUUYC89Z042s+0r/vMibY7GX/Emz4LDO5e7jYXhuoWfHISPFJYjpRLUSJGq6UQ6xlenvX1p/hJdfXuXg==}
+    peerDependencies:
+      graphology-types: '>=0.24.0'
 
   hash.js@1.1.7:
     resolution: {integrity: sha512-taOaskGt4z4SOANNseOviYDvjEJinIkRgmp7LbKP2YTTmVxWBl87s/uzK9r+44BclBSp2X7K1hqeNfz9JbBeXA==}
@@ -2576,6 +2694,9 @@ packages:
   minisearch@7.2.0:
     resolution: {integrity: sha512-dqT2XBYUOZOiC5t2HRnwADjhNS2cecp9u+TJRiJ1Qp/f5qjkeT5APcGPjHw+bz89Ms8Jp+cG4AlE+QZ/QnDglg==}
 
+  mnemonist@0.39.8:
+    resolution: {integrity: sha512-vyWo2K3fjrUw8YeeZ1zF0fy6Mu59RHokURlld8ymdUPjMlD9EC9ov1/YPqTgqRvUN9nTr3Gqfz29LYAmu0PHPQ==}
+
   nanoid@3.3.18:
     resolution: {integrity: sha512-DTg4MJbGMWkfi6VZFdNt2/caMbQy4Ou+Op/hJQvGEWcnVfoA1QA+xzRKAzw9jD6+GVOOeYr/mIcuDSdug6F6+w==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
@@ -2585,6 +2706,9 @@ packages:
     resolution: {integrity: sha512-kVrnsrJqMR8+oLJnGEmSWw9BivK5mt7H3FZatVRjrc5wGqFYuBxX1yG7+A7Gi5AefkX6t/oCkizcQgpu0cY1dQ==}
     engines: {node: ^18 || >=20}
     hasBin: true
+
+  obliterator@2.0.5:
+    resolution: {integrity: sha512-42CPE9AhahZRsMNslczq0ctAEtqk8Eka26QofnqC346BZdHDySk3LWka23LI7ULIw11NmltpiLagIq8gBozxTw==}
 
   obug@2.1.4:
     resolution: {integrity: sha512-4a+OsYv9UktOJKE+l1A4OufDgdRF9PifWj+tJnHURo/P+WOxpG4GzUFL9qCalmWauao6ogiG+QvnCovwPoyAWA==}
@@ -2605,6 +2729,9 @@ packages:
 
   pako@1.0.11:
     resolution: {integrity: sha512-4hLB8Py4zZce5s4yd9XzopqwVv/yGNhV1Bl8NTmCq1763HeK2+EwVTv+leGeL13Dnh2wfbqowVPXCIO0z4taYw==}
+
+  pandemonium@2.4.1:
+    resolution: {integrity: sha512-wRqjisUyiUfXowgm7MFH2rwJzKIr20rca5FsHXCMNm1W5YPP1hCtrZfgmQ62kP7OZ7Xt+cR858aB28lu5NX55g==}
 
   parse5@8.0.1:
     resolution: {integrity: sha512-z1e/HMG90obSGeidlli3hj7cbocou0/wa5HacvI3ASx34PecNjNQeaHNo5WIZpWofN9kgkqV1q5YvXe3F0FoPw==}
@@ -2718,6 +2845,9 @@ packages:
 
   siginfo@2.0.0:
     resolution: {integrity: sha512-ybx0WO1/8bSBLEWXZvEd7gMW3Sn3JFlW3TvX1nREbDLRNQNaeNN8WK0meBwPdAaOI7TtRRRJn/Es1zhrrCHu7g==}
+
+  sigma@3.0.3:
+    resolution: {integrity: sha512-5H0zFlx6/NTQpqBg4Rm569ZOpnBOXMaS25UQThIWMU3XyzI5AhmorK/gnl87BvJBLhQd0tW4C0LIp3enWzMoNw==}
 
   source-map-js@1.2.1:
     resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
@@ -3254,6 +3384,11 @@ snapshots:
     transitivePeerDependencies:
       - '@deepseek-ai/dsh-invariants'
 
+  '@deepseek-ai/dsh-client-locale@0.1.2-rc.1(@deepseek-ai/cordis@4.0.2)':
+    dependencies:
+      '@deepseek-ai/cordis': 4.0.2(@deepseek-ai/cordis-plugin-include@1.0.7)(@deepseek-ai/cordis-plugin-loader@1.0.3)
+      '@deepseek-ai/schemastery': 3.18.2
+
   '@deepseek-ai/dsh-client-store@0.1.2-rc.1(@deepseek-ai/cordis@4.0.2)(@types/react@18.2.79)(react@18.3.1)':
     dependencies:
       '@deepseek-ai/cordis': 4.0.2(@deepseek-ai/cordis-plugin-include@1.0.7)(@deepseek-ai/cordis-plugin-loader@1.0.3)
@@ -3281,6 +3416,10 @@ snapshots:
     transitivePeerDependencies:
       - typescript
 
+  '@deepseek-ai/dsh-client-ui-layout@0.1.2-rc.1(@deepseek-ai/cordis@4.0.2)':
+    dependencies:
+      '@deepseek-ai/cordis': 4.0.2(@deepseek-ai/cordis-plugin-include@1.0.7)(@deepseek-ai/cordis-plugin-loader@1.0.3)
+
   '@deepseek-ai/dsh-client-ui-renderer@0.1.2-rc.1(@deepseek-ai/cordis@4.0.2)(react@18.3.1)':
     dependencies:
       '@deepseek-ai/cordis': 4.0.2(@deepseek-ai/cordis-plugin-include@1.0.7)(@deepseek-ai/cordis-plugin-loader@1.0.3)
@@ -3295,6 +3434,12 @@ snapshots:
   '@deepseek-ai/dsh-client-ui-slots@0.1.2-rc.1(@deepseek-ai/cordis@4.0.2)':
     dependencies:
       '@deepseek-ai/cordis': 4.0.2(@deepseek-ai/cordis-plugin-include@1.0.7)(@deepseek-ai/cordis-plugin-loader@1.0.3)
+
+  '@deepseek-ai/dsh-client-ui-theme@0.1.2-rc.1(@deepseek-ai/cordis@4.0.2)':
+    dependencies:
+      '@deepseek-ai/cordis': 4.0.2(@deepseek-ai/cordis-plugin-include@1.0.7)(@deepseek-ai/cordis-plugin-loader@1.0.3)
+      '@deepseek-ai/schemastery': 3.18.2
+      clsx: 2.1.1
 
   '@deepseek-ai/dsh-client-ui-workspace@0.1.2-rc.1(@deepseek-ai/cordis@4.0.2)':
     dependencies:
@@ -4627,6 +4772,8 @@ snapshots:
     dependencies:
       '@types/estree': 1.0.9
 
+  events@3.3.0: {}
+
   expect-type@1.4.0: {}
 
   fdir@6.5.0(picomatch@4.0.7):
@@ -4641,6 +4788,28 @@ snapshots:
   get-tsconfig@5.0.0-beta.5:
     dependencies:
       resolve-pkg-maps: 1.0.0
+
+  graphology-layout-forceatlas2@0.10.1(graphology-types@0.24.8):
+    dependencies:
+      graphology-types: 0.24.8
+      graphology-utils: 2.5.2(graphology-types@0.24.8)
+
+  graphology-layout@0.6.1(graphology-types@0.24.8):
+    dependencies:
+      graphology-types: 0.24.8
+      graphology-utils: 2.5.2(graphology-types@0.24.8)
+      pandemonium: 2.4.1
+
+  graphology-types@0.24.8: {}
+
+  graphology-utils@2.5.2(graphology-types@0.24.8):
+    dependencies:
+      graphology-types: 0.24.8
+
+  graphology@0.26.0(graphology-types@0.24.8):
+    dependencies:
+      events: 3.3.0
+      graphology-types: 0.24.8
 
   hash.js@1.1.7:
     dependencies:
@@ -4758,9 +4927,15 @@ snapshots:
 
   minisearch@7.2.0: {}
 
+  mnemonist@0.39.8:
+    dependencies:
+      obliterator: 2.0.5
+
   nanoid@3.3.18: {}
 
   nanoid@5.1.16: {}
+
+  obliterator@2.0.5: {}
 
   obug@2.1.4: {}
 
@@ -4787,6 +4962,10 @@ snapshots:
       '@oxlint/binding-win32-x64-msvc': 1.76.0
 
   pako@1.0.11: {}
+
+  pandemonium@2.4.1:
+    dependencies:
+      mnemonist: 0.39.8
 
   parse5@8.0.1:
     dependencies:
@@ -4955,6 +5134,13 @@ snapshots:
       '@types/node': 22.20.0
 
   siginfo@2.0.0: {}
+
+  sigma@3.0.3(graphology-types@0.24.8):
+    dependencies:
+      events: 3.3.0
+      graphology-utils: 2.5.2(graphology-types@0.24.8)
+    transitivePeerDependencies:
+      - graphology-types
 
   source-map-js@1.2.1: {}
 

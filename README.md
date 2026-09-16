@@ -1,6 +1,8 @@
 # novel-agent
 
 当前正式开发按 [最终计划](tasks/plan-final.md) 推进。Canon 扩展和锁已有验证，
+下文各段测试数字是**各自迁移当日的记录**（244/245/255/256/259/262/264/266），不是当前总数；
+当前门禁以本机 `corepack pnpm test` 实测为准，最近一次结果记在 [任务清单](tasks/todo.md)。
 [接受/回滚通知的恢复补丁](docs/canon-session-recovery-2026-09-09.md)已通过 245 个测试和
 完整官方宿主 API 的两次冷重启验证；恢复后可继续回滚、接受新提案。新的 GUI 复验尚未完成。
 用户已明确选择 `0.1.2-rc.1`；[版本迁移](docs/open-source-evaluations/dsh-0.1.2-rc.1-adoption-2026-09-08.md)
@@ -89,15 +91,19 @@ DSH approval 后写入目标文件，不推进 Canon；编码实现留在 Writin
 
 ## 需要下载的社区插件
 
-| 使用面 | 下载项 | 上游提供 |
-| --- | --- | --- |
-| Web / Desktop | `dsh-better-sidebar@0.16.1` | 文件树、编辑/预览、真实终端、Git、Diff、Jobs/Subagents、分栏与浮窗 |
-| Web / Desktop | `@anweat/dsh-browser@0.1.9` | Playwright/OpenCLI 浏览器服务与工具 |
-| Web / Desktop | `dsh-web-search-pro@0.1.11` | 多引擎与中文站点 Web 检索 |
-| Web / Desktop | `dsh-file-upload@0.4.3` | 上传入口和通用文档转文本 |
-| TUI | `@xmoon76/dsh-pi-tui@0.3.4` | 完整 TUI、Session、审批、命令、搜索、Skills、Plan 与 Subagents |
-| 可选开发 | `dsh-git-worktree@0.6.0` | 隔离 Worktree 开发流程 |
+| 使用面 | 下载项 | 上游提供 | 在 `0.1.2-rc.1` 上的实测状态 |
+| --- | --- | --- | --- |
+| Web / Desktop | `dsh-better-sidebar@0.16.1` | 文件树、编辑/预览、真实终端、Git、Diff、Jobs/Subagents、分栏与浮窗 | **加载失败**：rc.1 的 `@deepseek-ai/dsh-settings` 没有 `settingsNamespace` 导出 |
+| Web / Desktop | `@anweat/dsh-browser@0.1.9` | Playwright/OpenCLI 浏览器服务与工具 | **加载失败**：同一个 `settingsNamespace` 缺失 |
+| Web / Desktop | `dsh-web-search-pro@0.1.11` | 多引擎与中文站点 Web 检索 | **加载失败**：rc.1 的 `@deepseek-ai/dsh-settings` 没有 `installSettingsSection` 导出 |
+| Web / Desktop | `dsh-file-upload@0.4.3` | 上传入口和通用文档转文本 | 安装、Host 启动、client artifact HTTP `200` 通过；未做浏览器交互 |
+| TUI | `@xmoon76/dsh-pi-tui@0.3.4` | 完整 TUI、Session、审批、命令、搜索、Skills、Plan 与 Subagents | 未在 `0.1.2-rc.1` 验收，旧 rc.2 记录保留在 `docs/` |
+| 可选开发 | `dsh-git-worktree@0.6.0` | 隔离 Worktree 开发流程 | 未在 `0.1.2-rc.1` 验收 |
 
+上表状态来自 [社区插件 rc.1 兼容性实测](docs/community-plugin-rc1-compatibility-2026-09-15.md)：
+前三个插件的这些版本面向更新的 DSH，装进 `0.1.2-rc.1` Profile 会让
+`plugin tree failed to load` 直接阻塞 Host 启动，因此已从隔离 Profile 移除；是否存在面向
+rc.1 的更老版本尚未排查。它们的更老版本可用前，不要把这些组合写成可用。
 这些全部是外部下载项，本仓库不复制、不包装，也不为它们再写通用前端。新的隔离
 DSH `0.1.2-rc.1` Profile 完成真实 load/UI/TUI smoke 前，不把对应组合写成已验证。
 
@@ -106,7 +112,8 @@ DSH `0.1.2-rc.1` Profile 完成真实 load/UI/TUI smoke 前，不把对应组合
 当前已验证的开发入口是官方 `@deepseek-ai/dsh@0.1.2-rc.1` Web Host。
 社区 [Desktop `2.0.5`](https://github.com/anywhere-labs/dsh-desktop/releases/tag/v2.0.5)
 配套该 DSH 版本，但尚未在本轮安装或验收；旧 `2.0.2` 组合只保留历史证据。
-以下社区插件命令保留为候选组合示例，其旧 rc.2 smoke 不能替代 rc.1 兼容性验收：
+以下社区插件命令保留为候选组合示例。按上面的 rc.1 实测，前三条命令装进 `0.1.2-rc.1`
+Profile 后会让 Host 加载失败，等出现兼容版本再执行；旧 rc.2 smoke 不能替代 rc.1 兼容性验收：
 
 ```powershell
 dsh plugin --profile web add `
@@ -181,7 +188,8 @@ dsh plugin --profile web add `
 
 ### 在另一台电脑上安装
 
-新机器克隆仓库后，`scripts/install-plugins.ps1` 完成整套安装：`corepack pnpm install`、
+新机器克隆仓库后，Windows 用 `scripts/install-plugins.ps1`、macOS/Linux 用
+`scripts/install-plugins.sh` 完成整套安装：`corepack pnpm install`、
 `corepack pnpm build`、打包到 `%TEMP%\novel-agent-packages`、给所选 Profile 的
 `pnpm-workspace.yaml` 写入授权的 `dsh-session` 补丁路径（并保留
 `autoInstallPeers: false`）后执行 `dsh plugin --profile <名称> add`，最后校验 Profile
@@ -195,6 +203,31 @@ corepack enable
 $env:DSH_HOME = 'D:\dsh-homes\dev'
 powershell -ExecutionPolicy Bypass -File scripts/install-plugins.ps1 -Profile web
 ```
+
+macOS / Linux 上先装本机唯一的已打补丁 CLI，再把它装进隔离 Home：
+
+```bash
+scripts/install-dsh.sh                              # 官方 0.1.2-rc.1 + 仓库 Session 补丁
+scripts/install-plugins.sh --dsh-home "$PWD/.novel-agent/dsh-home"
+DSH_HOME="$PWD/.novel-agent/dsh-home" dsh --profile web --host 127.0.0.1 --port 0 --no-open
+```
+
+`scripts/install-dsh.sh` 幂等：在 `~/.local/lib/dsh/0.1.2-rc.1` 装官方 CLI，校验每一份
+`dsh-session` 都带补丁，并写出 `~/.local/bin/dsh` shim；它不写任何 `DSH_HOME`，也不删除旧版本。
+本机（macOS）的搭建与冒烟证据见
+[macOS 开发环境记录](docs/development-environment-macos-2026-09-15.md)。
+
+装好之后用常驻开发宿主跑开发：它以脱离会话的后台进程提供前端和同一个 Host 里的后端服务，
+固定端口 `4780`，运行状态写在 `.novel-agent/run/`（已被 `.gitignore` 忽略）。
+
+```bash
+scripts/dev-host.sh start      # 后台启动；重复调用不会起第二个进程
+scripts/dev-host.sh rebuild    # 改完源码后：构建 → 装进 Profile → 重启
+scripts/dev-host.sh status     # 或用 open / url / logs / stop
+```
+
+token 只在首次访问该浏览器时需要，`scripts/dev-host.sh open` 会用它打开页面；
+日志里的 token 已打码。证据见 [任务清单](tasks/todo.md)。
 
 脚本只写入 `%TEMP%`、`$DSH_HOME` 与仓库内构建产物；安装完成后用同一已打补丁的 CLI
 启动该 Profile 即可。
@@ -378,9 +411,9 @@ Canon 与领域服务拥有。
 
 - 社区 Desktop `v2.0.2`、DSH `0.1.1-rc.2` 和 Better Sidebar `0.16.1` 的既有
   隔离 smoke 记录保留在 `docs/`。
-- 当前单插件组合已在新的临时 `DSH_HOME` 中验证到启动边界：Web 根页面、
-  `novel-project` client artifact 与 Better Sidebar client artifact 均返回
-  HTTP `200`；Pi TUI `0.3.4` 显示可输入主界面。该证据不等于 Better Sidebar
+- 2026-08-28 前后的单插件组合（当时版本为 `0.1.1-rc.2`）已在临时 `DSH_HOME` 中验证到
+  启动边界：Web 根页面、`novel-project` client artifact 与 Better Sidebar client artifact
+  均返回 HTTP `200`；Pi TUI `0.3.4` 显示可输入主界面。该证据不等于 Better Sidebar
   全部 Files/terminal/Git/Diff 交互或 Pi TUI 小说审阅流程已验收。
 - `dsh-file-upload@0.4.3` 已在新的隔离 DSH `0.1.1-rc.2` Web Profile 中用
   上述两个精确 `--allow-build` 参数完成安装、解析、Host 启动与 client artifact
@@ -1240,5 +1273,3 @@ corepack pnpm build
 [parity matrix](docs/claude-desktop-parity-matrix.md)。来源、许可证和精确版本见
 [upstream ledger](docs/upstream-sources.md) 与
 [THIRD_PARTY_NOTICES](THIRD_PARTY_NOTICES.md)。
-#   N o v e l - a g e n t  
- 

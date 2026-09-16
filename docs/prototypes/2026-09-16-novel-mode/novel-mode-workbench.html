@@ -1,0 +1,2418 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="day">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>小说模式 · 写作工作台（原型 v4）</title>
+<style>
+/* ═══ tokens · 日间 / 夜间 ═══ */
+:root {
+  /* 底色四档：窗口底 → 主面板 → 卡片/阅读区 → 输入区/次级面板 */
+  --bg-000: 0 0% 100%;
+  --bg-100: 48 33.3% 97.1%;
+  --bg-200: 53 28.6% 94.5%;
+  --bg-300: 48 25% 92.2%;
+  --border-100: 51 16.5% 84.5%;
+  --border-200: 48 14% 74%;
+  --text-000: 60 2.6% 7.6%;
+  --text-100: 60 2.6% 7.6%;
+  --text-200: 60 2.6% 7.6%;
+  --accent-brand: 15 63.1% 59.6%;
+  --accent-brand-deep: 15 54.2% 51.2%;
+  --accent-text: 15 55% 38%;
+  --on-accent: 20 14% 10%;
+  --ok: 150 22% 32%;
+  --err: 2 45% 38%;
+  --info: 212 20% 42%;
+  --warn: 36 62% 32%;
+  --f-none: 45 6% 46%;
+  --f-port: 212 20% 46%;
+  --f-river: 345 20% 40%;
+  --f-press: 158 18% 36%;
+  --f-bureau: 32 42% 45%;
+  --font-ui: "PingFang SC", "Microsoft YaHei", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-serif: "Source Han Serif SC", "Noto Serif SC", "Songti SC", "SimSun", serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --fs-12: 12px;
+  --fs-13: 13px;
+  --fs-14: 14px;
+  --fs-16: 16px;
+  --fs-20: 20px;
+  --read-size: 17px;
+  --read-lh: 1.85;
+  --read-measure: 40em;
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 20px; --s6: 24px; --s7: 32px;
+  --r-card: 10px; --r-ctl: 6px; --r-key: 4px;
+  --sh-1: 0 1px 2px hsl(30 10% 10% / .04), 0 0 0 .5px hsl(var(--border-100));
+  --sh-2: 0 2px 8px hsl(30 10% 10% / .07), 0 0 0 .5px hsl(var(--border-100));
+  --sh-3: 0 14px 38px hsl(30 10% 10% / .18), 0 0 0 .5px hsl(var(--border-100));
+  --t-fast: 150ms; --t-base: 220ms;
+  --app-w: 1440px;
+}
+html[data-theme="night"] {
+  --bg-000: 60 2.1% 18.4%;
+  --bg-100: 60 2.7% 14.5%;
+  --bg-200: 30 3.3% 11.8%;
+  --bg-300: 60 2.6% 7.6%;
+  /* 实测线值在夜间低于可辨识阈值，按两档提升以保证 1px 细线可见（见 design-tokens.md） */
+  --border-100: 30 4% 22%;
+  --border-200: 30 5% 30%;
+  --text-000: 48 33.3% 97.1%;
+  --text-100: 48 33.3% 97.1%;
+  --text-200: 48 33.3% 97.1%;
+  --accent-brand: 15 63.1% 59.6%;
+  --accent-brand-deep: 15 60% 53%;
+  --accent-text: 15 63.1% 59.6%;
+  --on-accent: 20 14% 10%;
+  --ok: 150 18% 60%;
+  --err: 5 45% 62%;
+  --info: 212 16% 68%;
+  --warn: 36 48% 62%;
+  --f-none: 45 6% 62%;
+  --f-port: 212 18% 64%;
+  --f-river: 345 22% 66%;
+  --f-press: 158 16% 60%;
+  --f-bureau: 32 40% 62%;
+  --sh-1: 0 1px 2px hsl(0 0% 0% / .3), 0 0 0 .5px hsl(var(--border-100));
+  --sh-2: 0 2px 8px hsl(0 0% 0% / .35), 0 0 0 .5px hsl(var(--border-100));
+  --sh-3: 0 14px 38px hsl(0 0% 0% / .5), 0 0 0 .5px hsl(var(--border-100));
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: hsl(var(--bg-300));
+  color: hsl(var(--text-100) / .92);
+  font-family: var(--font-ui);
+  font-size: var(--fs-13);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+button { font: inherit; color: inherit; cursor: pointer; background: none; border: 0; }
+input, textarea, select { font: inherit; color: inherit; }
+h1, h2, h3, h4 { margin: 0; font-family: var(--font-serif); font-weight: 600; letter-spacing: .01em; }
+p { margin: 0; }
+svg { display: block; }
+:focus-visible { outline: 2px solid hsl(var(--accent-brand)); outline-offset: 2px; border-radius: var(--r-key); }
+[hidden] { display: none !important; }
+.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.mono { font-family: var(--font-mono); }
+.muted { color: hsl(var(--text-200) / .7); }
+.full { width: 100%; }
+@media (prefers-reduced-motion: reduce) { * { transition-duration: 1ms !important; animation-duration: 1ms !important; } }
+
+/* ═══ 原型切换条（不属于产品界面） ═══ */
+body { display: flex; flex-direction: column; align-items: center; min-width: var(--app-w); }
+.proto {
+  width: var(--app-w);
+  display: flex; flex-wrap: wrap; gap: var(--s2);
+  align-items: center;
+  padding: 8px var(--s5);
+  background: hsl(var(--bg-300));
+  border-bottom: 1px solid hsl(var(--border-100));
+}
+.proto .proto-label { font-size: var(--fs-12); color: hsl(var(--text-200) / .7); padding-right: var(--s2); }
+.proto .spacer { flex: 1; }
+.pchip {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 26px; padding: 0 10px;
+  border-radius: var(--r-key);
+  border: 1px solid hsl(var(--border-100));
+  background: hsl(var(--bg-100));
+  font-size: var(--fs-12); color: hsl(var(--text-100) / .85);
+  transition: background var(--t-fast), border-color var(--t-fast), color var(--t-fast);
+}
+.pchip:hover { background: hsl(var(--bg-000)); border-color: hsl(var(--border-200)); }
+.pchip[aria-pressed="true"] { background: hsl(var(--accent-brand) / .14); border-color: hsl(var(--accent-brand) / .55); color: hsl(var(--accent-text)); font-weight: 600; }
+.pchip .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: .55; }
+
+/* ═══ 舞台与应用骨架 ═══ */
+.stage { width: var(--app-w); height: 900px; }
+.app {
+  position: relative;
+  width: 100%; height: 100%;
+  display: grid;
+  grid-template-columns: 248px minmax(0, 1fr) 296px;
+  grid-template-rows: 44px minmax(0, 1fr) 88px;
+  grid-template-areas: "top top top" "rail main side" "composer composer composer";
+  background: hsl(var(--bg-000));
+  border: 1px solid hsl(var(--border-100));
+  border-radius: var(--r-card);
+  overflow: hidden;
+  box-shadow: var(--sh-2);
+}
+
+/* 顶栏 */
+.topbar {
+  grid-area: top;
+  display: flex; align-items: center; gap: var(--s3);
+  padding: 0 var(--s4);
+  background: hsl(var(--bg-100));
+  border-bottom: 1px solid hsl(var(--border-100));
+}
+.topbar .brand { font-family: var(--font-serif); font-size: var(--fs-14); font-weight: 600; color: hsl(var(--text-000)); }
+.topbar .sep { width: 1px; height: 18px; background: hsl(var(--border-100)); }
+.topbar .ctx { font-size: var(--fs-13); color: hsl(var(--text-200) / .75); }
+.topbar .right { margin-left: auto; display: flex; align-items: center; gap: var(--s2); }
+.vbadge {
+  font-family: var(--font-mono); font-size: var(--fs-12); font-weight: 600;
+  padding: 2px 7px; border-radius: var(--r-key);
+  background: hsl(var(--accent-brand) / .14); color: hsl(var(--accent-text));
+  border: 1px solid hsl(var(--accent-brand) / .35);
+}
+
+/* 左栏 */
+.rail {
+  grid-area: rail;
+  display: flex; flex-direction: column;
+  background: hsl(var(--bg-100));
+  border-right: 1px solid hsl(var(--border-100));
+  min-height: 0;
+}
+.rail-scroll { flex: 1; overflow-y: auto; padding: var(--s3) var(--s2) var(--s2); }
+.rail-foot { border-top: 1px solid hsl(var(--border-100)); padding: var(--s2); }
+.grp + .grp { margin-top: var(--s5); }
+.grp-head {
+  display: flex; align-items: center; gap: 6px;
+  padding: 0 6px var(--s2);
+  font-size: var(--fs-12); color: hsl(var(--text-200) / .68);
+}
+.grp-head .count { margin-left: auto; font-family: var(--font-mono); }
+.item {
+  display: flex; align-items: center; gap: var(--s2);
+  width: 100%; padding: 5px 8px;
+  border-radius: var(--r-ctl);
+  font-size: var(--fs-13); color: hsl(var(--text-100) / .88);
+  text-align: left;
+  transition: background var(--t-fast), color var(--t-fast);
+}
+.item:hover { background: hsl(var(--bg-000) / .8); }
+.item[aria-current="true"], .item.on { background: hsl(var(--accent-brand) / .13); color: hsl(var(--accent-text)); font-weight: 600; }
+.item .ico { flex: none; width: 15px; height: 15px; opacity: .8; }
+.item .tail { margin-left: auto; font-family: var(--font-mono); font-size: var(--fs-12); color: hsl(var(--text-200) / .7); }
+.item[aria-current="true"] .tail { color: hsl(var(--accent-text)); }
+.vol-head {
+  display: flex; align-items: center; gap: 6px;
+  padding: var(--s3) 8px var(--s1);
+  font-size: var(--fs-12); color: hsl(var(--text-200) / .7);
+}
+.vol-head .vol-meta { margin-left: auto; font-family: var(--font-mono); }
+.ch-item { padding-left: 8px; gap: 7px; }
+.ch-item .ord { flex: none; width: 18px; font-family: var(--font-mono); font-size: var(--fs-12); color: hsl(var(--text-200) / .7); text-align: right; }
+.ch-item .t { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.st-dot { flex: none; width: 7px; height: 7px; border-radius: 50%; }
+.st-dot.ok { background: hsl(var(--ok)); }
+.st-dot.pend { background: hsl(var(--accent-brand)); }
+.st-dot.plan { background: hsl(var(--border-200)); }
+.st-dot.warn { background: hsl(var(--warn)); }
+
+/* 右栏 */
+.side {
+  grid-area: side;
+  display: flex; flex-direction: column;
+  background: hsl(var(--bg-100));
+  border-left: 1px solid hsl(var(--border-100));
+  min-height: 0;
+}
+.side-scroll { flex: 1; overflow-y: auto; padding: var(--s3) var(--s3) var(--s4); }
+.side-block + .side-block { margin-top: var(--s4); padding-top: var(--s4); border-top: 1px solid hsl(var(--border-100)); }
+.side-title { display: flex; align-items: center; gap: 6px; font-size: var(--fs-12); color: hsl(var(--text-200) / .7); margin-bottom: var(--s2); }
+.side-title .more { margin-left: auto; font-size: var(--fs-12); color: hsl(var(--accent-text)); }
+
+/* 主画布 */
+.main { grid-area: main; min-height: 0; display: flex; flex-direction: column; background: hsl(var(--bg-000)); }
+.main-head {
+  display: flex; align-items: flex-end; gap: var(--s3);
+  padding: var(--s4) var(--s6) var(--s3);
+  border-bottom: 1px solid hsl(var(--border-100));
+}
+.main-head .h-wrap { min-width: 0; }
+.main-head h1 { font-size: var(--fs-20); color: hsl(var(--text-000)); }
+.main-head .sub { margin-top: 3px; font-size: var(--fs-13); color: hsl(var(--text-200) / .72); }
+.main-head .tools { margin-left: auto; display: flex; align-items: center; gap: var(--s2); flex: none; }
+.main-body { flex: 1; overflow-y: auto; padding: var(--s5) var(--s6) var(--s6); min-height: 0; }
+.main-body.flush { padding: 0; }
+
+/* 底部输入条 */
+.composer {
+  grid-area: composer;
+  display: grid; grid-template-columns: 176px minmax(0, 1fr) auto;
+  gap: var(--s3); align-items: center;
+  padding: var(--s3) var(--s4);
+  background: hsl(var(--bg-300));
+  border-top: 1px solid hsl(var(--border-100));
+}
+.composer .inline { display: flex; align-items: center; gap: var(--s2); }
+#cmpThreadLabel { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ═══ 通用控件（静置 / hover / active / disabled / loading 五态） ═══ */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  height: 32px; padding: 0 14px;
+  border-radius: var(--r-ctl);
+  border: 1px solid hsl(var(--border-100));
+  background: hsl(var(--bg-000));
+  color: hsl(var(--text-100) / .92);
+  font-size: var(--fs-13); font-weight: 500;
+  transition: background var(--t-fast), border-color var(--t-fast), color var(--t-fast), transform 60ms;
+  white-space: nowrap;
+}
+.btn:hover { background: hsl(var(--bg-100)); border-color: hsl(var(--border-200)); }
+.btn:active { transform: translateY(1px); background: hsl(var(--bg-200)); }
+.btn.primary {
+  background: hsl(var(--accent-brand)); border-color: hsl(var(--accent-brand)); color: hsl(var(--on-accent)); font-weight: 600;
+}
+.btn.primary:hover { background: hsl(var(--accent-brand) / .88); border-color: hsl(var(--accent-brand-deep)); }
+.btn.primary:active { background: hsl(var(--accent-brand)); border-color: hsl(var(--accent-brand-deep)); color: hsl(var(--on-accent)); transform: translateY(1px); }
+.btn.ghost { background: transparent; border-color: transparent; color: hsl(var(--text-200) / .8); }
+.btn.ghost:hover { background: hsl(var(--bg-100)); color: hsl(var(--text-000)); }
+.btn.danger { color: hsl(var(--err)); border-color: hsl(var(--err) / .4); background: hsl(var(--bg-000)); }
+.btn.danger:hover { background: hsl(var(--err) / .1); border-color: hsl(var(--err) / .6); }
+.btn[disabled], .btn.is-disabled {
+  opacity: .45; cursor: not-allowed; background: hsl(var(--bg-200)); color: hsl(var(--text-200) / .8); border-color: hsl(var(--border-100));
+}
+.btn[disabled]:hover, .btn.is-disabled:hover { background: hsl(var(--bg-200)); border-color: hsl(var(--border-100)); transform: none; }
+.btn.loading { cursor: progress; color: hsl(var(--text-200) / .85); }
+.btn.primary.loading { background: hsl(var(--accent-brand) / .55); color: hsl(var(--on-accent)); }
+.btn.sm { height: 26px; padding: 0 10px; font-size: var(--fs-12); }
+.btn.lg { height: 36px; padding: 0 18px; font-size: var(--fs-14); }
+.spinner {
+  width: 12px; height: 12px; border-radius: 50%;
+  border: 1.5px solid currentColor; border-right-color: transparent;
+  animation: spin 700ms linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.seg { display: inline-flex; padding: 1px; border-radius: var(--r-ctl); background: hsl(var(--bg-300)); border: 1px solid hsl(var(--border-100)); }
+.seg button {
+  height: 24px; padding: 0 10px; border-radius: 5px; font-size: var(--fs-12); color: hsl(var(--text-200) / .8);
+  transition: background var(--t-fast), color var(--t-fast);
+}
+.seg button:hover { color: hsl(var(--text-000)); background: hsl(var(--bg-100)); }
+.seg button[aria-pressed="true"] { background: hsl(var(--bg-000)); color: hsl(var(--text-000)); font-weight: 600; box-shadow: var(--sh-1); }
+.seg button:disabled { opacity: .45; cursor: not-allowed; }
+
+.chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  height: 22px; padding: 0 8px; border-radius: var(--r-key);
+  border: 1px solid hsl(var(--border-100));
+  background: hsl(var(--bg-100));
+  font-size: var(--fs-12); color: hsl(var(--text-200) / .82);
+  white-space: nowrap;
+}
+.chip.ok { color: hsl(var(--ok)); border-color: hsl(var(--ok) / .35); background: hsl(var(--ok) / .08); }
+.chip.warn { color: hsl(var(--warn)); border-color: hsl(var(--warn) / .4); background: hsl(var(--warn) / .1); }
+.chip.err { color: hsl(var(--err)); border-color: hsl(var(--err) / .4); background: hsl(var(--err) / .08); }
+.chip.info { color: hsl(var(--info)); border-color: hsl(var(--info) / .35); background: hsl(var(--info) / .08); }
+.chip.accent { color: hsl(var(--accent-text)); border-color: hsl(var(--accent-brand) / .45); background: hsl(var(--accent-brand) / .12); }
+.chip .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.tag { display: inline-flex; align-items: center; height: 22px; padding: 0 9px; border-radius: 999px; font-size: var(--fs-12); color: hsl(var(--text-200) / .8); border: 1px solid hsl(var(--border-100)); }
+
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label, .field .lbl { font-size: var(--fs-12); color: hsl(var(--text-200) / .75); }
+.inp, .ta, .sel {
+  width: 100%; height: 32px; padding: 0 10px;
+  border: 1px solid hsl(var(--border-100)); border-radius: var(--r-ctl);
+  background: hsl(var(--bg-000)); color: hsl(var(--text-100) / .92);
+  font-size: var(--fs-13);
+  transition: border-color var(--t-fast), background var(--t-fast);
+}
+.ta { height: auto; min-height: 62px; padding: 8px 10px; resize: vertical; line-height: 1.6; }
+.inp:hover, .ta:hover, .sel:hover { border-color: hsl(var(--border-200)); }
+.inp:focus, .ta:focus, .sel:focus { outline: none; border-color: hsl(var(--accent-brand)); box-shadow: 0 0 0 3px hsl(var(--accent-brand) / .16); }
+.inp[disabled], .ta[disabled], .sel[disabled] { opacity: .5; cursor: not-allowed; }
+.inp::placeholder, .ta::placeholder { color: hsl(var(--text-200) / .5); }
+
+.switch { display: inline-flex; align-items: center; gap: 7px; font-size: var(--fs-12); color: hsl(var(--text-200) / .8); }
+.switch .track { width: 30px; height: 17px; border-radius: 999px; background: hsl(var(--border-200)); position: relative; transition: background var(--t-fast); flex: none; }
+.switch .track::after { content: ""; position: absolute; top: 2px; left: 2px; width: 13px; height: 13px; border-radius: 50%; background: hsl(var(--bg-000)); transition: transform var(--t-fast); box-shadow: var(--sh-1); }
+.switch[aria-checked="true"] .track { background: hsl(var(--accent-brand)); }
+.switch[aria-checked="true"] .track::after { transform: translateX(13px); }
+.switch:hover .track { box-shadow: 0 0 0 3px hsl(var(--accent-brand) / .14); }
+
+.card { background: hsl(var(--bg-200)); border: 1px solid hsl(var(--border-100)); border-radius: var(--r-card); padding: var(--s4); box-shadow: var(--sh-1); }
+.card.plain { background: hsl(var(--bg-000)); }
+.card.flat { background: transparent; box-shadow: none; }
+.card-h { display: flex; align-items: center; gap: var(--s2); margin-bottom: var(--s3); }
+.card-h .t { font-size: var(--fs-14); font-weight: 600; color: hsl(var(--text-000)); }
+.card-h .r { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+.kv { display: grid; grid-template-columns: 64px 1fr; gap: 4px var(--s3); font-size: var(--fs-13); }
+.kv dt { color: hsl(var(--text-200) / .7); }
+.kv dd { margin: 0; color: hsl(var(--text-100) / .9); }
+.rule { height: 1px; background: hsl(var(--border-100)); border: 0; margin: var(--s4) 0; }
+.note { font-size: var(--fs-12); color: hsl(var(--text-200) / .7); }
+.lead { font-size: var(--fs-14); color: hsl(var(--text-200) / .85); }
+.grid { display: grid; gap: var(--s4); }
+.g2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.g3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.g4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.row { display: flex; align-items: center; gap: var(--s2); }
+.row.between { justify-content: space-between; }
+.col { display: flex; flex-direction: column; gap: var(--s2); }
+.stack > * + * { margin-top: var(--s3); }
+.progress { height: 4px; border-radius: 999px; background: hsl(var(--bg-300)); overflow: hidden; }
+.progress > i { display: block; height: 100%; background: hsl(var(--accent-brand)); }
+.progress.ok > i { background: hsl(var(--ok)); }
+
+/* 骨架屏 */
+.sk { border-radius: var(--r-key); background: linear-gradient(90deg, hsl(var(--bg-300)), hsl(var(--bg-200)), hsl(var(--bg-300))); background-size: 240px 100%; animation: shimmer 1.5s linear infinite; }
+@keyframes shimmer { from { background-position: -120px 0; } to { background-position: 120px 0; } }
+.sk-line { height: 10px; margin-bottom: 8px; }
+.sk-card { height: 72px; border-radius: var(--r-card); margin-bottom: 10px; }
+
+/* ═══ 故事地图 ═══ */
+.map-wrap { position: relative; height: 100%; min-height: 0; display: flex; flex-direction: column; }
+.map-bar {
+  display: flex; align-items: center; gap: var(--s2);
+  padding: var(--s3) var(--s6);
+  border-bottom: 1px solid hsl(var(--border-100));
+  background: hsl(var(--bg-000));
+  flex-wrap: wrap;
+}
+.map-bar .grow { flex: 1; }
+.search { position: relative; }
+.search .inp { width: 188px; padding-left: 26px; }
+.search svg { position: absolute; left: 8px; top: 9px; opacity: .55; }
+.pop {
+  position: absolute; z-index: 30; top: calc(100% + 4px); left: 0; width: 240px;
+  background: hsl(var(--bg-000)); border: 1px solid hsl(var(--border-100)); border-radius: var(--r-ctl);
+  box-shadow: var(--sh-3); padding: 4px; max-height: 240px; overflow-y: auto;
+}
+.pop button { display: flex; align-items: center; gap: 6px; width: 100%; padding: 6px 8px; border-radius: var(--r-key); font-size: var(--fs-13); text-align: left; }
+.pop button:hover { background: hsl(var(--bg-100)); }
+.pop .hint { padding: 6px 8px; font-size: var(--fs-12); color: hsl(var(--text-200) / .7); }
+.map-vp { position: relative; flex: 1; min-height: 0; overflow: hidden; cursor: grab; background: hsl(var(--bg-000)); }
+.map-vp.dragging { cursor: grabbing; }
+.map-vp svg { width: 100%; height: 100%; }
+.map-foot { display: flex; align-items: center; gap: var(--s3); padding: var(--s2) var(--s6) var(--s3); border-top: 1px solid hsl(var(--border-100)); flex-wrap: wrap; }
+.legend { display: flex; align-items: center; gap: var(--s3); flex-wrap: wrap; font-size: var(--fs-12); color: hsl(var(--text-200) / .78); }
+.legend .li { display: inline-flex; align-items: center; gap: 5px; }
+.legend .sw { width: 9px; height: 9px; border-radius: 50%; }
+.li { display: inline-flex; align-items: center; gap: 5px; }
+.sw { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.legend .ln { width: 18px; height: 0; border-top: 2px solid hsl(var(--border-200)); }
+.legend .ln.dash { border-top-style: dashed; }
+/* 图谱图元 */
+.n-halo { fill: hsl(var(--accent-brand) / .12); }
+.n-body { stroke: hsl(var(--bg-000)); stroke-width: 1.5; cursor: pointer; transition: opacity var(--t-base); }
+.n-body.sel { stroke: hsl(var(--accent-brand)); stroke-width: 2.5; }
+.n-hit { fill: transparent; cursor: pointer; }
+.n-label { font-family: var(--font-ui); font-size: 11.5px; fill: hsl(var(--text-100) / .9); pointer-events: none; }
+.n-label.sel { font-weight: 600; fill: hsl(var(--text-000)); }
+.n-emo { stroke: hsl(var(--bg-000)); stroke-width: 1.5; pointer-events: none; }
+.n-debt { pointer-events: none; }
+.n-debt text { font-family: var(--font-mono); font-size: 8.5px; font-weight: 700; fill: hsl(var(--on-accent)); }
+.n-pin { pointer-events: none; }
+.n-g.dim { opacity: .26; }
+.n-g.hidden { display: none; }
+.e-line { fill: none; stroke: hsl(var(--border-200)); stroke-width: 1.4; transition: opacity var(--t-base), stroke var(--t-fast); }
+.e-line.back { stroke-dasharray: 3 3; }
+.e-line.hot { stroke: hsl(var(--accent-brand)); stroke-width: 2; }
+.e-line.dim { opacity: .18; }
+.e-hit { fill: none; stroke: transparent; stroke-width: 14px; cursor: pointer; }
+.cluster { fill: hsl(var(--border-100) / .5); stroke: hsl(var(--border-100)); stroke-width: 1; }
+.cluster-label { font-family: var(--font-mono); font-size: 10.5px; fill: hsl(var(--text-200) / .7); }
+.bubble { fill: hsl(var(--bg-200)); stroke: hsl(var(--border-200)); stroke-width: 1; cursor: pointer; }
+.bubble:hover { fill: hsl(var(--bg-300)); }
+.bubble-text { font-family: var(--font-mono); font-size: 11px; fill: hsl(var(--text-100) / .85); pointer-events: none; }
+.map-tip {
+  position: absolute; z-index: 20; max-width: 280px; padding: 8px 10px;
+  background: hsl(var(--bg-000)); border: 1px solid hsl(var(--border-100)); border-radius: var(--r-ctl);
+  box-shadow: var(--sh-3); font-size: var(--fs-12); color: hsl(var(--text-100) / .9); pointer-events: none;
+}
+.map-tip b { font-weight: 600; color: hsl(var(--text-000)); }
+.map-tip .d { display: block; margin-top: 4px; color: hsl(var(--text-200) / .8); }
+
+/* ═══ 提案审阅 ═══ */
+.rv-head { display: flex; align-items: center; gap: var(--s3); flex-wrap: wrap; font-size: var(--fs-13); color: hsl(var(--text-200) / .8); }
+.rv-head .path { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-weight: 600; color: hsl(var(--text-000)); }
+.rv-grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: var(--s5); align-items: start; margin-top: var(--s4); }
+.ms-scroll { max-height: 268px; overflow: hidden; position: relative; }
+.ms-scroll::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 64px; background: linear-gradient(hsl(var(--bg-200) / 0), hsl(var(--bg-200))); pointer-events: none; }
+.ms-body { font-family: var(--font-serif); font-size: var(--read-size); line-height: var(--read-lh); max-width: var(--read-measure); color: hsl(var(--text-100) / .92); }
+.ms-body p + p { margin-top: .82em; }
+.ms-body p { text-indent: 0; }
+.read-body { font-family: var(--font-serif); font-size: var(--read-size); line-height: var(--read-lh); max-width: var(--read-measure); color: hsl(var(--text-100) / .93); }
+.read-body p + p { margin-top: .86em; }
+.read-body mark { background: hsl(var(--accent-brand) / .2); color: inherit; border-radius: 2px; padding: 0 2px; box-shadow: inset 0 -1px 0 hsl(var(--accent-brand) / .5); }
+.ms-end { font-family: var(--font-mono); color: hsl(var(--text-200) / .6); letter-spacing: .3em; }
+.change-row { display: flex; align-items: center; gap: var(--s2); padding: 9px 10px; border-radius: var(--r-ctl); background: hsl(var(--bg-200)); border: 1px solid hsl(var(--border-100)); }
+.change-row + .change-row { margin-top: 6px; }
+.change-row .kind { flex: none; }
+.change-row .txt { flex: 1; font-size: var(--fs-13); color: hsl(var(--text-100) / .92); }
+.change-row[data-decision="accept"] { box-shadow: inset 2px 0 0 hsl(var(--accent-brand)); }
+.change-row[data-decision="reject"] .txt { color: hsl(var(--text-200) / .7); text-decoration: line-through solid hsl(var(--border-200)); }
+.reason { margin: 6px 0 0; }
+.issue { padding: 10px 12px; border-radius: var(--r-ctl); background: hsl(var(--bg-200)); border: 1px solid hsl(var(--border-100)); }
+.issue + .issue { margin-top: 8px; }
+.issue .top { display: flex; align-items: center; gap: var(--s2); margin-bottom: 4px; }
+.issue .q { font-size: var(--fs-13); color: hsl(var(--text-100) / .92); }
+.issue .sug { margin-top: 4px; font-size: var(--fs-13); color: hsl(var(--text-200) / .82); }
+.anchor { display: inline-flex; align-items: center; gap: 4px; font-size: var(--fs-12); color: hsl(var(--info)); border-bottom: 1px dashed hsl(var(--info) / .5); }
+.anchor:hover { color: hsl(var(--info)); background: hsl(var(--info) / .1); }
+.impact-card { border: 1px solid hsl(var(--accent-brand) / .4); background: hsl(var(--accent-brand) / .07); border-radius: var(--r-ctl); padding: 10px 12px; font-size: var(--fs-13); }
+.impact-card .big { font-family: var(--font-mono); font-weight: 600; color: hsl(var(--accent-text)); }
+.dup-note { border: 1px dashed hsl(var(--border-200)); border-radius: var(--r-ctl); padding: 10px 12px; font-size: var(--fs-12); color: hsl(var(--text-200) / .78); }
+
+/* ═══ 阅读与版本 ═══ */
+.read-wrap { display: grid; grid-template-columns: minmax(0, 1fr) 232px; gap: var(--s7); align-items: start; }
+.read-aside { font-size: var(--fs-13); }
+.read-aside .card + .card { margin-top: var(--s3); }
+.ver-row { display: flex; align-items: center; gap: var(--s3); padding: 12px 14px; border: 1px solid hsl(var(--border-100)); border-radius: var(--r-card); background: hsl(var(--bg-200)); }
+.ver-row + .ver-row { margin-top: 8px; }
+.ver-row[data-current="1"] { border-color: hsl(var(--accent-brand) / .5); box-shadow: inset 2px 0 0 hsl(var(--accent-brand)); }
+.ver-row[data-inactive="1"] { opacity: .62; }
+.ver-badge { flex: none; width: 42px; height: 28px; display: grid; place-items: center; border-radius: var(--r-key); font-family: var(--font-mono); font-weight: 700; font-size: var(--fs-13); background: hsl(var(--bg-300)); color: hsl(var(--text-100) / .88); }
+.ver-row[data-current="1"] .ver-badge { background: hsl(var(--accent-brand)); color: hsl(var(--on-accent)); }
+.ver-row .txt { flex: 1; min-width: 0; }
+.ver-row .sum { font-size: var(--fs-13); color: hsl(var(--text-100) / .9); }
+.ver-row .meta { margin-top: 2px; font-size: var(--fs-12); color: hsl(var(--text-200) / .7); }
+.ver-row .acts { display: flex; gap: 6px; flex: none; }
+
+/* ═══ 伏笔 / 债务 / 时间线 / 记忆 ═══ */
+.fcard { border: 1px solid hsl(var(--border-100)); border-radius: var(--r-card); background: hsl(var(--bg-200)); padding: var(--s4); }
+.fcard .top { display: flex; align-items: center; gap: var(--s2); margin-bottom: 6px; }
+.fcard .code { font-family: var(--font-mono); font-size: var(--fs-12); font-weight: 700; color: hsl(var(--text-000)); }
+.fcard .txt { font-size: var(--fs-14); color: hsl(var(--text-000)); }
+.fcard .grid2 { margin-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px var(--s4); font-size: var(--fs-12); color: hsl(var(--text-200) / .78); }
+.fcard .grid2 b { font-weight: 600; color: hsl(var(--text-100) / .9); }
+.debt-row { display: grid; grid-template-columns: 1fr 168px 104px; gap: var(--s4); align-items: center; padding: 12px 14px; border: 1px solid hsl(var(--border-100)); border-radius: var(--r-card); background: hsl(var(--bg-200)); }
+.debt-row + .debt-row { margin-top: 8px; }
+.debt-row.warn { border-color: hsl(var(--warn) / .45); }
+.track { position: relative; height: 14px; }
+.track .base { position: absolute; inset: 6px 0 auto; height: 2px; background: hsl(var(--border-100)); }
+.track .bar { position: absolute; height: 6px; top: 4px; border-radius: 999px; background: hsl(var(--accent-brand) / .6); }
+.track .ticks { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 9px; color: hsl(var(--text-200) / .6); margin-top: 8px; }
+.tl { position: relative; padding-left: 26px; }
+.tl::before { content: ""; position: absolute; left: 7px; top: 6px; bottom: 0; width: 1px; background: hsl(var(--border-100)); }
+.tl-item { position: relative; padding-bottom: var(--s5); }
+.tl-item:last-child { padding-bottom: 0; }
+.tl-item::before { content: ""; position: absolute; left: -22px; top: 5px; width: 9px; height: 9px; border-radius: 50%; background: hsl(var(--bg-000)); border: 2px solid hsl(var(--border-200)); }
+.tl-item.now::before { border-color: hsl(var(--accent-brand)); background: hsl(var(--accent-brand)); }
+.tl-item .day { font-family: var(--font-mono); font-size: var(--fs-12); color: hsl(var(--text-200) / .75); }
+.tl-item.now .day { color: hsl(var(--accent-text)); font-weight: 600; }
+.tl-item .t { margin-top: 2px; font-size: var(--fs-14); color: hsl(var(--text-000)); }
+.tl-item .d { margin-top: 3px; font-size: var(--fs-13); color: hsl(var(--text-200) / .82); }
+.mem-band { position: relative; height: 6px; border-radius: 999px; background: hsl(var(--bg-300)); margin: 8px 0 6px; }
+.mem-band > i { position: absolute; top: 0; height: 100%; border-radius: 999px; background: hsl(var(--accent-brand) / .65); }
+.char-card { display: flex; gap: var(--s3); align-items: flex-start; text-align: left; width: 100%; padding: var(--s3); border: 1px solid hsl(var(--border-100)); border-radius: var(--r-card); background: hsl(var(--bg-200)); transition: background var(--t-fast), border-color var(--t-fast); }
+.char-card:hover { background: hsl(var(--bg-300)); border-color: hsl(var(--border-200)); }
+.seal { flex: none; width: 34px; height: 34px; border-radius: 8px; display: grid; place-items: center; font-family: var(--font-serif); font-size: var(--fs-16); color: hsl(var(--on-accent)); background: hsl(var(--accent-brand) / .85); }
+.rel-line { padding: 10px 12px; border: 1px solid hsl(var(--border-100)); border-radius: var(--r-ctl); background: hsl(var(--bg-200)); }
+.rel-line + .rel-line { margin-top: 6px; }
+.rel-line .pair { font-size: var(--fs-13); font-weight: 600; color: hsl(var(--text-000)); }
+.rel-line .dir { display: grid; grid-template-columns: 62px 1fr; gap: 2px 8px; margin-top: 5px; font-size: var(--fs-12); color: hsl(var(--text-200) / .82); }
+.rel-line .dir .k { color: hsl(var(--text-200) / .68); }
+
+/* ═══ 线程（对话流） ═══ */
+.thread-wrap { display: grid; grid-template-columns: 232px minmax(0, 1fr); height: 100%; min-height: 0; }
+.thread-list { border-right: 1px solid hsl(var(--border-100)); padding: var(--s3) var(--s2); overflow-y: auto; background: hsl(var(--bg-100)); }
+.convo { overflow-y: auto; padding: var(--s5) var(--s6) var(--s6); min-height: 0; }
+.turn { max-width: 640px; }
+.turn + .turn { margin-top: var(--s5); }
+.turn.me { margin-left: auto; }
+.who { display: flex; align-items: center; gap: 6px; font-size: var(--fs-12); color: hsl(var(--text-200) / .7); margin-bottom: 6px; }
+.bubble { padding: 10px 13px; border-radius: var(--r-card); font-size: var(--fs-14); line-height: 1.75; background: hsl(var(--bg-200)); border: 1px solid hsl(var(--border-100)); color: hsl(var(--text-100) / .92); }
+.turn.me .bubble { background: hsl(var(--accent-brand) / .13); border-color: hsl(var(--accent-brand) / .3); }
+.tool-line { display: flex; align-items: center; gap: 7px; font-size: var(--fs-12); color: hsl(var(--text-200) / .78); padding: 5px 8px; border-radius: var(--r-key); background: hsl(var(--bg-100)); border: 1px dashed hsl(var(--border-100)); }
+.tool-line + .tool-line { margin-top: 4px; }
+.inline-card { margin-top: var(--s3); border: 1px solid hsl(var(--accent-brand) / .4); background: hsl(var(--bg-000)); border-radius: var(--r-card); padding: var(--s4); box-shadow: var(--sh-2); }
+.inline-card .acts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: var(--s3); }
+.finding { border-left: 2px solid hsl(var(--warn)); padding-left: 10px; }
+
+/* ═══ 进阶面 / 诊断 ═══ */
+.adv-tabs { display: flex; gap: 4px; padding: var(--s2) var(--s6) 0; border-bottom: 1px solid hsl(var(--border-100)); flex-wrap: wrap; }
+.adv-tab { height: 28px; padding: 0 11px; border-radius: var(--r-ctl) var(--r-ctl) 0 0; font-size: var(--fs-12); color: hsl(var(--text-200) / .8); border: 1px solid transparent; border-bottom: 0; }
+.adv-tab:hover { background: hsl(var(--bg-100)); color: hsl(var(--text-000)); }
+.adv-tab[aria-current="page"] { background: hsl(var(--bg-200)); border-color: hsl(var(--border-100)); color: hsl(var(--text-000)); font-weight: 600; }
+.dtable { width: 100%; border-collapse: collapse; font-size: var(--fs-12); }
+.dtable th { text-align: left; font-weight: 500; color: hsl(var(--text-200) / .72); padding: 7px 10px; border-bottom: 1px solid hsl(var(--border-100)); font-family: var(--font-mono); }
+.dtable td { padding: 7px 10px; border-bottom: 1px solid hsl(var(--border-100)); font-family: var(--font-mono); color: hsl(var(--text-100) / .88); vertical-align: top; }
+.dtable tr:hover td { background: hsl(var(--bg-100)); }
+.code { font-family: var(--font-mono); font-size: var(--fs-12); line-height: 1.65; background: hsl(var(--bg-300)); border: 1px solid hsl(var(--border-100)); border-radius: var(--r-ctl); padding: 10px 12px; color: hsl(var(--text-100) / .9); overflow-x: auto; white-space: pre; }
+.tree { font-family: var(--font-mono); font-size: var(--fs-12); }
+.tree .n { display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-radius: var(--r-key); }
+.tree .n:hover { background: hsl(var(--bg-100)); }
+.tree .n .l1 { padding-left: 0; } .tree .n .l2 { padding-left: 18px; } .tree .n .l3 { padding-left: 36px; }
+.tree .n .st { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+
+/* ═══ 抽屉 / 弹层 / 轻提示 ═══ */
+.scrim { position: absolute; inset: 0; background: hsl(30 10% 6% / .28); z-index: 40; animation: fade var(--t-base) ease-out; }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+.drawer {
+  position: absolute; top: 0; right: 0; bottom: 0; width: 448px; z-index: 45;
+  background: hsl(var(--bg-100)); border-left: 1px solid hsl(var(--border-100));
+  box-shadow: var(--sh-3); display: flex; flex-direction: column;
+  animation: slidein var(--t-base) cubic-bezier(.2, 0, 0, 1);
+}
+@keyframes slidein { from { transform: translateX(24px); opacity: .4; } to { transform: none; opacity: 1; } }
+.drawer-head { display: flex; align-items: flex-start; gap: var(--s3); padding: var(--s4) var(--s5); border-bottom: 1px solid hsl(var(--border-100)); }
+.drawer-body { flex: 1; overflow-y: auto; padding: var(--s4) var(--s5) var(--s6); }
+.drawer-foot { border-top: 1px solid hsl(var(--border-100)); padding: var(--s3) var(--s5); display: flex; gap: var(--s2); }
+.modal-layer { position: absolute; inset: 0; z-index: 50; display: grid; place-items: center; background: hsl(30 10% 6% / .3); animation: fade var(--t-base) ease-out; }
+.modal { width: 520px; max-width: calc(100% - 48px); max-height: calc(100% - 80px); overflow-y: auto; background: hsl(var(--bg-100)); border: 1px solid hsl(var(--border-100)); border-radius: var(--r-card); box-shadow: var(--sh-3); padding: var(--s5); }
+.modal.wide { width: 640px; }
+.modal h3 { font-size: var(--fs-16); color: hsl(var(--text-000)); }
+.modal-foot { display: flex; justify-content: flex-end; gap: var(--s2); margin-top: var(--s5); }
+.toast {
+  position: absolute; z-index: 60; left: 50%; bottom: 108px; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 16px; border-radius: 999px;
+  background: hsl(var(--text-000)); color: hsl(var(--bg-100));
+  font-size: var(--fs-13); box-shadow: var(--sh-3);
+  animation: toastin var(--t-base) cubic-bezier(.2, 0, 0, 1);
+}
+@keyframes toastin { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translate(-50%, 0); } }
+.settings-pop { position: absolute; z-index: 55; top: 44px; right: 12px; width: 300px; background: hsl(var(--bg-100)); border: 1px solid hsl(var(--border-100)); border-radius: var(--r-card); box-shadow: var(--sh-3); padding: var(--s4); }
+
+/* ═══ 边界态 ═══ */
+.hero-card { max-width: 560px; margin: 8% auto 0; text-align: center; }
+.hero-card h2 { font-size: var(--fs-20); margin-bottom: var(--s3); }
+.hero-card ol { text-align: left; margin: var(--s4) 0 var(--s5); padding-left: 0; list-style: none; display: grid; gap: var(--s3); }
+.hero-card li { display: grid; grid-template-columns: 22px 1fr; gap: var(--s3); font-size: var(--fs-13); color: hsl(var(--text-200) / .85); }
+.hero-card li .i { font-family: var(--font-mono); color: hsl(var(--accent-text)); }
+.err-card { max-width: 520px; margin: 6% auto 0; border: 1px solid hsl(var(--err) / .4); background: hsl(var(--err) / .06); border-radius: var(--r-card); padding: var(--s5); }
+.err-card h3 { font-size: var(--fs-16); color: hsl(var(--text-000)); }
+.warn-strip { display: flex; align-items: center; gap: var(--s2); padding: 9px 12px; border-radius: var(--r-ctl); font-size: var(--fs-13); border: 1px solid hsl(var(--warn) / .4); background: hsl(var(--warn) / .08); color: hsl(var(--text-100) / .9); }
+.warn-strip.err { border-color: hsl(var(--err) / .42); background: hsl(var(--err) / .07); }
+
+/* ═══ 窄窗 1280 ═══ */
+.app[data-narrow="1"] { grid-template-columns: 58px minmax(0, 1fr) 0; }
+.app[data-narrow="1"] .rail-scroll { padding: var(--s3) 6px; }
+.app[data-narrow="1"] .rail, .app[data-narrow="1"] .rail-scroll { overflow: visible; }
+.app[data-narrow="1"] .rail .item { justify-content: center; padding: 7px 0; }
+.app[data-narrow="1"] .rail .lbl, .app[data-narrow="1"] .rail .grp-head, .app[data-narrow="1"] .rail .tail,
+.app[data-narrow="1"] .rail .vol-head, .app[data-narrow="1"] .rail-foot .lbl { display: none; }
+.app[data-narrow="1"] .rail .ico { width: 17px; height: 17px; }
+.app[data-narrow="1"] .side { display: none; }
+.app[data-narrow="1"] .side.open { display: flex; position: absolute; top: 44px; bottom: 88px; right: 0; width: 296px; z-index: 35; box-shadow: var(--sh-3); }
+.tipwrap { position: relative; }
+.tipwrap .tip {
+  position: absolute; left: calc(100% + 8px); top: 50%; transform: translateY(-50%);
+  background: hsl(var(--text-000)); color: hsl(var(--bg-100)); font-size: var(--fs-12);
+  padding: 4px 8px; border-radius: var(--r-key); white-space: nowrap; opacity: 0; pointer-events: none;
+  transition: opacity var(--t-fast); z-index: 30;
+}
+.tipwrap:hover .tip, .tipwrap:focus-within .tip { opacity: 1; }
+
+@media (max-width: 1279px) { body { min-width: 1280px; } }
+</style>
+</head>
+<body>
+<div class="proto" id="proto" data-od-id="prototype-switcher"></div>
+
+<div class="stage" id="stage">
+  <div class="app" id="app" data-narrow="0">
+    <header class="topbar" data-od-id="topbar">
+      <span class="brand">《雾港夜航：第七码头》</span>
+      <span class="sep"></span>
+      <span class="vbadge num" id="topVer" title="当前已接受版本">R5</span>
+      <span class="ctx" id="topCtx"></span>
+      <div class="right" id="topRight"></div>
+    </header>
+
+    <aside class="rail" data-od-id="left-rail">
+      <div class="rail-scroll" id="railScroll"></div>
+      <div class="rail-foot" id="railFoot"></div>
+    </aside>
+
+    <main class="main" data-od-id="canvas">
+      <div class="main-head" id="mainHead" data-od-id="canvas-head"></div>
+      <div class="main-body" id="mainBody" data-od-id="canvas-body"></div>
+    </main>
+
+    <aside class="side" id="side" data-od-id="right-rail">
+      <div class="side-scroll" id="sideScroll"></div>
+    </aside>
+
+    <footer class="composer" data-od-id="composer">
+      <div class="inline">
+        <button class="btn sm" id="cmpThread" data-act="thread-menu" aria-haspopup="listbox" aria-expanded="false" title="切换线程">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M2 4h12M2 8h8M2 12h10"/></svg>
+          <span id="cmpThreadLabel">第 6 章 · 冷库之下的通道</span>
+        </button>
+      </div>
+      <div class="search" style="width:100%">
+        <input class="inp" id="cmpInput" data-od-id="composer-input" autocomplete="off"
+          placeholder="和 AI 说说下一步要做什么，输入 / 选命令、@ 引用人物或章节…" />
+        <div id="cmpPop"></div>
+      </div>
+      <div class="inline">
+        <span class="chip" id="cmpModel" title="当前模型与权限">模型 · 长篇写作 · 可直接改写草稿</span>
+        <button class="btn" id="btnWriteNext" data-act="write-next" data-od-id="cta-write-next">继续写第 7 章</button>
+        <button class="btn primary" id="btnReview" data-act="review-chapter" data-od-id="cta-review">审阅本章</button>
+      </div>
+    </footer>
+
+    <div id="overlay"></div>
+  </div>
+</div>
+
+<script>
+/* ══════════════ 样例数据包《雾港夜航：第七码头》· 来源：docs/frontend-redesign-brief-2026-09-15.md 附录 A ══════════════ */
+var FACTIONS = [
+  { id:'none',   name:'无势力',        tok:'--f-none' },
+  { id:'port',   name:'雾港港务集团',   tok:'--f-port' },
+  { id:'river',  name:'临江会',        tok:'--f-river' },
+  { id:'press',  name:'海燕调查社',     tok:'--f-press' },
+  { id:'bureau', name:'市局 7·11 专案组', tok:'--f-bureau' }
+];
+var PLACES = [
+  { id:'pier7',  name:'第七码头',   main:true },
+  { id:'cold3',  name:'3 号冷库',   main:true },
+  { id:'oldtown',name:'雾港老城区', main:true },
+  { id:'reef',   name:'灯塔礁',     main:true },
+  { id:'bar',    name:'沉船酒吧',   main:true }
+];
+var CHARS = [
+  { id:'chen-mo', name:'陈默', role:'前海事调查员，现第七码头夜航调度员', status:'被停职；手握半张货单',
+    emotion:'克制、焦躁交替', tone:'tense', faction:'none', place:'pier7', main:true, weight:5, debt:2,
+    arc:{ from:'不信任何人、只想复仇', to:'开始把后背交给林晚与江野', note:'最终必须在公开真相与保护妹妹之间抉择' },
+    apps:[ {ch:1,note:'在调度室发现半张货单'},{ch:2,note:'与林晚第一次会面'},{ch:3,note:'在沉船酒吧试探孔令奇'},{ch:4,note:'在 3 号冷库被铁门磕伤左臂'},{ch:5,note:'与江野夜探灯塔礁'},{ch:6,note:'下到冷库地下通道（待审）'} ] },
+  { id:'chen-wu', name:'陈雾', role:'陈默之妹，失踪者', status:'失踪第 41 天；线索指向 3 号冷库',
+    emotion:'—', tone:'none', faction:'none', place:'oldtown', main:true, weight:3, debt:0,
+    arc:{ from:'依赖哥哥的妹妹', to:'案卷里的一个名字', note:'她的录音笔是全场最关键的下落' },
+    apps:[ {ch:1,note:'失踪当夜的回忆片段'},{ch:4,note:'白桦提到她失踪前三天来过冷库'},{ch:6,note:'录音笔线索再次出现（待审）'} ] },
+  { id:'lin-wan', name:'林晚', role:'海燕调查社记者', status:'与陈默达成临时同盟',
+    emotion:'敏锐、戒备', tone:'calm', faction:'press', place:'oldtown', main:true, weight:4, debt:1,
+    arc:{ from:'只想拿到独家报道', to:'开始把自己押进这个案子', note:'她与苏曼在「慢挖还是曝光」上分歧渐深' },
+    apps:[ {ch:2,note:'到码头找陈默问陈雾'},{ch:3,note:'带来黑仔短信的线索'},{ch:5,note:'在灯塔礁分头行动'},{ch:6,note:'尚未知道地下通道（待审）'} ] },
+  { id:'zhou-tie', name:'周铁山', role:'第七码头工头', status:'被陈默逼问后动摇',
+    emotion:'恐惧、算计', tone:'tense', faction:'river', place:'pier7', main:true, weight:2, debt:0,
+    arc:{ from:'替临江会盯着码头', to:'想借陈默脱身', note:'他知道的比说出来的多' },
+    apps:[ {ch:2,note:'第一次被陈默堵在货场'},{ch:3,note:'在沉船酒吧给孔令奇递话'} ] },
+  { id:'su-ming', name:'苏明远', role:'港务集团副总', status:'明面配合调查',
+    emotion:'从容、阴沉', tone:'dark', faction:'port', place:'pier7', main:true, weight:3, debt:1,
+    arc:{ from:'稳坐钓鱼台', to:'开始亲自过问冷库', note:'KC-0413 那批货把他和孔令奇绑在一起' },
+    apps:[ {ch:2,note:'在码头与陈默打了个照面'},{ch:4,note:'过问 3 号冷库的铅封'} ] },
+  { id:'gu-xue', name:'顾雪', role:'市局 7·11 专案组组长，陈默前同事', status:'私下给陈默递消息',
+    emotion:'内疚、两难', tone:'tense', faction:'bureau', place:'oldtown', main:true, weight:3, debt:0,
+    arc:{ from:'按程序办事的组长', to:'在结案压力与旧友之间摇摆', note:'专案组即将结案是她最大的时间压力' },
+    apps:[ {ch:4,note:'私下把冷库排查结果递给陈默'},{ch:5,note:'在灯塔礁与陈默分道'} ] },
+  { id:'kong-ling', name:'孔令奇（老K）', role:'临江会二把手', status:'察觉货单外流',
+    emotion:'阴狠、玩味', tone:'dark', faction:'river', place:'bar', main:true, weight:3, debt:0,
+    arc:{ from:'码头暗面的实际控制人', to:'开始怀疑身边每一个人', note:'他的上线是谁，读者只看到 2/5' },
+    apps:[ {ch:3,note:'在沉船酒吧试探陈默'} ] },
+  { id:'zhao-xiaoman', name:'赵小满', role:'码头少年工，目击者', status:'被白桦暗中保护',
+    emotion:'惊惶', tone:'tense', faction:'none', place:'pier7', main:true, weight:2, debt:0,
+    arc:{ from:'不敢说话的目击者', to:'开始愿意开口', note:'他见过黑仔最后一晚穿的蓝色工装' },
+    apps:[ {ch:3,note:'躲着陈默，却留下黑仔的短信'},{ch:4,note:'提到白桦曾把钥匙短暂交给他'} ] },
+  { id:'bai-hua', name:'白桦', role:'3 号冷库管理员', status:'双面身份，态度暧昧',
+    emotion:'冷静、疏离', tone:'calm', faction:'none', place:'cold3', main:true, weight:4, debt:1, unknown:true,
+    arc:{ from:'守着一扇门的看门人', to:'开始主动把钥匙递出去', note:'因黑仔之死欠着一笔暗债' },
+    apps:[ {ch:4,note:'在冷库阴影里第一次正面登场'},{ch:6,note:'带陈默下地下通道（待审）'} ] },
+  { id:'su-man', name:'苏曼', role:'苏明远之女，实习记者', status:'追查父亲公司',
+    emotion:'理想主义', tone:'calm', faction:'press', place:'oldtown', main:true, weight:2, debt:0,
+    arc:{ from:'想直接曝光的实习生', to:'开始理解林的慢挖', note:'她手里有一份父亲公司的旧报表' },
+    apps:[ {ch:3,note:'与林晚在报社争执'} ] },
+  { id:'qin-mu', name:'秦慕白', role:'港务集团法务', status:'暗中复印账本',
+    emotion:'挣扎', tone:'tense', faction:'port', place:'pier7', main:false, weight:1, debt:0,
+    arc:{ from:'替集团擦干净每一页纸', to:'给自己留一份底稿', note:'账本是他给自己买的保险' },
+    apps:[ {ch:4,note:'在复印机前被苏明远撞见'} ] },
+  { id:'chen-li', name:'陈立国', role:'陈默之父', status:'中风卧床，偶尔清醒',
+    emotion:'恍惚', tone:'none', faction:'none', place:'oldtown', main:false, weight:1, debt:0,
+    arc:{ from:'等女儿回家的父亲', to:'偶尔清醒时反复念一个名字', note:'他念的是「远岚」' },
+    apps:[ {ch:1,note:'在病床边被提及'} ] },
+  { id:'a-zhen', name:'阿珍', role:'码头食堂老板娘', status:'情报中转站',
+    emotion:'热络、精明', tone:'calm', faction:'none', place:'pier7', main:false, weight:1, debt:0,
+    arc:{ from:'只卖饭不卖消息', to:'开始替陈默留一张桌子', note:'她认得每个夜班工的脸' },
+    apps:[ {ch:2,note:'在食堂给陈默递了句话'} ] },
+  { id:'jiang-ye', name:'江野', role:'前海警，私人打捞船船长', status:'答应帮陈默查灯塔礁',
+    emotion:'义气、粗犷', tone:'calm', faction:'none', place:'reef', main:false, weight:2, debt:0,
+    arc:{ from:'不问缘由地开船', to:'开始问「这灯是谁修的」', note:'他认得那片礁的每一道暗流' },
+    apps:[ {ch:5,note:'带陈默夜探灯塔礁'} ] },
+  { id:'hei-zai', name:'黑仔', role:'赵小满之兄，失踪者', status:'与陈雾同案失踪',
+    emotion:'—', tone:'none', faction:'none', place:'pier7', main:false, weight:1, debt:0,
+    arc:{ from:'码头夜班的少年', to:'案卷里第二个名字', note:'他的短信时间戳是 02:41' },
+    apps:[ {ch:3,note:'定时短信出现在卷宗里'} ] },
+  { id:'qiu-ju', name:'邱局长', role:'市局高层', status:'压顾雪结案',
+    emotion:'威严、回避', tone:'dark', faction:'bureau', place:'oldtown', main:false, weight:1, debt:0,
+    arc:{ from:'想把案子收进抽屉', to:'开始接听不该接的电话', note:'他接的那通电话来自港务集团' },
+    apps:[ {ch:5,note:'在专案组会议上定了结案期限'} ] },
+  { id:'fang-cheng', name:'方成', role:'陈雾的男友', status:'说法前后矛盾',
+    emotion:'慌张', tone:'tense', faction:'none', place:'oldtown', main:false, weight:1, debt:0,
+    arc:{ from:'焦急的报案人', to:'第一个被排除又第一个回来的人', note:'他删过一次通话记录' },
+    apps:[ {ch:4,note:'在冷库外被陈默撞见'} ] },
+  { id:'lao-bai', name:'老白', role:'货轮「远岚号」船长', status:'走私路线见证人',
+    emotion:'沉默、酗酒', tone:'dark', faction:'none', place:'reef', main:false, weight:1, debt:0,
+    arc:{ from:'不开口的老船长', to:'在礁边盯着那盏灯看了一夜', note:'他知道那夜货舱里装的是什么' },
+    apps:[ {ch:3,note:'在酒吧角落被提到'} ] }
+];
+var RELS = [
+  { id:'r1', a:'chen-mo', b:'lin-wan', from:'R2',
+    ab:{ text:'信任上升，但隐瞒了货单', trust:3, conflict:1 },
+    ba:{ text:'欣赏其执拗，防备被利用', trust:2, conflict:2 }, debt:'是否公开录音笔', hot:true },
+  { id:'r2', a:'chen-mo', b:'gu-xue', from:'R4',
+    ab:{ text:'旧友信赖与埋怨并存', trust:3, conflict:3 },
+    ba:{ text:'想帮，但不能违规', trust:3, conflict:2 }, debt:'专案组即将结案', hot:false },
+  { id:'r3', a:'chen-mo', b:'zhou-tie', from:'R2',
+    ab:{ text:'施压与试探', trust:1, conflict:4 },
+    ba:{ text:'恐惧，想借陈默脱身', trust:2, conflict:3 }, debt:'', hot:false },
+  { id:'r4', a:'su-ming', b:'kong-ling', from:'R2',
+    ab:{ text:'互相利用，随时翻脸', trust:2, conflict:3 },
+    ba:{ text:'互相利用，随时翻脸', trust:2, conflict:3 }, debt:'KC-0413 那批货', hot:false },
+  { id:'r5', a:'bai-hua', b:'zhao-xiaoman', from:'R4',
+    ab:{ text:'保护（暗债：因黑仔之死）', trust:4, conflict:1 },
+    ba:{ text:'依赖与怀疑', trust:3, conflict:2 }, debt:'黑仔之死', hot:false },
+  { id:'r6', a:'lin-wan', b:'su-man', from:'R3',
+    ab:{ text:'学姐学妹，理念冲突：慢挖', trust:4, conflict:2 },
+    ba:{ text:'想直接曝光，嫌林晚太慢', trust:3, conflict:3 }, debt:'曝光时机', hot:false },
+  { id:'r7', a:'chen-mo', b:'chen-wu', from:'R1',
+    ab:{ text:'愧疚：失踪前一夜的争吵', trust:5, conflict:1 },
+    ba:{ text:'依赖', trust:5, conflict:0 }, debt:'失踪前一夜的争吵', hot:false },
+  { id:'r8', a:'chen-mo', b:'bai-hua', from:'R6',
+    ab:{ text:'开始试探性信任：钥匙在手，话没说完', trust:2, conflict:2 },
+    ba:{ text:'观望：把钥匙递出去，但没说为什么', trust:2, conflict:1 }, debt:'黑仔之死的暗债', hot:true }
+];
+var CHAPTERS = [
+  { vol:1, volName:'卷一 雾中来客', num:1, title:'夜航调度室的半张货单', words:2100, status:'accepted', pov:'陈默', body:[
+    '凌晨两点十七分，第七码头的调度室只剩下一盏台灯。陈默把当天的夜航记录归了档，指尖在最后一页停住——有人把一张货单夹进了记录本，只夹了一半。',
+    '纸张的边缘是被撕开的，毛糙，像一句话被硬生生掐断。编号 KC-0413。出港时间，正是陈雾失踪的那个夜晚。',
+    '窗外，雾从海面上漫过来，把码头的灯一盏一盏地吞掉。陈默把那张纸折好，放进贴身的口袋，然后关了灯。他不知道自己刚刚接过的是什么，只知道从这一刻起，夜航调度员的身份，已经不够用了。'
+  ], hl:{ text:'编号 KC-0413', note:'货单编号' } },
+  { vol:1, volName:'卷一 雾中来客', num:2, title:'第七码头的第一次会面', words:2600, status:'accepted', pov:'陈默', body:[
+    '白天的第七码头是另一副面孔。吊机在头顶缓缓转向，铁链哗啦作响，工人们叼着烟，谁也不看谁。陈默靠在调度室门口，看着林晚穿过整个货场朝他走来。',
+    '「海燕调查社，林晚。」她递过名片，指尖冻得发红，「我找陈雾。」陈默没有接名片，只是把目光从她脸上移开，落在远处那排冷库上。「她失踪四十一天了。」他说，「你来晚了。」'
+  ], hl:null },
+  { vol:1, volName:'卷一 雾中来客', num:3, title:'沉船酒吧的试探', words:2400, status:'accepted', pov:'陈默', body:[
+    '沉船酒吧在码头背街的地下室，进门要下七级台阶。陈默推门的时候，孔令奇正坐在吧台尽头，面前摆着一杯没动过的酒。',
+    '「陈调度员。」孔令奇笑了笑，「坐。」陈默在他对面坐下。他们之间隔着整整一个吧台，像隔着一条谁都不肯先跨的河。',
+    '三天前，黑仔的手机在他母亲手里响过一次——那是条定时发送的短信，只有六个字：哥，别等我了。发送时间戳停在 02:41。陈默一直没想明白，凌晨两点四十一分，一个十七岁的少年，为什么会设一条定时短信。'
+  ], hl:{ text:'02:41', note:'黑仔短信时间戳' } },
+  { vol:1, volName:'卷一 雾中来客', num:4, title:'3 号冷库的铅封', words:2800, status:'accepted', pov:'陈默', body:[
+    '3 号冷库的铅封是新换的。陈默蹲下去，指尖摸到铅封的边缘，那里有一道被剪断又重压过的痕迹。',
+    '身后的铁门被风撞了一下。他起身去扶，左臂在门框上狠狠磕了一下，疼得他眼前发白。血从袖口渗出来的时候，他听见有人在他身后说：「那扇门，本来就该锁着的。」',
+    '白桦站在阴影里，手里转着一串钥匙。「你妹妹来过这里。」他说，「就在失踪前三天。」'
+  ], hl:{ text:'左臂在门框上狠狠磕了一下', note:'陈默受伤' } },
+  { vol:1, volName:'卷一 雾中来客', num:5, title:'灯塔礁的夜航灯', words:2500, status:'accepted', pov:'陈默', body:[
+    '江野的船在浪里颠了一夜。天亮前，他们终于靠上灯塔礁——礁石上那座废弃的灯，还在闪，闪得没有规律。',
+    '「有人给它换了电源。」江野把缆绳拴好，「这灯三年没亮过了。」陈默盯着那光看了很久。每闪七下，停一次。七。他想起了货单上的编号——KC-0413。'
+  ], hl:null },
+  { vol:2, volName:'卷二 冷库之下', num:6, title:'冷库之下的通道', words:2800, status:'pending', pov:'陈默', body:[
+    '冷库的门在身后合上时，陈默听见了那声闷响——像一记被棉被裹住的叹息。寒气顺着裤脚往上爬，白桦站在三步之外，钥匙在他指间转了一圈，停住。',
+    '「你确定要下去？」白桦的声音很轻，轻得像怕惊动什么。陈默没答，只把左手插进外套口袋——从灯塔礁回来之后，那条手臂就一直不太听话，此刻抬起来搬开脚边那只铁皮箱，立刻扯出一阵钝痛。',
+    '通道的入口藏在货架最里面，被一摞标着「冻品·待检」的纸箱挡着。白桦移开箱子，露出地面上一道约莫半米宽的裂缝，往下是黑，黑得没有尽头。他拧亮手电，光柱探进去，照见几级向下凿出的石阶，湿得发亮。',
+    '「铅封是上个月换的。」白桦说，「换的人不是我。」这句话他说得很平，像在报一个与自己无关的账。陈默盯着他看了两秒，把那半张货单在口袋里按了按——KC-0413，失踪那夜，远岚号。',
+    '石阶一共十九级。走到第九级时，陈默停住了。手电光扫过侧壁，那里有一道新鲜的刮痕，金属与水泥摩擦留下的，边缘还挂着细小的漆屑——蓝色。他想起赵小满说过的话：黑仔那天穿的，是蓝色的工装。',
+    '通道尽头传来一声极轻的水响。不是滴水，是有什么东西，在黑暗里动了一下。陈默屏住呼吸，左臂的钝痛在这一刻变得清晰起来，像有人在他骨头上，轻轻敲了一下。'
+  ], hl:null },
+  { vol:2, volName:'卷二 冷库之下', num:7, title:'赵小满的证词', words:2600, status:'planned', pov:'陈默', body:null, hl:null },
+  { vol:2, volName:'卷二 冷库之下', num:8, title:'苏明远的账本', words:2600, status:'planned', pov:'陈默', body:null, hl:null },
+  { vol:3, volName:'卷三 真相的代价', num:9, title:'方成的另一面', words:2600, status:'planned', pov:'陈默', body:null, hl:null },
+  { vol:3, volName:'卷三 真相的代价', num:10, title:'邱局长的选择', words:2600, status:'planned', pov:'陈默', body:null, hl:null },
+  { vol:3, volName:'卷三 真相的代价', num:11, title:'老K 的最后一步', words:2600, status:'planned', pov:'陈默', body:null, hl:null },
+  { vol:3, volName:'卷三 真相的代价', num:12, title:'第七码头', words:2600, status:'planned', pov:'陈默', body:null, hl:null }
+];
+var CONTRACT = {
+  unit:'卷二 · 第 6 章《冷库之下的通道》',
+  rows:[
+    { label:'视角', value:'陈默（第三人称限知）' },
+    { label:'故事时间', value:'第 41 天 · 夜' },
+    { label:'必须出现', items:['地下通道','白桦的钥匙','陈雾的录音笔线索'] },
+    { label:'禁止矛盾', items:['陈默左臂伤口未愈（第 4 章）','白桦此时不能暴露身份'] },
+    { label:'长度范围', value:'2,400–2,800 字' },
+    { label:'接受标准', value:'章末留下通道尽头的悬念' }
+  ],
+  checks:[
+    { label:'视角', text:'第三人称限知 · 陈默', status:'warn', note:'结尾一句混入了林晚的心理活动（审阅问题 · 低）' },
+    { label:'故事时间', text:'第 41 天 · 夜', status:'ok', note:'与第 5 章结尾相接' },
+    { label:'必须出现', text:'地下通道 · 白桦的钥匙 · 陈雾的录音笔线索', status:'ok', note:'三项都已出现' },
+    { label:'禁止矛盾', text:'陈默左臂伤口未愈', status:'warn', note:'动作描写中被忽略（审阅问题 · 高）' },
+    { label:'禁止矛盾', text:'白桦此时不能暴露身份', status:'ok', note:'没有越过这条线' },
+    { label:'长度', text:'2,400–2,800 字', status:'ok', note:'约 2,800 字 · 达标' },
+    { label:'接受标准', text:'章末留下通道尽头的悬念', status:'ok', note:'结尾的「水响」成立' }
+  ]
+};
+var PROPOSAL = {
+  code:'coldstore-passage-r6-001', fromRev:'R5', toRev:'R6', chapter:6, words:2800,
+  changes:[
+    { id:'c1', kind:'人物状态', text:'陈默得知 3 号冷库存在地下通道' },
+    { id:'c2', kind:'地点状态', text:'3 号冷库新增「地下通道」地点属性' },
+    { id:'c3', kind:'物件流转', text:'铅封钥匙从白桦转交陈默' },
+    { id:'c4', kind:'关系',     text:'陈默 ↔ 白桦：信任 +1' },
+    { id:'c5', kind:'伏笔',     text:'伏笔 P2「铅封被换」推进：确认为人为调换' },
+    { id:'c6', kind:'知识',     text:'知识边界：陈默已知通道，林晚尚不知情' }
+  ],
+  issues:[
+    { id:'i1', sev:'mid', sevLabel:'中', type:'节奏', text:'中段说明性对白偏长，建议拆成两个场景。', sug:'在通道口先给一次险情，再让白桦交代铅封的事。', anchors:[{ ch:3, label:'第 3 章 · 黑仔短信', hl:'02:41' }] },
+    { id:'i2', sev:'high', sevLabel:'高', type:'连续性', text:'陈默左臂伤（第 4 章）在本章动作描写中被忽略。', sug:'搬开铁门时加入左臂吃力的细节。', anchors:[{ ch:4, label:'第 4 章 · 陈默受伤', hl:'左臂在门框上狠狠磕了一下' }] },
+    { id:'i3', sev:'low', sevLabel:'低', type:'视角', text:'结尾一句混入了林晚的心理活动。', sug:'改为陈默观察到的外在反应。', anchors:[{ ch:1, label:'第 1 章 · 货单', hl:'编号 KC-0413' }] }
+  ]
+};
+var MEMORY = [
+  { id:'m1', text:'第 5 章结尾：陈默与顾雪在灯塔礁分道。', src:'第 5 章正文', ver:'R5', since:'第 5 章接受时写入', from:5 },
+  { id:'m2', text:'关系状态：陈默 ↔ 林晚 信任上升。', src:'关系状态', ver:'R3', since:'临时同盟、信任 +1 时更新', from:3 },
+  { id:'m3', text:'伏笔 P2 状态：铅封被人为调换。', src:'伏笔状态', ver:'R4', since:'铅封被确认动过时写入', from:4 }
+];
+var TIMELINE = [
+  { day:'第 0 天 · 夜', title:'陈雾与黑仔同时失踪', text:'货轮「远岚号」当夜出港，货单编号 KC-0413。', ch:1, past:true },
+  { day:'第 3 天', title:'黑仔手机发出最后一条求救短信', text:'定时短信，时间戳 02:41，收件人是他的母亲。', ch:3, past:true },
+  { day:'第 12 天', title:'3 号冷库更换铅封', text:'白桦说：换的人不是他。', ch:4, past:true },
+  { day:'第 38 天', title:'陈默在调度室发现半张货单', text:'KC-0413，出港时间与失踪夜吻合。', ch:1, past:true },
+  { day:'第 41 天 · 当下', title:'第 6 章的故事时间', text:'陈默与白桦下到冷库地下通道，章末留下悬念。', ch:6, past:false }
+];
+var DEBTS = [
+  { id:'d1', title:'陈雾录音笔下落未明', text:'已 5 章未推进，最近一次提及在第 1 章。', level:'warn', levelLabel:'临期', related:'陈雾 · 陈默', ch:1, age:5, kind:'物件债' },
+  { id:'d2', title:'黑仔求救短信时间戳无解释', text:'02:41 这个时间点还没有任何解释。', level:'warn', levelLabel:'临期', related:'黑仔 · 赵小满', ch:3, age:3, kind:'伏笔债' },
+  { id:'d3', title:'陈默对林晚隐瞒货单', text:'关系债：一旦被林晚发现，同盟可能破裂。', level:'info', levelLabel:'关系债', related:'陈默 · 林晚', ch:2, age:4, kind:'关系债' }
+];
+var FORESHADOW = [
+  { id:'P1', type:'promise', typeLabel:'伏笔', text:'陈雾的录音笔下落', status:'已埋', statusKey:'planted', ch:1, window:'第 9–12 章', note:'第 1 章埋下，待收', anchor:'第 1 章 · 调度室的半张货单' },
+  { id:'P2', type:'promise', typeLabel:'伏笔', text:'3 号冷库的铅封被换过', status:'推进中', statusKey:'progress', ch:4, window:'第 6–8 章', note:'第 6 章提案确认为人为调换', anchor:'第 4 章 · 3 号冷库的铅封' },
+  { id:'P3', type:'promise', typeLabel:'伏笔', text:'黑仔的求救短信时间戳', status:'已埋', statusKey:'planted', ch:3, window:'第 9–11 章', note:'未收束', anchor:'第 3 章 · 沉船酒吧的试探' },
+  { id:'C1', type:'clue', typeLabel:'线索', text:'货单 KC-0413 与失踪夜同批出港', status:'推进中', statusKey:'progress', ch:1, window:'第 7 章前', note:'已进入第 5 章正文', anchor:'第 1 章 · 货单编号' },
+  { id:'C2', type:'clue', typeLabel:'线索', text:'灯塔礁夜航灯异常闪烁', status:'推进中', statusKey:'progress', ch:5, window:'第 8 章前', note:'有误读风险：每闪七下停一次', anchor:'第 5 章 · 灯塔礁的夜航灯' },
+  { id:'M1', type:'mystery', typeLabel:'谜团', text:'老K 的真实上线是谁', status:'推进中', statusKey:'progress', ch:3, window:'第 10–12 章', note:'读者可见进度 2/5', progress:2, progressMax:5, anchor:'第 3 章 · 沉船酒吧' }
+];
+var ARCS = ['chen-mo','lin-wan','gu-xue','bai-hua','su-ming','kong-ling'];
+var REVERSIONS = [
+  { ver:'R6', sum:'第 6 章《冷库之下的通道》· 正文 1 篇 · 设定变更 6 条', time:'待审提案', ch:6 },
+  { ver:'R5', sum:'第 5 章《灯塔礁的夜航灯》· 正文 1 篇 · 设定变更 5 条 · 审阅问题 2 个', time:'2 小时前', ch:5 },
+  { ver:'R4', sum:'第 4 章《3 号冷库的铅封》· 正文 1 篇 · 设定变更 6 条 · 审阅问题 4 个', time:'昨天', ch:4 },
+  { ver:'R3', sum:'第 3 章《沉船酒吧的试探》· 正文 1 篇 · 设定变更 4 条 · 审阅问题 2 个', time:'3 天前', ch:3 },
+  { ver:'R2', sum:'第 2 章《第七码头的第一次会面》· 正文 1 篇 · 设定变更 5 条 · 审阅问题 1 个', time:'5 天前', ch:2 },
+  { ver:'R1', sum:'立项 · 第 1 章《夜航调度室的半张货单》· 人物 18 · 势力 4 · 地点 5', time:'第 1 周', ch:1 }
+];
+var EXPERIMENTS = [
+  { id:'e1', name:'读者反应 · 第 6 章悬念强度', kind:'读者反应', status:'未连接', desc:'模拟不同读者在第 6 章结尾的悬念感知与继续阅读意愿。' },
+  { id:'e2', name:'人物压力 · 陈默 × 白桦', kind:'人物压力', status:'未连接', desc:'把两个人物放进地下通道的场景，观察联盟、误读与未解决钩子。' }
+];
+var THREADS = [
+  { id:'t1', name:'第 6 章 · 冷库之下的通道', note:'当前章 · 待审提案', ch:6, active:true },
+  { id:'t2', name:'全书 · 路线规划', note:'卷一至卷三 · 12 章路线', ch:null },
+  { id:'t3', name:'第 4 章 · 冷库铅封', note:'已归档 · 3 天前', ch:4 },
+  { id:'t4', name:'人物 · 白桦的双面身份', note:'设定讨论 · 昨天', ch:null }
+];
+var THREAD_TURNS = [
+  { who:'me', name:'我', text:'帮我写第 6 章《冷库之下的通道》，视角陈默，故事时间第 41 天夜。注意第 4 章他左臂的伤还没好。' },
+  { who:'ai', name:'AI · 长篇写作', tool:'读取写作记忆 · 命中 3 条（第 5 章正文 / 关系状态 / 伏笔状态）', text:'按本章合同写了第 6 章，约 2,800 字；整理出 6 条设定变更和 3 个审阅问题，等你决定。', card:true },
+  { who:'ai', name:'AI · 长篇写作', tool:'核对本章合同 · 3 项必须出现全部命中，1 处禁止矛盾被忽略', text:'两处提醒需要你判断：陈默左臂的伤在本章动作里没体现；结尾混进了林晚的心理活动。', find:true },
+  { who:'me', name:'我', text:'先只看设定变更。正文我想让 AI 再改一版。' }
+];
+var ADV = {
+  tree:[
+    { lvl:1, name:'novel-project', ver:'0.4.2', state:'已挂载', kind:'domain' },
+    { lvl:2, name:'planning', ver:'0.3.1', state:'已挂载', kind:'capability' },
+    { lvl:2, name:'writing-memory', ver:'0.3.0', state:'已挂载', kind:'capability' },
+    { lvl:2, name:'review-engine', ver:'0.2.7', state:'已挂载', kind:'capability' },
+    { lvl:3, name:'reader-response-sim', ver:'0.1.4', state:'未挂载', kind:'sidecar' },
+    { lvl:1, name:'mirofish-sandbox', ver:'—', state:'未安装', kind:'sidecar' }
+  ],
+  plugins:[
+    { name:'novel-project', ver:'0.4.2', state:'已挂载', scope:'领域包 · 提案 / 版本 / 事实投影' },
+    { name:'novel-planning', ver:'0.3.1', state:'已挂载', scope:'本章合同 · 卷章路线' },
+    { name:'novel-writing-memory', ver:'0.3.0', state:'已挂载', scope:'写作记忆 · 新鲜度' },
+    { name:'novel-review-engine', ver:'0.2.7', state:'已挂载', scope:'审阅问题 · 出处锚点' },
+    { name:'novel-reader-sim', ver:'0.1.4', state:'未挂载', scope:'读者反应实验（侧车）' }
+  ],
+  presets:[
+    { name:'长篇写作（默认）', model:'deepseek-chat', ctx:'1,050,000', perm:'可读全部设定 · 可生成提案' },
+    { name:'审阅专用', model:'deepseek-reasoner', ctx:'262,144', perm:'只读 · 只输出审阅问题' },
+    { name:'走查（只读）', model:'deepseek-chat', ctx:'131,072', perm:'只读 · 不生成提案' }
+  ],
+  jobs:[
+    { id:'job-7841', kind:'生成提案', target:'第 6 章', state:'已完成', t:'今天 21:04', dur:'48s' },
+    { id:'job-7842', kind:'审阅草案', target:'第 6 章', state:'已完成', t:'今天 21:05', dur:'12s' },
+    { id:'job-7843', kind:'重写段落', target:'第 6 章 · 通道入口', state:'排队中', t:'今天 21:12', dur:'—' },
+    { id:'job-7840', kind:'读者反应实验', target:'第 6 章', state:'失败', t:'今天 20:58', dur:'3s', err:'侧车未连接' }
+  ],
+  subs:[
+    { id:'sub-11', role:'连续性走查', scope:'第 4–6 章', state:'运行中', out:'已发现 1 处禁止矛盾' },
+    { id:'sub-12', role:'人物口吻校对', scope:'白桦', state:'已完成', out:'2 处措辞偏书面' },
+    { id:'sub-13', role:'伏笔回收检查', scope:'P1 · P2 · P3', state:'空闲', out:'—' }
+  ],
+  packets:[
+    { id:'coldstore-passage-r6-001', ch:6, rev:'R5', deltas:6, issues:3, status:'pending' },
+    { id:'reef-light-r5-001', ch:5, rev:'R4', deltas:5, issues:2, status:'accepted' },
+    { id:'coldstore-seal-r4-001', ch:4, rev:'R3', deltas:6, issues:4, status:'accepted' },
+    { id:'bar-test-r3-001', ch:3, rev:'R2', deltas:4, issues:2, status:'accepted' },
+    { id:'first-meet-r2-001', ch:2, rev:'R1', deltas:5, issues:1, status:'accepted' }
+  ],
+  lifecycle:[
+    { fact:'promise:P1', kind:'promise', state:'planted', since:'R1', note:'录音笔下落' },
+    { fact:'promise:P2', kind:'promise', state:'progress', since:'R4', note:'铅封被人为调换' },
+    { fact:'promise:P3', kind:'promise', state:'planted', since:'R3', note:'短信时间戳' },
+    { fact:'clue:C1', kind:'clue', state:'progress', since:'R1', note:'KC-0413' },
+    { fact:'clue:C2', kind:'clue', state:'progress', since:'R5', note:'夜航灯闪烁' },
+    { fact:'mystery:M1', kind:'mystery', state:'progress', since:'R3', note:'老K 的上线' },
+    { fact:'narrative-debt:D1', kind:'debt', state:'open', since:'R1', note:'录音笔未推进 5 章' },
+    { fact:'narrative-debt:D3', kind:'debt', state:'open', since:'R3', note:'隐瞒货单' }
+  ],
+  fields:[
+    { key:'character.chen-mo.status', value:'suspended; holds half manifest' },
+    { key:'character.chen-mo.emotion', value:'restrained / agitated (alternating)' },
+    { key:'character.chen-mo.injury', value:'left arm, unhealed (since ch4)' },
+    { key:'character.chen-mo.knowledge[]', value:'underground-passage (pending R6)' },
+    { key:'character.chen-mo.location', value:'cold-storage-3' },
+    { key:'relation.chen-mo->bai-hua.trust', value:'+1 (pending R6)' }
+  ],
+  log:[
+    { t:'21:12:04', ev:'job.queued', detail:'job-7843 rewrite.segment ch6' },
+    { t:'21:05:31', ev:'review.completed', detail:'coldstore-passage-r6-001 issues=3' },
+    { t:'21:04:52', ev:'proposal.ready', detail:'coldstore-passage-r6-001 deltas=6' },
+    { t:'21:04:03', ev:'session.input', detail:'t1 "帮我写第 6 章"' },
+    { t:'20:58:12', ev:'sidecar.error', detail:'reader-sim not connected' }
+  ],
+  raw:'{\n  "packetId": "coldstore-passage-r6-001",\n  "expectedRevision": "R5",\n  "producedAt": "2026-09-16T21:04:52+08:00",\n  "manuscript": { "unitId": "volume-2/chapter-6", "chars": 2800, "pov": "chen-mo" },\n  "deltas": [\n    { "kind": "character-state", "subject": "chen-mo", "assert": "knows:underground-passage" },\n    { "kind": "location-state", "subject": "cold-storage-3", "assert": "has:underground-passage" },\n    { "kind": "object-transfer", "subject": "seal-key", "from": "bai-hua", "to": "chen-mo" },\n    { "kind": "relation", "pair": ["chen-mo","bai-hua"], "axis": "trust", "delta": 1 },\n    { "kind": "promise", "id": "P2", "state": "progress", "assert": "man-made-replacement" },\n    { "kind": "knowledge-boundary", "knownBy": ["chen-mo"], "unknownBy": ["lin-wan"] }\n  ],\n  "issues": [\n    { "id": "i1", "severity": "mid", "dimension": "pacing" },\n    { "id": "i2", "severity": "high", "dimension": "continuity", "fact": "chen-mo.injury.left-arm" },\n    { "id": "i3", "severity": "low", "dimension": "pov" }\n  ],\n  "sourceAnchors": ["ch4#chen-mo-injury", "ch1#manifest", "ch3#hei-zai-sms"]\n}'
+};
+
+/* ══════════════ 状态 ══════════════ */
+var LS='novel-mode-proto-2026-09-16';
+var D = {
+  screen:'map', adv:false, advTab:'cordis',
+  theme:'day', themePref:'day', narrow:false,
+  loading:false, empty:false, pluginErr:false, aiFail:false,
+  revision:5, propState:'pending',
+  decisions:{}, reasons:{},
+  sel:null, drawer:null, modal:null, settings:false,
+  clusterBy:'faction', zoom:1, pan:{x:0,y:0}, pins:{}, expanded:{}, vol2only:false, q:'', qOpen:false,
+  mount:{},
+  readCh:1, hl:null, thread:'t1', tMenu:false,
+  chFilter:'all'
+};
+PROPOSAL.changes.forEach(function(c){ D.decisions[c.id]='accept'; D.reasons[c.id]=''; });
+
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function $(s){ return document.querySelector(s); }
+function revN(r){ return parseInt(String(r).replace(/[^0-9]/g,''),10)||1; }
+function ch(n){ return CHAPTERS.filter(function(c){ return c.num===n; })[0]; }
+function charOf(id){ return CHARS.filter(function(c){ return c.id===id; })[0]; }
+function factionOf(id){ return FACTIONS.filter(function(f){ return f.id===id; })[0]; }
+function tok(t){ return 'hsl(var('+t+'))'; }
+function volOf(n){ return n<=5?1:(n<=8?2:3); }
+function vols(c){ var o={}; c.apps.forEach(function(a){ o[volOf(a.ch)]=1; }); return Object.keys(o).map(Number); }
+function toneTok(t){ return t==='tense'?'--warn':(t==='dark'?'--f-river':(t==='calm'?'--info':'--f-none')); }
+function appsOf(id, upto){ return charOf(id).apps.filter(function(a){ return !upto||a.ch<=upto; }); }
+
+/* 派生状态：所有界面只读这里 —— 版本号一变，地图 / 右栏 / 伏笔 / 时间线同步 */
+function derive(){
+  var rev=D.revision, pend=D.propState==='pending'||D.propState==='expired';
+  var rels=RELS.filter(function(r){ return revN(r.from)<=rev; });
+  var ch6st = D.propState==='accepted'?'accepted':(D.propState==='split'?'unwritten':(D.propState==='discarded'?'planned':'pending'));
+  var f6=FORESHADOW.map(function(f){
+    if(f.id==='P2'&&rev>=6) return Object.assign({},f,{status:'推进中',statusKey:'progress',note:'R6 已接受：铅封确认为人为调换'});
+    return f;
+  });
+  return {
+    rev:rev, revLabel:'R'+rev, pending:{ state:pend, expired:D.propState==='expired', consumed:!pend },
+    propState:D.propState, rels:rels, foreshadow:f6,
+    ch6:{ status: ch6st },
+    acceptCount: PROPOSAL.changes.filter(function(c){ return D.decisions[c.id]==='accept'; }).length,
+    rejectCount: PROPOSAL.changes.filter(function(c){ return D.decisions[c.id]==='reject'; }).length,
+    cur:{ num: D.propState==='accepted'?7:6, title: D.propState==='accepted'?'赵小满的证词':'冷库之下的通道',
+          status: D.propState==='accepted'?'planned':'pending' }
+  };
+}
+
+/* ══════════════ 顶栏 / 切换条 ══════════════ */
+var SCREENS=[
+  { k:'map', label:'① 工作台' }, { k:'proposal', label:'② 提案审阅' }, { k:'expired', label:'③ 过期提案' },
+  { k:'split', label:'④ 接受设定·拒绝正文' }, { k:'read', label:'⑤ 正文阅读' }, { k:'characters', label:'⑥ 人物档案' },
+  { k:'foreshadow', label:'⑦ 伏笔与线索' }, { k:'debts', label:'⑧ 未收束债务' }, { k:'timeline', label:'⑨ 时间线' },
+  { k:'memory', label:'⑩ 写作记忆' }, { k:'history', label:'⑪ 版本历史' }, { k:'thread', label:'⑫ 线程对话流' },
+  { k:'advanced', label:'⑬ 进阶面' }, { k:'night', label:'⑭ 夜间关键屏' }, { k:'boundary', label:'⑮ 边界态' }
+];
+var TOGGLES=[
+  { k:'narrow', label:'窄窗 1280' }, { k:'loading', label:'加载中' }, { k:'empty', label:'空项目' },
+  { k:'pluginErr', label:'缺插件' }, { k:'aiFail', label:'AI 无输出' }
+];
+function renderProto(){
+  var cur = D.screen==='night' ? 'night' : (D.adv ? 'advanced' : D.screen);
+  var h = '<span class="proto-label">原型屏幕</span>';
+  SCREENS.forEach(function(s){
+    var on = (s.k===cur) || (s.k==='expired'&&D.screen==='proposal'&&D.propState==='expired') ||
+             (s.k==='split'&&D.screen==='proposal'&&D.propState==='split') ||
+             (s.k==='read'&&D.screen==='read') || (s.k==='characters'&&D.drawer);
+    h += '<button class="pchip" data-act="go" data-go="'+s.k+'" aria-pressed="'+(on?'true':'false')+'">'+esc(s.label)+'</button>';
+  });
+  h += '<span class="spacer"></span><span class="proto-label">演示开关</span>';
+  TOGGLES.forEach(function(t){
+    h += '<button class="pchip" data-act="toggle" data-toggle="'+t.k+'" aria-pressed="'+(D[t.k]?'true':'false')+'">'+esc(t.label)+'</button>';
+  });
+  h += '<button class="pchip" data-act="theme-quick" aria-pressed="'+(D.theme==='night')+'"><span class="dot"></span>日 / 夜</button>';
+  $('#proto').innerHTML=h;
+}
+function renderTop(){
+  var d=derive();
+  $('#topVer').textContent=d.revLabel;
+  $('#topVer').title='当前已接受版本 '+d.revLabel;
+  var chapter = d.propState==='accepted'
+    ? '卷二 · 第 7 章《赵小满的证词》· 计划中'
+    : (d.propState==='split' ? '卷二 · 第 6 章《冷库之下的通道》· 正文未接受' : '卷二 · 第 6 章《冷库之下的通道》· 待审');
+  $('#topCtx').textContent=chapter;
+  $('#topRight').innerHTML =
+    '<button class="btn sm '+(D.adv?'primary':'')+'" data-act="toggle" data-toggle="adv" aria-pressed="'+(D.adv?'true':'false')+'" title="显示内核、插件、Agent、任务与诊断面板">进阶</button>'+
+    '<button class="btn sm" data-act="toggle" data-toggle="settings" title="阅读与显示设置">设置</button>'+
+    '<div class="seg" role="group" aria-label="主题">'+
+      ['auto','day','night'].map(function(t){
+        var lab=t==='auto'?'跟随系统':(t==='day'?'日间':'夜间');
+        return '<button data-act="theme" data-theme="'+t+'" aria-pressed="'+(D.themePref===t?'true':'false')+'">'+lab+'</button>';
+      }).join('')+
+    '</div>'+
+    '<div class="tipwrap"><button class="btn sm" data-act="toggle-side" title="收起或展开右栏">'+
+      '<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M2 3h12v10H2zM10 3v10"/></svg>右栏</button>'+
+      '<span class="tip">收起右栏，把主画布让给正文</span></div>';
+}
+
+/* ══════════════ 左栏 ══════════════ */
+var VIEWS=[
+  { k:'map', label:'故事地图', ico:'M2 3h12v10H2zM2 8h12M8 3v10' },
+  { k:'foreshadow', label:'伏笔与线索', ico:'M3 13l5-5 2 2 3-4M3 13h2' },
+  { k:'debts', label:'未收束债务', ico:'M8 2v8M5 7l3 3 3-3M3 13h10' },
+  { k:'characters', label:'人物与关系', ico:'M6 7a2 2 0 100-4 2 2 0 000 4zM2 13c0-2 2-3 4-3s4 1 4 3M11 6h3M11 9h3' },
+  { k:'timeline', label:'时间线', ico:'M2 8h12M4 5v6M8 5v6M12 5v6' },
+  { k:'memory', label:'写作记忆', ico:'M3 3h10v10H3zM5 6h6M5 9h4' },
+  { k:'contract', label:'本章合同', ico:'M4 2h8v12H4zM6 5h4M6 8h4M6 11h2' },
+  { k:'sim', label:'推演', ico:'M8 2a6 6 0 106 6H8zM9 2v5h5' },
+  { k:'history', label:'版本历史', ico:'M8 3v5l3 2M8 3a5 5 0 105 5' }
+];
+function advGroups(){
+  return [
+    { k:'core', label:'内核', items:[{t:'cordis',label:'Cordis 插件树'},{t:'plugins',label:'插件清单'}] },
+    { k:'agent', label:'Agent', items:[{t:'agent',label:'Agent preset 与模型'}] },
+    { k:'jobs', label:'任务', items:[{t:'jobs',label:'Jobs 列表'},{t:'subs',label:'Subagent 列表'}] },
+    { k:'diag', label:'诊断', items:[{t:'diag',label:'诊断原始数据'},{t:'log',label:'事件日志'}] }
+  ];
+}
+function renderRail(){
+  var d=derive(), h='';
+  /* ① 作品 */
+  h += '<div class="grp"><div class="grp-head"><span>作品</span><span class="count">3 卷 · 12 章</span></div>';
+  if(D.empty){
+    h += '<div class="item" aria-current="true"><span class="ico">·</span><span class="lbl">尚未立项</span></div>'+
+         '<div class="note" style="padding:6px 8px">立项后这里会长出卷、章与状态徽标。</div>';
+  } else {
+    [1,2,3].forEach(function(v){
+      var list=CHAPTERS.filter(function(c){ return c.vol===v; });
+      var done=list.filter(function(c){ return c.status==='accepted'&&c.num<=d.rev; }).length;
+      h += '<div class="vol-head"><span>'+esc(list[0].volName)+'</span><span class="vol-meta">'+done+' / '+list.length+'</span></div>';
+      list.forEach(function(c){
+        var st = c.num<=d.rev ? 'accepted' : (c.num===6&&d.ch6.status==='pending'?'pending':(c.num===6&&d.ch6.status==='unwritten'?'unwritten':'planned'));
+        var dot = st==='accepted'?'ok':(st==='pending'?'pend':(st==='unwritten'?'warn':'plan'));
+        var tail = st==='accepted'?'已接受':(st==='pending'?'待审':(st==='unwritten'?'未接受':'计划中'));
+        var on = D.screen==='read'&&D.readCh===c.num;
+        var hasDebt = DEBTS.some(function(x){ return x.ch===c.num; });
+        h += '<button class="item ch-item" data-act="chapter" data-ch="'+c.num+'" aria-current="'+(on?'true':'false')+'" title="第 '+c.num+' 章 · '+esc(c.title)+'">'+
+             '<span class="ord">'+c.num+'</span><span class="st-dot '+dot+'"></span>'+
+             (hasDebt?'<span class="st-dot warn" title="有未收束债务"></span>':'')+
+             '<span class="t">'+esc(c.title)+'</span><span class="tail">'+tail+'</span></button>';
+      });
+    });
+  }
+  h += '</div>';
+  /* ② 线程 */
+  h += '<div class="grp"><div class="grp-head"><span>线程</span><span class="count">'+THREADS.length+'</span></div>';
+  (D.empty?[]:THREADS).forEach(function(t){
+    h += '<button class="item" data-act="open-thread" data-thread="'+t.id+'" aria-current="'+(D.thread===t.id?'true':'false')+'" title="'+esc(t.name)+'">'+
+         '<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M2 4h12M2 8h8M2 12h10"/></svg>'+
+         '<span class="lbl">'+esc(t.name)+'</span></button>';
+  });
+  h += '<button class="item" data-act="new-thread"><svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M8 3v10M3 8h10"/></svg><span class="lbl">新建线程</span></button></div>';
+  /* ③ 视图 */
+  h += '<div class="grp"><div class="grp-head"><span>视图</span>'+(D.empty?'<span class="count">未启用</span>':'')+'</div>';
+  VIEWS.forEach(function(v){
+    var on = D.screen===v.k || (v.k==='map'&&D.screen==='map');
+    var badge = v.k==='debts'?'3':(v.k==='foreshadow'?'6':'');
+    h += '<button class="item" data-act="view" data-view="'+v.k+'" aria-current="'+(on?'true':'false')+'" title="'+v.label+'">'+
+         '<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="'+v.ico+'"/></svg>'+
+         '<span class="lbl">'+v.label+'</span>'+(badge?'<span class="tail">'+badge+'</span>':'')+'</button>';
+  });
+  h += '</div>';
+  /* 进阶分组 */
+  if(D.adv){
+    advGroups().forEach(function(g){
+      h += '<div class="grp"><div class="grp-head"><span>'+g.label+'</span><span class="count">进阶</span></div>';
+      g.items.forEach(function(it){
+        var on = D.screen==='advanced'&&D.advTab===it.t;
+        h += '<button class="item" data-act="adv-tab" data-tab="'+it.t+'" aria-current="'+(on?'true':'false')+'" title="'+it.label+'">'+
+             '<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M3 4h10M3 8h10M3 12h6"/></svg><span class="lbl">'+it.label+'</span></button>';
+      });
+      h += '</div>';
+    });
+  }
+  if(D.narrow){
+    h = h.replace(/<span class="lbl">([^<]*)<\/span>/g,'<span class="tip">$1</span>');
+    h = h.replace(/class="item([^"]*)"/g,'class="item$1 tipwrap"');
+    h = h.replace(/class="ch-item([^"]*)"/g,'class="ch-item$1 tipwrap"');
+  }
+  $('#railScroll').innerHTML=h;
+  $('#railFoot').innerHTML =
+    '<button class="item '+(D.adv?'on':'')+'" data-act="toggle" data-toggle="adv" aria-pressed="'+(D.adv?'true':'false')+'" title="进阶面（内核 / Agent / 插件 / 任务 / 诊断）">'+
+    '<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M8 2l5 3v6l-5 3-5-3V5z"/></svg>'+
+    '<span class="lbl">进阶</span><span class="tail">'+(D.adv?'开':'关')+'</span></button>';
+}
+
+/* ══════════════ 右栏 ══════════════ */
+function renderSide(){
+  var d=derive(), h='';
+  if(D.loading){
+    h = '<div class="sk sk-card"></div><div class="sk sk-line" style="width:70%"></div><div class="sk sk-line" style="width:50%"></div>'+
+        '<div class="sk sk-card" style="margin-top:18px"></div><div class="sk sk-line" style="width:60%"></div>';
+    $('#sideScroll').innerHTML=h; return;
+  }
+  if(D.empty){
+    $('#sideScroll').innerHTML='<div class="side-block"><div class="side-title">当前章</div>'+
+      '<div class="card"><div class="muted" style="font-size:13px">还没有章节。立项之后，当前章卡片、待审提案和角色状态会出现在这里。</div></div></div>';
+    return;
+  }
+  /* 选中的是人物时，右栏切到人物摘要 */
+  if(D.sel){
+    var c=charOf(D.sel), f=factionOf(c.faction);
+    h += '<div class="side-block"><div class="side-title">人物摘要<span class="more"><button data-act="drawer" data-id="'+c.id+'">打开档案</button></span></div>'+
+      '<div class="card"><div class="row" style="align-items:flex-start;gap:10px">'+
+      '<div class="seal">'+esc(c.name.slice(0,1))+'</div><div style="min-width:0">'+
+      '<div style="font-weight:600;font-size:14px">'+esc(c.name)+'</div>'+
+      '<div class="muted" style="font-size:12px;margin-top:2px">'+esc(c.role)+'</div></div></div>'+
+      '<hr class="rule">'+
+      '<dl class="kv"><dt>当前状态</dt><dd>'+esc(c.status)+'</dd><dt>情绪</dt><dd>'+esc(c.emotion)+'</dd>'+
+      '<dt>所属势力</dt><dd>'+esc(f.name)+(c.unknown?' · 身份未明':'')+'</dd></dl>'+
+      '<div class="row" style="margin-top:12px;gap:6px;flex-wrap:wrap">'+
+      '<button class="btn sm" data-act="focus-node" data-id="'+c.id+'">在地图上定位</button>'+
+      '<button class="btn sm" data-act="clear-sel">取消选中</button></div></div></div>';
+  } else {
+    /* 当前章卡片 */
+    var cur=ch(d.cur.num), st=d.cur.status==='accepted'?'已接受':(d.cur.status==='planned'?'计划中':'待审提案');
+    h += '<div class="side-block"><div class="side-title">当前章</div><div class="card">'+
+      '<div style="font-weight:600;font-size:14px">卷二 · 第 '+cur.num+' 章</div>'+
+      '<div style="font-family:var(--font-serif);font-size:15px;margin-top:2px">《'+esc(cur.title)+'》</div>'+
+      '<div class="row" style="margin-top:8px;gap:6px"><span class="chip '+(st==='待审提案'?'accent':'')+'">'+st+'</span>'+
+      '<span class="chip">'+esc(cur.pov)+' 视角</span></div>'+
+      '<div style="margin-top:12px"><div class="row between" style="font-size:12px;color:hsl(var(--text-200)/.75)"><span>字数进度</span><span class="num">'+
+      (d.cur.status==='accepted'?cur.words:'约 2,800')+' / 2,800</span></div>'+
+      '<div class="progress" style="margin-top:6px"><i style="width:'+(d.propState==='accepted'?'100%':'0%')+'"></i></div></div>'+
+      '<div class="row" style="margin-top:12px;gap:6px"><button class="btn sm" data-act="goto-chapter" data-ch="'+cur.num+'">读正文</button>'+
+      '<button class="btn sm" data-act="view" data-view="contract">本章合同</button></div></div></div>';
+    /* 待审提案入口 */
+    if(d.propState==='pending'||d.propState==='expired'){
+      var expired=d.propState==='expired';
+      h += '<div class="side-block"><div class="side-title">待审提案'+(expired?'<span class="more">已过期</span>':'<span class="more">1 份</span>')+'</div>'+
+        '<button class="card '+(expired?'':'plain')+'" style="display:block;text-align:left;width:100%;'+(expired?'':'border-color:hsl(var(--accent-brand)/.45)')+'" data-act="go" data-go="proposal">'+
+        '<div class="row"><span class="chip '+(expired?'err':'accent')+'">'+(expired?'已过期':'待审')+'</span>'+
+        '<span class="num" style="margin-left:auto;font-size:12px">R5 → R6</span></div>'+
+        '<div style="margin-top:8px;font-size:13px;color:hsl(var(--text-100)/.9)">第 6 章《冷库之下的通道》· 约 2,800 字 · 6 条设定变更 · 3 个审阅问题</div>'+
+        '<div class="muted" style="font-size:12px;margin-top:6px">'+(expired?'基于 R5 生成，当前已是 R6，只能丢弃':'点开逐条决定，或直接接受本章')+'</div></button></div>';
+    } else {
+      h += '<div class="side-block"><div class="side-title">待审提案</div><div class="card"><div class="muted" style="font-size:13px">'+
+        (d.propState==='accepted' ? '第 6 章已接受为 R6，暂无待审提案。'
+          : (d.propState==='discarded' ? '第 6 章提案已丢弃，本章回到计划中。'
+          : '第 6 章提案已处理：5 条设定变更写入 R6，正文未接受。'))+'</div>'+
+        '<button class="btn sm" style="margin-top:10px" data-act="view" data-view="history">看版本历史</button></div></div>';
+    }
+  }
+  /* 最近 AI 活动 */
+  var act, tone='';
+  if(D.aiFail){ tone='err'; act='本次写作没有返回内容：模型在 22 秒内未产生输出。'; }
+  else if(d.propState==='accepted') act='已接受 R6：第 6 章正文 1 篇 · 6 条设定变更已写入。';
+  else if(d.propState==='split') act='已接受 5 条设定变更，正文未接受。';
+  else act='第 6 章草稿已生成 · 6 条设定变更 · 3 个审阅问题';
+  h += '<div class="side-block"><div class="side-title">最近 AI 活动</div>'+
+    '<div class="'+(D.aiFail?'warn-strip err':'card')+'"><div style="font-size:13px">'+esc(act)+'</div>'+
+    '<div class="muted" style="font-size:12px;margin-top:6px">'+(D.aiFail?'线程「第 6 章 · 冷库之下的通道」· 今天 21:12':'今天 21:04 · 线程「第 6 章 · 冷库之下的通道」')+'</div>'+
+    (D.aiFail?'<button class="btn sm" style="margin-top:8px" data-act="retry-ai">重试</button>':
+      '<button class="btn sm" style="margin-top:8px" data-act="go" data-go="proposal">查看审阅详情</button>')+'</div></div>';
+  /* 角色状态摘要 */
+  var picks=['chen-mo','bai-hua','lin-wan'];
+  h += '<div class="side-block"><div class="side-title">角色状态摘要</div><div class="col">';
+  picks.forEach(function(id){
+    var c=charOf(id);
+    var extra = id==='chen-mo'&&d.propState!=='pending' ? '已进入冷库地下通道' : (id==='bai-hua'&&d.propState!=='pending'?'钥匙已转交陈默':'');
+    h += '<button class="char-card" data-act="drawer" data-id="'+c.id+'" style="padding:10px">'+
+      '<span class="seal" style="width:26px;height:26px;font-size:13px;border-radius:6px">'+esc(c.name.slice(0,1))+'</span>'+
+      '<span style="min-width:0"><span style="display:block;font-size:13px;font-weight:600">'+esc(c.name)+'</span>'+
+      '<span class="muted" style="display:block;font-size:12px;margin-top:2px">'+esc(extra||c.status)+'</span></span></button>';
+  });
+  h += '</div><div class="note" style="margin-top:8px">只看本卷主要人物 · <button data-act="view" data-view="characters" style="color:hsl(var(--accent-text))">全部人物与关系</button></div></div>';
+  $('#sideScroll').innerHTML=h;
+}
+
+/* ══════════════ 故事地图 ══════════════ */
+var MB={w:880,h:740,cx:440,cy:356};
+function layout(){
+  var d=derive(), key=D.clusterBy==='faction'?'faction':'place';
+  var ids = key==='faction' ? FACTIONS.map(function(f){ return f.id; }) : PLACES.map(function(p){ return p.id; });
+  var groups=ids.map(function(gid){
+    var list=CHARS.filter(function(c){ return c[key]===gid; });
+    return { id:gid, mains:list.filter(function(c){ return c.main; }), rest:list.filter(function(c){ return !c.main; }) };
+  }).filter(function(g){ return g.mains.length||g.rest.length; });
+  var n=groups.length, R = n>=5?238:(n===4?218:206), pos={}, clusters=[];
+  var label = function(id){
+    if(key==='faction'){ var f=FACTIONS.filter(function(x){ return x.id===id; })[0]; return f?f.name:id; }
+    var p=PLACES.filter(function(x){ return x.id===id; })[0]; return p?p.name:id;
+  };
+  groups.forEach(function(g,i){
+    var a=(-90+i*(360/n))*Math.PI/180;
+    var cxp=MB.cx+Math.cos(a)*R, cyp=MB.cy+Math.sin(a)*R;
+    var expanded=!!D.expanded[g.id];
+    var members = g.mains.concat(expanded?g.rest:[]);
+    var ring = 34+Math.min(members.length,5)*11 + (expanded?22:0);
+    members.forEach(function(c,j){
+      var aa=(members.length===1? -Math.PI/2 : -Math.PI/2 + j*(2*Math.PI/members.length));
+      pos[c.id]= D.pins[c.id] ? {x:D.pins[c.id].x, y:D.pins[c.id].y, pinned:true} : { x:cxp+Math.cos(aa)*ring, y:cyp+Math.sin(aa)*ring };
+    });
+    var box = ring+52;
+    clusters.push({ id:g.id, label:label(g.id), cx:cxp, cy:cyp, r:box, out:a,
+      bubble:(!expanded&&g.rest.length)?{ x:cxp+Math.cos(a)*(ring+46), y:cyp+Math.sin(a)*(ring+46), n:g.rest.length, ids:g.rest.map(function(c){ return c.id; }) }:null });
+  });
+  return { pos:pos, clusters:clusters };
+}
+function nodeR(c){ return 9+c.weight*2.4; }
+function renderMapScreen(){
+  var d=derive();
+  var bar = '<div class="map-bar" data-od-id="map-bar">'+
+    '<div class="search">'+
+      '<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="7" cy="7" r="4.2"/><path d="M10 10l3.5 3.5"/></svg>'+
+      '<input class="inp" id="mapSearch" data-act="map-search" placeholder="搜索人物，自动定位并高亮邻居" value="'+esc(D.q)+'" aria-label="搜索人物" />'+
+      (D.qOpen?'<div class="pop">'+searchResults()+'</div>':'')+
+    '</div>'+
+    '<div class="seg" role="group" aria-label="分簇方式">'+
+      '<button data-act="cluster" data-cluster="faction" aria-pressed="'+(D.clusterBy==='faction')+'">按势力分簇</button>'+
+      '<button data-act="cluster" data-cluster="place" aria-pressed="'+(D.clusterBy==='place')+'">按地点分布</button></div>'+
+    '<button class="pchip" data-act="vol2" aria-pressed="'+(D.vol2only?'true':'false')+'">只看本卷出场</button>'+
+    '<span class="grow"></span>'+
+    (D.sel?'<button class="btn sm" data-act="clear-sel">取消选中</button>':'')+
+    '<button class="btn sm" data-act="zoom" data-z="-1" aria-label="缩小">−</button>'+
+    '<span class="chip num" style="min-width:52px;justify-content:center">'+Math.round(D.zoom*100)+'%</span>'+
+    '<button class="btn sm" data-act="zoom" data-z="1" aria-label="放大">＋</button>'+
+    '<button class="btn sm" data-act="zoom" data-z="0">重置</button>'+
+    (Object.keys(D.pins).length?'<button class="btn sm" data-act="unpin-all">解除全部钉位（'+Object.keys(D.pins).length+'）</button>':'')+
+    '</div>';
+  var h = '<div class="map-wrap">'+bar;
+  if(D.loading){
+    h += '<div class="map-vp" style="padding:32px">'+repeat('<div class="sk sk-card" style="height:120px"></div>',3)+'</div>'+
+      '<div class="map-foot"><div class="sk sk-line" style="width:320px"></div></div></div>';
+    $('#mainBody').className='main-body flush'; $('#mainBody').innerHTML=h; return;
+  }
+  h += '<div class="map-vp" id="mapVp" data-od-id="story-map">'+mapSVG()+'</div>';
+  h += '<div class="map-foot">'+
+    '<div class="legend">'+
+      FACTIONS.map(function(f){ return '<span class="li"><i class="sw" style="background:'+tok(f.tok)+'"></i>'+esc(f.name)+'</span>'; }).join('')+
+      '<span class="li"><i class="ln"></i>实体线：上→下方向</span><span class="li"><i class="ln dash"></i>虚线：下→上方向</span>'+
+      '<span class="li">状态点：情绪</span><span class="li">角标：未收束债务</span>'+
+    '</div>'+
+    '<span class="grow"></span>'+
+    '<span class="note">主要人物 '+CHARS.filter(function(c){return c.main;}).length+' · 折叠 '+
+      CHARS.filter(function(c){return !c.main;}).length+'　Enter 选定 · 双击节点或 D 打开档案 · 拖拽钉位</span></div>'+
+    '</div>';
+  $('#mainBody').className='main-body flush';
+  $('#mainBody').innerHTML=h;
+}
+function repeat(s,n){ var o=''; for(var i=0;i<n;i++) o+=s; return o; }
+function searchResults(){
+  var q=D.q.trim();
+  var list=CHARS.filter(function(c){ return !q || c.name.indexOf(q)>=0 || c.role.indexOf(q)>=0; });
+  if(!list.length) return '<div class="hint">没有匹配的人物</div>';
+  return list.slice(0,8).map(function(c){
+    return '<button data-act="focus-node" data-id="'+c.id+'"><span class="st-dot" style="background:'+tok(FACTIONS.filter(function(f){return f.id===c.faction;})[0].tok)+'"></span>'+esc(c.name)+
+      '<span class="muted" style="margin-left:auto;font-size:12px">'+esc(c.role.slice(0,8))+'</span></button>';
+  }).join('');
+}
+function mapSVG(){
+  var d=derive(), L=layout();
+  var vis=CHARS.filter(function(c){
+    if(D.vol2only) return vols(c).indexOf(2)>=0;
+    return c.main || Object.keys(D.expanded).some(function(k){ return D.expanded[k]===c.id; });
+  });
+  var restOf=function(gid){
+    var key=D.clusterBy==='faction'?'faction':'place';
+    return CHARS.filter(function(c){ return !c.main && c[key]===gid; });
+  };
+  var s='<svg viewBox="0 0 '+MB.w+' '+MB.h+'" preserveAspectRatio="xMidYMid meet" role="img" aria-label="人物关系故事地图">';
+  s+='<defs>'+
+    '<marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0l8 4-8 4z" fill="hsl(var(--border-200))"/></marker>'+
+    '<marker id="arhot" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0l8 4-8 4z" fill="hsl(var(--accent-brand))"/></marker>'+
+    '</defs>';
+  s+='<g transform="translate('+D.pan.x+','+D.pan.y+') scale('+D.zoom+')">';
+  /* 簇底与标签 */
+  L.clusters.forEach(function(cl){
+    s+='<circle class="cluster" cx="'+cl.cx+'" cy="'+cl.cy+'" r="'+cl.r+'"/>';
+    s+='<text class="cluster-label" x="'+cl.cx+'" y="'+(cl.cy-cl.r-6)+'" text-anchor="middle">'+esc(cl.label)+'</text>';
+  });
+  /* 边（双向：两半各自独立） */
+  d.rels.forEach(function(r){
+    var A=L.pos[r.a], B=L.pos[r.b];
+    if(!A||!B) return;
+    var hot = D.sel && (r.a===D.sel||r.b===D.sel);
+    var dim = D.sel && !hot;
+    var dx=B.x-A.x, dy=B.y-A.y, len=Math.sqrt(dx*dx+dy*dy)||1, ux=dx/len, uy=dy/len, px=-uy*5, py=ux*5;
+    var cls='e-line'+(hot?' hot':'')+(dim?' dim':'');
+    var m=hot?'url(#arhot)':'url(#ar)';
+    s+='<line class="'+cls+'" x1="'+(A.x+px)+'" y1="'+(A.y+py)+'" x2="'+(B.x+px-ux*10)+'" y2="'+(B.y+py-uy*10)+'" marker-end="'+m+'"/>';
+    s+='<line class="'+cls+' back" x1="'+(B.x-px)+'" y1="'+(B.y-py)+'" x2="'+(A.x-px+ux*10)+'" y2="'+(A.y-py+uy*10)+'" marker-end="'+m+'"/>';
+    var mx=(A.x+B.x)/2, my=(A.y+B.y)/2;
+    s+='<line class="e-hit" x1="'+(A.x+px)+'" y1="'+(A.y+py)+'" x2="'+(B.x+px)+'" y2="'+(B.y+py)+'" data-act="edge-tip" data-rel="'+r.id+'"/>';
+    s+='<line class="e-hit" x1="'+(B.x-px)+'" y1="'+(B.y-py)+'" x2="'+(A.x-px)+'" y2="'+(A.y-py)+'" data-act="edge-tip" data-rel="'+r.id+'"/>';
+  });
+  /* 折叠气泡 */
+  L.clusters.forEach(function(cl){
+    if(!cl.bubble) return;
+    if(!restOf(cl.id).length) return;
+    s+='<g data-act="expand" data-cluster="'+cl.id+'"><circle class="bubble" cx="'+cl.bubble.x+'" cy="'+cl.bubble.y+'" r="15"/>'+
+       '<text class="bubble-text" x="'+cl.bubble.x+'" y="'+(cl.bubble.y+3.5)+'" text-anchor="middle">+'+cl.bubble.n+'</text></g>';
+  });
+  /* 节点 */
+  CHARS.forEach(function(c){
+    var p=L.pos[c.id]; if(!p) return;
+    var shown = vis.indexOf(c)>=0;
+    var dim = D.sel && D.sel!==c.id && !d.rels.some(function(r){ return (r.a===D.sel&&r.b===c.id)||(r.b===D.sel&&r.a===c.id); });
+    var r=nodeR(c), f=FACTIONS.filter(function(x){ return x.id===c.faction; })[0];
+    var hidden = D.vol2only && !shown;
+    var g='<g class="n-g'+(dim?' dim':'')+(hidden?' hidden':'')+'" tabindex="0" role="button" data-act="node" data-id="'+c.id+'" data-od-id="map-node-'+c.id+'" aria-label="'+esc(c.name+'，'+c.role)+'">';
+    if(D.sel===c.id) g+='<circle class="n-halo" cx="'+p.x+'" cy="'+p.y+'" r="'+(r+9)+'"/>';
+    g+='<circle class="n-body'+(D.sel===c.id?' sel':'')+'" cx="'+p.x+'" cy="'+p.y+'" r="'+r+'" fill="'+tok(f.tok)+'" fill-opacity="'+(c.unknown?'.42':'.9')+'"/>';
+    if(c.unknown) g+='<circle cx="'+p.x+'" cy="'+p.y+'" r="'+(r-3)+'" fill="none" stroke="hsl(var(--bg-000))" stroke-width="1" stroke-dasharray="2 2"/>';
+    g+='<circle class="n-emo" cx="'+(p.x+r*0.72)+'" cy="'+(p.y-r*0.78)+'" r="3.6" fill="'+tok(toneTok(c.tone))+'"/>';
+    if(c.debt) g+='<g class="n-debt"><circle cx="'+(p.x-r*0.72)+'" cy="'+(p.y+r*0.78)+'" r="6" fill="'+tok('--warn')+'"/>'+
+      '<text x="'+(p.x-r*0.72)+'" y="'+(p.y+r*0.78+3)+'" text-anchor="middle">'+c.debt+'</text></g>';
+    if(p.pinned) g+='<g class="n-pin"><circle cx="'+p.x+'" cy="'+(p.y-r-9)+'" r="3" fill="'+tok('--accent-brand')+'"/></g>';
+    g+='<text class="n-label'+(D.sel===c.id?' sel':'')+'" x="'+p.x+'" y="'+(p.y+r+13)+'" text-anchor="middle">'+esc(c.name)+'</text></g>';
+    s+=g;
+  });
+  s+='</g></svg>';
+  return s;
+}
+/* ══════════════ 屏幕标题 ══════════════ */
+var HEAD={
+  map:      { t:'故事地图', s:'人物、关系与进度一眼看清 · 点节点看摘要，双击开档案' },
+  characters:{ t:'人物与关系', s:'18 人物 · 4 势力 · 8 条双向关系（每条两个方向各自独立）' },
+  foreshadow:{ t:'伏笔与线索板', s:'6 条未收束的伏笔 / 线索 / 谜团 · 点证据锚点回到正文' },
+  debts:    { t:'未收束债务', s:'按「多久没推进」排序 · 临期项加提示色' },
+  timeline: { t:'时间线', s:'故事内时间 第 0 天 → 第 41 天 · 与章节交叉引用' },
+  memory:   { t:'写作记忆', s:'AI 记得什么 · 来源与新鲜度' },
+  contract: { t:'本章合同', s:'这一章要写成什么样，先和 AI 对齐' },
+  sim:      { t:'推演', s:'读者反应与人物压力实验 · 只作创作参考' },
+  history:  { t:'版本历史', s:'每个已接受版本一句人话摘要 · 回滚会停用其后的变更' },
+  read:     { t:'正文阅读', s:'衬线 17px · 行高 1.85 · 行宽不超过 40 字' },
+  proposal: { t:'提案审阅', s:'作者是决策者，AI 是稿手：逐条决定，再写入故事事实' },
+  thread:   { t:'线程', s:'一条线程服务一章或一个阶段，多条线程共享同一套故事事实' },
+  advanced: { t:'进阶面', s:'内核 / Agent / 插件 / 任务 / 诊断 · 默认关闭，关闭后整组消失' }
+};
+function renderHead(){
+  var d=derive();
+  if(D.empty){ $('#mainHead').innerHTML='<div class="h-wrap"><h1>故事地图</h1><div class="sub">还没有任何设定与正文</div></div>'; return; }
+  var hd=HEAD[D.screen]||HEAD.map;
+  var extra='';
+  if(D.screen==='proposal') extra='<span class="chip accent">'+(d.propState==='pending'?'待你决定':(d.propState==='expired'?'已过期':'已处理'))+'</span><span class="chip num">R5 → R6</span>';
+  if(D.screen==='read'){ var c=ch(D.readCh); extra='<span class="vbadge num">'+(c.num<=d.rev?'R'+Math.min(d.rev,c.num):'未接受')+'</span><span class="chip">'+esc(c.pov)+' 视角</span><span class="num chip">'+c.words+' 字</span>'; }
+  if(D.screen==='advanced') extra='<span class="chip warn">工程视图 · 允许等宽与原始数据</span>';
+  if(D.screen==='thread') extra='<span class="chip">线程 '+esc((THREADS.filter(function(t){return t.id===D.thread;})[0]||{}).name||'')+'</span>';
+  $('#mainHead').innerHTML='<div class="h-wrap"><h1>'+esc(hd.t)+'</h1><div class="sub">'+esc(hd.s)+'</div></div>'+
+    '<div class="tools">'+extra+
+    (D.screen==='map'?'<button class="btn sm" data-act="view" data-view="characters">人物与关系</button>':'')+
+    (D.screen==='read'?'<button class="btn sm" data-act="view" data-view="map">回到地图</button>':'')+
+    (D.screen==='proposal'?'<button class="btn sm" data-act="view" data-view="map">回到工作台</button>':'')+
+    '</div>';
+}
+
+/* ══════════════ 人物与关系 ══════════════ */
+function renderCharactersScreen(){
+  var d=derive(), h='';
+  var mains=CHARS.filter(function(c){ return c.main; });
+  h += '<div class="row" style="margin-bottom:16px;gap:8px;flex-wrap:wrap">'+
+    '<span class="note">主要人物 '+mains.length+' · 次要人物 '+CHARS.filter(function(c){return !c.main;}).length+'（次要人物在地图上折叠为「+N」气泡）</span>'+
+    '<span class="grow" style="flex:1"></span><button class="btn sm" data-act="view" data-view="map">在故事地图上看</button></div>';
+  h += '<div class="grid g3">'+mains.map(function(c){
+    var f=FACTIONS.filter(function(x){ return x.id===c.faction; })[0];
+    return '<button class="char-card" data-act="drawer" data-id="'+c.id+'" data-od-id="char-card-'+c.id+'">'+
+      '<span class="seal">'+esc(c.name.slice(0,1))+'</span><span style="min-width:0">'+
+      '<span class="row" style="gap:6px"><b style="font-size:14px">'+esc(c.name)+'</b>'+
+      '<span class="li" style="font-size:12px;color:hsl(var(--text-200)/.8)"><i class="sw" style="background:'+tok(f.tok)+'"></i>'+esc(f.name)+'</span></span>'+
+      '<span class="muted" style="display:block;font-size:12px;margin-top:3px">'+esc(c.role)+'</span>'+
+      '<span style="display:block;font-size:12px;margin-top:5px;color:hsl(var(--text-100)/.85)">'+esc(c.status)+'</span>'+
+      '<span class="muted" style="display:block;font-size:12px;margin-top:2px">情绪：'+esc(c.emotion)+' · 出场 '+c.apps.length+' 次</span></span></button>';
+  }).join('')+'</div>';
+  h += '<h2 style="font-size:16px;margin:28px 0 12px">关系（同一条边，上下两个方向各自独立）</h2>';
+  var rels = RELS.filter(function(r){ return revN(r.from)<=d.rev; });
+  h += '<div>'+rels.map(function(r){
+    var A=charOf(r.a), B=charOf(r.b);
+    return '<div class="rel-line" data-od-id="rel-'+r.id+'"><div class="row"><span class="pair">'+esc(A.name)+' ↔ '+esc(B.name)+'</span>'+
+      '<span class="chip '+(r.hot?'accent':'')+'" style="margin-left:auto">从 '+r.from+' 起</span>'+
+      (r.debt?'<span class="chip info">未了债务：'+esc(r.debt)+'</span>':'')+'</div>'+
+      '<div class="dir"><span class="k">'+esc(A.name)+' → '+esc(B.name)+'</span><span>'+esc(r.ab.text)+'（信任 '+r.ab.trust+' · 冲突 '+r.ab.conflict+'）</span>'+
+      '<span class="k">'+esc(B.name)+' → '+esc(A.name)+'</span><span>'+esc(r.ba.text)+'（信任 '+r.ba.trust+' · 冲突 '+r.ba.conflict+'）</span></div></div>';
+  }).join('')+'</div>';
+  if(d.rev<6) h+='<div class="dup-note" style="margin-top:12px">陈默 ↔ 白桦 这条关系会在 R6 接受后进入关系图：提案里写着「钥匙转交，信任 +1」。</div>';
+  $('#mainBody').className='main-body';
+  $('#mainBody').innerHTML=h;
+}
+
+/* ══════════════ 伏笔与线索板 ══════════════ */
+function renderForeshadowScreen(){
+  var d=derive(), h='';
+  var kinds=[['all','全部'],['promise','伏笔'],['clue','线索'],['mystery','谜团']];
+  h+='<div class="row" style="gap:8px;margin-bottom:16px">'+
+    '<div class="seg">'+kinds.map(function(k){
+      return '<button data-act="fv-filter" data-k="'+k[0]+'" aria-pressed="'+(D.chFilter===k[0])+'">'+k[1]+'</button>'; }).join('')+'</div>'+
+    '<span class="note">状态：已埋 / 推进中 / 待收 · 回收窗口按卷三第 9–12 章排布</span></div>';
+  var list=d.foreshadow.filter(function(f){ return D.chFilter==='all'||f.type===D.chFilter; });
+  h+='<div class="grid g2">'+list.map(function(f){
+    return '<div class="fcard" data-od-id="foreshadow-'+f.id+'"><div class="top"><span class="code">'+f.id+'</span>'+
+      '<span class="chip">'+esc(f.typeLabel)+'</span>'+
+      '<span class="chip '+(f.statusKey==='planted'?'warn':'accent')+'">'+esc(f.status)+'</span>'+
+      (f.progress?'<span class="chip num" style="margin-left:auto">'+f.progress+' / '+f.progressMax+'</span>':'')+'</div>'+
+      '<div class="txt">'+esc(f.text)+'</div>'+
+      '<div class="grid2"><span>首次出现：<b>第 '+f.ch+' 章</b></span><span>回收窗口：<b>'+esc(f.window)+'</b></span>'+
+      '<span>当前状态：<b>'+esc(f.note)+'</b></span><span>证据锚点：<button class="anchor" data-act="anchor" data-ch="'+f.ch+'">'+esc(f.anchor)+'</button></span></div></div>';
+  }).join('')+'</div>';
+  $('#mainBody').className='main-body';
+  $('#mainBody').innerHTML=h;
+}
+
+/* ══════════════ 未收束债务 ══════════════ */
+function renderDebtsScreen(){
+  var list=DEBTS.slice().sort(function(a,b){ return b.age-a.age; });
+  var h='<div class="grid g3" style="margin-bottom:18px">'+
+    '<div class="card"><div class="num" style="font-size:20px;font-weight:600">'+list.length+'</div><div class="note">未收束债务</div></div>'+
+    '<div class="card"><div class="num" style="font-size:20px;font-weight:600">'+list[0].age+' 章</div><div class="note">最久未推进：'+esc(list[0].title)+'</div></div>'+
+    '<div class="card"><div class="num" style="font-size:20px;font-weight:600">'+list.filter(function(x){return x.level==='warn';}).length+' 条</div><div class="note">临期提醒（已超过 3 章未推进）</div></div></div>';
+  h+=list.map(function(x){
+    var w=Math.max(6,(x.age/6)*100);
+    return '<div class="debt-row'+(x.level==='warn'?' warn':'')+'" data-od-id="debt-'+x.id+'">'+
+      '<div><div class="row" style="gap:6px"><span class="chip '+(x.level==='warn'?'warn':'info')+'">'+esc(x.levelLabel)+'</span>'+
+      '<span class="chip">'+esc(x.kind)+'</span></div>'+
+      '<div style="margin-top:6px;font-size:14px;font-weight:600">'+esc(x.title)+'</div>'+
+      '<div class="note" style="margin-top:3px">'+esc(x.text)+'　涉及：'+esc(x.related)+'</div></div>'+
+      '<div class="track"><span class="base"></span><span class="bar" style="left:0;width:'+w+'%;background:hsl(var('+(x.level==='warn'?'--warn':'--info')+')/.55)"></span>'+
+      '<span class="ticks"><span>第 '+x.ch+' 章</span><span>第 6 章</span></span></div>'+
+      '<div class="row" style="gap:6px"><button class="btn sm" data-act="push-debt" data-id="'+x.id+'">让 AI 推进</button>'+
+      '<button class="btn sm" data-act="anchor" data-ch="'+x.ch+'">看出处</button></div></div>';
+  }).join('');
+  $('#mainBody').className='main-body';
+  $('#mainBody').innerHTML=h;
+}
+
+/* ══════════════ 时间线 ══════════════ */
+function renderTimelineScreen(){
+  var d=derive();
+  var items=TIMELINE.map(function(t){
+    if(t.ch===6&&d.rev>=6) return Object.assign({},t,{ text:'陈默与白桦下到冷库地下通道，通道入口与十九级石阶已被写入故事事实。' });
+    return t;
+  });
+  var h='<div class="tl">'+items.map(function(t){
+    return '<div class="tl-item'+(t.past?'':' now')+'"><div class="day">'+esc(t.day)+'</div>'+
+      '<div class="t">'+esc(t.title)+'</div><div class="d">'+esc(t.text)+'</div>'+
+      '<div class="row" style="gap:6px;margin-top:6px"><button class="btn sm" data-act="anchor" data-ch="'+t.ch+'">第 '+t.ch+' 章 · 看这一段</button>'+
+      '<span class="chip">'+(t.past?'已发生':'当下')+'</span></div></div>';
+  }).join('')+'</div>';
+  h+='<div class="dup-note" style="margin-top:20px">故事内时间由数据给出，界面一律用「第 N 天」表述；真实时间只出现在线程与版本记录里。</div>';
+  $('#mainBody').className='main-body';
+  $('#mainBody').innerHTML=h;
+}
+
+/* ══════════════ 写作记忆 ══════════════ */
+function renderMemoryScreen(){
+  var d=derive();
+  var h='<div class="row" style="margin-bottom:16px;gap:8px">'+
+    '<span class="chip '+(d.rev>=5?'ok':'warn')+'">基于 '+d.revLabel+'，最新</span>'+
+    '<span class="note">AI 写作前会读到的三条摘要；来源与写入版本都写在下面。</span></div>';
+  h+=MEMORY.map(function(m){
+    var lit=Math.min(100,Math.max(12,(m.from/Math.max(d.rev,1))*100));
+    return '<div class="card" style="margin-bottom:12px" data-od-id="memory-'+m.id+'">'+
+      '<div class="row"><span style="font-size:14px">'+esc(m.text)+'</span>'+
+      '<span class="chip '+(m.from>=d.rev?'accent':'')+'" style="margin-left:auto">'+m.ver+' 起生效</span></div>'+
+      '<div class="mem-band"><i style="left:0;width:'+lit+'%"></i></div>'+
+      '<div class="row" style="gap:12px"><span class="note">新鲜度：基于 '+d.revLabel+'，最新</span>'+
+      '<span class="note">来源：'+esc(m.src)+'</span><span class="note">'+esc(m.since)+'</span></div></div>';
+  }).join('');
+  h+='<div class="row" style="gap:8px;margin-top:16px"><button class="btn sm" data-act="view" data-view="foreshadow">看伏笔状态</button>'+
+    '<button class="btn sm" data-act="view" data-view="thread">去线程里问 AI 记得什么</button></div>';
+  $('#mainBody').className='main-body';
+  $('#mainBody').innerHTML=h;
+}
+
+/* ══════════════ 本章合同 ══════════════ */
+function renderContractScreen(){
+  var d=derive(), h='';
+  if(D.pluginErr){
+    h='<div class="err-card" data-od-id="plugin-missing"><div class="row" style="gap:6px"><span class="chip err">缺插件</span><span class="chip num">novel-planning 0.3.1</span></div>'+
+      '<h3 style="margin-top:10px">未安装小说规划插件，本章合同暂不可用</h3>'+
+      '<p class="note" style="margin-top:8px">第 6 章的视角、故事时间、必须出现与禁止矛盾都存在规划插件里。装好之后这一页会自动恢复；地图、正文、伏笔与版本历史不受影响，可以继续用。</p>'+
+      '<div class="row" style="gap:8px;margin-top:14px"><button class="btn primary" data-act="retry-plugin" id="btnRetryPlugin">重试检测</button>'+
+      '<button class="btn" data-act="view" data-view="map">回到地图</button></div></div>';
+    $('#mainBody').className='main-body'; $('#mainBody').innerHTML=h; return;
+  }
+  h='<div class="card plain" style="margin-bottom:16px"><div class="card-h"><span class="t">'+esc(CONTRACT.unit)+'</span>'+
+    '<span class="r"><span class="chip accent">'+(d.propState==='pending'?'按此合同生成的提案待审':(d.propState==='expired'?'此合同对应的提案已过期':'已按此合同接受 R6'))+'</span></span></div>';
+  CONTRACT.rows.forEach(function(r){
+    h+='<div class="row" style="align-items:flex-start;gap:12px;padding:8px 0;border-top:1px solid hsl(var(--border-100))">'+
+      '<span style="flex:none;width:76px;font-size:12px;color:hsl(var(--text-200)/.72)">'+esc(r.label)+'</span>'+
+      '<span style="font-size:13px">'+(r.items?r.items.map(function(x){return '<span class="tag" style="margin-right:6px">'+esc(x)+'</span>';}).join(''):esc(r.value))+'</span></div>';
+  });
+  h+='</div>';
+  h+='<h2 style="font-size:16px;margin:8px 0 12px">对照检查（当前草稿）</h2>';
+  h+=CONTRACT.checks.map(function(c){
+    return '<div class="row" style="align-items:flex-start;gap:10px;padding:9px 0;border-top:1px solid hsl(var(--border-100))">'+
+      '<span class="chip '+(c.status==='ok'?'ok':'warn')+'" style="flex:none">'+(c.status==='ok'?'符合':'待处理')+'</span>'+
+      '<span style="flex:none;width:76px;font-size:12px;color:hsl(var(--text-200)/.72)">'+esc(c.label)+'</span>'+
+      '<span style="min-width:0"><span style="font-size:13px">'+esc(c.text)+'</span>'+
+      '<span class="note" style="display:block;margin-top:2px">'+esc(c.note)+'</span></span></div>';
+  }).join('');
+  h+='<div class="row" style="gap:8px;margin-top:18px"><button class="btn primary" data-act="go" data-go="proposal">去审阅第 6 章提案</button>'+
+    '<button class="btn" data-act="view" data-view="read">读已接受正文</button></div>';
+  $('#mainBody').className='main-body';
+  $('#mainBody').innerHTML=h;
+}
+
+/* ══════════════ 推演（未连接） ══════════════ */
+function renderSimScreen(){
+  var h='<div class="card plain" style="border-color:hsl(var(--warn)/.4);margin-bottom:18px" data-od-id="sidecar-off">'+
+    '<div class="card-h"><span class="chip warn">沙盒侧车未连接</span><span class="r chip">推演功能暂不可用</span></div>'+
+    '<div style="font-size:13px;line-height:1.7">连接后可运行读者反应与人物压力实验。实验基于<b>指定的固定版本</b> snapshot 运行，'+
+    '结果只作创作参考，不会直接写入故事事实——要写进故事，仍然必须经过提案审阅。</div>'+
+    '<div class="row" style="gap:8px;margin-top:14px"><button class="btn" data-act="sim-connect">查看连接指引</button>'+
+    '<span class="note">连接后此处显示实验详情、人物反应与未解决钩子</span></div></div>';
+  h+='<div class="grid g2" style="margin-bottom:18px">'+EXPERIMENTS.map(function(e){
+    return '<div class="card" style="opacity:.62"><div class="card-h"><span class="t">'+esc(e.name)+'</span><span class="r"><span class="chip">'+esc(e.kind)+'</span></span></div>'+
+      '<div class="note" style="line-height:1.7">'+esc(e.desc)+'</div>'+
+      '<div class="row" style="gap:8px;margin-top:12px"><button class="btn sm is-disabled" disabled>运行实验</button>'+
+      '<button class="btn sm is-disabled" disabled>查看报告</button></div></div>';
+  }).join('')+'</div>';
+  h+='<h2 style="font-size:16px;margin:8px 0 12px">新建实验</h2><div class="card" style="opacity:.7">'+
+    '<div class="grid g3"><div class="field"><span class="lbl">实验类型</span><select class="sel" disabled><option>读者反应</option><option>人物压力</option></select></div>'+
+    '<div class="field"><span class="lbl">固定版本</span><select class="sel" disabled><option>R6</option></select></div>'+
+    '<div class="field"><span class="lbl">人物子集</span><select class="sel" disabled><option>陈默 · 白桦 · 林晚</option></select></div></div>'+
+    '<div class="field" style="margin-top:12px"><span class="lbl">想问的问题</span><textarea class="ta" disabled placeholder="例：读到通道尽头那声水响，读者会不会觉得是巧合？"></textarea></div>'+
+    '<div class="row" style="gap:8px;margin-top:12px"><button class="btn primary is-disabled" disabled>开始推演</button>'+
+    '<span class="note">侧车未连接时，表单与入口全部置灰</span></div></div>';
+  $('#mainBody').className='main-body';
+  $('#mainBody').innerHTML=h;
+}
+/* ══════════════ 正文阅读 ══════════════ */
+function readAside(c, d){
+  return '<div class="card"><div class="card-h"><span class="t">本章信息</span></div>'+
+    '<dl class="kv"><dt>卷 / 章</dt><dd>'+esc(c.volName)+' · 第 '+c.num+' 章</dd>'+
+    '<dt>视角</dt><dd>'+esc(c.pov)+'</dd><dt>字数</dt><dd class="num">'+c.words+' 字</dd>'+
+    '<dt>状态</dt><dd>'+(c.num<=d.rev?'已接受 · R'+c.num:'尚未接受')+'</dd>'+
+    '<dt>故事时间</dt><dd>'+(c.num===6?'第 41 天 · 夜':'第 '+(c.num<=6?41:41+c.num-6)+' 天')+'</dd></dl></div>'+
+    '<div class="card"><div class="card-h"><span class="t">本章锚点</span></div>'+
+    '<div class="col" style="gap:6px">'+(CONTRACT.rows[2].items.map(function(x){
+      return '<span class="tag" style="align-self:flex-start">'+esc(x)+'</span>'; }).join(''))+'</div>'+
+    '<div class="note" style="margin-top:10px">审阅问题点进来时，对应段落会自动高亮。</div></div>'+
+    '<div class="card"><div class="card-h"><span class="t">版本操作</span></div>'+
+    '<div class="col" style="gap:6px"><button class="btn sm" data-act="compare" data-ver="R'+c.num+'">对比上一版</button>'+
+    '<button class="btn sm '+(c.num<=1?'is-disabled':'')+'" data-act="rollback" data-ver="R'+Math.max(1,c.num-1)+'" '+(c.num<=1?'disabled':'')+'>回滚到此版本</button>'+
+    '<button class="btn sm" data-act="view" data-view="history">看版本历史</button></div></div>';
+}
+function renderReadScreen(){
+  var d=derive(), c=ch(D.readCh), h='';
+  if(D.loading){ $('#mainBody').className='main-body'; $('#mainBody').innerHTML=skeletonBlock(); return; }
+  if(c.status==='planned'){
+    h='<div class="card plain" style="max-width:560px;margin:40px auto 0;text-align:center">'+
+      '<div class="chip">第 '+c.num+' 章 · 计划中</div>'+
+      '<h2 style="font-size:18px;margin-top:12px">'+esc(c.title)+'</h2>'+
+      '<p class="note" style="margin-top:10px">这一章还没有正文。它在路线里排在第 '+(c.num-5)+' 位，前面的债务要先有个了断。</p>'+
+      '<div class="row" style="gap:8px;justify-content:center;margin-top:16px">'+
+      '<button class="btn primary" data-act="write-next">让 AI 起草第 '+c.num+' 章</button>'+
+      '<button class="btn" data-act="view" data-view="map">回到地图</button></div>'+
+      '<div class="note" style="margin-top:12px">提出来的稿子会先变成提案，等你在审阅页逐条决定。</div></div>';
+    $('#mainBody').className='main-body'; $('#mainBody').innerHTML=h; return;
+  }
+  if(c.num===6 && d.propState==='pending'){
+    h='<div class="card plain" style="max-width:640px;margin:40px auto 0">'+
+      '<div class="row" style="gap:8px"><span class="chip accent">待审提案</span><span class="chip">约 2,800 字</span></div>'+
+      '<h2 style="font-size:18px;margin-top:12px">第 6 章《冷库之下的通道》还没有被接受</h2>'+
+      '<p class="note" style="margin-top:10px;line-height:1.75">AI 已经把草稿和 6 条设定变更整理好，但它们还没有变成故事事实。'+
+      '你可以逐条决定，也可以按自己的节奏先看一遍。</p>'+
+      '<div class="row" style="gap:8px;margin-top:16px"><button class="btn primary" data-act="go" data-go="proposal">去审阅提案</button>'+
+      '<button class="btn" data-act="read" data-ch="5">先读第 5 章</button></div></div>';
+    $('#mainBody').className='main-body'; $('#mainBody').innerHTML=h; return;
+  }
+  if(c.num===6 && d.propState==='split'){
+    h='<div class="card plain" style="max-width:640px;margin:40px auto 0">'+
+      '<div class="row" style="gap:8px"><span class="chip warn">正文未接受</span><span class="chip">R6 已写入 5 条设定变更</span></div>'+
+      '<h2 style="font-size:18px;margin-top:12px">第 6 章正文留在待改状态</h2>'+
+      '<p class="note" style="margin-top:10px;line-height:1.75">你接受了 5 条设定变更（通道、钥匙、关系、伏笔、知识边界），'+
+      '但没有接受这一版正文。地图与角色状态已经按 R6 更新；这一章仍然可以按审阅问题重写。</p>'+
+      '<div class="row" style="gap:8px;margin-top:16px"><button class="btn primary" data-act="rewrite-chapter" data-ch="6">让 AI 按未采纳建议重写第 6 章</button>'+
+      '<button class="btn" data-act="go" data-go="proposal">看逐条决定</button></div></div>';
+    $('#mainBody').className='main-body'; $('#mainBody').innerHTML=h; return;
+  }
+  var body=c.body.map(function(p){
+    var t=esc(p);
+    if(D.hl && D.hl.ch===c.num && c.hl && p.indexOf(c.hl.text)>=0) t=t.replace(esc(c.hl.text),'<mark>'+esc(c.hl.text)+'</mark>');
+    return '<p>'+t+'</p>';
+  }).join('');
+  if(c.num===6) body+='<p class="ms-end">……</p>';
+  if(D.hl && D.hl.ch===c.num) h='<div class="warn-strip" style="margin-bottom:16px">'+
+    '<span class="chip accent">出处锚点</span><span>来自审阅问题：'+esc(D.hl.label||'')+' · 已定位到本段</span>'+
+    '<button class="btn sm" style="margin-left:auto" data-act="clear-hl">取消高亮</button></div>';
+  h+='<div class="read-wrap"><article class="read-body" data-od-id="reading-body">'+
+    '<h2 style="font-size:20px;margin-bottom:6px">第 '+c.num+' 章 · '+esc(c.title)+'</h2>'+
+    '<div class="row" style="gap:8px;margin-bottom:18px">'+
+    '<span class="vbadge num">R'+(c.num<=d.rev?Math.min(d.rev,c.num):'—')+'</span><span class="chip">'+esc(c.pov)+' 视角</span>'+
+    '<span class="chip">第 '+c.num+' 章 · 已接受</span></div>'+body+'</article>'+
+    '<aside class="read-aside">'+readAside(c,d)+'</aside></div>';
+  $('#mainBody').className='main-body';
+  $('#mainBody').innerHTML=h;
+}
+function skeletonBlock(){
+  return '<div class="row" style="gap:20px;align-items:flex-start"><div style="flex:2"><div class="sk sk-line" style="width:40%;height:16px"></div>'+
+    repeat('<div class="sk sk-line" style="height:12px"></div>',8)+'<div class="sk sk-line" style="width:60%;height:12px"></div></div>'+
+    '<div style="flex:1"><div class="sk sk-card"></div><div class="sk sk-card"></div></div></div>';
+}
+
+/* ══════════════ 提案审阅 ══════════════ */
+function changeRows(editable){
+  return PROPOSAL.changes.map(function(c){
+    var dec=D.decisions[c.id];
+    return '<div class="change-row" data-decision="'+dec+'" data-od-id="change-'+c.id+'">'+
+      '<span class="chip kind">'+esc(c.kind)+'</span><span class="txt">'+esc(c.text)+'</span>'+
+      '<div class="seg"><button data-act="decide" data-id="'+c.id+'" data-dec="accept" aria-pressed="'+(dec==='accept')+'" '+(editable?'':'disabled')+'>接受</button>'+
+      '<button data-act="decide" data-id="'+c.id+'" data-dec="reject" aria-pressed="'+(dec==='reject')+'" '+(editable?'':'disabled')+'>拒绝</button></div></div>'+
+      (dec==='reject' ? '<div class="reason"><input class="inp" data-act="reason" data-id="'+c.id+'" value="'+esc(D.reasons[c.id])+
+        '" placeholder="留一句拒绝的理由（可选）" '+(editable?'':'disabled')+' aria-label="拒绝理由"></div>' : '');
+  }).join('');
+}
+function issueList(dim){
+  return PROPOSAL.issues.map(function(it){
+    var sev=it.sev==='high'?'err':(it.sev==='mid'?'warn':'info');
+    var anchors=it.anchors.map(function(a){
+      return '<button class="anchor" data-act="anchor" data-ch="'+a.ch+'" data-hl="'+esc(a.hl)+'" data-label="'+esc(a.label)+'">'+esc(a.label)+'</button>';
+    }).join('');
+    var fixed = !dim && it.sev==='high';
+    return '<div class="issue" data-od-id="issue-'+it.id+'"'+(dim?' style="opacity:.6"':'')+'>'+
+      '<div class="top"><span class="chip '+sev+'">'+it.sevLabel+'</span><span class="chip">'+esc(it.type)+'</span>'+
+      (fixed?'<span class="chip ok">接受时按建议修正</span>':'')+
+      '<span style="margin-left:auto">'+anchors+'</span></div>'+
+      '<div class="q">'+esc(it.text)+'</div><div class="sug">建议：'+esc(it.sug)+'</div></div>';
+  }).join('');
+}
+function msPreview(){
+  var c=ch(6);
+  return '<div class="ms-scroll"><div class="ms-body">'+c.body.map(function(p){ return '<p>'+esc(p)+'</p>'; }).join('')+
+    '<p class="ms-end">……</p></div></div>'+
+    '<div class="row" style="gap:8px;margin-top:12px"><button class="btn sm" data-act="read-draft">展开读全文（约 2,800 字）</button>'+
+    '<span class="note">草稿会随滚动继续，结尾停在通道尽头的那声水响。</span></div>';
+}
+function impactLine(d, part){
+  var ch2=d.ch6.status==='unwritten';
+  var base='<span class="big">R5 → R6</span>：正文 1 篇'+(ch2?'（未接受）':'')+' · 设定变更 <span class="big">'+d.acceptCount+'</span> 条';
+  var tail = ch2 ? ' · 未采纳建议 3 条' : ' · 未采纳建议 2 条（另有 1 条高优先级问题已在接受时按建议修正）';
+  return base+tail;
+}
+function renderProposalScreen(){
+  var d=derive(), h='';
+  if(D.loading){
+    $('#mainBody').className='main-body';
+    $('#mainBody').innerHTML='<div class="row" style="gap:20px;align-items:flex-start"><div style="flex:1">'+
+      repeat('<div class="sk sk-line" style="height:12px"></div>',10)+'</div><div style="width:380px">'+repeat('<div class="sk sk-card"></div>',4)+'</div></div>'+
+      '<div class="row" style="gap:8px;margin-top:18px"><button class="btn primary loading"><span class="spinner"></span>正在计算影响…</button>'+
+      '<span class="note">正在核对写作记忆、关系与伏笔状态</span></div>';
+    return;
+  }
+  h+='<div class="rv-head" data-od-id="proposal-head">'+
+    '<span class="path">R5 <span>→</span> R6</span><span>·</span>'+
+    '<span>卷二 第 6 章《冷库之下的通道》</span><span>·</span><span class="num">约 2,800 字</span><span>·</span>'+
+    '<span>6 条设定变更</span><span>·</span><span>3 个审阅问题</span>'+
+    (D.propState==='pending'?'<span class="chip accent" style="margin-left:auto">待你决定</span>':'')+'</div>';
+  if(D.propState==='expired'){
+    h+='<div class="warn-strip err" style="margin-top:14px"><span class="chip err">此提案已过期</span>'+
+      '<span>这份提案基于 R5 生成，当前已经是 R6 —— 里面的设定变更不再成立。为避免写乱故事事实，只能丢弃。</span></div>';
+  }
+  if(D.propState==='split'||D.propState==='accepted'){
+    h+='<div class="warn-strip" style="margin-top:14px;border-color:hsl(var(--accent-brand)/.45);background:hsl(var(--accent-brand)/.09)">'+
+      '<span class="chip accent">已写入 '+d.revLabel+'</span><span>'+impactLine(d)+'</span></div>';
+  }
+  h+='<div class="rv-grid">'+
+    '<div class="card plain"><div class="card-h"><span class="t">正文预览 · 第 6 章《冷库之下的通道》</span>'+
+    '<span class="r chip">'+(d.propState==='accepted'?'已接受':(d.propState==='split'?'未接受':(d.propState==='expired'?'已过期':'待审')))+'</span></div>'+
+    msPreview()+'</div>'+
+    '<div><div class="card plain"><div class="card-h"><span class="t">设定变更 · 逐条决定</span>'+
+    '<span class="r note">默认接受 · 拒绝可留一句理由</span></div>'+changeRows(D.propState==='pending')+'</div>'+
+    '<div class="card plain" style="margin-top:16px"><div class="card-h"><span class="t">审阅问题</span>'+
+    '<span class="r note">点出处锚点回到正文对应段落</span></div>'+issueList(D.propState!=='pending')+'</div></div></div>';
+  if(D.propState==='pending'){
+    h+='<div class="row" style="gap:12px;align-items:center;margin-top:18px;flex-wrap:wrap">'+
+      '<div class="impact-card" data-od-id="impact-preview" style="flex:1;min-width:320px">影响预览：'+impactLine(d)+
+      '<div class="note" style="margin-top:4px">接受后地图、角色状态、伏笔与时间线会同步到 R6；正文与设定变更都可以分开处理。</div></div>'+
+      '<button class="btn" data-act="split-accept">只接受设定变更</button>'+
+      '<button class="btn" data-act="discard">暂不处理</button>'+
+      '<button class="btn primary" data-act="accept" data-od-id="cta-accept-chapter">接受本章</button></div>';
+  } else if(D.propState==='expired'){
+    h+='<div class="row" style="gap:12px;align-items:center;margin-top:18px;flex-wrap:wrap">'+
+      '<div class="impact-card" style="flex:1;min-width:320px;border-color:hsl(var(--err)/.4);background:hsl(var(--err)/.06)">'+
+      '这份提案不再产生任何影响：没有正文写入，也没有设定变更生效。</div>'+
+      '<button class="btn is-disabled" disabled title="提案已过期，无法接受">接受本章</button>'+
+      '<button class="btn" data-act="split-accept" disabled title="提案已过期">只接受设定变更</button>'+
+      '<button class="btn danger" data-act="discard" data-od-id="cta-discard">丢弃</button></div>';
+  } else if(D.propState==='split'){
+    h+='<div class="row" style="gap:12px;align-items:center;margin-top:18px;flex-wrap:wrap">'+
+      '<div class="impact-card" style="flex:1;min-width:320px">已生效：5 条设定变更写入 '+d.revLabel+'；第 6 章正文未接受，仍可重写。</div>'+
+      '<button class="btn" data-act="view" data-view="history">看版本历史</button>'+
+      '<button class="btn primary" data-act="rewrite-chapter" data-ch="6">让 AI 重写第 6 章</button></div>';
+  } else {
+    h+='<div class="row" style="gap:12px;align-items:center;margin-top:18px;flex-wrap:wrap">'+
+      '<div class="impact-card" style="flex:1;min-width:320px">已写入 '+d.revLabel+'：第 6 章正文 1 篇 · 6 条设定变更 · 高优先级审阅问题已按建议修正。</div>'+
+      '<button class="btn" data-act="read" data-ch="6">读第 6 章正文</button>'+
+      '<button class="btn primary" data-act="write-next">继续写第 7 章</button></div>';
+  }
+  $('#mainBody').className='main-body';
+  $('#mainBody').innerHTML=h;
+}
+
+/* ══════════════ 版本历史 ══════════════ */
+function renderHistoryScreen(){
+  var d=derive(), h='';
+  h+='<div class="row" style="margin-bottom:14px;gap:8px"><span class="chip accent">当前 '+d.revLabel+'</span>'+
+    '<span class="note">已接受版本 R1–'+d.revLabel+' · 回滚会停用其后所有变更</span></div>';
+  REVERSIONS.forEach(function(r){
+    var n=revN(r.ver), isCur=n===d.rev, inactive=n>d.rev;
+    var pendingRow = n===6 && d.propState==='pending';
+    var sum=r.sum, time=r.time;
+    if(n===6){
+      if(d.propState==='accepted'){ sum='R6：接受第 6 章正文与 6 条设定变更'; time='刚刚'; }
+      else if(d.propState==='split'){ sum='R6：接受 5 条设定变更，第 6 章正文未变'; time='刚刚'; }
+      else if(d.propState==='expired'){ sum='R6：第 6 章已按另一版稿子写入，与当前提案冲突'; time='稍早'; }
+      else if(d.propState==='discarded'){ sum='R6：提案已丢弃，没有写入任何内容'; time='已丢弃'; }
+    }
+    h+='<div class="ver-row" data-current="'+(isCur?'1':'0')+'" data-inactive="'+(inactive?'1':'0')+'" data-od-id="version-'+r.ver+'">'+
+      '<span class="ver-badge">'+r.ver+'</span>'+
+      '<span class="txt"><span class="sum">'+esc(sum)+'</span><span class="meta">'+esc(time)+' · 第 '+r.ch+' 章</span></span>'+
+      '<span class="acts">'+
+      (pendingRow?'<span class="chip accent">待审提案</span><button class="btn sm primary" data-act="go" data-go="proposal">前往审阅</button>':
+        (isCur?'<span class="chip">当前版本</span>':
+          '<button class="btn sm" data-act="compare" data-ver="'+r.ver+'">对比</button>'+
+          '<button class="btn sm" data-act="rollback" data-ver="'+r.ver+'">回滚到此版本</button>'))+
+      '</span></div>';
+  });
+  h+='<div class="dup-note" style="margin-top:16px">版本号只跟着「已接受的变更」走：接受设定变更但拒绝正文时，版本照样前进，右栏活动行会写清楚哪一半没接受。</div>';
+  $('#mainBody').className='main-body';
+  $('#mainBody').innerHTML=h;
+}
+
+/* ══════════════ 线程（对话流） ══════════════ */
+function renderThreadScreen(){
+  var d=derive(), h='<div class="thread-wrap">';
+  h+='<div class="thread-list"><div class="grp-head" style="padding:0 8px 8px">线程 · 一个作品多条线程</div>';
+  THREADS.forEach(function(t){
+    h+='<button class="item" data-act="open-thread" data-thread="'+t.id+'" aria-current="'+(D.thread===t.id?'true':'false')+'">'+
+      '<span class="lbl" style="display:block;text-align:left"><span style="display:block">'+esc(t.name)+'</span>'+
+      '<span class="note">'+esc(t.note)+'</span></span></button>';
+  });
+  h+='<button class="item" data-act="new-thread"><span class="lbl">＋ 新建线程</span></button></div>';
+  h+='<div class="convo" data-od-id="convo">';
+  THREAD_TURNS.forEach(function(t){
+    h+='<div class="turn '+(t.who==='me'?'me':'ai')+'"><div class="who">'+esc(t.name)+
+      (t.who==='ai'?'<span class="chip">AI 稿手</span>':'')+'</div>';
+    if(t.tool && D.showTools!==false) h+='<div class="tool-line" style="margin-bottom:8px"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M3 8l3 3 7-7"/></svg>工具活动：'+esc(t.tool)+'</div>';
+    h+='<div class="bubble">'+esc(t.text)+'</div>';
+    if(t.card){
+      h+='<div class="inline-card" data-od-id="inline-proposal-card">'+
+        '<div class="row" style="gap:8px"><span class="chip accent">提案</span><span class="num chip">R5 → R6</span>'+
+        '<span class="chip num" style="margin-left:auto">约 2,800 字</span></div>'+
+        '<div style="margin-top:10px;font-size:14px;font-weight:600">卷二 第 6 章《冷库之下的通道》</div>'+
+        '<div class="note" style="margin-top:4px">6 条设定变更 · 3 个审阅问题 · 接受后写入 R6</div>'+
+        '<div class="acts"><button class="btn sm primary" data-act="accept">接受本章</button>'+
+        '<button class="btn sm" data-act="accept-preview">预览影响</button>'+
+        '<button class="btn sm" data-act="go" data-go="proposal">在写作台打开</button>'+
+        '<button class="btn sm ghost" data-act="discard">丢弃</button></div></div>';
+    }
+    if(t.find){
+      h+='<div class="inline-card" style="border-color:hsl(var(--warn)/.45);box-shadow:none">'+
+        '<div class="row" style="gap:8px"><span class="chip warn">审阅发现</span><span class="chip">2 条需要你判断</span></div>'+
+        '<div class="finding" style="margin-top:10px"><div style="font-size:13px">陈默左臂伤（第 4 章）在本章动作描写中被忽略。</div>'+
+        '<div class="row" style="gap:8px;margin-top:6px"><span class="chip err">高</span><button class="anchor" data-act="anchor" data-ch="4" data-hl="左臂在门框上狠狠磕了一下" data-label="第 4 章 · 陈默受伤">第 4 章 · 陈默受伤</button></div></div>'+
+        '<div class="finding" style="margin-top:10px;border-color:hsl(var(--info))"><div style="font-size:13px">结尾一句混入了林晚的心理活动。</div>'+
+        '<div class="row" style="gap:8px;margin-top:6px"><span class="chip info">低</span><button class="anchor" data-act="anchor" data-ch="1" data-hl="编号 KC-0413" data-label="第 1 章 · 货单">第 1 章 · 货单</button></div></div></div>';
+    }
+    h+='</div>';
+  });
+  h+='</div></div>';
+  $('#mainBody').className='main-body flush';
+  $('#mainBody').innerHTML=h;
+}
+
+/* ══════════════ 进阶面 ══════════════ */
+function renderAdvancedScreen(){
+  var tabs=[['cordis','Cordis 插件树'],['plugins','插件清单'],['agent','Agent preset'],['jobs','Jobs'],['subs','Subagent'],['diag','诊断原始数据'],['log','事件日志']];
+  var h='<div class="adv-tabs">'+tabs.map(function(t){
+    return '<button class="adv-tab" data-act="adv-tab" data-tab="'+t[0]+'" aria-current="'+(D.advTab===t[0]?'page':'false')+'">'+t[1]+'</button>';
+  }).join('')+'</div>';
+  var body='';
+  if(D.advTab==='cordis'){
+    body='<div class="card plain"><div class="card-h"><span class="t mono">Cordis · 插件树</span><span class="r note">挂载 / 卸载会立刻改变能力面</span></div><div class="tree">'+
+      ADV.tree.map(function(n){
+        var key=n.name, mounted=D.mount[key]!==false;
+        return '<div class="n"><span class="l'+n.lvl+'"></span><span>'+esc(n.name)+'</span><span class="mono" style="opacity:.7">'+esc(n.ver)+'</span>'+
+        '<span class="st"><span class="chip '+(mounted?'ok':'')+'">'+(mounted?'已挂载':'未挂载')+'</span>'+
+        '<button class="btn sm" data-act="mount" data-name="'+esc(key)+'">'+(mounted?'卸载':'挂载')+'</button></span></div>';
+      }).join('')+'</div></div>';
+  } else if(D.advTab==='plugins'){
+    body='<table class="dtable"><thead><tr><th>插件</th><th>版本</th><th>状态</th><th>能力面</th></tr></thead><tbody>'+
+      ADV.plugins.map(function(p){ return '<tr><td>'+esc(p.name)+'</td><td>'+esc(p.ver)+'</td><td>'+esc(p.state)+'</td><td>'+esc(p.scope)+'</td></tr>'; }).join('')+
+      '</tbody></table>';
+  } else if(D.advTab==='agent'){
+    body='<div class="grid g3">'+ADV.presets.map(function(p,i){
+      return '<div class="card"'+(i===0?' style="border-color:hsl(var(--accent-brand)/.45)"':'')+'><div class="card-h"><span class="t">'+esc(p.name)+'</span>'+
+      '<span class="r">'+(i===0?'<span class="chip accent">当前</span>':'')+'</span></div>'+
+      '<dl class="kv"><dt>模型</dt><dd class="mono">'+esc(p.model)+'</dd><dt>上下文</dt><dd class="num">'+esc(p.ctx)+'</dd><dt>权限</dt><dd>'+esc(p.perm)+'</dd></dl>'+
+      '<div class="row" style="gap:6px;margin-top:10px"><button class="btn sm" data-act="toast" data-msg="已切换到「'+esc(p.name)+'」（原型演示）">切换</button></div></div>';
+    }).join('')+'</div>'+
+    '<div class="card plain" style="margin-top:16px"><div class="card-h"><span class="t">凭据</span><span class="r chip ok">已配置</span></div>'+
+    '<div class="row" style="gap:10px"><span class="mono">sk-••••••••••••3f2a</span><span class="note">仅本地使用，不写入项目文件</span>'+
+    '<button class="btn sm" style="margin-left:auto" data-act="toast" data-msg="凭据轮换需要重新登录（原型演示）">轮换凭据</button></div></div>';
+  } else if(D.advTab==='jobs'){
+    body='<table class="dtable"><thead><tr><th>任务</th><th>类型</th><th>对象</th><th>状态</th><th>时间</th><th>耗时</th><th>操作</th></tr></thead><tbody>'+
+      ADV.jobs.map(function(j){
+        var st=j.state==='失败'?'err':(j.state==='排队中'?'warn':'ok');
+        return '<tr><td>'+esc(j.id)+'</td><td>'+esc(j.kind)+'</td><td>'+esc(j.target)+'</td><td><span class="chip '+st+'">'+esc(j.state)+'</span>'+
+        (j.err?'<div style="font-size:11px;opacity:.7">'+esc(j.err)+'</div>':'')+'</td><td>'+esc(j.t)+'</td><td>'+esc(j.dur)+'</td>'+
+        '<td>'+(j.state==='失败'?'<button class="btn sm" data-act="toast" data-msg="已重新排队 '+esc(j.id)+'（原型演示）">重试</button>':
+          '<button class="btn sm is-disabled" disabled>重试</button>')+'</td></tr>';
+      }).join('')+'</tbody></table>';
+  } else if(D.advTab==='subs'){
+    body='<table class="dtable"><thead><tr><th>子代理</th><th>职责</th><th>范围</th><th>状态</th><th>产出</th></tr></thead><tbody>'+
+      ADV.subs.map(function(s){
+        var st=s.state==='运行中'?'warn':(s.state==='已完成'?'ok':'');
+        return '<tr><td>'+esc(s.id)+'</td><td>'+esc(s.role)+'</td><td>'+esc(s.scope)+'</td><td><span class="chip '+st+'">'+esc(s.state)+'</span></td><td>'+esc(s.out)+'</td></tr>';
+      }).join('')+'</tbody></table>';
+  } else if(D.advTab==='diag'){
+    body='<div class="row" style="gap:8px;margin-bottom:12px"><span class="chip warn">原始数据 · 只读</span>'+
+      '<span class="note">作者面不会出现这些内容；这里是排障用的投影原样输出。</span></div>'+
+      '<h2 style="font-size:14px;margin-bottom:8px" class="mono">result-packet · '+esc(PROPOSAL.code)+'</h2>'+
+      '<pre class="code">'+esc(ADV.raw)+'</pre>'+
+      '<h2 style="font-size:14px;margin:18px 0 8px" class="mono">fact lifecycle projection</h2>'+
+      '<table class="dtable"><thead><tr><th>fact</th><th>kind</th><th>state</th><th>since</th><th>note</th></tr></thead><tbody>'+
+      ADV.lifecycle.map(function(l){ return '<tr><td>'+esc(l.fact)+'</td><td>'+esc(l.kind)+'</td><td>'+esc(l.state)+'</td><td>'+esc(l.since)+'</td><td>'+esc(l.note)+'</td></tr>'; }).join('')+
+      '</tbody></table>'+
+      '<h2 style="font-size:14px;margin:18px 0 8px" class="mono">character projection · chen-mo</h2>'+
+      '<table class="dtable"><thead><tr><th>field</th><th>value</th></tr></thead><tbody>'+
+      ADV.fields.map(function(f){ return '<tr><td>'+esc(f.key)+'</td><td>'+esc(f.value)+'</td></tr>'; }).join('')+'</tbody></table>'+
+      '<h2 style="font-size:14px;margin:18px 0 8px" class="mono">pending proposals</h2>'+
+      '<table class="dtable"><thead><tr><th>packetId</th><th>chapter</th><th>expectedRevision</th><th>deltas</th><th>issues</th><th>status</th></tr></thead><tbody>'+
+      ADV.packets.map(function(p){ return '<tr><td>'+esc(p.id)+'</td><td>'+p.ch+'</td><td>'+esc(p.rev)+'</td><td>'+p.deltas+'</td><td>'+p.issues+'</td><td>'+esc(p.status)+'</td></tr>'; }).join('')+
+      '</tbody></table>';
+  } else {
+    body='<table class="dtable"><thead><tr><th>时间</th><th>事件</th><th>明细</th></tr></thead><tbody>'+
+      ADV.log.map(function(l){ return '<tr><td>'+esc(l.t)+'</td><td>'+esc(l.ev)+'</td><td>'+esc(l.detail)+'</td></tr>'; }).join('')+'</tbody></table>';
+  }
+  h+='<div style="padding:16px 0 0">'+body+'</div>';
+  $('#mainBody').className='main-body';
+  $('#mainBody').innerHTML=h;
+}
+/* ══════════════ 人物档案抽屉 ══════════════ */
+function drawerHTML(id){
+  var c=charOf(id), f=factionOf(c.faction), d=derive();
+  var rels=RELS.filter(function(r){ return revN(r.from)<=d.rev && (r.a===id||r.b===id); });
+  var h='<div class="scrim" data-act="close-drawer"></div><div class="drawer" role="dialog" aria-label="'+esc(c.name)+' 人物档案" data-od-id="character-drawer">'+
+    '<div class="drawer-head"><div class="seal" style="width:44px;height:44px;font-size:19px">'+esc(c.name.slice(0,1))+'</div>'+
+    '<div style="min-width:0;flex:1"><div style="font-family:var(--font-serif);font-size:16px;font-weight:600">'+esc(c.name)+'</div>'+
+    '<div class="muted" style="font-size:12px;margin-top:2px">'+esc(c.role)+'</div></div>'+
+    '<button class="btn sm ghost" data-act="close-drawer" aria-label="关闭档案">关闭</button></div>'+
+    '<div class="drawer-body">'+
+    '<div class="row" style="gap:6px;flex-wrap:wrap"><span class="chip"><i class="sw" style="background:'+tok(f.tok)+'"></i>'+esc(f.name)+'</span>'+
+    (c.unknown?'<span class="chip warn">身份未明</span>':'')+'<span class="chip">出场 '+c.apps.length+' 章</span>'+
+    (D.pins[c.id]?'<span class="chip accent">已钉在地图上</span>':'')+'</div>'+
+    '<div class="card" style="margin-top:12px"><dl class="kv"><dt>当前状态</dt><dd>'+esc(c.status)+'</dd>'+
+    '<dt>情绪</dt><dd>'+esc(c.emotion)+'</dd>'+
+    '<dt>常驻地点</dt><dd>'+esc((PLACES.filter(function(p){return p.id===c.place;})[0]||{name:'—'}).name)+'</dd></dl></div>'+
+    '<h2 style="font-size:14px;margin:18px 0 8px">人物弧线</h2>'+
+    '<div class="card plain"><div style="font-size:13px">从「'+esc(c.arc.from)+'」</div>'+
+    '<div class="row" style="gap:6px;margin:6px 0"><span class="mono muted">↓</span></div>'+
+    '<div style="font-size:13px">到「'+esc(c.arc.to)+'」</div>'+
+    '<div class="note" style="margin-top:8px">'+esc(c.arc.note)+'</div></div>'+
+    '<h2 style="font-size:14px;margin:18px 0 8px">关系列表 · 两个方向各自独立</h2>'+
+    (rels.length? rels.map(function(r){
+      var other=charOf(r.a===id?r.b:r.a), mine=r.a===id?r.ab:r.ba, theirs=r.a===id?r.ba:r.ab;
+      return '<div class="rel-line"><div class="row"><span class="pair">'+esc(c.name)+' ↔ '+esc(other.name)+'</span>'+
+        '<span class="chip '+(r.hot?'accent':'')+'" style="margin-left:auto">'+r.from+' 起</span></div>'+
+        '<div class="dir"><span class="k">我 → 对方</span><span>'+esc(mine.text)+'（信任 '+mine.trust+' · 冲突 '+mine.conflict+'）</span>'+
+        '<span class="k">对方 → 我</span><span>'+esc(theirs.text)+'（信任 '+theirs.trust+' · 冲突 '+theirs.conflict+'）</span></div>'+
+        (r.debt?'<div class="note" style="margin-top:5px">未了债务：'+esc(r.debt)+'</div>':'')+'</div>';
+    }).join('') : '<div class="dup-note">还没有已接受的关系记录。</div>')+
+    '<h2 style="font-size:14px;margin:18px 0 8px">出场章节</h2>'+
+    '<div class="col" style="gap:6px">'+c.apps.map(function(a){
+      var accepted=a.ch<=d.rev;
+      return '<button class="item" data-act="read" data-ch="'+a.ch+'" style="border:1px solid hsl(var(--border-100));background:hsl(var(--bg-200))">'+
+        '<span class="ord num">'+a.ch+'</span><span class="t">'+esc(a.note)+'</span>'+
+        '<span class="tail">'+(accepted?'已接受':'待审')+'</span></button>';
+    }).join('')+'</div></div>'+
+    '<div class="drawer-foot">'+
+    (D.pins[c.id]?'<button class="btn" data-act="unpin" data-id="'+c.id+'">取消钉位</button>':'')+
+    '<button class="btn" data-act="focus-node" data-id="'+c.id+'">在地图上定位</button>'+
+    '<button class="btn primary" style="margin-left:auto" data-act="write-for-char" data-id="'+c.id+'">让 AI 从这个人物继续写</button></div></div>';
+  return h;
+}
+
+/* ══════════════ 弹层 ══════════════ */
+function modalHTML(){
+  var m=D.modal, d=derive(), h='<div class="modal-layer" data-act="modal-bg"><div class="modal" role="dialog" aria-modal="true">';
+  if(m.kind==='impact'||m.kind==='split'){
+    var isSplit=m.kind==='split';
+    h+='<h3>'+(isSplit?'只接受设定变更？':'确认接受本章？')+'</h3>'+
+      '<div class="impact-card" style="margin-top:14px">R5 → R6：正文 1 篇'+(isSplit?'（未接受）':'')+
+      ' · 设定变更 '+d.acceptCount+' 条 · 未采纳建议 '+(isSplit?'3':'2')+' 条</div>'+
+      '<div style="margin-top:14px" class="col">'+
+      '<div class="row" style="gap:8px"><span class="chip '+(isSplit?'':'ok')+'">'+(isSplit?'正文不写入':'正文写入第 6 章')+'</span>'+
+      '<span style="font-size:13px">'+(isSplit?'第 6 章仍保持在待改状态，可以按审阅问题重写。':'第 6 章《冷库之下的通道》成为 R6 的正文。')+'</span></div>'+
+      '<div class="row" style="gap:8px"><span class="chip ok">设定变更 '+d.acceptCount+' 条</span>'+
+      '<span style="font-size:13px">按你的逐条选择写入'+(d.rejectCount?'，' + d.rejectCount + ' 条拒绝并留下理由':'')+'。</span></div>'+
+      '<div class="row" style="gap:8px"><span class="chip">版本</span><span style="font-size:13px">R5 → R6，地图、角色状态、伏笔与时间线同步更新。</span></div>'+
+      '</div>'+
+      '<div class="note" style="margin-top:14px">接受之后仍然可以回滚到 R5：回滚会停用这次写入的全部变更。</div>'+
+      '<div class="modal-foot"><button class="btn" data-act="close-modal">返回调整</button>'+
+      '<button class="btn primary" data-act="confirm-accept" data-split="'+(isSplit?'1':'0')+'" data-autofocus>'+(isSplit?'确认写入设定变更':'确认接受 R6')+'</button></div>';
+  } else if(m.kind==='rollback'){
+    var n=revN(m.ver);
+    h+='<h3>回滚到 '+esc(m.ver)+'？</h3>'+
+      '<div style="margin-top:12px;font-size:13px;line-height:1.75">回滚会把故事事实退回 '+esc(m.ver)+' 的状态：'+
+      'R'+(n+1)+' 到 R'+D.revision+' 之间接受的正文与设定变更全部停用（不会被删除，历史里仍然查得到）。</div>'+
+      '<div class="col" style="margin-top:14px">'+
+      '<div class="row" style="gap:8px"><span class="chip err">会停用</span><span style="font-size:13px">'+
+      (D.revision-n>0?('R'+(n+1)+'–R'+D.revision+' 的正文与设定变更'):'没有可停用的版本')+'</span></div>'+
+      '<div class="row" style="gap:8px"><span class="chip">地图状态</span><span style="font-size:13px">关系与伏笔回到 '+esc(m.ver)+' 的投影</span></div>'+
+      '<div class="row" style="gap:8px"><span class="chip">右栏</span><span style="font-size:13px">活动行会写明「已回滚到 '+esc(m.ver)+'」</span></div></div>'+
+      '<div class="modal-foot"><button class="btn" data-act="close-modal">取消</button>'+
+      '<button class="btn danger" data-act="confirm-rollback" data-ver="'+esc(m.ver)+'" data-autofocus>确认回滚</button></div>';
+  } else if(m.kind==='compare'){
+    var v=revN(m.ver), cur=CHAPTERS.filter(function(c){ return c.num===Math.max(1,v); })[0];
+    h+='<h3>'+esc(m.ver)+' 与上一版的差别</h3>'+
+      '<div class="note" style="margin-top:8px">按段落对照，只列出变化的部分。</div>'+
+      '<div class="col" style="margin-top:14px">'+
+      '<div class="rel-line"><div class="pair">正文</div><div class="dir"><span class="k">+'+(v>=6?'1 篇':'0 篇')+'</span><span>'+
+        (v>=6?'第 6 章《冷库之下的通道》新增正文（未接受时为空）':'第 '+cur.num+' 章《'+esc(cur.title)+'》正文定稿')+'</span></div></div>'+
+      '<div class="rel-line"><div class="pair">设定变更</div><div class="dir"><span class="k">+6</span><span>通道、钥匙流转、陈默 ↔ 白桦 信任 +1、伏笔 P2 推进、知识边界</span></div></div>'+
+      '<div class="rel-line"><div class="pair">关系</div><div class="dir"><span class="k">+1</span><span>陈默 ↔ 白桦 进入关系图（R6）</span></div></div>'+
+      '<div class="rel-line"><div class="pair">未采纳建议</div><div class="dir"><span class="k">2</span><span>节奏拆场景、结尾视角改写</span></div></div></div>'+
+      '<div class="modal-foot"><button class="btn" data-act="close-modal" data-autofocus>知道了</button>'+
+      '<button class="btn primary" data-act="go-version" data-ver="'+esc(m.ver)+'">读这一版正文</button></div>';
+  } else if(m.kind==='connect'){
+    h+='<h3>沙盒侧车连接指引</h3>'+
+      '<div style="margin-top:12px;font-size:13px;line-height:1.75">推演实验跑在独立的侧车里，不占用写作线程，也不会自动改故事事实。'+
+      '本地启动侧车后，回到这一页点「重新检测」即可。流程图与实验结果只在侧车连接后出现。</div>'+
+      '<pre class="code" style="margin-top:12px">'+esc('$ novel-agent sandbox up\n  sidecar listening on 127.0.0.1:8319\n  experiments: reader-response, character-pressure')+'</pre>'+
+      '<div class="modal-foot"><button class="btn" data-act="close-modal" data-autofocus>关闭</button>'+
+      '<button class="btn primary" data-act="sim-retry">重新检测</button></div>';
+  } else {
+    h+='<h3>'+(m.kind==='discard'?'丢弃这份提案？':'确认操作')+'</h3>'+
+      '<div style="margin-top:12px;font-size:13px;line-height:1.75">丢弃后这份提案不会再出现在待审里，正文与设定变更都不会写入。'+
+      '需要的话，可以让 AI 按同一份本章合同重新起草一版。</div>'+
+      '<div class="modal-foot"><button class="btn" data-act="close-modal" data-autofocus>取消</button>'+
+      '<button class="btn danger" data-act="confirm-discard">丢弃提案</button></div>';
+  }
+  return h+'</div></div>';
+}
+function settingsHTML(){
+  return '<div class="settings-pop" role="dialog" aria-label="设置" data-od-id="settings">'+
+    '<div class="row between"><b style="font-size:14px">设置</b><button class="btn sm ghost" data-act="toggle" data-toggle="settings">收起</button></div>'+
+    '<div class="col" style="gap:12px;margin-top:12px">'+
+    '<div class="field"><span class="lbl">主题</span><div class="seg">'+
+      ['auto','day','night'].map(function(t){ var lab=t==='auto'?'跟随系统':(t==='day'?'日间':'夜间');
+        return '<button data-act="theme" data-theme="'+t+'" aria-pressed="'+(D.themePref===t)+'">'+lab+'</button>'; }).join('')+'</div>'+
+      '<span class="note">夜间是暖深灰，不是纯黑。</span></div>'+
+    '<div class="field"><span class="lbl">正文字号</span><div class="seg">'+
+      [16,17,18].map(function(n){ return '<button data-act="read-size" data-size="'+n+'" aria-pressed="'+((D.readSize||17)===n)+'">'+n+'px</button>'; }).join('')+'</div></div>'+
+    '<div class="field"><span class="lbl">阅读行宽</span><div class="seg">'+
+      [34,40].map(function(n){ return '<button data-act="read-width" data-w="'+n+'" aria-pressed="'+((D.readW||40)===n)+'">'+n+' 字</button>'; }).join('')+'</div></div>'+
+    '<label class="switch" data-act="toggle" data-toggle="showTools" role="switch" aria-checked="'+(D.showTools!==false)+'" tabindex="0"><span class="track"></span>线程里显示工具活动</label>'+
+    '<div class="note">设置只影响这台机器上的界面，不写进项目文件。</div>'+
+    '</div></div>';
+}
+function renderOverlay(){
+  var h='';
+  if(D.drawer) h+=drawerHTML(D.drawer);
+  if(D.modal) h+=modalHTML();
+  if(D.settings) h+=settingsHTML();
+  if(D.toast) h+='<div class="toast" role="status">'+esc(D.toast)+'</div>';
+  $('#overlay').innerHTML=h;
+  var f=$('#overlay').querySelector('[data-autofocus]');
+  if(f) f.focus();
+}
+function toast(msg){ D.toast=msg; renderOverlay(); clearTimeout(D._tt); D._tt=setTimeout(function(){ D.toast=null; renderOverlay(); },2600); }
+
+/* ══════════════ 底部输入条 ══════════════ */
+var CMD_LIST=[['/写下一章','按本章合同写下一章'],['/审阅','打开待审提案并逐条决定'],['/伏笔','列出未收束的伏笔与线索'],['/重排本卷','重新规划本卷章节顺序'],['/记忆','AI 现在记得什么']];
+function renderComposer(){
+  var d=derive(), t=THREADS.filter(function(x){ return x.id===D.thread; })[0]||THREADS[0];
+  $('#cmpThreadLabel').textContent=t?t.name:'线程';
+  var bw=$('#btnWriteNext'), br=$('#btnReview');
+  if(D.empty){
+    bw.className='btn is-disabled'; bw.disabled=true; bw.textContent='继续写第 1 章';
+    br.className='btn primary is-disabled'; br.disabled=true; br.textContent='审阅本章';
+    $('#cmpModel').textContent='未立项 · 还不能写作';
+    return;
+  }
+  bw.disabled=false; br.disabled=false;
+  if(D.loading){ bw.className='btn loading'; bw.innerHTML='<span class="spinner"></span>正在起草第 7 章…'; }
+  else { bw.className='btn'; bw.textContent='继续写第 7 章'; }
+  br.className='btn primary';
+  br.textContent = d.propState==='pending' ? '审阅本章'
+    : (d.propState==='expired' ? '审阅本章（提案已过期）'
+    : (d.propState==='split' ? '重写第 6 章' : '读第 6 章正文'));
+  var m=$('#cmpModel');
+  if(D.aiFail) m.textContent='模型 · 上次没有返回内容';
+  else if(D.propState==='pending') m.textContent='模型 · 长篇写作 · 提案待审';
+  else m.textContent='模型 · 长篇写作 · 可直接改写草稿';
+}
+function renderCmpPop(){
+  var v=$('#cmpInput').value, pop=$('#cmpPop'), h='';
+  if(v.slice(0,1)==='/'){
+    h='<div class="pop" style="bottom:calc(100% + 6px);top:auto">'+CMD_LIST.map(function(c){
+      return '<button data-act="insert" data-text="'+esc(c[0])+'"><b class="mono">'+esc(c[0])+'</b><span class="muted" style="margin-left:8px">'+esc(c[1])+'</span></button>'; }).join('')+'</div>';
+  } else if(v.indexOf('@')>=0){
+    var people=CHARS.filter(function(c){ return c.main; }).slice(0,6).map(function(c){
+      return '<button data-act="insert" data-text="@'+esc(c.name)+' ">@'+esc(c.name)+'<span class="muted" style="margin-left:auto;font-size:12px">'+esc(c.role.slice(0,10))+'</span></button>'; }).join('');
+    var chaps=[1,3,4,5,6].map(function(n){ var c=ch(n);
+      return '<button data-act="insert" data-text="@第 '+n+' 章《'+esc(c.title)+'》 ">第 '+n+' 章《'+esc(c.title)+'》</button>'; }).join('');
+    h='<div class="pop" style="bottom:calc(100% + 6px);top:auto;width:280px"><div class="hint">引用人物</div>'+people+'<div class="hint">引用章节</div>'+chaps+'</div>';
+  }
+  pop.innerHTML=h;
+}
+
+/* ══════════════ 渲染调度 ══════════════ */
+function renderCanvas(){
+  if(D.pluginErr){ D.screen='contract'; }
+  if(D.screen==='proposal'&&D.propState==='discarded') D.screen='map';
+  if(D.empty){ renderEmptyScreen(); return; }
+  var s = D.adv ? 'advanced' : D.screen;
+  if(D.loading && s!=='map'){ $('#mainBody').className='main-body'; $('#mainBody').innerHTML=skeletonBlock(); return; }
+  if(s==='map') renderMapScreen();
+  else if(s==='characters') renderCharactersScreen();
+  else if(s==='foreshadow') renderForeshadowScreen();
+  else if(s==='debts') renderDebtsScreen();
+  else if(s==='timeline') renderTimelineScreen();
+  else if(s==='memory') renderMemoryScreen();
+  else if(s==='contract') renderContractScreen();
+  else if(s==='sim') renderSimScreen();
+  else if(s==='history') renderHistoryScreen();
+  else if(s==='read') renderReadScreen();
+  else if(s==='proposal') renderProposalScreen();
+  else if(s==='thread') renderThreadScreen();
+  else if(s==='advanced') renderAdvancedScreen();
+  else renderMapScreen();
+}
+function renderEmptyScreen(){
+  $('#mainHead').innerHTML='<div class="h-wrap"><h1>故事地图</h1><div class="sub">还没有任何设定与正文，地图会在立项之后长出来</div></div>';
+  $('#mainBody').className='main-body';
+  $('#mainBody').innerHTML='<div class="hero-card">'+
+    '<div class="chip">空项目</div>'+
+    '<h2>先和 AI 聊几句，再让它把故事立起来</h2>'+
+    '<ol><li><span class="i">一</span><span>和 AI 聊几句你的想法：题材、主角、想要的感觉。</span></li>'+
+    '<li><span class="i">二</span><span>让它生成一份立项提案：人物、势力、地点，以及开篇三章。</span></li>'+
+    '<li><span class="i">三</span><span>你审阅、修改、接受 —— 故事从这里长出第一版事实。</span></li></ol>'+
+    '<div class="row" style="gap:8px;justify-content:center"><button class="btn primary lg" data-act="bootstrap" id="btnBootstrap">让 AI 生成立项提案</button>'+
+    '<button class="btn" data-act="toggle" data-toggle="empty">退出空项目演示</button></div>'+
+    '<div class="note" style="margin-top:14px">还没有任何设定与正文，所以地图、伏笔与版本历史都是空的。</div></div>';
+}
+function render(){
+  renderProto(); renderTop(); renderRail(); renderSide(); renderHead(); renderCanvas(); renderComposer();
+  renderOverlay();
+  document.documentElement.style.setProperty('--app-w', D.narrow?'1280px':'1440px');
+  $('#app').setAttribute('data-narrow', D.narrow?'1':'0');
+  $('#stage').style.width=D.narrow?'1280px':'1440px';
+  $('#proto').style.width=D.narrow?'1280px':'1440px';
+  document.documentElement.setAttribute('data-theme', D.theme);
+  if(D.readSize) document.documentElement.style.setProperty('--read-size', D.readSize+'px');
+  if(D.readW) document.documentElement.style.setProperty('--read-measure', D.readW+'em');
+  save();
+}
+function save(){
+  try{ localStorage.setItem(LS, JSON.stringify({ screen:D.screen, themePref:D.themePref, revision:D.revision, propState:D.propState,
+    adv:D.adv, narrow:D.narrow, readSize:D.readSize||17, readW:D.readW||40, thread:D.thread })); }catch(e){}
+}
+/* ══════════════ 交互 ══════════════ */
+function resolveTheme(){
+  if(D.themePref==='auto'){
+    D.theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'night' : 'day';
+  } else D.theme = D.themePref;
+}
+function resetDecisions(){
+  PROPOSAL.changes.forEach(function(c){ D.decisions[c.id]='accept'; D.reasons[c.id]=''; });
+}
+function goto(k){
+  D.settings=false;
+  if(k==='night'){ D.themePref='night'; D.theme='night'; D.adv=false; D.screen='map'; }
+  else if(k==='boundary'){ D.empty=true; D.loading=false; D.pluginErr=false; D.adv=false; D.screen='map'; }
+  else if(k==='expired'){ D.empty=false; D.loading=false; D.aiFail=false; D.revision=6; D.propState='expired'; D.adv=false; D.screen='proposal'; }
+  else if(k==='split'){ D.empty=false; D.loading=false; D.revision=6; D.propState='split'; resetDecisions();
+    D.decisions.c2='reject'; D.reasons.c2='通道先作为 3 号冷库的内部结构，不单独立成地点。'; D.adv=false; D.screen='proposal'; }
+  else if(k==='proposal'){ D.empty=false; D.loading=false; D.aiFail=false; D.revision=5; D.propState='pending'; resetDecisions(); D.adv=false; D.screen='proposal'; }
+  else if(k==='read'){ D.empty=false; D.adv=false; D.screen='read'; D.readCh=4; D.hl={ ch:4, text:'左臂在门框上狠狠磕了一下', label:'第 4 章 · 陈默受伤' }; }
+  else if(k==='characters'){ D.empty=false; D.adv=false; D.screen='map'; D.drawer='chen-mo'; }
+  else if(k==='advanced'){ D.empty=false; D.adv=true; D.screen='advanced'; }
+  else if(k==='thread'){ D.empty=false; D.adv=false; D.screen='thread'; }
+  else { D.empty=false; D.loading=false; D.adv=false; D.screen=k; }
+  render();
+}
+function applyAccept(split){
+  var d=derive();
+  D.propState = split ? 'split' : 'accepted';
+  D.revision = 6; D.modal=null; D.screen='proposal';
+  render();
+  toast(split ? '已写入 R6：' + d.acceptCount + ' 条设定变更，正文未接受' : '已接受为 R6');
+}
+function setDraft(text){
+  var i=$('#cmpInput'); i.value=text; i.focus(); i.setSelectionRange(text.length,text.length);
+}
+document.addEventListener('click', function(e){
+  var el=e.target.closest('[data-act]');
+  if(!el) return;
+  var act=el.dataset.act;
+  if(el.tagName==='INPUT'||el.tagName==='TEXTAREA') return;
+  switch(act){
+    case 'go': goto(el.dataset.go); break;
+    case 'node': D.sel=el.dataset.id; render(); break;
+    case 'toggle': {
+      var k=el.dataset.toggle;
+      if(k==='adv'){ D.adv=!D.adv; D.screen=D.adv?'advanced':(D.screen==='advanced'?'map':D.screen); if(D.adv&&D.advTab) D.screen='advanced'; }
+      else if(k==='settings'){ D.settings=!D.settings; }
+      else if(k==='empty'){ D.empty=!D.empty; D.screen='map'; D.drawer=null; }
+      else if(k==='narrow'){ D.narrow=!D.narrow; }
+      else if(k==='loading'){ D.loading=!D.loading; }
+      else if(k==='pluginErr'){ D.pluginErr=!D.pluginErr; D.screen=D.pluginErr?'contract':(D.screen==='contract'?'map':D.screen); }
+      else if(k==='aiFail'){ D.aiFail=!D.aiFail; }
+      else if(k==='showTools'){ D.showTools=!(D.showTools!==false); }
+      render(); break;
+    }
+    case 'toggle-side': D.sideOpen=!D.sideOpen; $('#side').classList.toggle('open',!!D.sideOpen); break;
+    case 'theme': D.themePref=el.dataset.theme; resolveTheme(); render(); break;
+    case 'theme-quick': D.themePref=D.theme==='night'?'day':'night'; resolveTheme(); render(); break;
+    case 'read-size': D.readSize=+el.dataset.size; render(); break;
+    case 'read-width': D.readW=+el.dataset.w; render(); break;
+    case 'view': goto(el.dataset.view); break;
+    case 'chapter': {
+      var n=+el.dataset.ch, dd=derive();
+      if(n===6 && dd.propState==='pending'){ D.screen='proposal'; }
+      else { D.screen='read'; D.readCh=n; D.hl=null; }
+      render(); break;
+    }
+    case 'read': D.screen='read'; D.readCh=+el.dataset.ch; D.hl=null; D.drawer=null; render(); break;
+    case 'anchor': {
+      var c=+el.dataset.ch;
+      D.screen='read'; D.readCh=c; D.drawer=null;
+      D.hl={ ch:c, text:el.dataset.hl, label:el.dataset.label };
+      render(); break;
+    }
+    case 'clear-hl': D.hl=null; render(); break;
+    case 'open-thread': D.thread=el.dataset.thread; D.screen= D.empty?'map':'thread'; D.tMenu=false; render(); break;
+    case 'new-thread': {
+      var id='t'+(THREADS.length+1);
+      THREADS.push({ id:id, name:'新线程 · 未命名', note:'刚刚创建 · 还没有内容', ch:null });
+      D.thread=id; D.screen='thread'; D.tMenu=false;
+      render(); toast('已新建线程，可以从一句话开始'); break;
+    }
+    case 'thread-menu': D.tMenu=!D.tMenu; if(D.tMenu){
+        $('#cmpPop').innerHTML='<div class="pop" style="bottom:calc(100% + 6px);top:auto;width:280px">'+
+          '<div class="hint">切换线程 · 多条线程共享同一套故事事实</div>'+
+          THREADS.map(function(t){ return '<button data-act="open-thread" data-thread="'+t.id+'">'+esc(t.name)+
+            '<span class="muted" style="margin-left:auto;font-size:12px">'+esc(t.note)+'</span></button>'; }).join('')+
+          '<button data-act="new-thread">＋ 新建线程</button></div>';
+      } else $('#cmpPop').innerHTML='';
+      break;
+    case 'adv-tab': D.adv=true; D.advTab=el.dataset.tab; D.screen='advanced'; render(); break;
+    case 'mount': { var nm=el.dataset.name; D.mount=D.mount||{}; D.mount[nm]=D.mount[nm]===false?true:false;
+      render(); toast(D.mount[nm]?'已挂载 '+nm:'已卸载 '+nm); break; }
+    case 'drawer': D.drawer=el.dataset.id; renderOverlay(); break;
+    case 'close-drawer': D.drawer=null; renderOverlay(); break;
+    case 'unpin': delete D.pins[el.dataset.id]; render(); toast('已取消钉位'); break;
+    case 'clear-sel': D.sel=null; render(); break;
+    case 'focus-node': {
+      var id2=el.dataset.id;
+      if(!D.pins[id2]){
+        var L=layout(), p=L.pos[id2];
+        if(el.dataset.pin==='1'&&p) D.pins[id2]={x:p.x,y:p.y};
+      }
+      D.sel=id2; D.drawer=null; D.adv=false; D.screen='map';
+      if(D.q!=='') D.qOpen=false;
+      render(); break;
+    }
+    case 'cluster': D.clusterBy=el.dataset.cluster; render(); break;
+    case 'vol2': D.vol2only=!D.vol2only; render(); break;
+    case 'fv-filter': D.chFilter=el.dataset.k; render(); break;
+    case 'zoom': {
+      var z=el.dataset.z;
+      if(z==='0'){ D.zoom=1; D.pan={x:0,y:0}; }
+      else D.zoom=Math.min(2,Math.max(.6, D.zoom + (z==='1'?.15:-.15)));
+      render(); break;
+    }
+    case 'unpin-all': D.pins={}; render(); toast('已解除全部钉位'); break;
+    case 'expand': { var cl=el.dataset.cluster; if(D.expanded[cl]) delete D.expanded[cl]; else D.expanded[cl]=1;
+      render(); break; }
+    case 'decide': D.decisions[el.dataset.id]=el.dataset.dec; render(); break;
+    case 'accept': case 'accept-preview': D.modal={kind:'impact'}; renderOverlay(); break;
+    case 'split-accept': if(D.propState==='pending'){ D.modal={kind:'split'}; renderOverlay(); } break;
+    case 'confirm-accept': {
+      var btn=el, sp=el.dataset.split==='1';
+      btn.className='btn primary loading';
+      btn.innerHTML='<span class="spinner"></span>正在计算影响…';
+      var fb=$('#overlay .modal .btn.primary'); if(fb){ fb.className='btn primary loading'; fb.innerHTML='<span class="spinner"></span>正在计算影响…'; }
+      setTimeout(function(){ applyAccept(sp); },900);
+      break;
+    }
+    case 'discard': D.modal={kind:'discard'}; renderOverlay(); break;
+    case 'confirm-discard': D.modal=null; D.propState='discarded'; D.screen='map'; render(); toast('提案已丢弃，第 6 章回到计划中'); break;
+    case 'close-modal': case 'modal-bg': if(act==='modal-bg'&&e.target!==el.parentElement) break;
+      D.modal=null; renderOverlay(); break;
+    case 'compare': D.modal={kind:'compare', ver:el.dataset.ver}; renderOverlay(); break;
+    case 'rollback': D.modal={kind:'rollback', ver:el.dataset.ver}; renderOverlay(); break;
+    case 'confirm-rollback': {
+      var r=revN(el.dataset.ver);
+      D.revision=r; D.modal=null;
+      if(r<6 && (D.propState==='split'||D.propState==='accepted')) D.propState='pending';
+      render(); toast('已回滚到 R'+r+'，地图与右栏同步回退'); break;
+    }
+    case 'go-version': D.modal=null; D.screen='read'; D.readCh=Math.max(1,revN(el.dataset.ver)); D.hl=null; render(); break;
+    case 'retry-plugin': {
+      var b=$('#btnRetryPlugin'); if(b){ b.className='btn primary loading'; b.innerHTML='<span class="spinner"></span>正在检测…'; }
+      setTimeout(function(){ D.pluginErr=false; render(); toast('规划插件已就位，本章合同恢复可用'); },1100); break;
+    }
+    case 'retry-ai': D.aiFail=false; D.loading=true; render();
+      setTimeout(function(){ D.loading=false; render(); toast('已重新生成：第 6 章草稿 · 6 条设定变更 · 3 个审阅问题'); },1500); break;
+    case 'write-next': {
+      if(D.loading) break;
+      D.loading=true; render();
+      setTimeout(function(){ D.loading=false; render(); toast('第 7 章草稿已生成：6 条设定变更 · 2 个审阅问题'); },1600); break;
+    }
+    case 'review-chapter': {
+      var dd2=derive();
+      if(dd2.propState==='pending'||dd2.propState==='expired') D.screen='proposal';
+      else { D.screen='read'; D.readCh=6; }
+      render(); break;
+    }
+    case 'rewrite-chapter': D.screen='proposal'; D.propState='pending'; D.revision=5; resetDecisions(); render();
+      toast('已按未采纳建议重新起草第 6 章'); break;
+    case 'read-draft': toast('全文约 2,800 字 · 原型保留前六段与结尾的悬念'); break;
+    case 'push-debt': {
+      var x=DEBTS.filter(function(v){ return v.id===el.dataset.id; })[0];
+      setDraft('推进这条未收束债务：'+x.title+'。先给我两个可行的收束方式，不要直接改正文。');
+      toast('已把指令草稿放进输入框，发不发由你决定'); break;
+    }
+    case 'write-for-char': {
+      var c2=charOf(el.dataset.id);
+      D.drawer=null;
+      setDraft('从这个人物继续写：'+c2.name+'（'+c2.role+'）。保持现有关系状态，别让他知道还没轮到他知道的事。');
+      renderOverlay(); toast('已把指令草稿放进输入框'); break;
+    }
+    case 'bootstrap': D.loading=true; render();
+      setTimeout(function(){ D.empty=false; D.loading=false; render(); toast('立项提案已生成：18 人物 · 4 势力 · 5 地点 · 开篇三章'); },1500); break;
+    case 'sim-connect': D.modal={kind:'connect'}; renderOverlay(); break;
+    case 'sim-retry': D.modal=null; renderOverlay(); toast('侧车仍未连接：请先在本地启动沙盒推演'); break;
+    case 'insert': {
+      var i2=$('#cmpInput'); i2.value=(i2.value.replace(/\/[^\s]*$/,'').replace(/@[^\s]*$/,''))+el.dataset.text+' ';
+      $('#cmpPop').innerHTML=''; i2.focus(); break;
+    }
+    case 'toast': toast(el.dataset.msg||'原型演示'); break;
+    default: break;
+  }
+});
+/* 地图：拖拽钉位 / 平移 / 滚轮缩放 / 双击开档案 / 键盘 */
+document.addEventListener('pointerdown', function(e){
+  var vp=e.target.closest('#mapVp'); if(!vp) return;
+  var node=e.target.closest('[data-act="node"]');
+  var L=layout(), mode=node?'node':'pan', id=node?node.dataset.id:null;
+  var start={ x:e.clientX, y:e.clientY }, base= node ? (L.pos[id]||{x:0,y:0}) : { x:D.pan.x, y:D.pan.y };
+  var moved=false;
+  vp.classList.add('dragging');
+  function mv(ev){
+    var dx=ev.clientX-start.x, dy=ev.clientY-start.y;
+    if(Math.abs(dx)+Math.abs(dy)>3) moved=true;
+    var sc=MB.w/vp.clientWidth;
+    if(mode==='node'){
+      D.pins[id]={ x:base.x+dx*sc, y:base.y+dy*sc };
+      var g=vp.querySelector('[data-act="node"][data-id="'+id+'"]');
+      if(g) g.setAttribute('transform','translate('+(dx*sc)+','+(dy*sc)+')');
+    } else {
+      D.pan={ x:base.x+dx, y:base.y+dy };
+      var g3=vp.querySelector('svg > g');
+      if(g3) g3.setAttribute('transform','translate('+D.pan.x+','+D.pan.y+') scale('+D.zoom+')');
+    }
+  }
+  function up(){
+    document.removeEventListener('pointermove',mv); document.removeEventListener('pointerup',up);
+    vp.classList.remove('dragging');
+    if(mode==='node'&&moved){ D.sel=id; render(); toast('已钉住 '+charOf(id).name+' · 双击解除'); }
+    else if(mode==='pan'&&moved){ render(); }
+  }
+  document.addEventListener('pointermove',mv); document.addEventListener('pointerup',up);
+});
+document.addEventListener('dblclick', function(e){
+  var node=e.target.closest('[data-act="node"]');
+  if(node){ D.drawer=node.dataset.id; renderOverlay(); }
+});
+document.addEventListener('wheel', function(e){
+  var vp=e.target.closest('#mapVp'); if(!vp) return;
+  e.preventDefault();
+  D.zoom=Math.min(2,Math.max(.6, D.zoom + (e.deltaY<0?.08:-.08)));
+  render();
+},{ passive:false });
+document.addEventListener('mouseover', function(e){
+  var t=e.target.closest('[data-act="edge-tip"]'); if(!t) return;
+  var r=RELS.filter(function(x){ return x.id===t.dataset.rel; })[0]; if(!r) return;
+  var A=charOf(r.a), B=charOf(r.b), vp=$('#mapVp'), box=vp.getBoundingClientRect();
+  var old=document.querySelector('.map-tip'); if(old) old.remove();
+  var d=document.createElement('div'); d.className='map-tip';
+  d.innerHTML='<b>'+esc(A.name)+' → '+esc(B.name)+'</b> '+esc(r.ab.text)+'<span class="d"><b>'+esc(B.name)+' → '+esc(A.name)+'</b> '+esc(r.ba.text)+'</span>'+
+    (r.debt?'<span class="d">未了债务：'+esc(r.debt)+'</span>':'');
+  d.style.left=Math.min(box.width-300, e.clientX-box.left+12)+'px';
+  d.style.top=(e.clientY-box.top+12)+'px';
+  vp.appendChild(d);
+});
+document.addEventListener('mouseout', function(e){
+  if(e.target.closest('[data-act="edge-tip"]')){ var old=document.querySelector('.map-tip'); if(old) old.remove(); }
+});
+/* 键盘 */
+document.addEventListener('keydown', function(e){
+  var el=e.target.closest&&e.target.closest('[data-act="node"]');
+  if(el && (e.key==='Enter'||e.key===' '||e.key==='d'||e.key==='D')){
+    e.preventDefault();
+    if(e.key==='Enter'||e.key===' '){ D.sel=el.dataset.id; render(); }
+    else { D.drawer=el.dataset.id; renderOverlay(); }
+    return;
+  }
+  var sw=e.target.closest&&e.target.closest('[role="switch"]');
+  if(sw && (e.key==='Enter'||e.key===' ')){ e.preventDefault(); sw.click(); return; }
+  if(e.key==='Escape'){
+    if(D.modal){ D.modal=null; renderOverlay(); }
+    else if(D.drawer){ D.drawer=null; renderOverlay(); }
+    else if(D.settings){ D.settings=false; renderOverlay(); }
+    else if(D.tMenu){ D.tMenu=false; $('#cmpPop').innerHTML=''; }
+    else if(D.qOpen){ D.qOpen=false; render(); }
+    return;
+  }
+  if(e.key==='Enter'&&D.modal){
+    var p=$('#overlay .modal .btn.primary'); if(p){ e.preventDefault(); p.click(); }
+    return;
+  }
+  if(e.key==='Tab'&&D.modal){
+    var f=$('#overlay .modal').querySelectorAll('button:not([disabled]), input:not([disabled]), textarea:not([disabled])');
+    if(!f.length) return;
+    var first=f[0], last=f[f.length-1];
+    if(e.shiftKey&&document.activeElement===first){ e.preventDefault(); last.focus(); }
+    else if(!e.shiftKey&&document.activeElement===last){ e.preventDefault(); first.focus(); }
+  }
+});
+/* 输入区 */
+document.addEventListener('input', function(e){
+  if(e.target.id==='cmpInput'){ renderCmpPop(); }
+  if(e.target.id==='mapSearch'){ D.q=e.target.value; D.qOpen=true; render(); var i=$('#mapSearch'); if(i){ i.focus(); i.setSelectionRange(D.q.length,D.q.length); } }
+  if(e.target.dataset&&e.target.dataset.act==='reason'){
+    D.reasons[e.target.dataset.id]=e.target.value;
+  }
+});
+document.addEventListener('change', function(e){
+  if(e.target.dataset&&e.target.dataset.act==='reason'){ D.reasons[e.target.dataset.id]=e.target.value; }
+});
+/* ══════════════ 启动 ══════════════ */
+(function boot(){
+  try{
+    var s=JSON.parse(localStorage.getItem(LS)||'{}');
+    if(s.screen) D.screen=s.screen;
+    if(s.themePref) D.themePref=s.themePref;
+    if(s.revision) D.revision=s.revision;
+    if(s.propState) D.propState=s.propState;
+    if(s.adv) D.adv=true;
+    if(s.narrow) D.narrow=true;
+    if(s.readSize) D.readSize=s.readSize;
+    if(s.readW) D.readW=s.readW;
+    if(s.thread) D.thread=s.thread;
+  }catch(err){}
+  if(D.revision>=6&&(D.propState==='pending'||D.propState==='expired')) D.propState='expired';
+  resolveTheme();
+  if(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').addEventListener){
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',function(){ if(D.themePref==='auto'){ resolveTheme(); render(); } });
+  }
+  render();
+})();
+</script>
+</body>
+</html>

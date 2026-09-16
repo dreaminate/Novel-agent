@@ -6,6 +6,7 @@
     { "path": "./packages/novel-planning" },
     { "path": "./packages/novel-writing" },
     { "path": "./packages/novel-memory" },
-    { "path": "./packages/novel-review" }
+    { "path": "./packages/novel-review" },
+    { "path": "./packages/novel-workbench" }
   ]
 }

@@ -1,0 +1,17 @@
+# Novel-mode front end: this bundle owns the browser surface. It disables the
+# shipped frame (ui-layout) and the shipped navigation column (ui-sidebar), then
+# registers its own root occupant, which declares the sidebar / novel.canvas /
+# conversation / details / shell.overlay seats. The novel left column and canvas
+# fill the first two; the remaining official occupants keep working underneath.
+#
+# Keep this list minimal: every disabled row is a DSH surface novel-agent now
+# has to render itself.
+- id: ui-layout
+  disabled: true
+
+- id: ui-sidebar
+  disabled: true
+
+- insert:
+    - id: novel-workbench
+      name: '@novel-agent/novel-workbench'

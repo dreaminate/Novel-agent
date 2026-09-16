@@ -37,12 +37,14 @@ describe('novel-agent product boundary', () => {
       { path: './packages/novel-writing' },
       { path: './packages/novel-memory' },
       { path: './packages/novel-review' },
+      { path: './packages/novel-workbench' },
     ])
     expect(workspace).toContain('  - packages/novel-project')
     expect(workspace).toContain('  - packages/novel-planning')
     expect(workspace).toContain('  - packages/novel-writing')
     expect(workspace).toContain('  - packages/novel-memory')
     expect(workspace).toContain('  - packages/novel-review')
+    expect(workspace).toContain('  - packages/novel-workbench')
     expect(workspace).not.toContain('  - packages/*')
     expect(workspace).not.toContain('node-pty')
     expect(rootManifest.devDependencies).not.toHaveProperty('@playwright/test')
@@ -55,6 +57,21 @@ describe('novel-agent product boundary', () => {
       .toBe(false)
     expect(existsSync(join(workspaceRoot, 'packages', 'novel-tui-extension', 'package.json')))
       .toBe(false)
+
+    // The novel-mode front end owns the root slot and disables the shipped
+    // frame; those two facts are the whole reason the package exists.
+    const workbenchPatch = readFileSync(
+      join(workspaceRoot, 'packages', 'novel-workbench', 'cordis.patch.yml'),
+      'utf8',
+    )
+    expect(workbenchPatch).toContain('- id: ui-layout')
+    expect(workbenchPatch).toContain('disabled: true')
+    const workbenchClient = readFileSync(
+      join(workspaceRoot, 'packages', 'novel-workbench', 'src', 'client', 'index.tsx'),
+      'utf8',
+    )
+    expect(workbenchClient).toContain("name: 'root'")
+    expect(workbenchClient).toContain("'shell.overlay'")
 
     expect(novelProjectManifest.dependencies).not.toHaveProperty('dsh-better-sidebar')
     expect(novelProjectManifest.dependencies).not.toHaveProperty('@xmoon76/dsh-pi-tui')

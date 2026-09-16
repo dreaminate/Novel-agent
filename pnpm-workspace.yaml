@@ -4,6 +4,7 @@ packages:
   - packages/novel-writing
   - packages/novel-memory
   - packages/novel-review
+  - packages/novel-workbench
 
 # Native providers used by the retained plugin run their published build steps.
 # Values must be booleans. pnpm 11's createAllowBuildFunction switches on

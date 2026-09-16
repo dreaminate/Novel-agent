@@ -1,0 +1,76 @@
+{
+  "name": "@novel-agent/novel-workbench",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "UNLICENSED",
+  "description": "Novel-mode web front-end layer: owns the DSH root occupant, frame geometry, the ctx.layout face and the theme presenter for the novel writing workbench.",
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-ui-renderer",
+        "@deepseek-ai/dsh-client-ui-session",
+        "@deepseek-ai/dsh-client-ui-theme"
+      ],
+      "platform": "web",
+      "immediately": true
+    }
+  },
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./client": {
+      "types": "./lib/client/index.d.ts",
+      "default": "./lib/client.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "cordis.patch.yml",
+    "lib/index.js",
+    "lib/index.d.ts",
+    "lib/client.js",
+    "lib/client/index.d.ts",
+    "lib/client/WorkbenchFrame.d.ts"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json && tsc -p tsconfig.client.build.json && tsdown",
+    "typecheck": "tsc -b",
+    "test": "vitest run --root ../.. packages/novel-workbench/tests"
+  },
+  "dependencies": {
+    "@deepseek-ai/cordis": "4.0.2",
+    "@deepseek-ai/dsh-api-remotes": "0.1.2-rc.1",
+    "@deepseek-ai/dsh-api-session-controller": "0.1.2-rc.1",
+    "@deepseek-ai/dsh-api-workspace-controller": "0.1.2-rc.1",
+    "@deepseek-ai/dsh-client-locale": "0.1.2-rc.1",
+    "@deepseek-ai/dsh-client-store": "0.1.2-rc.1",
+    "@deepseek-ai/dsh-client-ui-renderer": "0.1.2-rc.1",
+    "@deepseek-ai/dsh-client-ui-session": "0.1.2-rc.1",
+    "@deepseek-ai/dsh-client-ui-slots": "0.1.2-rc.1",
+    "@deepseek-ai/dsh-client-ui-theme": "0.1.2-rc.1",
+    "@deepseek-ai/dsh-client-ui-workspace": "0.1.2-rc.1",
+    "@deepseek-ai/dsh-session": "0.1.2-rc.1",
+    "@deepseek-ai/dsh-typert-protocol": "0.1.2-rc.1",
+    "events": "3.3.0",
+    "graphology": "0.26.0",
+    "graphology-layout": "^0.6.1",
+    "graphology-layout-forceatlas2": "^0.10.1",
+    "react": "18.3.1",
+    "sigma": "3.0.3"
+  },
+  "devDependencies": {
+    "@deepseek-ai/dsh-client-ui-layout": "0.1.2-rc.1",
+    "@novel-agent/novel-project": "workspace:*",
+    "react-dom": "18.3.1",
+    "tsdown": "0.22.2"
+  }
+}

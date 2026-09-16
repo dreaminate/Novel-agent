@@ -1,5 +1,186 @@
 # Execution checklist
 
+## Novel-mode front end, increments 2–5 — novel navigation, story map, review, advanced, 2026-09-16
+
+**Status:** `verified` for the left column and the advanced surface on the real Host; `implemented-unverified`
+for the story map, proposal review and version history against real Canon (unit-verified, and the isolated dev
+profile has no work yet, so their live render is still the empty state).
+
+- [x] `packages/novel-workbench/src/client/store.ts` — one React-external store for the frame: column
+  geometry, the active canvas, the chapter the tree last opened, the advanced flag and a reload counter that
+  every Canon-derived surface follows. `ctx.layout` writes through it.
+- [x] Novel navigation column `NovelSidebar.tsx` (increment 2): three segments — 作品 (works + volume/chapter
+  tree with 已接受/待审/计划中 badges and debt counts), 线程 (the work's own sessions, subagent transcripts
+  filtered out) and 视图 (the brief's nine canvases, unbuilt ones rendered disabled) — closed by the 进阶
+  entry. The bundle patch now disables `ui-sidebar` as well as `ui-layout`.
+- [x] Novel data face `novel-data.ts`: pure mappers `buildWorkOutline` / `buildStoryMap` / `buildReviewProposal`
+  / `describeRevision` plus the Remote-backed `createNovelWorkFace`, handed to every surface as one stable
+  injected share. Canon stays in Novel Project; nothing here is a second source of truth.
+- [x] Story map `StoryMapView.tsx` (increment 3): sigma 3 + graphology + forceAtlas2 (all MIT, upstream
+  layout and rendering, no hand-written force simulation). Faction colouring, edge labels carrying both
+  directions of a pair, node size from unresolved relationship debts, click-to-select neighbourhood fade.
+  Bundle cost measured: workbench `lib/client.js` 33,334 B → 490,183 B (gzip 9,173 B → 89,048 B); isolated
+  esbuild comparison and the `events`-shim build fix are recorded in
+  [frontend-stack-2026-09-16](../docs/open-source-evaluations/frontend-stack-2026-09-16.md#5-实测故事地图选型与-bundle-体积2026-09-16).
+- [x] Proposal review `ProposalReviewView.tsx` + history `VersionHistoryView.tsx` (increment 4): per-item
+  接受/拒绝 on every proposed setting change, per-issue 采纳建议 toggle, live impact preview through
+  `previewReview`, 「接受本章」/「暂不处理」/「丢弃提案」, the 接受设定·拒绝正文 acceptance path (the notice
+  reports 已接受 N 条设定变更，正文未接受), the stale-proposal state (过期 → 只能丢弃) and a two-step
+  rollback that writes a new revision.
+- [x] Thread header `NovelThreadHeader.tsx` + advanced surface `AdvancedView.tsx` (increment 5): the strip
+  above the conversation names the work, the accepted revision and the waiting proposals; the advanced canvas
+  renders kernel facts, the current thread's background jobs, its subagent catalog and the raw accepted Canon
+  projection. New slot `novel.thread.header` declared by the root registration.
+- [x] RED → GREEN with captured failures: the sidebar seat was empty first; the story-map mapping test was
+  shown to fail by returning the raw character id; the review spec first failed on the missing WebGL globals
+  sigma reads at module scope. Tests: `packages/novel-workbench/tests/` (7 files, 9 tests).
+- [x] Real-browser probe of the graph stack (headless Chrome + SwiftShader, `/tmp/ossize`): the same dependency
++ alias combination builds the graph, runs both layouts and paints 7 sigma canvases with no console error.
+It caught two defects the unit tests could not — forceAtlas2 needs seeded coordinates before sigma accepts a
+node, and the CJS bundle was externalizing `events`.
+- [x] Real-Host evidence (pid 11095, `127.0.0.1:4780`): root page HTTP 200, client loader HTTP 200
+  (5,753,853 B) contains every new surface, and a headless-Chrome CDP session rendered
+  `frame=1`, `data-novel-sidebar="nav"=1`, official sidebar `=0`, segments `["works","threads","views"]`,
+  the nine view entries and the 进阶 entry. Screenshot: `/tmp/novel-mode-left-column.png`.
+- [x] Gates: 293/293 tests, `typecheck`, `lint`, package `build` and `git diff --check` clean.
+- [x] `scripts/install-plugins.sh` now drops the six installed packages before `dsh plugin add`: re-packing
+  keeps the same tarball path and `0.0.0` version, so pnpm had silently kept the previous copy and the host
+  served a stale bundle (found by the live smoke, not by the unit tests).
+- [ ] Next: seed one work in the isolated dev profile and run the V-a loop (real Canon → proposal → review →
+  accept settings / reject manuscript → rollback) so the map, review and history screens get live evidence.
+- [ ] Story map scale work not started: folding minor characters into 「+N」, per-volume/arc filters, pinned
+  positions, search-to-focus.
+- [ ] The advanced surface still covers only 内核/任务/Subagent/诊断. The shipped Cordis tree, plugin
+  inventory, agent presets and settings pages remain the official ones, reachable from the conversation
+  surface; re-rendering them inside the novel surface is not started.
+
+## Novel-mode front end, increment 1 — root takeover, 2026-09-16
+
+**Status:** `verified` for the root-occupant seam on the real Host. The novel surfaces themselves
+(story map, proposal review, novel navigation) are not started.
+
+- [x] `AGENTS.md` boundary amendments: the novel-mode front end is owned by novel-agent (root occupant +
+  visible surfaces), the visible/invisible split (H1), Desktop compatibility-mode only, and the
+  stale `conversation.view` wording in the reuse gate.
+- [x] New package [`packages/novel-workbench`](../packages/novel-workbench/package.json): bundle patch that
+  disables `ui-layout` and inserts the workbench row; client half registers the built-in `root` slot with
+  the four child seats (`sidebar` / `conversation` / `details` / `shell.overlay`), provides `ctx.layout`,
+  and carries the theme presenter upstream's frame used to own (color-scheme, dark attribute, token
+  overrides, content font size, `theme-color`). Host half is an empty Loader seat.
+- [x] RED → GREEN: `packages/novel-workbench/tests/novel-workbench-client.spec.ts` (jsdom) fails on the
+  missing module first, then asserts the root registration shape, the rendered `data-novel-workbench="frame"`
+  marker and the `ctx.layout` face.
+- [x] `novel` profile = `dsh-base + dsh-web-app + six novel-agent plugins`; `scripts/install-plugins.sh` now
+  packs/ships the workbench and repairs a profile scaffolded from tarballs by inserting `dsh-web-app`
+  after `dsh-base`. `scripts/dev-host.sh` defaults to the `novel` profile and refuses to start a second
+  host under a different profile/port.
+- [x] Real-Host evidence (pid 78149, `127.0.0.1:4781`): root page HTTP `200` (24,547 B) lists
+  `@novel-agent/novel-workbench/client.js`; client loader HTTP `200` (5,324,739 B) contains the plugin;
+  a headless-Chrome CDP session rendered the page and returned a 337,848-byte DOM with 8
+  `data-novel-workbench` markers, our `nw-sidebar` seat, and the official conversation surface rendering
+  inside our frame. Screenshot: `.novel-agent/run/` is gitignored, the capture lives in `/tmp/novel-mode.png`.
+- [x] Gates: 285/285 tests, `typecheck`, `lint`, package `build`, `git diff --check` clean.
+- [ ] Next increments: novel navigation in the sidebar seat → story map → proposal review → thread view;
+  OSS picks from the front-end selection record still need their bundle-cost and isolated-profile smoke.
+
+## Novel-mode front end: prototype and OSS-reuse principle, 2026-09-16
+
+**Status:** `implemented-unverified` for the design artifact (needs the author's eyes); `verified` for the
+OpenDesign pipeline wiring and the reuse-principle record. No product code or test was touched.
+
+- [x] Grilling settled the design tree: A (novel-agent owns the web front-end layer), S2 (Claude Code
+  desktop skeleton + measured tokens), T1 (one book = one Workspace, many threads), H1 (all visible
+  surfaces self-rendered, invisible client services reused), G-c (minimal acceptance guardrails first),
+  `novel` profile + `@novel-agent/novel-workbench` bundle, AGENTS.md front-end boundary amendments, and
+  the V-a real-loop acceptance slice.
+- [x] Wrote the paste-ready brief: [novel-mode front-end brief](../docs/novel-mode-frontend-brief-2026-09-16.md)
+  (Claude desktop measured tokens, three-segment left column, 15 screens, self-check list).
+- [x] OpenDesign pipeline: first run failed (`AGENT_EXECUTION_FAILED`, codex CLI demanded API-key login and
+  logged the CLI out of ChatGPT). Diagnosed from the machine config, then detected OpenCode was missing from
+  the GUI PATH (OpenDesign scans `~/.local/bin` for `opencode-cli`), added a user-level symlink, switched the
+  agent to `opencode` with model `deepseek-flash`, and its connection test returned
+  `已连接。396 毫秒响应 — 'ok'`. The prototype itself was produced by the earlier codex run (`--model
+  deepseek-flash`, xhigh) before that switch.
+- [x] Imported the prototype to [docs/prototypes/2026-09-16-novel-mode](../docs/prototypes/2026-09-16-novel-mode/README.md):
+  `novel-mode-workbench.html` (178,791 B), `design-tokens.md`, `README.md`; repository-side re-checks (0 external
+  refs, 0 placeholder hits, key labels present, 124 buttons) and SHA256 recorded in that README.
+- [x] Recorded the user's OSS-reuse-first principle in `AGENTS.md` and opened
+  [frontend-stack selection](../docs/open-source-evaluations/frontend-stack-2026-09-16.md): Obsidian itself is
+  closed-source, so the graph candidates are sigma.js + graphology / react-force-graph / Quartz's pixi graph,
+  plus reuse picks for panels, command palette, virtualization, icons and charts.
+- [ ] Author reviews the prototype visually and against the brief's checklist; failures go back to OpenDesign.
+- [ ] Side effect to repair: the user's global Codex CLI is now `Not logged in` (`codex login status`) because
+  OpenDesign forced an API-key login; the CLI needs a deliberate login choice.
+
+## Persistent dev host (front + back), 2026-09-15
+
+**Status:** `verified` for the local dev loop: detached fixed-port host, rebuild → install → restart, and
+restart persistence. No product code, test, spec or dependency version changed.
+
+- [x] Added `scripts/dev-host.sh`: `start` / `stop` / `restart` / `rebuild` / `status` / `url` / `open` / `logs`
+  for the isolated home `.novel-agent/dsh-home` and profile `web` on the fixed loopback port `4780`.
+  Front end (DSH Web UI, five novel plugins through `conversation.view`) and back end (the DSH services and the
+  five plugins) are the same host process, which is the only serving path this repository has.
+- [x] `nohup` was not enough: the process was reaped with the launching tool session. The launcher now forks with
+  `os.setsid`, so the host is re-parented to `launchd` (`PPID 1`) and survives across sessions and turns.
+- [x] Boot boundary re-measured on the running host: root page HTTP `200` (24,553 bytes) lists
+  `@novel-agent/novel-project/client.js`; the client loader returns HTTP `200`, 5,336,593 bytes, 156
+  `novel-project` hits; host log has no error line.
+- [x] `scripts/dev-host.sh rebuild` ran the documented `pnpm install` → `build` → pack → `dsh plugin add` →
+  verify path in ~14 s and restarted the host; the profile keeps the patched `dsh-session` and has no
+  profile-level `dsh-tools` copy.
+- [x] Persistence: restarting keeps port `4780` and a previously issued `dsh-auth-*` cookie still returns `200`
+  (plain `/` without a cookie is `401`), so the tokenized URL is needed once per browser.
+- [x] Runtime state lives in `.novel-agent/run/` (`host.pid`, `host.url` mode `600`, `host.log` with the token
+  redacted). `.novel-agent/` stays gitignored; the user's global `~/.dsh` is untouched.
+- [ ] Panel rendering/interaction in a real browser, real-model rounds and Desktop `2.0.5` remain unverified here.
+
+## Documentation corrections for the current baseline, 2026-09-15
+
+**Status:** `done` (documentation only; no product code or spec text changed).
+
+- [x] Repaired `README.md`: the file ended with a UTF-16LE `# Novel-agent` fragment appended after
+  the UTF-8 content, which made `rg`/`grep` treat the whole README as binary. The exact 29 trailing
+  bytes were removed; the file is valid UTF-8 and every other repository file was clean.
+- [x] Marked the community plugin table with the measured `0.1.2-rc.1` status: `dsh-better-sidebar@0.16.1`,
+  `@anweat/dsh-browser@0.1.9` and `dsh-web-search-pro@0.1.11` fail to load on rc.1
+  (`settingsNamespace` / `installSettingsSection` are absent), `dsh-file-upload@0.4.3` passed the load
+  boundary, and the TUI/git-worktree rows are not verified on rc.1.
+- [x] Framed the migration-era test counts in the README opening as dated records instead of current
+  totals, and dated the legacy "single-plugin composition" line in the evidence boundary section.
+
+## macOS 开发环境与唯一 DSH CLI, 2026-09-15
+
+**Status:** `verified` for this machine's install, profile composition and host boot boundary.
+Product code, tests and specs were not touched.
+
+- [x] Retired the local `0.1.1-rc.2` CLI and the `dsh-coding` / `dsh-desktop` / `dsh-office`
+  wrappers into `~/.local/lib/dsh-retired-20260915/` (moved, not deleted); `~/.local/lib/dsh/`
+  now holds the single `0.1.2-rc.1` install and `~/.local/bin/dsh` is the only `dsh` command.
+- [x] Added `scripts/install-dsh.sh`: installs official `@deepseek-ai/dsh@0.1.2-rc.1` with the
+  repository's authorized `dsh-session` patch, verifies the shared-registry marker in every
+  installed copy, and writes the `dsh` shim with the resolved `node`/`pnpm` directories.
+  `dsh --version` now reports `0.1.2-rc.1`.
+- [x] Added `scripts/install-plugins.sh`, the macOS/Linux counterpart of
+  `scripts/install-plugins.ps1`: build, pack five plugins, write the profile
+  `patchedDependencies` plus `autoInstallPeers: false`, install, and verify the patch marker and
+  all five packages.
+- [x] Isolated dev home `.novel-agent/dsh-home` with profile `web`: profile `dsh-session@0.1.2-rc.1`
+  carries the patch, five novel plugins installed, bundles `dsh-base + dsh-web-app + five plugins`.
+  The user's global `~/.dsh` was left untouched.
+- [x] Boot boundary smoke: host starts with no error lines, root page HTTP `303` → `200` with the
+  token cookie (24,553 bytes) and lists `@novel-agent/novel-project/client.js`; the client loader
+  returns HTTP `200` (5,336,593 bytes, 156 `novel-project` references); port released on stop.
+- [x] Repository gates on this machine: `corepack pnpm install --frozen-lockfile`, `build`,
+  `typecheck`, `lint`, `test` (284/284) all pass.
+- [ ] Real-model credential is not configured in the isolated home; GUI interaction, Desktop
+  `2.0.5` and the community plugins that fail on rc.1 remain out of scope.
+- [ ] Known nuisance: `dsh plugin add` can stall in pnpm's supply-chain policy check after the
+  files are already written (one occurrence, >5 min; a re-run finished in 0.6 s). Verify the
+  markers instead of reinstalling.
+
+Record: [macOS development environment](../docs/development-environment-macos-2026-09-15.md).
+
 ## Writing-workbench prototype imported, 2026-09-15
 
 **Status:** `implemented-unverified` for the design artifact; visual and interaction acceptance still needs the author's eyes.

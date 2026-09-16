@@ -175,11 +175,16 @@ describe('novel-workbench novel navigation rail', () => {
     expect(
       [...rail!.querySelectorAll('[data-novel-rail-segment]')]
         .map(node => node.getAttribute('data-novel-rail-segment')),
-    ).toEqual(['works', 'threads', 'views'])
+    // 视图 before 线程: an author with seventeen threads could not reach the
+    // navigation without scrolling past every one of them.
+    ).toEqual(['works', 'views', 'threads'])
     // The prototype's 作品 group is the chapter tree itself; the work title now
-    // lives in the topbar, so the rail only has to carry its volume/chapter count.
+    // lives in the topbar, so the rail carries its volume/chapter count — plus
+    // where Canon stands, which the retired context column used to say.
     expect(rail!.querySelector('[data-novel-rail-segment="works"] .grp-head')?.textContent)
       .toContain('1 卷 · 2 章')
+    expect(rail!.querySelector('[data-novel-rail-segment="works"] .grp-head')?.textContent)
+      .toContain('R5')
     expect(rail!.querySelector('[data-novel-chapter="chapter-6"]')?.textContent)
       .toContain('冷库之下的通道')
     expect(
@@ -250,5 +255,48 @@ describe('novel-workbench novel navigation rail', () => {
     expect(gap?.textContent).not.toContain('projector registered')
     await act(async () => { root.unmount() })
     dispose()
+  })
+
+  it('folds a long thread list instead of pushing the navigation off screen', async () => {
+    const { NovelRail } = await import('../src/client/NovelRail.js')
+    const ids = ['t1', 't2', 't3', 't4', 't5', 't6', 't7']
+    const many = {
+      current: 't1',
+      ids,
+      byId: Object.fromEntries(ids.map(id => [id, { id, title: `线程 ${id}`, running: false, updatedAt: 0 }])),
+    }
+    const busyWork = {
+      workspaceId: 'ws-1', path: '/books/x', title: '天机阁主',
+      sessionIds: ids, createdAt: '', updatedAt: '',
+    }
+
+    const container = document.createElement('div')
+    document.body.append(container)
+    const root = createRoot(container)
+    await act(async () => {
+      root.render(createElement(NovelRail as never, {
+        sessionId: undefined,
+        useWorkspaces: (selector: (value: unknown) => unknown) => selector({ items: [busyWork] }),
+        useSessions: (selector: (value: unknown) => unknown) => selector(many),
+        loadOutline: async () => outline,
+        openThread: () => {},
+        newThread: () => {},
+      } as never))
+    })
+    await act(async () => {})
+
+    // Seven threads, and the navigation is still one screen: the newest few are
+    // there, the rest are one click away rather than a scroll away.
+    expect(container.querySelectorAll('[data-novel-thread]')).toHaveLength(5)
+    const toggle = container.querySelector<HTMLButtonElement>('[data-novel-threads-toggle]')
+    expect(toggle?.getAttribute('data-novel-threads-toggle')).toBe('expand')
+    expect(toggle?.textContent).toContain('展开其余 2 条')
+
+    await act(async () => { toggle?.click() })
+    await act(async () => {})
+    expect(container.querySelectorAll('[data-novel-thread]')).toHaveLength(7)
+
+    await act(async () => { root.unmount() })
+    container.remove()
   })
 })

@@ -57,6 +57,9 @@ const ADVANCED_GROUPS: readonly {
 /** Prototype glyphs for the thread and thread-creation rows. */
 const THREAD_ICON = 'M2 4h12M2 8h8M2 12h10'
 const PLUS_ICON = 'M8 3v10M3 8h10'
+const MINUS_ICON = 'M3 8h10'
+/** How many threads the rail shows before the list folds. */
+const VISIBLE_THREADS = 5
 const ADVANCED_ICON = 'M8 2a6 6 0 106 6H8zM9 2v5h5'
 
 /**
@@ -86,6 +89,8 @@ const RAIL_CSS = `
 /** The navigation column. */
 export function NovelRail(props: NovelRailProps): ReactNode {
   const state = useWorkbenchState()
+  /** Whether the author unfolded the whole thread list. Local: it is a glance, not a setting. */
+  const [expanded, setExpanded] = useState<boolean | undefined>(undefined)
   const works = props.useWorkspaces(snapshot => snapshot.items)
   const current = props.useSessions(snapshot => snapshot.current)
   const work = resolveCurrentWork(works, current)
@@ -121,7 +126,9 @@ export function NovelRail(props: NovelRailProps): ReactNode {
   const threads = work === undefined ? [] : threadRows(work, sessions.ids, sessions.byId)
   const counts = outline === undefined
     ? '尚未立项'
-    : `${String(outline.groups.length)} 卷 · ${String(outline.chapterCount)} 章`
+    // 进度摘要: what the work holds and where Canon stands, on one line — the
+    // context column used to say this, and it is cheap to keep saying.
+    : `${String(outline.groups.length)} 卷 · ${String(outline.chapterCount)} 章 · R${String(outline.revision)}`
 
   return [
     createElement('style', { key: 'css' }, RAIL_CSS),
@@ -144,49 +151,10 @@ export function NovelRail(props: NovelRailProps): ReactNode {
         ),
         renderWorks(outline, error, state.chapterId),
       ),
-      createElement(
-        'div',
-        { className: 'grp', key: 'threads', 'data-novel-rail-segment': 'threads' },
-        createElement(
-          'div',
-          { className: 'grp-head' },
-          createElement('span', null, '线程'),
-          createElement('span', { className: 'count' }, String(threads.length)),
-        ),
-        threads.map(summary => createElement(
-          'button',
-          {
-            key: summary.id,
-            type: 'button',
-            className: 'item',
-            'data-novel-thread': summary.id,
-            'aria-current': current === summary.id ? 'true' : 'false',
-            title: summary.title,
-            onClick: () => {
-              props.openThread(summary.id)
-              workbenchActions.openDetails()
-            },
-          },
-          railIcon(THREAD_ICON),
-          createElement('span', { className: 'lbl' }, summary.title),
-        )),
-        createElement(
-          'button',
-          {
-            type: 'button',
-            className: 'item',
-            'data-novel-new-thread': 'true',
-            onClick: () => {
-              if (workId !== undefined) props.newThread(workId)
-              workbenchActions.requestNewThread()
-              // The author asked to talk, so the conversation gets the column.
-              workbenchActions.openDetails()
-            },
-          },
-          railIcon(PLUS_ICON),
-          createElement('span', { className: 'lbl' }, '新建线程'),
-        ),
-      ),
+      // 视图 before 线程, and the rail spec pins that order: an author with
+      // seventeen threads could not reach the navigation without scrolling past
+      // all of them. 写作 is the landing page, so its entry should not be the one
+      // that falls off the first screen.
       createElement(
         'div',
         { className: 'grp', key: 'views', 'data-novel-rail-segment': 'views' },
@@ -206,6 +174,69 @@ export function NovelRail(props: NovelRailProps): ReactNode {
           railIcon(entry.icon),
           createElement('span', { className: 'lbl' }, entry.label),
         )),
+      ),
+      createElement(
+        'div',
+        { className: 'grp', key: 'threads', 'data-novel-rail-segment': 'threads' },
+        createElement(
+          'div',
+          { className: 'grp-head' },
+          createElement('span', null, '线程'),
+          createElement('span', { className: 'count' }, String(threads.length)),
+        ),
+        // Long thread lists stay reachable but stop pushing everything else off
+        // the column: the newest few are always there, and the rest are one
+        // click away rather than a scroll away.
+        threads.slice(0, expanded === true ? threads.length : VISIBLE_THREADS).map(summary => createElement(
+          'button',
+          {
+            key: summary.id,
+            type: 'button',
+            className: 'item',
+            'data-novel-thread': summary.id,
+            'aria-current': current === summary.id ? 'true' : 'false',
+            title: summary.title,
+            onClick: () => {
+              props.openThread(summary.id)
+              workbenchActions.openDetails()
+            },
+          },
+          railIcon(THREAD_ICON),
+          createElement('span', { className: 'lbl' }, summary.title),
+        )),
+        threads.length > VISIBLE_THREADS
+          ? createElement(
+              'button',
+              {
+                type: 'button',
+                className: 'item',
+                'data-novel-threads-toggle': expanded === true ? 'collapse' : 'expand',
+                onClick: () => { setExpanded(expanded !== true) },
+              },
+              railIcon(expanded === true ? MINUS_ICON : PLUS_ICON),
+              createElement(
+                'span',
+                { className: 'lbl' },
+                expanded === true ? '收起' : `展开其余 ${String(threads.length - VISIBLE_THREADS)} 条`,
+              ),
+            )
+          : null,
+        createElement(
+          'button',
+          {
+            type: 'button',
+            className: 'item',
+            'data-novel-new-thread': 'true',
+            onClick: () => {
+              if (workId !== undefined) props.newThread(workId)
+              workbenchActions.requestNewThread()
+              // The author asked to talk, so the conversation gets the column.
+              workbenchActions.openDetails()
+            },
+          },
+          railIcon(PLUS_ICON),
+          createElement('span', { className: 'lbl' }, '新建线程'),
+        ),
       ),
       state.advanced
         ? ADVANCED_GROUPS.map(group => createElement(

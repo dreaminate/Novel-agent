@@ -242,9 +242,7 @@ node -e '...'   # 遍历 node_modules，打印 name/version/license/生命周期
 
 ---
 
-## 6. 复现命令汇总
-
-```bash
+## 6. 复现命令汇总```bash
 # 基线
 cd /Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent
 wc -c < packages/novel-workbench/lib/client.js
@@ -285,3 +283,35 @@ shasum -a 256 packages/novel-workbench/lib/client.js                 # 548d1124�
 grep -rl 'require("react-dom")' node_modules/.pnpm --include=client.js
 # 输出含 @deepseek-ai/dsh-client-ui-renderer / -conversation / -chat 的 client.js
 ```
+
+---
+
+## 7. 真正把它接进产品之后才暴露的构建坑（2026-09-17，I3.2a）
+
+**症状：整个前端白屏 —— 不是编辑器坏，是**所有**界面都没了。** smoke 报「frame 从未渲染」，
+浏览器 console 第一行是：
+
+```
+failed to import loader entry 518e3c23 (@novel-agent/novel-workbench): process is not defined
+```
+
+**根因：** `@tiptap/react` 依赖 `use-sync-external-store`，它的 ESM shim 在**模块顶层**读
+`process.env.NODE_ENV`（`use-sync-external-store-shim.development.js`）。DSH 的 client module system
+**不注入任何 Node 全局**（和 `events` 那个坑同一类：它只提供自己的模块表），所以整个 `client.js`
+在 import 阶段就抛错。
+
+**修法**（浏览器 bundle 的标准做法，写进 `packages/novel-workbench/tsdown.config.ts`）：
+
+```ts
+define: { 'process.env.NODE_ENV': '"production"' },
+```
+
+修完 `grep -c "process\.env" lib/client.js` 从 **6 → 0**，frame 恢复渲染，console 0 报错，
+并且 development 分支被一并去掉（体积也降了一点）。
+
+**教训：** 这类缺陷 `tsc`、`oxlint`、`pnpm test`（349 条）**全都不报** —— 因为它们是构建期和运行期的事，
+不是类型或逻辑的事。**引入一个会进 browser bundle 的依赖之后，必须真的把页面加载一次。**
+同一天第二次栽在这上面（第一次是 `instanceof FsError` 跨了 pnpm 里的两份 `dsh-fs`）。
+
+**引入后的实测体积（§5 护栏核对）：** `lib/client.js` = **1,576,385 B raw / 347,392 B gzip**
+（上限 2,400,000 B → PASS）。只比第 5 节的投影多约 24 KB —— 因为只用到实际 import 的部分，tree-shaking 生效。

@@ -590,12 +590,47 @@ HEAD `02a48d8` —— 即本计划写的 `8926e31` **加本计划文件本身的
   > **验证汇总：** 349 tests 全绿（新增 7 条 chapter-files 断言）、typecheck 0、lint 0、`git diff --check` 0、
   > `dev-host.sh rebuild` + smoke **exit 0**。
 
-- [ ] **I3.2 编辑器画布（含阅读模式）** — 目标：Tiptap 编辑器成为默认主画布，阅读并入同一文档。
-  - 文件：`packages/novel-workbench/src/client/NovelEditor.tsx`（新）、`novel-copy.ts`、
-    `NovelCanvas.tsx`（默认视图改编辑器）、`novel-workbench-editor.spec.ts`（新）
-  - 要求：写作/阅读两态切换；阅读态沿用衬线排版与锚点定位；**中文字数统计**；段首缩进与行高可调
-    （接设置面板的 `--read-*`）；删除原「正文阅读」画布入口并说明迁移。
-  - 验证：spec 绿；真机写作与阅读两态都对；原 read 画布不再出现在视图段。
+- [x] **I3.2a 编辑器画布（写作态）** — 目标：Tiptap 成为真实可用的写作面，且真的写到 workdir 的草稿文件
+  （原 I3.2 的前半，2026-09-17 按 §0 拆出）。
+  - 文件：`packages/novel-workbench/src/client/NovelEditor.tsx`（新）、`NovelCanvas.tsx`（接线 + 视图头）、
+    `store.ts`（新增 `editor` 视图，排在视图段**第一位**）、`tsdown.config.ts`（构建常量）、相关 spec
+
+  > **✅ 已完成（2026-09-17）。真机敲字 → 磁盘上出现草稿文件。**
+  >
+  > **实现：** `NovelEditor` 用 Tiptap（StarterKit）编辑当前章节的草稿；两条规则写在组件注释里，因为
+  > 破任一条都会吃掉作者的稿子：① **保存带读回来的 version**，冲突就**拒绝并在屏幕上保住作者的文字**，
+  > 只改状态行；② **自动保存（700ms 防抖）不因卸载取消**。文件里存的仍是纯文本段落，
+  > 所以保存时序列化回 `\n\n` 分段。视图段新增「写作」并**排在第一位**（体验优先：作者干活的面不该要滚动才到）。
+  >
+  > **🐛 真机验证抓到的第二个缺陷（已修）：整个前端白屏，不只是编辑器。** 第一次 rebuild 后 smoke 报
+  > 「frame 从未渲染」。抓浏览器 console 得到根因：
+  > `failed to import loader entry (@novel-agent/novel-workbench): process is not defined`。
+  > 追下去是 **`@tiptap/react` → `use-sync-external-store` 的 ESM shim 在模块顶层读 `process.env.NODE_ENV`**，
+  > 而 DSH 的 client module system **不注入任何 Node 全局**。修法是浏览器 bundle 的标准做法：
+  > `tsdown.config.ts` 里 `define: { 'process.env.NODE_ENV': '"production"' }`。修完 `process.env` 引用 **6 → 0**，
+  > frame 渲染、console 0 报错，顺带把 development 分支也去掉了。
+  > **这一类缺陷类型检查、单测、`pnpm test` 全都看不见** —— 只有把真东西加载起来才会露出来。
+  > （与上一轮那个 `instanceof FsError` 是同一类：**真机验证不是形式**。）
+  >
+  > **真机验证（探针 `docs/evidence/editor-2026-09-17/probe-editor-write.mjs`）：**
+  > 打开「写作」→ 编辑器渲染、状态 `clean`、字数 `0`（文件不存在，空白开稿，正确）；
+  > 敲入「风起于青萍之末。」→ 字数变 **8**、状态回到 `clean`（自动保存已触发）；
+  > **workdir 里出现 `第1章《开篇章》.草稿.md`，内容与敲入的一字不差**；console 0 报错。
+  > 探针文件测完已删除。
+  >
+  > **体积（§5 护栏核对）：** 引入 Tiptap 后 `lib/client.js` = **1,576,385 B raw / 347,392 B gzip**，
+  > 上限 2,400,000 B → **PASS**。只比 I0.2 的投影多约 24 KB，因为只用到了实际 import 的部分，tree-shaking 生效。
+  >
+  > **本轮未做（归 I3.2b）：** 阅读态、段首缩进与行高接设置面板、删除原「正文阅读」画布（现在与新的「写作」并存，
+  > 是有意的过渡态）、以及把默认落地页改为编辑器。
+
+- [ ] **I3.2b 阅读态与设置接线** — 目标：写作与阅读是同一份文档的两个状态；编辑器成为默认落地页。
+  - 文件：`NovelEditor.tsx`、`NovelCanvas.tsx`、`store.ts`、`novel-workbench-editor.spec.ts`（新）
+  - 前置：I3.2a 已绿（编辑器已真实写入 workdir 的草稿文件）。
+  - 要求：写作/阅读两态切换；阅读态沿用衬线排版与锚点定位；段首缩进与行高接设置面板的 `--read-*`；
+    **删除原「正文阅读」画布入口**并说明迁移（现在两个入口并存是有意的过渡态）；
+    默认落地页改为编辑器（无选中章节时要给体面的空态，不能是白屏）。
+  - 验证：spec 绿；真机两态都对；原 `read` 画布不再出现在视图段；新建会话的落地页是编辑器且不空。
 
 - [ ] **I3.3 提交本章 → 提案** — 目标：手稿经作者确认后进入 Canon 事务。
   - 文件：`NovelEditor.tsx`、`novel-data.ts`、spec

@@ -41,6 +41,7 @@ const keepOpen = flag('--keep-open')
 
 /** The rail's own view segment: clicking each entry must land its canvas. */
 const RAIL_VIEWS = [
+  ['editor', '写作'],
   ['map', '故事地图'],
   ['clues', '伏笔与线索'],
   ['debts', '未收束债务'],

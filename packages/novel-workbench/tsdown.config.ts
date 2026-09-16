@@ -33,6 +33,15 @@ export default defineConfig({
   format: 'cjs',
   platform: 'browser',
   alias: { events: eventsShim },
+  /**
+   * `@tiptap/react` reaches `use-sync-external-store`, whose ESM shim branches on
+   * `process.env.NODE_ENV` at module scope. The client module system seeds no
+   * Node globals, so leaving it unresolved makes the whole bundle throw
+   * `process is not defined` at import — every surface disappears, not just the
+   * editor. Substituting the constant is the ordinary browser-bundle answer and
+   * also drops the development branches.
+   */
+  define: { 'process.env.NODE_ENV': '"production"' },
   target: 'es2023',
   dts: false,
   sourcemap: true,

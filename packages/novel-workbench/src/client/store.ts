@@ -39,6 +39,7 @@ export interface WorkbenchWindow {
 /** Every canvas the workbench can show in the main column. */
 export type WorkbenchViewId =
   | 'thread'
+  | 'editor'
   | 'map'
   | 'review'
   | 'clues'
@@ -69,6 +70,9 @@ export interface WorkbenchViewEntry {
  * and the canvas head, the way the prototype navigates.
  */
 export const WORKBENCH_VIEWS: readonly WorkbenchViewEntry[] = [
+  // 写作 first: this is the surface the author works in, and the one the rail
+  // should put within reach without scrolling.
+  { id: 'editor', label: '写作', icon: 'M3 2h10v12H3zM5 5h6M5 8h6M5 11h3', ready: true },
   { id: 'map', label: '故事地图', icon: 'M2 3h12v10H2zM2 8h12M8 3v10', ready: true },
   { id: 'clues', label: '伏笔与线索', icon: 'M3 13l5-5 2 2 3-4M3 13h2', ready: true },
   { id: 'debts', label: '未收束债务', icon: 'M8 2v8M5 7l3 3 3-3M3 13h10', ready: true },

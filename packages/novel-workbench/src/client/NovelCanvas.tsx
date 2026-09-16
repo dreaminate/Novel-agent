@@ -7,6 +7,8 @@ import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { NovelResultItemDecision } from '@novel-agent/novel-project/types'
 import { useWorkbenchState, workbenchActions } from './store.js'
+import { NovelEditor } from './NovelEditor.js'
+import type { ChapterIdentity } from './chapter-files.js'
 import {
   resolveCurrentWork,
   type NovelReviewDeck,
@@ -89,6 +91,7 @@ const VIEW_HEAD: Readonly<Record<string, { readonly title: string; readonly sub:
   review: { title: '提案审阅', sub: '作者是决策者，AI 是稿手：逐条决定，再写入故事事实' },
   history: { title: '版本历史', sub: '每个已接受版本一句人话摘要 · 回滚会停用其后的变更' },
   read: { title: '正文阅读', sub: '衬线 17px · 行高 1.85 · 行宽不超过 40 字' },
+  editor: { title: '写作', sub: '这一章的草稿文件 · 自动保存到你自己的 workdir，接受后才进 Canon' },
   advanced: { title: '进阶面', sub: '内核 / Agent / 插件 / 任务 / 诊断 · 默认关闭，关闭后整组消失' },
 }
 
@@ -126,6 +129,8 @@ export function NovelCanvas(props: NovelCanvasProps): ReactNode {
   const [deck, setDeck] = useState<NovelReviewDeck | undefined>(undefined)
   const [impact, setImpact] = useState<NovelReviewImpact | undefined>(undefined)
   const [history, setHistory] = useState<readonly NovelRevisionRow[]>([])
+  /** The chapter the writing surface is editing, named the way its draft file is. */
+  const [editorChapter, setEditorChapter] = useState<ChapterIdentity | undefined>(undefined)
   const [diagnostics, setDiagnostics] = useState<NovelDiagnostics | undefined>(undefined)
   const [panels, setPanels] = useState<NovelAdvancedPanels | undefined>(undefined)
   const [busy, setBusy] = useState(false)
@@ -379,6 +384,36 @@ export function NovelCanvas(props: NovelCanvasProps): ReactNode {
       live = false
     }
   }, [state.view, state.chapterId, workId, props.loadManuscriptText, state.revision])
+
+  /**
+   * The writing surface names its draft file after the chapter, so it needs the
+   * chapter's number and title rather than the id the tree carries. The outline
+   * is the only place that has both, and it is one read for the whole view.
+   */
+  useEffect(() => {
+    if (state.view !== 'editor' || workId === undefined || state.chapterId === undefined) {
+      setEditorChapter(undefined)
+      return
+    }
+    let live = true
+    props.loadOutline(workId).then(
+      outline => {
+        if (!live) return
+        const chapter = outline.groups
+          .flatMap(group => group.chapters)
+          .find(candidate => candidate.id === state.chapterId)
+        setEditorChapter(
+          chapter === undefined ? undefined : { number: chapter.number, title: chapter.title },
+        )
+      },
+      () => {
+        if (live) setEditorChapter(undefined)
+      },
+    )
+    return () => {
+      live = false
+    }
+  }, [state.view, state.chapterId, workId, props.loadOutline, state.revision])
 
   const proposal = deck?.proposals.find(
     candidate => candidate.unitId !== undefined && candidate.unitId === state.chapterId,
@@ -641,6 +676,22 @@ export function NovelCanvas(props: NovelCanvasProps): ReactNode {
               return `已回滚到 R${String(target)}，新版本 R${String(outcome.revision)}`
             })
           }}
+        />
+      </Shell>
+    )
+  }
+
+  if (state.view === 'editor') {
+    return (
+      <Shell view="editor" tools={null}>
+        <style>{CANVAS_CSS}</style>
+        <NovelEditor
+          workId={workId}
+          chapter={editorChapter}
+          loadChapterDraft={props.loadChapterDraft}
+          saveChapterDraft={props.saveChapterDraft}
+          readingSize={state.settings.readingSize}
+          readingMeasure={state.settings.readingMeasure}
         />
       </Shell>
     )

@@ -190,7 +190,11 @@ describe('novel-workbench novel navigation rail', () => {
       [...rail!.querySelectorAll('[data-novel-thread]')]
         .map(node => node.getAttribute('data-novel-thread')),
     ).toEqual(['s-6', 's-plan'])
-    expect(rail!.querySelectorAll('[data-novel-view]')).toHaveLength(9)
+    const views = [...rail!.querySelectorAll('[data-novel-view]')]
+    expect(views).toHaveLength(10)
+    // 写作 leads the segment: the surface the author works in should not be the
+    // one they have to scroll to.
+    expect(views[0]?.getAttribute('data-novel-view')).toBe('editor')
     expect(container.querySelector('[data-novel-advanced-toggle]')).not.toBeNull()
 
     await act(async () => { root.unmount() })

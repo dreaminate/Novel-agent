@@ -95,14 +95,29 @@ describe('transcriptOf', () => {
     expect(failed[0].state).toBe('failed')
   })
 
-  it('surfaces a failed turn as a notice instead of dropping it', () => {
+  it('leaves a failed turn to the strip under the transcript, not to a line', () => {
+    // A failure carries an affordance (resend the sentence), not prose, so it
+    // renders as NovelThreadNotice. Emitting a line here as well would say the
+    // same thing twice — which is exactly what this increment removed.
     const transcript = transcriptOf([
       event('turn/end', { reason: { kind: 'error', error: { message: '连接中断' } } }),
     ])
 
-    expect(transcript).toHaveLength(1)
-    expect(transcript[0].kind).toBe('notice')
-    expect(transcript[0].text).toContain('连接中断')
+    expect(transcript).toEqual([])
+  })
+
+  it('reads the one useful detail out of a tool call', () => {
+    const transcript = transcriptOf([
+      event('tool/call', { turn: 1, step: 1, callId: 'c1', name: 'read', arguments: '{"file_path":"/books/x/ch1.md"}' }),
+      event('tool/call', { turn: 1, step: 2, callId: 'c2', name: 'bash', arguments: '{"command":"ls -la","description":"看看目录里有什么"}' }),
+      event('tool/call', { turn: 1, step: 3, callId: 'c3', name: 'read', arguments: 'not json at all' }),
+    ])
+
+    expect(transcript[0].detail).toBe('/books/x/ch1.md')
+    // A shell call carries both the raw command and the model's own sentence;
+    // the sentence is the human one, so it wins.
+    expect(transcript[1].detail).toBe('看看目录里有什么')
+    expect(transcript[2].detail).toBeUndefined()
   })
 
   it('ignores log entries that carry no transcript meaning', () => {
@@ -129,6 +144,35 @@ describe('NovelTranscript', () => {
     expect(container.querySelectorAll('[data-novel-transcript-entry]')).toHaveLength(3)
     expect(container.querySelector('[data-novel-transcript-streaming="true"]')).not.toBeNull()
     expect(container.textContent).toContain('风起于青萍之末。')
+
+    await act(async () => { root.unmount() })
+    container.remove()
+  })
+
+  it('renders a tool call as prose, never as the tool name', async () => {
+    const container = document.createElement('div')
+    document.body.append(container)
+    const root = createRoot(container)
+
+    await act(async () => {
+      root.render(createElement(NovelTranscript, {
+        entries: [
+          { kind: 'tool', id: 'a', text: 'propose_novel_result_packet', state: 'done', detail: '第一章' },
+          { kind: 'tool', id: 'b', text: 'read', state: 'running' },
+          { kind: 'tool', id: 'c', text: 'write', state: 'failed', detail: '/books/x/ch2.md' },
+        ],
+      }))
+    })
+
+    const text = container.textContent ?? ''
+    expect(text).toContain('已整理成提案')
+    expect(text).toContain('第一章')
+    expect(text).toContain('正在读取文件')
+    expect(text).toContain('写入文件时出错')
+    // The harness's identifiers must not reach the manuscript.
+    expect(text).not.toContain('propose_novel_result_packet')
+    expect(text).not.toContain('running')
+    expect(text).not.toContain('done')
 
     await act(async () => { root.unmount() })
     container.remove()

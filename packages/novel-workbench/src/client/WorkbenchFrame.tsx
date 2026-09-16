@@ -28,6 +28,7 @@ export type WorkbenchFrameProps = PropsRenderSlots<
   | 'novel.topbar'
   | 'conversation'
   | 'novel.thread.header'
+  | 'novel.thread.notice'
   | 'novel.composer'
   | 'novel.canvas'
   | 'details'
@@ -110,6 +111,7 @@ export function WorkbenchFrame(props: WorkbenchFrameProps): ReactNode {
           'div',
           { key: 'transcript', className: 'seat', 'data-novel-transcript-seat': 'true' },
           createElement(NovelTranscript, { entries: transcript }),
+          props.renderSlot('novel.thread.notice', threadProps),
         ),
         props.renderSlot('conversation', threadProps),
       ),

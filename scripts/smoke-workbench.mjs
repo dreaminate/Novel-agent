@@ -268,7 +268,7 @@ async function main() {
   if (thread?.transcript !== undefined && thread.transcript !== null) {
     console.log(`thread transcript: ${thread.transcript.empty
       ? 'empty-state'
-      : `${String(thread.transcript.entries)} entries${thread.transcript.streaming ? ' (streaming)' : ''}`}`)
+      : `${String(thread.transcript.entries)} entries (${String(thread.transcript.tools ?? 0)} tool lines)${thread.transcript.streaming ? ' (streaming)' : ''}`}`)
     if (typeof thread.transcript.sample === 'string' && thread.transcript.sample !== '') {
       console.log(`thread sample: ${thread.transcript.sample}`)
     }
@@ -405,11 +405,20 @@ async function sweepThread(session) {
     transcript = await session.evaluate(
       `(() => { const seat = document.querySelector('[data-novel-transcript-seat]')
         if (seat === null) return null
+        const text = seat.innerText ?? ''
+        // The transcript must speak the author's language: a tool's own name
+        // reaching the page is the regression this screen exists to catch.
+        const leaks = ['propose_novel_result_packet','retrieve_novel_context','rebuild_novel_index',
+          'simulate_novel_story_world','simulate_novel_reader_response','todo_write','subagent_fork',
+          'web_search','web_fetch','read_image','propose_novel_import','publish_novel_manuscript']
+          .filter(name => text.includes(name))
         return {
           entries: seat.querySelectorAll('[data-novel-transcript-entry]').length,
+          tools: seat.querySelectorAll('[data-novel-transcript-entry="tool"]').length,
           empty: seat.querySelector('[data-novel-transcript="empty"]') !== null,
           streaming: seat.querySelector('[data-novel-transcript-streaming="true"]') !== null,
-          sample: (seat.innerText ?? '').trim().replace(/\\n+/g, ' ').slice(0, 160)
+          leaks,
+          sample: text.trim().replace(/\\n+/g, ' ').slice(0, 160)
         } })()`)
     if (transcript !== null && transcript.entries > 0) break
   }
@@ -420,6 +429,9 @@ async function sweepThread(session) {
   // An empty transcript across every reachable thread is the failure this screen
   // exists to catch: the frame renders, but it is not rendering the conversation.
   if (transcript.entries === 0) screen.state = 'transcript-empty'
+  if (Array.isArray(transcript.leaks) && transcript.leaks.length > 0) {
+    screen.state = 'transcript-leaks-tool-names'
+  }
   screen.threadHeader = await session.evaluate(
     `(() => { const node = document.querySelector('[data-novel-thread-header]')
       return node === null ? '' : node.innerText.trim().replace(/\\n+/g, ' · ') })()`)

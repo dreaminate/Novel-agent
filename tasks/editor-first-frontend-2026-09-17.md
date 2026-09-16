@@ -329,10 +329,38 @@ HEAD `02a48d8` —— 即本计划写的 `8926e31` **加本计划文件本身的
   >   安全过滤需要 llm 的 `MessageSource` **特化**轴（base 上写的是 `form?: never`），本轮没有足够证据
   >   区分「注入的上下文」与「作者真的写了这句」，所以不在 I2.1 猜着过滤 —— 归 I2.2 / I6.5 的「信息去术语化」。
 
-- [ ] **I2.2 工具行与失败重试** — 目标：工具调用渲染成**人话行**，失败态可重试。
+- [x] **I2.2 工具行与失败重试** — 目标：工具调用渲染成**人话行**，失败态可重试。
   - 文件：`NovelTranscript.tsx`、`novel-workbench-failure.spec.ts`（扩展）
   - 要求：不用工程术语；已有「上次生成失败 + 重试上一句」的条带行为并入消息流，不重复两处。
   - 验证：spec 绿；失败回合真机可见。
+
+  > **✅ 已完成（2026-09-17）。**
+  > - **工具行人话化。** `novel-copy.ts` 新增 `toolPhrase(name)`：把工具名翻成作者语言
+  >   （`propose_novel_result_packet` → 整理成提案、`bash` → 运行命令、`retrieve_novel_context` → 翻查作品设定…）。
+  >   **工具名清单不是猜的** —— 是从本 profile 自己的 session 日志（zstd JSONL）里统计出来的真实调用名。
+  >   未收录的名字回落到中性短语「处理」，而不是把标识符漏进正文。
+  > - **工具行还带一个对象。** `transcript-data.ts` 新增 `detail`：从 `arguments` 里取**一个**最有用的值，
+  >   优先级 `description`（bash 的、模型自己写的句子）> `file_path` > `pattern` > `path`；取不到就不显示。
+  >   渲染成「已整理成提案 · 第一章」「正在读取文件…」这种。
+  > - **失败条带并入消息流，不重复两处。** 新 `NovelThreadNotice.tsx` 承载原 header 里的
+  >   「上次生成失败 + 重试上一句」，由 frame 渲染在 transcript **正下方**；`NovelThreadHeader` 里的那一份**删掉**。
+  >   它做成独立 seat（`novel.thread.notice`）而不是 transcript 的一部分，因为重试要用会话面的 `resend`，
+  >   而 frame 拿不到它 —— 该 seat 只声明它需要的这一个能力（`inject: () => ({ resend: face.resend })`）。
+  >   `transcriptOf` 里原本由我加的 `turn/end` notice **撤掉**，否则同一个失败还是说两遍。
+  > - **RED→GREEN**：先改 spec（transcript 断言 `turn/end` 不再产出行、工具行必须出现短语且**不得**出现工具名），
+  >   跑出失败，再实现。
+  > - **真机验证（两处，都不是推断）：**
+  >   ① smoke 走线程列表，实测 `6 entries (2 tool lines)`，并新增一条**泄漏检查** ——
+  >   在 transcript 文本里搜 12 个特征工具名，命中即把该屏判为失败（`transcript-leaks-tool-names`）；
+  >   本次 0 命中。**这条检查不是空转**：同一次运行确认了确实有 2 条工具行。
+  >   ② 失败态真机可见：用官方的连接 fixture（`?fixture=1&fixturePrompt=reject`）让 prompt RPC 失败，
+  >   走的是条带真正读的那条 `promptError` 路径 —— **不需要模型、不需要凭据**。
+  >   实测发送后 `[data-novel-thread-notice]` 出现，文案「上次生成失败 fixture: prompt rejected before acceptance」，
+  >   且 **header 里不再出现「上次生成失败」**（`headerSaysFailed: false`）→ 不重复两处。
+  >   复跑：`node docs/evidence/thread-2026-09-17/probe-failure-strip.mjs /tmp/failure-strip`。
+  > - **一处如实说明：** 那条 fixture 路径下 `retry` 按钮**没有**出现，因为直接往官方 composer 打字
+  >   不会写 `lastSubmission`（那是我们 novel bar 提交时才记的），没有「上一句」可重试 —— 行为正确。
+  >   重试动作本身由 spec 点击并断言 `resend` 被调用，覆盖在单测里。
 
 - [ ] **I2.3 `/` 与 `@` 候选菜单** — 目标：拆掉「请切到线程输入」的挡板，复用官方管道只换渲染。
   - 文件：`NovelComposer.tsx`、`novel-workbench-composer.spec.ts`（扩展）

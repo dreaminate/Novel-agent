@@ -137,6 +137,47 @@ export function countCharacters(text: string): number {
   return text.replace(/\s+/g, '').length
 }
 
+/**
+ * Author-facing phrase for a tool the assistant used.
+ *
+ * The transcript shows a tool call as a line of prose, so it must not print the
+ * tool's own name: `propose_novel_result_packet` and `retrieve_novel_context`
+ * are the harness's vocabulary, not the author's. The names below are the ones
+ * this profile actually runs, read out of its own session logs rather than
+ * guessed. Anything unmapped falls back to a neutral phrase instead of leaking
+ * an identifier into the manuscript.
+ */
+const TOOL_PHRASES: Readonly<Record<string, string>> = {
+  read: '读取文件',
+  write: '写入文件',
+  edit: '修改文件',
+  glob: '查找文件',
+  grep: '在文件里搜索',
+  bash: '运行命令',
+  read_image: '查看图片',
+  web_search: '检索资料',
+  web_fetch: '读取网页',
+  retrieve_novel_context: '翻查作品设定',
+  rebuild_novel_index: '重建检索索引',
+  propose_novel_result_packet: '整理成提案',
+  propose_novel_import: '导入作品',
+  publish_novel_manuscript: '导出稿件',
+  simulate_novel_story_world: '推演故事走向',
+  simulate_novel_reader_response: '推演读者反应',
+  update_goal: '更新目标',
+  todo_write: '整理待办',
+  subagent: '分派子任务',
+  subagent_fork: '分派子任务',
+  send_message: '发送消息',
+  skill: '按既有方法处理',
+  workflow: '按既有流程处理',
+}
+
+/** Author-facing phrase for one tool name. */
+export function toolPhrase(name: string): string {
+  return TOOL_PHRASES[name] ?? '处理'
+}
+
 function describeValue(value: unknown): string {
   if (typeof value === 'string') return shorten(value.trim(), 60)
   if (typeof value === 'number' || typeof value === 'boolean') return String(value)

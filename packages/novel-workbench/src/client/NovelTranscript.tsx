@@ -10,6 +10,7 @@
  * the model's answer in a different voice than their own draft.
  */
 import { createElement, type ReactNode } from 'react'
+import { toolPhrase } from './novel-copy.js'
 import type { TranscriptEntry } from './transcript-data.js'
 
 /** Reading measure for the transcript column. */
@@ -34,12 +35,6 @@ const TRANSCRIPT_CSS = `
 .novel-transcript-line.is-user .novel-transcript-text {
   color: hsl(var(--text-100));
 }
-.novel-transcript-line.is-notice .novel-transcript-text {
-  font-family: var(--font-ui);
-  font-size: 13px;
-  line-height: 1.6;
-  color: hsl(var(--text-200));
-}
 .novel-transcript-tool {
   margin: 0;
   font-family: var(--font-ui);
@@ -60,11 +55,22 @@ const TRANSCRIPT_CSS = `
 }
 `
 
-/** How a tool line reads while it is still open, and after it settles. */
-const TOOL_STATE: Record<NonNullable<TranscriptEntry['state']>, string> = {
-  running: '进行中',
-  done: '已完成',
-  failed: '失败',
+/**
+ * How one tool line reads.
+ *
+ * The tool's own name never reaches the page: `toolPhrase` turns it into the
+ * author's vocabulary, and the lead says whether the step is still running or
+ * already went wrong. The detail is what it acted on — a path, a pattern, or the
+ * model's own short description of the command.
+ */
+function toolLine(entry: TranscriptEntry): string {
+  const phrase = toolPhrase(entry.text)
+  const lead = entry.state === 'running'
+    ? `正在${phrase}…`
+    : entry.state === 'failed'
+      ? `${phrase}时出错`
+      : `已${phrase}`
+  return entry.detail === undefined ? lead : `${lead} · ${entry.detail}`
 }
 
 /** Everything the transcript needs: the lines, already reduced. */
@@ -95,11 +101,7 @@ export function NovelTranscript(props: NovelTranscriptProps): ReactNode {
               ...(entry.streaming === true ? { 'data-novel-transcript-streaming': 'true' } : {}),
             },
             entry.kind === 'tool'
-              ? createElement(
-                  'p',
-                  { className: 'novel-transcript-tool' },
-                  `${entry.text} · ${TOOL_STATE[entry.state ?? 'running']}`,
-                )
+              ? createElement('p', { className: 'novel-transcript-tool' }, toolLine(entry))
               : createElement(
                   'p',
                   {

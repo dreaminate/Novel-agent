@@ -32,6 +32,7 @@ import { NovelComposer } from './NovelComposer.js'
 import { NovelSettings } from './NovelSettings.js'
 import { PersonFileSeat } from './PersonFileSeat.js'
 import { NovelThreadHeader } from './NovelThreadHeader.js'
+import { NovelThreadNotice } from './NovelThreadNotice.js'
 import { NovelTopbar } from './NovelTopbar.js'
 import {
   WorkbenchFrame,
@@ -67,6 +68,16 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
      * serves and links to the proposals waiting on it.
      */
     'novel.thread.header': {
+      kind: 'single'
+      scope: 'session-maybe'
+    }
+    /**
+     * The failed-turn strip under the transcript. OCCUPIED by this bundle's
+     * NovelThreadNotice, which says a turn failed and offers to resend the
+     * sentence that failed. It is a seat rather than part of the transcript
+     * because resending needs the session face, which the frame does not get.
+     */
+    'novel.thread.notice': {
       kind: 'single'
       scope: 'session-maybe'
     }
@@ -152,6 +163,7 @@ export function apply(ctx: ClientContext): () => void {
       'novel.topbar': { kind: 'single', scope: 'root' },
       conversation: { kind: 'single', scope: 'session-maybe' },
       'novel.thread.header': { kind: 'single', scope: 'session-maybe' },
+      'novel.thread.notice': { kind: 'single', scope: 'session-maybe' },
       'novel.composer': { kind: 'single', scope: 'session-maybe' },
       'novel.canvas': { kind: 'single', scope: 'session-maybe' },
       details: { kind: 'single', scope: 'session' },
@@ -301,6 +313,10 @@ export function apply(ctx: ClientContext): () => void {
         name: 'novel.thread.header',
         inject: () => face,
       }, NovelThreadHeader)), 'novel-mode thread header')
+      surfaceCtx.effect(() => surfaceCtx.slots.inject('novel.thread.notice', () => surfaceCtx.slots.register({
+        name: 'novel.thread.notice',
+        inject: () => ({ resend: face.resend }),
+      }, NovelThreadNotice)), 'novel-mode failed-turn strip')
     },
   })
 

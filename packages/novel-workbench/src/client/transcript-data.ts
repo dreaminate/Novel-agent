@@ -7,12 +7,16 @@
  * so the transcript can never disagree with the conversation the host recorded:
  * there is one log, and this is a view of it.
  *
- * The reduction keeps four things and drops the rest: what the author asked
+ * The reduction keeps three things and drops the rest: what the author asked
  * (`user/message`), what the model wrote (`assistant/chunk` deltas, finalized by
- * `assistant/message`), which tools ran (`tool/call` paired with `tool/result`),
- * and a turn that ended in failure (`turn/end`). Reasoning deltas are
- * deliberately not folded into the prose — they are the model thinking, not the
- * manuscript.
+ * `assistant/message`), and which tools ran (`tool/call` paired with
+ * `tool/result`). Reasoning deltas are deliberately not folded into the prose —
+ * they are the model thinking, not the manuscript.
+ *
+ * A turn that ended in failure is deliberately *not* a line here. It carries an
+ * affordance (resend the sentence that failed) rather than prose, so it renders
+ * as the strip that sits directly under these lines; emitting a notice line as
+ * well would say the same thing twice.
  */
 
 /** One durable log entry, in the shape the Session binding exposes. */
@@ -29,14 +33,16 @@ export interface SessionLogEntry {
  * list should not have to narrow a union to ask for text.
  */
 export interface TranscriptEntry {
-  readonly kind: 'user' | 'assistant' | 'tool' | 'notice'
+  readonly kind: 'user' | 'assistant' | 'tool'
   readonly id: string
-  /** The line's prose; for a tool line this is the tool's name until it reads better. */
+  /** The line's prose; for a tool line this is the tool's own name. */
   readonly text: string
   /** Set on an assistant line that is still receiving deltas. */
   readonly streaming?: boolean
   /** Set on a tool line once its result is known. */
   readonly state?: 'running' | 'done' | 'failed'
+  /** What a tool line acted on — the path, pattern or the model's own short description. */
+  readonly detail?: string
 }
 
 /** Read the visible text of one message-shaped payload. */
@@ -58,6 +64,30 @@ function resultCallId(message: unknown): string | undefined {
   for (const block of content) {
     const callId = (block as { callId?: unknown } | undefined)?.callId
     if (typeof callId === 'string' && callId !== '') return callId
+  }
+  return undefined
+}
+
+/**
+ * The one detail worth showing on a tool line.
+ *
+ * Preference order matters: a shell call carries both a `command` and a
+ * model-written `description`, and the description is the human sentence, so it
+ * wins. File tools carry `file_path`; search tools carry `pattern`.
+ */
+function toolDetail(argumentsJson: unknown): string | undefined {
+  if (typeof argumentsJson !== 'string' || argumentsJson === '') return undefined
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(argumentsJson)
+  } catch {
+    return undefined
+  }
+  if (parsed === null || typeof parsed !== 'object') return undefined
+  const record = parsed as Record<string, unknown>
+  for (const key of ['description', 'file_path', 'pattern', 'path']) {
+    const value = record[key]
+    if (typeof value === 'string' && value.trim() !== '') return value.trim()
   }
   return undefined
 }
@@ -128,12 +158,14 @@ export function transcriptOf(entries: readonly SessionLogEntry[]): TranscriptEnt
       }
       case 'tool/call': {
         const id = String(data.callId ?? `call-${String(lines.length)}`)
+        const detail = toolDetail(data.arguments)
         calls.set(id, lines.length)
         lines.push({
           kind: 'tool',
           id,
-          text: String(data.name ?? '工具调用'),
+          text: String(data.name ?? ''),
           state: 'running',
+          ...(detail === undefined ? {} : { detail }),
         })
         break
       }
@@ -143,18 +175,6 @@ export function transcriptOf(entries: readonly SessionLogEntry[]): TranscriptEnt
         if (at !== undefined && current !== undefined) {
           lines[at] = { ...current, state: data.error === undefined ? 'done' : 'failed' }
         }
-        break
-      }
-      case 'turn/end': {
-        const reason = data.reason as { kind?: unknown; error?: { message?: unknown } } | undefined
-        if (reason?.kind !== 'error') break
-        const message = reason.error?.message
-        lines.push({
-          kind: 'notice',
-          id: `turn-end-${String(lines.length)}`,
-          text: typeof message === 'string' && message !== '' ? message : '这次生成没有返回内容。',
-          state: 'failed',
-        })
         break
       }
       default:

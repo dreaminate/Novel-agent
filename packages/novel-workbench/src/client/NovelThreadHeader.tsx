@@ -1,12 +1,15 @@
 /**
  * The novel-mode strip above the conversation surface: which work and revision
  * the current thread is serving, and how many proposals are waiting for the
- * author. It is chrome, not a second chat surface — the conversation below it
- * stays the shipped one.
+ * author. It is chrome, not a second chat surface.
+ *
+ * A failed turn is *not* reported here: that is the strip under the transcript
+ * (`NovelThreadNotice`), where the author is actually reading. Reporting it in
+ * both places said the same thing twice.
  */
 import { useEffect, useState, type ReactNode } from 'react'
 import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
-import { useWorkbenchState, workbenchActions } from './store.js'
+import { workbenchActions } from './store.js'
 import { resolveCurrentWork, type NovelWorkFace } from './novel-data.js'
 
 /** Everything the thread header receives: the framework shares and the data face. */
@@ -36,46 +39,12 @@ const HEADER_CSS = `
   font: inherit;
   cursor: pointer;
 }
-[data-novel-thread-header] .nw-thread-failure {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 1 1 auto;
-  min-width: 0;
-  margin-left: auto;
-}
-[data-novel-thread-header] .nw-thread-failure-text {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: hsl(var(--warn));
-}
 `
 
 /** The thread context strip. */
 export function NovelThreadHeader(props: NovelThreadHeaderProps): ReactNode {
   const works = props.useWorkspaces(snapshot => snapshot.items)
   const work = resolveCurrentWork(works, props.sessionId)
-  const state = useWorkbenchState()
-  /**
-   * A failed turn is a state the author has to see: the Host records it on the
-   * session snapshot, and without this strip the thread just goes quiet
-   * (the prototype's AI 无输出 boundary).
-   */
-  const failure = props.useSession(snapshot => (
-    snapshot.lastAgentError ?? snapshot.promptError?.error.message ?? undefined
-  ))
-  const submission = state.lastSubmission
-  const lastText = submission !== undefined && submission.sessionId === props.sessionId
-    ? submission.text
-    : undefined
-  /** A turn that ended in error lives in the session log, mirrored by the plugin. */
-  const mirrored = state.turnFailure
-  const turnFailure = mirrored !== undefined && mirrored.sessionId === props.sessionId
-    ? mirrored.message
-    : undefined
-  const problem = failure ?? turnFailure
   const workId = work?.workspaceId
   const { loadReviews } = props
   const [pending, setPending] = useState<number | undefined>(undefined)
@@ -100,8 +69,7 @@ export function NovelThreadHeader(props: NovelThreadHeaderProps): ReactNode {
   }, [workId, loadReviews])
 
   if (work === undefined) return null
-  const sessionId = props.sessionId
-  if (sessionId === undefined) return null
+  if (props.sessionId === undefined) return null
 
   return (
     <div data-novel-thread-header="" data-novel-thread-work={work.workspaceId}>
@@ -117,24 +85,6 @@ export function NovelThreadHeader(props: NovelThreadHeaderProps): ReactNode {
         >
           {`待审提案 ${String(pending)}`}
         </button>
-      )}
-      {problem !== undefined && (
-        <div className="nw-thread-failure" data-novel-thread-failure="" role="alert">
-          <span className="chip warn">上次生成失败</span>
-          <span className="nw-thread-failure-text" title={problem}>{problem}</span>
-          {lastText !== undefined && (
-            <button
-              type="button"
-              className="btn sm"
-              data-novel-thread-retry="true"
-              onClick={() => {
-                void props.resend(sessionId, lastText).catch(() => {})
-              }}
-            >
-              重试上一句
-            </button>
-          )}
-        </div>
       )}
     </div>
   )

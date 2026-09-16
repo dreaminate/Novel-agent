@@ -72,6 +72,7 @@ describe('novel-workbench root occupant', () => {
       'novel.canvas',
       'novel.composer',
       'novel.thread.header',
+      'novel.thread.notice',
       'novel.topbar',
       'shell.overlay',
       'sidebar',

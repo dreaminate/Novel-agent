@@ -11,6 +11,7 @@
  */
 import { createElement, type ReactNode } from 'react'
 import type { PropsRenderSlots } from '@deepseek-ai/dsh-client-ui-slots'
+import { NovelTranscript } from './NovelTranscript.js'
 import { useWorkbenchState } from './store.js'
 import { WorkbenchStyleSheet } from './WorkbenchStyleSheet.js'
 
@@ -51,11 +52,21 @@ const FRAME_CSS = `
 [data-novel-workbench="frame"] .seat {
   display: contents;
 }
+/*
+ * The frame renders the thread's prose itself (NovelTranscript) and sets it as
+ * reading. The shipped conversation surface is left mounted because it still
+ * owns what the novel mode has not replaced yet — the composer, the input
+ * menus, the approval panel — so only its own transcript region is hidden.
+ * I2.4 stops rendering that surface once the replacement covers all of it.
+ */
+[data-novel-workbench="frame"] [data-slot="conversation.session"] {
+  display: none;
+}
 `
 
 /** The novel-mode frame: topbar / rail / canvas / side / composer, all seats declared. */
 export function WorkbenchFrame(props: WorkbenchFrameProps): ReactNode {
-  const { panels, theme, view, sessionId } = useWorkbenchState()
+  const { panels, theme, view, sessionId, transcript } = useWorkbenchState()
   const sideOpen = panels.details > 0 && sessionId !== undefined
   const threads = view === 'thread'
   const threadProps = sessionId === undefined ? { 'data-novel-thread': 'idle' } : {}
@@ -95,6 +106,11 @@ export function WorkbenchFrame(props: WorkbenchFrameProps): ReactNode {
           hidden: !threads,
         },
         props.renderSlot('novel.thread.header', threadProps),
+        createElement(
+          'div',
+          { key: 'transcript', className: 'seat', 'data-novel-transcript-seat': 'true' },
+          createElement(NovelTranscript, { entries: transcript }),
+        ),
         props.renderSlot('conversation', threadProps),
       ),
       threads

@@ -295,13 +295,39 @@ HEAD `02a48d8` —— 即本计划写的 `8926e31` **加本计划文件本身的
 
 ### Phase 2 — 对话面自研
 
-- [ ] **I2.1 消息流** — 目标：自渲染用户/助手消息与流式增量，替换官方会话面的排版。
+- [x] **I2.1 消息流** — 目标：自渲染用户/助手消息与流式增量，替换官方会话面的排版。
   - 文件：`packages/novel-workbench/src/client/NovelTranscript.tsx`（新）、`transcript-data.ts`（新）、
     `NovelCanvas.tsx` 或 `WorkbenchFrame.tsx`（接线）、对应 spec（新）
   - RED：先写「给定一组会话消息渲染出 N 条消息与流式追加」的 focused test，证明当前没有这个面。
   - 要求：数据只从官方会话绑定读取（`binding` / `eventSource`），**不新建消息存储**；
     正文用阅读排版（衬线/行高/行宽沿用 `--read-*` token）；长文、段落、中文标点正常。
   - 验证：spec 绿；真机 smoke 里线程视图出现自渲染消息流。
+
+  > **✅ 已完成（2026-09-17）。**
+  > - **新增** `src/client/transcript-data.ts`（纯归约）、`src/client/NovelTranscript.tsx`（纯呈现）、
+  >   `tests/novel-workbench-transcript.spec.ts`（8 个断言）。**接线**：`store.ts` 加 `transcript` 切片
+  >   与 `setTranscript`（带同值短路，避免每个无关事件都重渲染）、`index.tsx` 在**既有的**
+  >   session-follow 里从 `binding.eventSource` 归约、`WorkbenchFrame.tsx` 在线程视图渲染。
+  > - **RED→GREEN**：spec 先因 `Failed to resolve import ".../transcript-data.js"` 失败（证明缺的就是这个面），
+  >   实现后 8/8 绿。
+  > - **不新建消息存储**：`transcriptOf(entries)` 是官方 session log 的**纯函数视图**，没有第二个真相源。
+  > - **归约范围**：`user/message`；`assistant/chunk` 的 `text-delta` 流式累积、由 `assistant/message` 定稿；
+  >   `tool/call` 与 `tool/result` 配对（`running`/`done`/`failed`）；`turn/end` 失败转成一条 notice。
+  >   **`reasoning-delta` 故意不进正文** —— 那是模型在想，不是手稿。
+  > - **排版**：正文用 `--font-serif` + `--read-size` / `--read-lh` / `--read-measure`，与手稿视图同一套；
+  >   `white-space: pre-wrap` 保住中文标点与分段。
+  > - **官方会话面怎么处理**：frame 只在 `FRAME_CSS` 里隐藏官方的 `[data-slot="conversation.session"]`
+  >   （它自己的消息区），**其余全部保留**（composer / 输入菜单 / 审批面板）—— 这正是 I2.4 的前置要求：
+  >   I2.2/I2.3 到位前不丢作者还在用的能力。
+  > - **真机验证**：按 §4.7「如需覆盖新屏幕先扩展扫描脚本」，扩了 `scripts/smoke-workbench.mjs` 的线程扫描 ——
+  >   它会**沿线程列表走到第一个真有正文的线程**（第一行常是空线程，只测它等于什么都没测），并把
+  >   transcript 座椅缺失、或所有可达线程都空，判为**失败**而非跳过。实测
+  >   `thread transcript: 6 entries`，样本就是真实会话内容；smoke exit 0。
+  > - **已知问题（不在 I2.1 修，留给后续）：** transcript 会**原样渲染运行期上下文快照**
+  >   （那条 `Current runtime context. This snapshot supersedes earlier…` 的 user-role 注入）。它是日志里
+  >   真实存在的 user 消息（官方会话面同样会显示它），但在一段中文里读起来像噪音。
+  >   安全过滤需要 llm 的 `MessageSource` **特化**轴（base 上写的是 `form?: never`），本轮没有足够证据
+  >   区分「注入的上下文」与「作者真的写了这句」，所以不在 I2.1 猜着过滤 —— 归 I2.2 / I6.5 的「信息去术语化」。
 
 - [ ] **I2.2 工具行与失败重试** — 目标：工具调用渲染成**人话行**，失败态可重试。
   - 文件：`NovelTranscript.tsx`、`novel-workbench-failure.spec.ts`（扩展）

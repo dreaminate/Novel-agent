@@ -264,6 +264,15 @@ async function main() {
   console.log(`rail segments: ${(report.railSegments ?? []).join(' / ')}`)
   console.log(`view entries (${String(report.viewEntries?.length ?? 0)}): ${(report.viewEntries ?? []).join(' ')}`)
   console.log(rows.join('\n'))
+  const thread = report.screens.find(screen => screen.view === 'thread')
+  if (thread?.transcript !== undefined && thread.transcript !== null) {
+    console.log(`thread transcript: ${thread.transcript.empty
+      ? 'empty-state'
+      : `${String(thread.transcript.entries)} entries${thread.transcript.streaming ? ' (streaming)' : ''}`}`)
+    if (typeof thread.transcript.sample === 'string' && thread.transcript.sample !== '') {
+      console.log(`thread sample: ${thread.transcript.sample}`)
+    }
+  }
   console.log(`out: ${outDir}`)
   const failures = report.failures
   // A skip is a truthful record (no proposal, no accepted chapter), not a
@@ -373,16 +382,44 @@ async function sweepProposal(session) {
  * is the frame's own seat plus the novel strip above it — not a canvas.
  */
 async function sweepThread(session) {
-  const row = await session.evaluate(
-    `(() => { const node = document.querySelector('[data-novel-rail="nav"] [data-novel-thread]')
-      return node === null ? null : node.getAttribute('data-novel-thread') })()`)
-  if (row === null) return { view: 'thread', label: '线程对话流', state: 'skipped-no-thread', head: '' }
-  await session.evaluate(`document.querySelector('[data-novel-rail="nav"] [data-novel-thread]').click()`)
-  const shown = await session.until(
-    `document.querySelector('[data-novel-conversation-seat="true"]:not([hidden])') !== null`)
-  if (!shown) return { view: 'thread', label: '线程对话流', state: 'seat-missing', head: '' }
-  await sleep(settleMs)
+  // The rail's thread list only materialises once its segment is selected.
+  await session.evaluate(`(() => {
+    const segment = document.querySelector('[data-novel-rail-segment="threads"]')
+    if (segment !== null) segment.click() })()`)
+  await session.until(`document.querySelector('[data-novel-thread]') !== null`)
+  const rows = await session.evaluate(
+    `Array.from(document.querySelectorAll('[data-novel-thread]')).map(node => node.getAttribute('data-novel-thread'))`)
+  if (rows.length === 0) return { view: 'thread', label: '线程对话流', state: 'skipped-no-thread', head: '' }
+
+  // Walk the list until a thread actually carries prose. The first row is often
+  // a brand-new thread, and the point of this screen is to see the frame set real
+  // messages, not its empty state.
+  let transcript = null
+  for (const row of rows.slice(0, 8)) {
+    await session.evaluate(`(() => {
+      const node = document.querySelector('[data-novel-thread=${JSON.stringify(row)}]')
+      if (node !== null) node.click() })()`)
+    if (!await session.until(
+      `document.querySelector('[data-novel-conversation-seat="true"]:not([hidden])') !== null`)) continue
+    await sleep(settleMs)
+    transcript = await session.evaluate(
+      `(() => { const seat = document.querySelector('[data-novel-transcript-seat]')
+        if (seat === null) return null
+        return {
+          entries: seat.querySelectorAll('[data-novel-transcript-entry]').length,
+          empty: seat.querySelector('[data-novel-transcript="empty"]') !== null,
+          streaming: seat.querySelector('[data-novel-transcript-streaming="true"]') !== null,
+          sample: (seat.innerText ?? '').trim().replace(/\\n+/g, ' ').slice(0, 160)
+        } })()`)
+    if (transcript !== null && transcript.entries > 0) break
+  }
+  if (transcript === null) return { view: 'thread', label: '线程对话流', state: 'transcript-seat-missing', head: '' }
+
   const screen = await record(session, 'thread', '线程对话流', '[data-novel-conversation-seat="true"]')
+  screen.transcript = transcript
+  // An empty transcript across every reachable thread is the failure this screen
+  // exists to catch: the frame renders, but it is not rendering the conversation.
+  if (transcript.entries === 0) screen.state = 'transcript-empty'
   screen.threadHeader = await session.evaluate(
     `(() => { const node = document.querySelector('[data-novel-thread-header]')
       return node === null ? '' : node.innerText.trim().replace(/\\n+/g, ' · ') })()`)

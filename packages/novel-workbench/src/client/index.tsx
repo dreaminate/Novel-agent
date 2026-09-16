@@ -38,6 +38,7 @@ import {
   type WorkbenchPanelActions,
 } from './WorkbenchFrame.js'
 import { ThemePresenter } from './theme-presenter.js'
+import { transcriptOf } from './transcript-data.js'
 import {
   getWorkbenchState,
   resetWorkbench,
@@ -178,11 +179,13 @@ export function apply(ctx: ClientContext): () => void {
     stopFailureFollow = undefined
     if (sessionId === undefined) {
       workbenchActions.setTurnFailure(undefined)
+      workbenchActions.setTranscript([])
       return
     }
     const binding = ctx.sessions.binding(sessionId as never)
     if (binding === undefined) {
       workbenchActions.setTurnFailure(undefined)
+      workbenchActions.setTranscript([])
       return
     }
     const read = (): void => {
@@ -192,6 +195,9 @@ export function apply(ctx: ClientContext): () => void {
           ? undefined
           : { sessionId: sessionId as never, message: lastFailedTurn(entries) as string },
       )
+      // The transcript is a view of this same log, recomputed per append; the
+      // store drops it when the result is unchanged.
+      workbenchActions.setTranscript(transcriptOf(entries))
     }
     stopFailureFollow = binding.eventSource.subscribe(read)
     read()

@@ -11,6 +11,7 @@
  */
 import { useSyncExternalStore } from 'react'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
+import type { TranscriptEntry } from './transcript-data.js'
 
 /** Live shell geometry (px; sidebar 0 = collapsed rail, details 0 = no context column). */
 export interface WorkbenchPanels {
@@ -110,6 +111,12 @@ export interface WorkbenchState {
    * (`api-session/error`), so a failed *turn* is only visible here.
    */
   readonly turnFailure: { readonly sessionId: SessionId; readonly message: string } | undefined
+  /**
+   * The current session's log reduced to transcript lines. This is a *view* of
+   * the shipped session log, never a second message store: `index.tsx` recomputes
+   * it from the binding's `eventSource` on every append.
+   */
+  readonly transcript: readonly TranscriptEntry[]
   /** Live width of the frame's window, mirrored for slot renderers. */
   readonly window: WorkbenchWindow
   /** Start a new thread inside one work (the frame owns the request, the caller opens it). */
@@ -148,6 +155,7 @@ const DEFAULT_STATE: WorkbenchState = {
   personFileId: undefined,
   lastSubmission: undefined,
   turnFailure: undefined,
+  transcript: [],
   window: { width: 1440, nearLimit: false },
   newThreadToken: 0,
   sessionId: undefined,
@@ -160,6 +168,26 @@ const listeners = new Set<() => void>()
 function publish(next: WorkbenchState): void {
   state = next
   for (const listener of listeners) listener()
+}
+
+/**
+ * Whether a fresh reduction says the same thing as the one in state.
+ *
+ * The transcript is recomputed from the log on every append, so the array is
+ * always new; without this guard every unrelated session event would re-render
+ * the whole thread view.
+ */
+function sameTranscript(a: readonly TranscriptEntry[], b: readonly TranscriptEntry[]): boolean {
+  if (a.length !== b.length) return false
+  return a.every((line, at) => {
+    const other = b[at]
+    return other !== undefined
+      && line.id === other.id
+      && line.kind === other.kind
+      && line.text === other.text
+      && line.streaming === other.streaming
+      && line.state === other.state
+  })
 }
 
 /** Current workbench state (stable reference between mutations). */
@@ -271,6 +299,12 @@ export const workbenchActions = {
       && state.turnFailure?.message === turnFailure?.message
     if (same) return
     publish({ ...state, turnFailure })
+  },
+
+  /** Replace the transcript with the current session log's reduction. */
+  setTranscript(transcript: readonly TranscriptEntry[]): void {
+    if (sameTranscript(state.transcript, transcript)) return
+    publish({ ...state, transcript })
   },
 
   /** Reload every Canon-derived surface (one accepted revision landed). */

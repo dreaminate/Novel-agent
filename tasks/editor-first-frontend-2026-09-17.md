@@ -389,10 +389,38 @@ HEAD `02a48d8` —— 即本计划写的 `8926e31` **加本计划文件本身的
   > **而 I2.4（线程视图不再渲染官方会话面）的前置又明写要求 I2.1–I2.3 先全绿** —— 所以不能简单地先做 I2.4。
   > 这就是循环。
   >
-  > **✅ 用户裁定（2026-09-17）：换序，走「底栏渲染官方草稿控制器」。**
-  > 即：**先停渲染官方会话面**（官方输入机降级为不可见服务），**再**由我们的底栏**直接渲染那套官方草稿状态**，
-  > 而不是自己再开一个 `useState` 草稿。这样"选中"的落点天然归我们，且不需要赌邻居的 CAS 会输。
-  > **Phase 2 的新顺序见下方重写后的 I2.3 / I2.4。**
+  > **🛑 阻塞 2（2026-09-17，§5 类：裁定路线被证伪）。前置实验的答案是「不成立」，理由和原来那条不同。**
+  >
+  > **前半是好的：** 那套 shell **确实是服务**，不是渲染产物 —— `InputHub.shellFor(binding)` 在
+  > **会话作用域物化时**构造 `SessionInputShell` 并把监听与销毁都挂进该作用域，跟官方 composer 渲不渲染无关。
+  >
+  > **但「底栏渲染官方草稿控制器」做不到，官方类型自己写了原因：**
+  > - **草稿读不到。** `contract/input.d.ts` 的 `InputState` 原文：「The draft text and its reference chips live
+  >   in the shell's **Lexical** editor; the machine here is the **submit plane (phase, claim, attempt) alone**」——
+  >   业务面能看到的状态里**没有草稿文本**。
+  > - **公开动作面只能写、不能读。** `InputActions` = `setDraft(text)` / `addImages` / `removeImage` /
+  >   `pruneImages` / `submit()`。没有任何读草稿的入口。
+  > - **暴露 editor 的那张面禁止跨插件。** `ComposerKeyboard` 的原文：「The **InputBar-exclusive**
+  >   keyboard/DOM command face … **package-internal, never across a plugin boundary**」—— 而
+  >   `editor: LexicalEditor` 正是在这张面上。
+  > - **就算拿得到也共享不了。** 我们自己 `novel-copy.ts` 里就写着「Client plugins cannot import each
+  >   other's modules (each ships a standalone bundle)」—— 两个 bundle 各带一份 Lexical，无法共用同一个
+  >   editor 实例。
+  >
+  > **结论：官方输入区是「可以 `setDraft` + `submit` 的黑盒」，读、托管、绑定都不开放。** 底栏要么
+  > **放弃自己的 textarea 去当它的装饰层**，要么**自己持有草稿并自己实现"应用选中"那一层**。
+  >
+  > **两条真路线（要用户重选）：**
+  > 1. **官方输入区就是唯一输入**：我们的底栏不再做第二个 composer，改为在官方输入区的槽位上做装饰
+  >    （DOM 里已有 `conversation.input.left/right/dock/overlay`、`conversation.composer.bar` 等）。
+  >    `/` 与 `@` 天然可用（官方管道 + 官方菜单），"拆掉挡板"就是**删掉我们那条拒绝逻辑**。
+  >    代价：底栏不再是我们自己的输入框，计划里"编辑器优先/底栏自渲染"的形态要相应放宽。
+  > 2. **我们持有草稿，只把"应用选中"这一层做薄**：候选仍来自官方管道（`ctx.inputTriggers` 的
+  >    `track` + `menu` 是**可读**的，这半没被挡），选中后由我们自己把文本插进底栏的 textarea。
+  >    代价：把计划里「不重建输入状态机」放宽为「只重建应用层」—— 这也是当初选项 2 的内容，
+  >    但现在的理由不是排序，而是**官方 API 是闭的**。
+  >
+  > **I2.4 未动工**：本轮只做了前置实验（读官方类型与实现），没有改代码、没有花模型额度。
 
 - [ ] **I2.4 停用官方会话面（换序后先做）** — 目标：**线程视图不再渲染官方 conversation seat，但它的服务照旧**；
   我们的底栏改绑官方草稿控制器，不再持有自己的 `useState` 草稿。

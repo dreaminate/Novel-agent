@@ -299,3 +299,51 @@ NOVEL_AGENT_DEV_HOME="$PWD/.novel-agent/web-run" DSH_HOME="$PWD/.novel-agent/dsh
 
 **成本提示：** 真实审批需要一次带工具调用的**真实模型会话**（会产生模型调用费用），
 是本计划里第一个真正消耗模型额度的动作。这一步不免费。
+
+---
+
+## 9. 真实审批（2026-09-17）：官方面板在我们 frame 里**正常工作**
+
+用户授权后跑了真实模型会话。**结论：复用路径可用，没有缺陷，I1.3 没有要修的东西。**
+
+### 9.1 方法
+
+```bash
+node docs/evidence/approval-red-2026-09-17/probe-real-approval.mjs --explore     # 只 dump，不发送
+node docs/evidence/approval-red-2026-09-17/probe-real-approval.mjs --out DIR \
+  --answer reject  --send "<越界写入的提示>"
+node docs/evidence/approval-red-2026-09-17/probe-real-approval.mjs --out DIR \
+  --answer approve --send "<同一条提示>"
+```
+
+探针的安全设计（写进计划后才执行）：**默认只拒绝**；只有触发操作**被证明无害**时才测批准半边，
+且测完立刻清理。触发方式是让模型做一次**会话工作区之外**的写入 —— 默认预设 `workspace-write`
+的语义正是「工作区内写免批，更宽的写入重试需要审批」，所以**不需要真的做任何危险操作**。
+
+两个操作细节值得记下（都卡过一轮）：
+- composer 是自定义 `contenteditable`，**`.focus()` 不够**，要用真实鼠标事件点击才拿到焦点；
+- 会话座位在其他视图里也在 DOM 中但**尺寸为 0**，必须先点 rail 的 `threads` 段再点线程行，
+  等 composer 真有 `getBoundingClientRect()` 尺寸才发得出去。探针现在用「宽度 > 50」当就绪判据，
+  并在打字为空时**拒绝发送**（避免发空回合）。
+
+### 9.2 四条断言（真实会话，两轮）
+
+| 断言 | 观测 | 结果 |
+| --- | --- | --- |
+| **(a) 面板在我们 frame 里画出来** | `data-slot="conversation.approval.detail"` **存在**，`approvalishNodes=2` | ✅ |
+| **(b) 展示要批准的具体内容** | composer 里逐字出现：「等待审批 / escalate sandbox to danger-full-access: 目标路径 /Users/wzy/novel-approval-probe.txt 在会话工作区之外，写入需要放宽到工作区外访问权限。」+ 两个动作「拒绝」「允许一次」 | ✅ |
+| **(c) 拒绝 → 操作中止** | 点「拒绝」后面板消失、composer 复位；**`/Users/wzy/novel-approval-probe.txt` 始终不存在** | ✅ |
+| **(c) 批准 → 操作继续** | 点「允许一次」后面板消失；**文件真的出现了**（`ok`，3 字节，`-rw-------`） | ✅ |
+| **(d) Esc 不等价于批准** | 按 Esc 后 `approvalDetailSlot` **仍为 true**，文案一字未变，审批仍挂起 | ✅ |
+
+**清理：** 批准那轮产生的 `/Users/wzy/novel-approval-probe.txt` 已删除并复验不存在；
+两轮用的都是**新线程**，没有动既有线程；没有碰 `~/.dsh`；没有改权限预设；没有碰 Canon。
+
+### 9.3 结论与边界
+
+- **结论：官方审批 UI 在我们的 frame 里渲染、应答、并且真的能拦住和放行操作。**
+  之前 §7/§8 那条 fixture 不对称与我们的 frame 无关，这里也不再重要 —— 真实路径是通的。
+- **边界（不得过度声称）：** 这是**真实审批**，但触发是**我们挑的一个合成操作**（一次越界小文件写入）。
+  它没有覆盖全部工具类型；也没有证明审批在长会话、多审批并发、或审批超时下的表现。
+- **一处观察：** 两轮里 `reason` 文案一轮中文、一轮英文（模型生成），说明该文案不是固定翻译。
+  若将来要按作者语言统一审批文案，那是**改呈现**的事，属于用户此前未选的选项 ②，不在本次范围。

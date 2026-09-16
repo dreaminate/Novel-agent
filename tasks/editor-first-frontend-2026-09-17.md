@@ -148,7 +148,7 @@ HEAD `02a48d8` —— 即本计划写的 `8926e31` **加本计划文件本身的
 
 ### Phase 1 — 审批面（安全优先）
 
-- [ ] **I1.1 RED：确认审批回归** — 目标：用证据证明「现在没有审批渲染者」，而不是靠推断。
+- [x] **I1.1 RED：确认审批回归** — 目标：用证据证明「现在没有审批渲染者」，而不是靠推断。
   - 文件：`docs/` 下的证据记录（新）
   - RED：在**隔离 profile**（`.novel-agent/dsh-home` + 新 profile）里驱动一次真正需要审批的操作
     （例如需要 approval 的 shell/文件写入），记录：操作是否卡住、有没有出现审批 UI、DOM 里有没有
@@ -156,7 +156,8 @@ HEAD `02a48d8` —— 即本计划写的 `8926e31` **加本计划文件本身的
     approval 的只有 `dsh-client-ui-chat`，而它被我们的 bundle patch 禁用。
   - 验证：RED 证据落盘（截图/DOM dump/日志），并注明这是**回归**还是**从未有过**。
 
-  > **🛑 阻塞（2026-09-17，§5 触发，前提被证伪，等用户裁定）：官方审批渲染者存在、已加载、且我们没禁它。**
+  > **✅ 已完成（2026-09-17）。** 官方审批渲染者存在、已加载、我们没禁它，
+  > 并且**真实审批已跑通** —— 四条断言全部成立，见下方 I1.2 与证据 §9。
   > 证据：[`docs/approval-renderer-red-2026-09-17.md`](../docs/approval-renderer-red-2026-09-17.md)，
   > 原始产物 `docs/evidence/approval-red-2026-09-17/`（`summary.json` + 可复跑的 `probe.mjs`）。
   >
@@ -233,9 +234,20 @@ HEAD `02a48d8` —— 即本计划写的 `8926e31` **加本计划文件本身的
   > 可直接复用 `docs/evidence/approval-red-2026-09-17/probe-fixture-approval.mjs` 的 CDP 骨架
   > （Chrome 启动、`Session` 类、`DUMP` 表达式都已具备），**去掉 `?fixture=1`** 即走真实连接。
   >
-  > **I1.1 仍未完成**（真实审批待执行）。前两轮都没有花模型额度。
+  > **✅ 真实审批已执行（2026-09-17）。** 用 `docs/evidence/approval-red-2026-09-17/probe-real-approval.mjs`
+  > 跑了两轮真实模型会话（一轮拒绝、一轮批准），四条断言**全部成立**：
+  > (a) 面板在我们 frame 里画出（`conversation.approval.detail` 存在）；
+  > (b) 逐字展示要批准的内容（越界目标路径 + 放宽到 `danger-full-access` 的原因）+ 「拒绝」「允许一次」；
+  > (c) **拒绝 → 文件始终不存在**；**批准 → 文件真的写出来**（`ok`，3 字节）；
+  > (d) Esc 后审批**仍挂起**，文案一字未变 → Esc 不等于批准。
+  > 收尾：批准那轮产生的 `/Users/wzy/novel-approval-probe.txt` 已删除并复验不存在；用的是新线程；
+  > 没碰 `~/.dsh`、没改权限预设、没碰 Canon。**证据 §9。**
+  >
+  > **两个操作坑（都卡过一轮，已写进探针）：** composer 是自定义 `contenteditable`，`.focus()` 不够，
+  > 要用真实鼠标事件点击；会话座位在其他视图里**尺寸为 0**，必须先点 rail 的 `threads` 段再点线程行。
+  > 探针现在以「composer 宽度 > 50」为就绪判据，并在打字为空时**拒绝发送**（避免白发一个空回合）。
 
-- [ ] **I1.2 GREEN：真机验证官方审批面板** — 目标：证明「复用路径可用」，而不是假设它可用。
+- [x] **I1.2 GREEN：真机验证官方审批面板** — 目标：证明「复用路径可用」，而不是假设它可用。
   - 前置：I1.1 的剩余部分（真机驱动一次真实审批）。
   - 文件：`docs/evidence/approval-red-2026-09-17/`（追加真实审批证据）、
     `packages/novel-workbench/tests/novel-workbench-approval.spec.ts`（新，若需要）、必要时 frame 侧文件
@@ -249,7 +261,18 @@ HEAD `02a48d8` —— 即本计划写的 `8926e31` **加本计划文件本身的
   - 注：`approval/request` 是 **fail-closed**（无应答者 → `unavailable`），所以缺陷的表现应是
     **操作被拒绝**而不是卡死；按这个预期观察，别把「被拒绝」误判成「卡住」。
 
-- [ ] **I1.3 修复用路径的缺陷（不是造卡）** — 目标：把 I1.2 暴露的 frame 侧问题就地修好。
+  > **✅ 已完成（2026-09-17）：四条断言全部成立，复用路径可用。**
+  > 真实模型会话两轮（拒绝 / 批准），证据
+  > [`docs/approval-renderer-red-2026-09-17.md`](../docs/approval-renderer-red-2026-09-17.md) §9，
+  > 产物 `docs/evidence/approval-red-2026-09-17/real-*-summary.json` 与 `real-approval-*.png`。
+  > (a) 面板画出；(b) 逐字展示越界目标路径与放宽原因 + 「拒绝」「允许一次」；
+  > (c) **拒绝 → 文件始终不存在**、**批准 → 文件真被写出**；(d) Esc 后审批仍挂起。
+  > 没有另建 `novel-workbench-approval.spec.ts` —— 这条路径由官方包拥有，我们的仓库里没有可测的
+  > 新行为，硬造一个 spec 只会是「为绿而绿」。
+  > **边界：** 触发是**我们挑的一个合成操作**（一次越界小文件写入），没有覆盖全部工具类型，
+  > 也没有证明多审批并发 / 超时下的表现。
+
+- [x] **I1.3 修复用路径的缺陷（不是造卡）** — 目标：把 I1.2 暴露的 frame 侧问题就地修好。
   - 文件：`WorkbenchFrame.tsx` / `novel-copy.ts` 等 **frame 侧**文件、相关 spec
   - 要求：只修「我们的 frame 让官方面板画不出来 / 画不正 / 抢焦点」这一类问题 ——
     座位几何、`conversation.composer` 的可见尺寸（它是 `display: contents`，尺寸由会话面决定）、
@@ -257,6 +280,18 @@ HEAD `02a48d8` —— 即本计划写的 `8926e31` **加本计划文件本身的
     **不得**复制官方的审批数据通路或应答逻辑。
   - 验证：spec 绿；真机复跑 I1.2 的四条断言全部成立；并把「不建第二套审批」固化成一条 spec
     不变量（面板仍由 `ui-approval` 提供，我们的 bundle 里没有第二个 `approval/request` 应答者）。
+
+  > **✅ 已完成（2026-09-17）：缺陷清单为空，不变量已落地。**
+  > I1.2 四条断言在真实会话里全部成立，**没有暴露任何 frame 侧缺陷**（座位几何、composer 尺寸、
+  > 与 `novel.composer` 的叠加、焦点与 Esc 都没问题），所以这个增量的「修」没有对象。
+  > 它唯一的实质产出是**把不变量固化成测试**：
+  > `packages/novel-workbench/tests/novel-workbench-approval-ownership.spec.ts`（新，3 个断言）
+  > —— ① `src/` 里不得出现 `approval/request`（不得自建应答者）；② 不得出现 `conversation.approval`
+  > （不得自建座位）；③ `cordis.patch.yml` **不得禁用 `ui-approval`**。
+  > **已证明它能咬人**（§4.3 要求）：临时注入一处违规后三个断言**全部失败**，并各自指出了具体文件 /
+  > 具体被禁 id；注入已完全还原（`git status` 里 `cordis.patch.yml` 无改动）。
+  > **未做：** 没有新建 `novel-workbench-approval.spec.ts` 之类的「面板行为」spec —— 那条路径由官方包
+  > 拥有，我们仓库里没有可测的新行为，硬造只会是为绿而绿。
 
 ### Phase 2 — 对话面自研
 

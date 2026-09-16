@@ -1,5 +1,419 @@
 # Execution checklist
 
+## Front-end work landed as a reviewable delivery, 2026-09-17
+
+**Status:** `verified` for the record itself — the 2026-09-16 front end is committed in three slices,
+its live evidence is reproducible from the repo, and the stale status index is refreshed.
+
+- [x] Committed the 2026-09-16 work in three green, single-purpose slices: `novel-project`'s Canon
+  guidance + `chapterControlPack`; the whole `novel-workbench` prototype port (48 files); then this record.
+  The 2,700-line worktree had no recovery point before this. The first attempt swept in a test rename the
+  index had already staged — `git status` column 1 is not empty in this checkout, so check it before
+  `git add` — and was redone.
+- [x] `scripts/smoke-workbench.mjs`: the one-off `/tmp` CDP sweep is now a committed, dependency-free
+  script (Node 24 `WebSocket` + the local Chrome; no Playwright, because the repo has no browser
+  automation dependency and one smoke script does not justify adding one). It walks the 14 readable
+  surfaces, screenshots each, collects console/page/request failures, and reports the write-path
+  surfaces as `skipped-*` rather than faking them.
+- [x] Its own two defects, found by reading its output rather than its exit code: `textContent` folded each
+  canvas's inline `<style>` into the record, and the exit code counted an honest skip as a failure. Both
+  fixed; `innerText` now matches what the author sees.
+- [x] Live evidence recorded in [the front-end record](../docs/novel-mode-front-end-2026-09-16.md) plus the
+  machine-readable [sweep JSON](../docs/novel-mode-front-end-sweep-2026-09-17.json). The 14 rendered
+  surfaces were verified against accepted Canon at **R5**, with zero browser failures. It also confirms
+  the numbers the previous entry claimed.
+- [x] The record states the boundary it does not cover: 提案审阅 / 过期提案 / 接受设定·拒绝正文 (no pending
+  proposal existed), 人物档案抽屉, and the 空项目 / 缺插件 / AI 无输出 states all keep their older evidence
+  and are **not** re-claimed. No author review of visual fidelity is recorded either.
+- [x] Profile install path fixed in both `install-plugins.sh` and `.ps1`: tarballs move from the OS temp
+  directory into `<checkout>/.novel-agent/packages`, because the installed profile's lockfile pins the
+  resolved `file:` path and dies with the temp directory. Cold start verified: `/var/folders` references
+  in the profile lockfile went 6 → **0**, the Host restarted, and the full sweep passed on the fresh install.
+- [x] `docs/claude-desktop-parity-matrix.md` gained a **Novel-mode front end — 2026-09-16** section, and the
+  Host-composition and Workspace/Sidebar/Composer rows were corrected (they still described a
+  `novel-project`-only install). Every new row is scoped to the Web Host.
+- [x] Gates: 322/322 tests (19 files), `typecheck`, `lint`, `git diff --check`, and
+  `node scripts/port-prototype-css.mjs --check` all clean.
+- [ ] The sweep's seven uncovered surfaces still need a live run — most need a write (a pending proposal)
+  or a second profile, so they belong with whoever drives the next real model turn.
+- [ ] Unchanged and still open: the 12-chapter acceptance of `tasks/plan-final.md` §6. The dev profile's
+  accepted work is a 穿越/系统 manuscript (`/private/tmp/nw-workspace/天机阁主`), **not** 《雾港夜航》.
+
+## Novel-mode front end — final per-screen matrix, 2026-09-16
+
+**Status:** every prototype screen is `verified` live on the running Host (profile `novel`, port 4780)
+against real accepted Canon at **R5** (5 revisions, 7 people, 3 relationship lines, 6 promise/clue/mystery
+facts, 2 story events, 1 accepted chapter of 213 characters). Screenshots and CDP dumps are listed per row;
+the sweep itself is `/tmp/nwsweep.json` + `/tmp/nwsweep-<view>.png`.
+
+| Prototype screen | Live evidence | State |
+| --- | --- | --- |
+| ① 工作台 (故事地图 + 三段左栏 + 右栏 + 底部输入) | `/tmp/nwsweep-map.png` — `R4 · 7 个人物 · 3 条关系` with sigma painting the accepted cast | verified |
+| ② 提案审阅 | `/tmp/nwrev2-review.png`, `/tmp/nwacc-staged.png` — route line, 逐条 接受/拒绝, 审阅问题, 影响预览 | verified |
+| ③ 过期提案 | `/tmp/nwreviewprobe.png` — real stale packet: `此提案已过期 · 它基于 R2，当前已是 R3，只能丢弃` + 丢弃提案, then discarded (`/tmp/nwdiscard.json`) | verified |
+| ④ 接受设定·拒绝正文 | `/tmp/nwacceptloop-round1.png` — `已接受 2 条设定变更，正文未接受（R3）` | verified |
+| ⑤ 正文阅读 | `/tmp/nwsweep-read.png` — the accepted 213-character chapter in the serif reading canvas at the author's chosen size/measure | verified |
+| ⑥ 人物档案 | `/tmp/nwperson-drawer.png` — aspects under Canon's own field names, both directions, appearances | verified |
+| ⑦ 伏笔与线索板 | `/tmp/nwsweep-clues.png` — 6 accepted promise/clue/mystery cards with anchors | verified |
+| ⑧ 未收束债务 | `/tmp/nwfinal-debts.png` — **3 real debts** after R5, with clock labels (世界 / 关系 / 谜团), summaries, 回收窗口, age and the two row actions | verified |
+| ⑨ 时间线 | `/tmp/nwsweep-timeline.png` — accepted story events in story order, last one 当下 | verified |
+| ⑩ 写作记忆 | `/tmp/nwsweep-memory.png` — newest accepted facts with the revision they took effect in | verified |
+| ⑪ 版本历史 | `/tmp/nwsweep-history.png` — R4/R3/R2/R1 with 回滚到此版本 and the real rollback warning (`/tmp/nwconfirm-rollback.png`) | verified |
+| ⑫ 线程对话流 | `/tmp/nwtrig-slash.png`, `/tmp/nwstrip4.png` — shipped transcript with working `/` commands and `@` references, plus the novel header's revision, waiting-proposal and failed-turn strips | verified |
+| ⑬ 进阶面 | `/tmp/nwadvview.png` — 内核 / 插件清单 (**155 real plugin rows**) / Agent preset (**4 real presets**) / Cordis 插件树 / 任务 / Subagent / 诊断 | verified (Cordis tree empty: this deployment holds no model-defined plugins) |
+| ⑭ 夜间关键屏 | `/tmp/nwtheme-night.png` — `data-nw-theme="night"`, frame `rgb(48,48,46)` | verified |
+| ⑮ 边界态 | 空项目 `/tmp/nwadopt2-form.png`; 加载中 (per-canvas 正在读取…); 缺插件 `/tmp/nwmin2-contract.png`; AI 无输出 `/tmp/nwstrip4.png`; 窄窗 1280 `/tmp/nwtheme-narrow.png` (frame 1280, rail 248, no horizontal scroll) | verified |
+
+**How the last two panels were populated, and the one boundary that stays:**
+
+- 未收束债务 was 0 until R5. Chasing it produced a useful fact: `narrative-debt` is its own delta kind
+  (`unitId` + `field` = one narrative clock + `{summary, status, horizon?}`) and needs **no** anchors — unlike
+  `narrative-clock` moves, which the planning validator refuses without at least one source anchor. A
+  three-debt packet (mystery / world / relationship on chapter 1) was accepted as **R5** and the panel now
+  renders them with their clocks, horizons and ages (`/tmp/nwfinal-debts.png`, `/tmp/nwfinal.json`).
+- Cordis 插件树 is 0 because this deployment has no model-defined Cordis plugin; the panel reads
+  `dynamicCordisRunner.inventory()` live and renders the honest empty sentence. Populating it means defining a
+  dynamic Cordis plugin through the runner (a product action, not a front-end gap).
+- 设置's 线程里的工具活动 is stored but not yet applied — the shipped conversation surface renders tool
+  activity, so the sheet says so instead of implying an effect it does not have.
+
+## Prototype-driven front end — the AI 无输出 boundary, 2026-09-16
+
+**Status:** `verified` live against a real failed turn.
+
+- [x] **The state existed and the author could not see it.** Driving a real failure (the same profile run with
+  an invalid `DEEPSEEK_API_KEY`) produced a durable `turn/end` with
+  `reason: {kind: 'error', code: 'AUTH', message: 'Authentication Fails, Your api key: ****test is invalid'}`
+  — and the UI showed **nothing**: no alert node, no error text, no retry, just a quiet thread. Evidence:
+  session log plus `/tmp/nwfail-after.png` and an empty DOM probe (`/tmp/nwfailstate.json`).
+- [x] **Root cause, from the shipped code**: the snapshot's `lastAgentError` is fed by
+  `handleAgentError` ← the `api-session/error` relay, which is "the outlet for live failures **with no turn
+  position**". A turn that ends in error never reaches it, so the front end had no source for this state.
+- [x] **Fix, using the authoritative source**: the plugin mirrors the current session's durable event window
+  (`binding.eventSource`) and publishes the last failed `turn/end` into the workbench store; the novel thread
+  strip renders it as `上次生成失败 <Host message>` with `重试上一句` when the novel bar knows the sentence
+  it sent (the composer remembers its last accepted submission and resends it through the same submission
+  echo). RED → GREEN in `novel-workbench-failure.spec.ts`; the advanced spec's header fixture gained the
+  session-snapshot stub.
+- [x] Live after the fix: `/tmp/nwstrip4.png` shows the strip on the failed thread with the Host's message
+  (`Authentication Fails, Your api key: ****test is invalid`); the retry button is correctly absent for a
+  turn the *official* composer sent, because the bar never learned that sentence (test covers the retry path
+  for bar-sent turns).
+- [x] Key restored and the profile proven healthy again: the host now runs with the real credential and a
+  fresh turn completed (`turn/end {"kind":"completed"}`, reply 「恢复」).
+- [x] Gates: 320/320 tests (18 files), `typecheck`, `lint`, `git diff --check` clean.
+- [ ] Last surface outstanding: 进阶面's Cordis tree and plugin inventory.
+
+## Prototype-driven front end — the 缺插件 boundary, 2026-09-16
+
+**Status:** `verified` live against a real minimal profile.
+
+- [x] `MissingPluginCard` + `missingDomainPlugin`: Novel Project's domain-unavailable answer
+  (`novel project has no 'planning/narrative' projector registered; install the domain plugin that
+  registers it`) is recognised and rendered as the prototype's card — 缺插件 chip, the namespace, the plugin
+  the author has to install, what stops working, 重试检测 and 回到地图 — instead of a raw error string. The
+  rail says the short form of the same thing. RED → GREEN in
+  `novel-workbench-contexts.spec.ts` (card) and `novel-workbench-rail.spec.ts` (rail copy).
+- [x] **Live evidence on an isolated minimal profile** (`.novel-agent/dsh-home/profiles/novel-min` =
+  `dsh-base + dsh-web-app + novel-project + novel-workbench`, host on `127.0.0.1:4782`): the 本章合同 canvas
+  renders the card verbatim (`缺插件 / planning/narrative / 未安装小说规划插件（novel-planning）` +
+  重试检测 + 回到地图) while the rail, context column and composer row keep working — screenshot
+  `/tmp/nwmin2-contract.png`. The smoke host was stopped afterwards; the profile stays for future checks.
+- [x] A real finding about the plugin graph, from trying the obvious composition first: removing **only**
+  `novel-planning` (keeping writing / memory / review) does not degrade — the Host refuses to boot
+  (`3 entries did not activate: novel-memory waiting for novelPlanning, novelWriting; novel-review waiting
+  for novelPlanning, novelWriting, novelMemory; novel-writing waiting for novelPlanning`). The domain
+  plugins hard-require planning, so 缺插件 in this product means a *minimal* composition (novel-project +
+  workbench), not a profile with one plugin missing. Worth deciding later whether that hard dependency is
+  the product's intent; it is not a front-end question.
+- [x] Gates: 319/319 tests, `typecheck`, `lint`, `git diff --check` clean; the main dev host (profile
+  `novel`, port 4780) is the only host still running.
+- [ ] Last boundary state outstanding: AI 无输出 (a turn that produces nothing). The shipped conversation
+  surface owns that rendering, so verifying it means driving a real failing turn and reading its error
+  card — worth doing before calling the boundary set complete.
+- [ ] Then the last surface: 进阶面's Cordis tree and plugin inventory.
+
+## Prototype-driven front end — the `/` and `@` boundary, 2026-09-16
+
+**Status:** `verified` live. The triggers exist in the product and the novel bar routes to them instead of
+re-implementing the input machine.
+
+- [x] Live proof that `/` and `@` are real capabilities (`/tmp/nwtrig-slash.png`, `/tmp/nwtrig-at.png`):
+  typing `/` in the shipped composer lists the Host's own commands (compact / export / feedback / goal /
+  permission / plan / model), and typing `@` lists the real work directory (`12-创作中枢/`, `outputs/`,
+  `04-设定大全.md`, …) and the real conversations.
+- [x] `NovelComposer` now refuses to send a draft that opens with `/` or `@` and offers
+  「`/` 指令与 `@` 引用在线程输入框里可用：切到线程输入」. The reason is architectural, not cosmetic: the
+  trigger pipeline (`InputTriggerController.track(draft, caret, guard, draftRev)`) mutates the shipped
+  per-session input machine with a draft revision and dispatches its pick outcomes through that machine's
+  scoped events — rebuilding it in the novel bar is exactly the second input machine H1 forbids, so the bar
+  hands the author to the surface that owns it. Live: `/tmp/nwtrigbar-slash.png`, dump
+  `/tmp/nwtrigbar.json` (`hint: true`, `sendDisabled: true`, draft preserved).
+- [x] Normal submission from the bar still works from the story map (the same run added a thread whose title
+  came from the model's reply).
+- [x] Gates: 317/317 tests, `typecheck`, `lint`, `git diff --check` clean; host rebuilt and live.
+- [ ] Remaining in scope: 进阶面's Cordis tree and plugin inventory, and the two boundary states
+  (缺插件, AI 无输出). The pending proposal `tiangege-status-r2-2026-09-16` is still waiting for an author
+  decision (it was kept so the accept sheet stays demonstrable).
+
+## Prototype-driven front end — confirmation sheets and the anchor rule, 2026-09-16
+
+**Status:** `verified` live for both sheets; the proposal-filing friction behind them is fixed and
+re-verified by a real model turn.
+
+- [x] 接受本章 now confirms before writing, like the prototype's 弹层: the button opens a sheet that states
+  the real impact (`R2 → R3：正文 0 篇 · 设定变更 2 条 · 未采纳建议 0 条`), the rollback note, and
+  返回调整 / 确认接受 R3. Nothing reaches the Host until the author confirms. Live:
+  `/tmp/nwaccsheet-sheet.png`, dump `/tmp/nwaccsheet.json` (返回调整 left the proposal pending).
+- [x] 版本历史's rollback confirmation carries the prototype's own explanation with the real revisions:
+  `回滚会把故事事实退回 R1：R2 到 R2 之间接受的正文与设定变更全部停用（不会被删除，历史里仍然查得到）`.
+  Live: `/tmp/nwconfirm-rollback.png`.
+- [x] **The real blocker behind three failed model turns is fixed.** A packet may carry
+  `sourceAnchors: []` and empty per-delta `sourceAnchorIds` — anchors are optional, and a present anchor
+  must carry the exact SHA-256 of its byte range. The model did not know that: it spent whole turns
+  grepping for content to hash and never filed anything (22 `bash` calls, no proposal). The tool
+  description and `novel_canon` guidance now say anchors are optional and must never be guessed; a
+  re-run filed a two-delta proposal **in one turn** with `sourceAnchors: []`
+  (`tiangege-status-r2-2026-09-16`, 2 deltas, 0 anchors in the durable inbox).
+- [x] Gates: 316/316 tests, `typecheck`, `lint`, `git diff --check` clean; host rebuilt and live.
+- [ ] That pending proposal was deliberately left unaccepted so the accept sheet stays demonstrable; accept
+  or discard it before turning the profile over to an author.
+- [ ] Still open: composer `/` and `@` triggers, 进阶面's Cordis tree and plugin inventory, and the
+  boundary states 缺插件 and AI 无输出.
+
+## Prototype-driven front end — 人物档案 drawer, 2026-09-16
+
+**Status:** `verified` live from the cast board, `verified` by test from the story map.
+
+- [x] `buildPersonFile` + `PersonFileDrawer` + `PersonFileSeat`: one person's accepted file —
+  every aspect under Canon's own field name, the relationship lines that name them with **both**
+  directions written out, and the accepted story events that list them as a participant (which is how
+  the file knows their chapters without inventing an appearance index).
+- [x] Opened two ways, matching the prototype: 看档案 on a 人物与关系 card, and double-clicking a node on
+  the story map (`StoryMapView` now subscribes to sigma's `doubleClickNode` and hands the node to the
+  frame store, which the drawer seat reads). The map's callback is `useCallback`-stable so the sigma
+  renderer is not rebuilt on every render.
+- [x] Live evidence (`/tmp/nwperson-drawer.png`, dump `/tmp/nwperson.json`): opening `junlinyuan` on the
+  real R2 work shows `档案：1 条已接受设定` with the accepted aspect rendered under its own field name
+  (`thread`), 关系 0 条 and 出场 0 个 with honest empty copy, 关闭 and 让 AI 从这个人物继续写. The map
+  double-click path is proven in `novel-workbench-story-map.spec.ts` by firing the registered handler
+  and asserting the frame store receives the node id.
+- [x] Gates: 316/316 tests (17 files), `typecheck`, `lint`, `git diff --check` clean; host rebuilt and
+  live (pid 61214).
+- [ ] Still open: composer `/` and `@` triggers, the accept / rollback confirmation sheets, the 进阶面's
+  Cordis tree and plugin inventory, and the two unverified boundary states (缺插件, AI 无输出). Canon
+  still holds no relationships, so the drawer's relation block and the map's edges stay empty until a
+  relationship proposal is accepted.
+
+## Prototype-driven front end — simulation canvas and the settings sheet, 2026-09-16
+
+**Status:** `verified` live. All nine rail entries are now real surfaces, and the 设置 sheet drives the
+reading canvas instead of just remembering a preference.
+
+- [x] `SimulationView` (推演): the prototype draws this screen as 沙盒侧车未连接 with disabled forms. The
+  canvas now says what is true — the two experiments are real Agent tools (`simulate_novel_reader_response`,
+  `simulate_novel_story_world`) that run in a thread against a frozen accepted revision and never advance
+  Canon, while the external MiroFish sidecar is not connected. It lists each tool's own parameters (read out
+  of the registered tool schemas, not the prototype's sample), shows the revision Canon would freeze
+  (固定版本 R2), and hands the author to a thread. Live: `/tmp/nwsim-simulation.png`.
+- [x] `NovelSettings` (设置) in the frame's `shell.overlay` seat plus the topbar's 设置 button: theme,
+  正文字号 16/17/18, 阅读行宽 34/40 字, and 线程里的工具活动 显示/收起. The reading choices are real — the
+  正文阅读 canvas applies them as its own type size and measure (asserted in
+  `novel-workbench-contexts.spec.ts` with an accepted manuscript), and the sheet closes on 完成, on Escape
+  and on a backdrop click. Live: sheet opened from the topbar with all four choices
+  (`/tmp/nwset-sheet.png`, dump `/tmp/nwset.json`).
+- [x] With this, every rail entry is `ready: true` and renders: 故事地图 / 伏笔与线索 / 未收束债务 /
+  人物与关系 / 时间线 / 写作记忆 / 本章合同 / 推演 / 版本历史 (+ 提案审阅 from the waiting-proposal entry).
+- [x] Gates: 314/314 tests, `typecheck`, `lint`, `git diff --check` clean.
+- [ ] The 进阶面's Cordis tree and plugin inventory are still the shipped panels: their inventory does not
+  arrive over a Remote a novel surface can simply read (the Cordis host-runner exposes it through the
+  runner's own dispatch/approval flow), so re-rendering them needs that flow read through the same seam
+  rather than a new one. Jobs, Subagent and the raw Canon projection are already novel-rendered.
+- [ ] Still open overall: `/` command and `@` reference triggers in the composer, 人物档案抽屉, the accept /
+  rollback confirmation sheets, and the boundary states 缺插件 and AI 无输出.
+
+## Prototype-driven front end — cast board and the composer row, 2026-09-16
+
+**Status:** `verified` live for both. Eight of the nine story surfaces now render, and the composer bar the
+prototype keeps on every screen is real: a draft typed on 故事地图 reaches the Host and the model answers.
+
+- [x] `CastView` + `buildCastBoard` (人物与关系): people, the factions they answer to, and every
+  relationship line with **both** directions written separately — Canon stores each direction on its own, so
+  the board never infers one from the other. Live: `5 人物 · 4 势力 · 0 条双向关系`, each person card showing
+  their accepted aspects and a readable one-line summary (`/tmp/nwcast2-cast.png`, dump `/tmp/nwcast2.json`).
+- [x] Reading the AI's *shape*, not a guessed key list: the model records character facts one aspect at a
+  time (`constitution`, `realm`, `persona`, `mechanism`, …) with no `name`/`status` field, so the mapper
+  falls back to the entity id, shows "N 条设定", the aspect names Canon holds, and the first aspect as the
+  summary. Verified against the real accepted deltas before writing the code.
+- [x] `NovelComposer` in the frame's `novel.composer` seat: the bar shows the thread, a textarea and 发送,
+  and submits through the Session Controller's own verbs (`beginSubmission` → `prompt`) so the queue, echo
+  and failure semantics stay the Host's. Live: typed a prompt on the 故事地图 screen, the Host accepted it,
+  the model answered and a new thread appeared in the rail (`/tmp/nwbar-before.png`, `/tmp/nwbar-sent.png`).
+- [x] Gates: 311/311 tests (composer spec added), `typecheck`, `lint`, `git diff --check` clean.
+- [ ] Not yet in the bar, and honestly missing: `/` command and `@` reference triggers (the shipped
+  `dsh-client-ui-input-trigger` service is the right seam), image attachments, model/permission indicators.
+- [ ] 推演 (simulation) is still the one disabled rail entry; the advanced panels (Cordis tree, plugin
+  inventory, presets, jobs, diagnostics, event log) are still the shipped ones, reachable only from the
+  conversation view.
+- [ ] Boundary states still unverified: 缺插件 (profile without `novel-planning`) and AI 无输出.
+- [ ] Data gaps unchanged: 0 relationships and 0 open debts in Canon, so those two surfaces show counts of
+  zero; the manuscript reading path still has no accepted text.
+
+## Prototype-driven front end — first accepted Canon, dense screens, 2026-09-16
+
+**Status:** `verified` for dense rendering of seven story surfaces against accepted Canon, and for the two
+extra boundary states the brief lists (夜间, 窄窗 1280). The work now has a real R1/R2 with 22 accepted facts.
+
+- [x] **The acceptance path works end to end.** R1 was accepted through the product's own 提案审阅 screen
+  (5 narrative-unit deltas: series → book → volume → arc → chapter), then R2 with 22 facts (8
+  character-state, 6 faction-state, 3 promise, 2 clue, 1 mystery, 2 story-event). Evidence:
+  `/tmp/nwstruct-accepted.png`, `/tmp/nwacc2-accepted.png`, and storage
+  `.novel-agent/dsh-home/storages/novel_project.json` → `acceptedRevision: 2`.
+- [x] **Dense screens captured from the running Host** (`/tmp/nwden-*.png`, dump `/tmp/nwden.json`):
+  故事地图 `R2 · 5 个人物 · 0 条关系` painting five real sigma nodes; 伏笔与线索板 6 cards with kind chips,
+  lifecycle words and evidence anchors; 时间线 two story events with 第 N 天 labels and 当下 marker;
+  写作记忆 the two newest facts with `R2 起生效`; 本章合同 the full contract sheet for chapter 1;
+  版本历史 R2/R1 rows with 回滚到此版本; 未收束债务 the honest empty state.
+- [x] **Two real UI defects the live data exposed, both fixed with RED→GREEN:**
+  - the work tree grouped chapters by their immediate parent, which the real chain (chapter → arc → volume)
+    turned into `篇章四`; it now groups by the Volume and names the heading after it (`卷一 · 天机入世`).
+    `buildWorkOutline` + test in `novel-workbench-contexts.spec.ts`.
+  - a Volume's objective is a full sentence, which wrapped one character per line in the 248 px rail; the
+    heading now truncates inside the column (screenshot `/tmp/nwrail-clues.png`).
+- [x] 正文阅读 stops pretending to load: a chapter with no accepted manuscript now says
+  「这一章还没有被接受的正文。」(canvas test + live dump `/tmp/nwfin.json`).
+- [x] Boundary states verified live: 空项目 (the welcome/adopt screen), 加载中 (正在读取… per canvas),
+  夜间 (`data-nw-theme="night"`, frame `rgb(48,48,46)`), 窄窗 1280 (frame 1280, rail 248, no horizontal
+  scroll).
+- [x] Canon guidance corrected against the domain's own validator (`REQUIRED_PARENT_LEVEL` in
+  `novel-planning/src/projection.ts`): the chain is `series → book → volume → arc → chapter → scene → beat →
+  prose`, one level per step. My previous sentence had skipped `volume`, which is exactly the mistake that
+  cost three model turns — evidence that the recipe has to be copied from the validator, not memory.
+- [x] Gates: 309/309 tests, `typecheck`, `lint`, `git diff --check` clean; dev host live (pid 50618 rebased
+  to the current build) with the API key inherited.
+- [ ] Still not built in the novel surface: 人物与关系 (cast) and 推演 (simulation) canvases (both still
+  disabled in the rail), the advanced panels (Cordis tree, plugin inventory, presets, jobs, diagnostics,
+  event log) and the composer row the prototype keeps on every screen.
+- [ ] Boundary states not yet verified: 缺插件 (a profile without `novel-planning`) and AI 无输出.
+- [ ] Data gaps, not UI gaps: 0 relationships (the facts packet carried none) and 0 open debts, so the story
+  map draws nodes without edges and 未收束债务 stays empty; a relationship/debt proposal or an accepted
+  manuscript chapter would exercise those paths.
+
+## Prototype-driven front end — work adoption and the review loop, 2026-09-16
+
+**Status:** `verified` for the adoption flow and for the review screen rendering a real proposal. The empty
+profile can now become a work entirely inside the novel product, and the first real proposal was reviewed in
+it. Dense Canon is still missing: the AI's packet violates a Canon rule and the Host refuses the whole packet.
+
+- [x] `NovelWelcome.tsx` + face methods `adoptWork(path)` / `pickWorkDirectory()`: the 空项目 canvas now owns
+  the first step. It composes the Host's own chooser (`UiWorkspace.pickDirectory`) with the Workspace
+  Controller's `create({ path })`, so the Host mints the Workspace id and the Novel Project binding can never
+  drift; a typed path works too, and the Host's failure text is shown unchanged. RED → GREEN in
+  `tests/novel-workbench-adopt.spec.ts` (3 tests). **Live-verified**: the form adopted
+  `/private/tmp/nw-workspace/天机阁主` in the running product (screenshot `/tmp/nwadopt2-form.png`,
+  state `/tmp/nwadopt2.json`), and `workspace.json` then carried the Host-minted id
+  `b7cc9537-…` with path `/private/tmp/nw-workspace/天机阁主`.
+- [x] The frame mirrors the Session Controller's current selection into the workbench store
+  (`workbenchActions.setCurrentSession`, subscribed in the plugin). Before this the context column never
+  appeared: a slot registration renders once, so the frame kept the session it saw at mount. Verified live —
+  the right column and its 待审提案 card now render as soon as a thread opens.
+- [x] The default canvas is 故事地图 (the prototype's first screen), and 新建线程 switches the column to 线程,
+  so the author's first screen is the workbench and the composer appears when they ask to talk.
+- [x] **Live: 提案审阅 with a real proposal.** A real DeepSeek turn (after its own long packet-building loop)
+  produced a **47-delta pending proposal** — 2 creative-profile, 5 narrative-unit, 16 character-state,
+  12 faction-state, 5 promise, 3 clue, 1 mystery, 3 story-event — and the canvas rendered its route line
+  (`R0 → R1`), 逐条 接受/拒绝 rows, 审阅问题 and the 影响预览 error verbatim. Screenshots
+  `/tmp/nwrev2-review.png`, `/tmp/nwacc-staged.png`.
+- [x] Canon guidance now carries the rule the AI kept breaking: `series → book → arc → chapter → scene →
+  beat`, plus the fact that **every delta of a packet is validated together**, so an author cannot rescue an
+  invalid packet item by item. Asserted in `novel-project.spec.ts`.
+- [ ] **Blocker for dense Canon (product-level, reproduced 3×):** the AI writes Chapters whose parent is a
+  `book`; acceptance then fails with `narrative unit 'vol01-ch0001' at level chapter requires parent level
+  arc, got book`. Rejecting those five rows on the review screen does not help — the Host validates the whole
+  packet — so the author can only discard the proposal and ask again. The guidance fix is in but not yet
+  re-verified against a fresh model turn.
+- [ ] Second real friction, from the same session: building an R0 packet took the model ~50 tool calls and
+  >10 minutes, with a 41 KB helper script written into the work directory. Worth a smaller setup entry
+  (a domain-owned setup helper or a documented minimal packet) before calling the setup path usable.
+- [ ] Still open from the previous increment: dense-data screenshots (故事地图 / 伏笔与线索 / 未收束债务 /
+  时间线 / 写作记忆 / 本章合同) need accepted Canon; the advanced panels and the composer row are untouched.
+
+## Prototype-driven front end — context canvases, 2026-09-16
+
+**Status:** `implemented-unverified` for dense data, `verified` for routing and empty states on the real
+Host. Five of the nine story surfaces now render from accepted Canon instead of a placeholder, and the
+whole product was driven end to end by a real DeepSeek turn for the first time.
+
+- [x] `chapterControlPack` on the novel-project Typert boundary: the 本章合同 canvas needed the control pack
+  Memory assembles, and Canon owns the read. The Remote is a thin delegate to the `novelMemory` service, so
+  the boundary stayed on one namespace (product-boundary now asserts 15 invocations, all `novelProject`).
+- [x] Mappers in `novel-data.ts` — `buildClueBoard` (promise / clue / mystery facts with lifecycle words and
+  the chapter their anchor names), `buildDebtBoard` (open debts aged by how long **their own clock** stood
+  still, stalest first, resolved debts off the board), `buildChapterContract` (viewpoint, story time, must
+  appear, forbidden contradictions, length range, acceptance gates, scenes, and the references Canon cannot
+  resolve as explicit gaps), `buildTimeline` (accepted story events in story-time order, last one 当下) and
+  `buildMemoryBoard` (newest accepted facts with the revision they took effect in).
+- [x] Views `ClueBoardView.tsx`, `DebtBoardView.tsx`, `ChapterContractView.tsx`, `TimelineView.tsx` and
+  `MemoryView.tsx` draw the prototype's cards, rails and sheets with the ported class names; the rail marks
+  all five entries `ready`.
+- [x] RED → GREEN captured for each mapping and each view (`packages/novel-workbench/tests/novel-workbench-contexts.spec.ts`,
+  8 tests) plus the shell spec (3 tests). Gates: 304/304 tests, `typecheck`, `lint`, `git diff --check`.
+- [x] Real Host evidence (pid 29304, `127.0.0.1:4780`): a real DeepSeek turn ran the full product loop —
+  rail → official composer → Host → model → streamed reply — and a second turn produced a real pending
+  proposal of **50 deltas** (series/book/3 chapters with contracts, creative profile, reader contract, 6+
+  character and faction facts) via `propose_novel_result_packet`. Screenshots `/tmp/nwreal-*.png`.
+- [x] All nine surfaces route to the right canvas on the live Host (CDP pass, `/tmp/nwviews.json`): the five
+  new ones show their real empty states against an R0 work, 版本历史 shows 还没有已接受版本.
+- [ ] **Dense-data render is unverified.** Accepted Canon is still empty, so 故事地图 / 伏笔与线索 / 未收束债务 /
+  时间线 / 写作记忆 have only been seen with zero rows. The pending 50-delta proposal was never accepted.
+- [ ] **Workspace creation in the novel profile is still blocked** (live-verified twice): the composer's
+  workspace chip toggles `aria-expanded` but neither the picker menu nor the directory flow appears, so a
+  new author cannot adopt a folder from the UI. Seeding `workspace.json` by hand works only when the
+  workspace id is the one DSH itself minted — a path-based id I invented made Novel Project reject the
+  binding (`has a conflicting DSH Workspace binding`), which is what a real user would hit if the id drifted.
+- [ ] Next: adopt a folder through the app so the id is Host-minted, then accept a slice of the pending
+  proposal and screenshot every canvas with real rows; then re-render the advanced panels (Cordis tree,
+  plugin inventory, presets, jobs, diagnostics) inside the novel surface and fill the composer row.
+
+## Prototype-driven front end — shell assembly, 2026-09-16
+
+**Status:** `verified` for the shell on the real Host (pid 21037, `127.0.0.1:4780`). The prototype is now the
+design source of truth: the frame renders the ported stylesheet and the prototype's `.app` grid
+(topbar / rail / canvas / side / composer), and the navigation column is the prototype's three groups with
+the 进阶 entry. The contexts and canvases that the prototype draws beyond 故事地图 / 版本历史 / 提案审阅 are
+still the old surfaces, so their `ready: false` entries stay disabled.
+
+- [x] `scripts/port-prototype-css.mjs` + `packages/novel-workbench/src/client/workbench-css.ts`: the
+  prototype's 38 KB stylesheet is ported verbatim as the product stylesheet. The generator only drops the
+  prototype's own screen switcher and demo page floor and binds the night selector to the frame
+  (`[data-novel-workbench="frame"][data-nw-theme="night"]`) or the host dark theme. `--check` mode fails
+  when the module drifts from the prototype.
+- [x] `WorkbenchFrame.tsx` renders `.app` — `data-novel-topbar`, the three sections
+  (`data-novel-shell="left|main|right"`) and `data-novel-composer` — and declares two new seats, `novel.topbar`
+  (root) and `novel.composer` (session-maybe). It hands the Session down from `sessions.list` through the
+  root registration's inject factory and scopes the strict `details` seat with `SessionProvider`, so the
+  right column only renders with a live Session.
+- [x] `NovelTopbar.tsx`: work title from the workspace registry, `R<n>` from Novel Project, the chapter
+  context line, and the 进阶 / 跟随系统·日间·夜间 / 左栏 switches.
+- [x] `NovelRail.tsx` (replaces `NovelSidebar.tsx`): the prototype's 作品 (volume heads + chapter rows with
+  status dot, debt mark and 已接受/待审/计划中 tail), 线程 (real sessions minus subagent transcripts, plus
+  新建线程) and 视图 (the nine story surfaces, unbuilt ones disabled) groups, 进阶 groups and the rail-foot
+  toggle.
+- [x] `NovelSide.tsx`: the context column's 当前章 / 待审提案 / 最近 AI 活动 blocks, fed by
+  `loadOutline` / `loadReviews` / `loadManuscript` (first character-count read of accepted Canon).
+- [x] `NovelCanvas.tsx` emits the prototype's `main-head` (title + one-line summary) and `main-body`, and
+  gained the 正文阅读 canvas reading accepted manuscript text.
+- [x] `cordis.patch.yml` also disables `ui-chat`, because the shipped 详情 column occupied the strict
+  `details` seat at priority 0 and the novel context column could not register beside it.
+- [x] Gates: 296/296 tests (12 in `novel-workbench`), `typecheck`, `lint`, `git diff --check`. Live: the
+  headless CDP pass renders `小说模式 / R— / 尚未立项` topbar, the three-group rail, the nine view entries and
+  the official conversation hero in the main column (screenshot `/tmp/nw-6-live.png`).
+- [ ] Next in the same conversion: the prototype's remaining contexts (伏笔与线索, 未收束债务, 时间线,
+  写作记忆, 本章合同, 推演, 人物档案抽屉, 设置弹层, 边界态) and their data reads, then the advanced panels
+  (Cordis tree, plugin inventory, presets, jobs, diagnostics, event log) inside the novel surface.
+- [ ] The composer row is still empty: the prototype's input bar (thread selector, `/` and `@` triggers, model
+  and permission indicators) awaits the novel composer seat.
+
 ## Novel-mode front end, increments 2–5 — novel navigation, story map, review, advanced, 2026-09-16
 
 **Status:** `verified` for the left column and the advanced surface on the real Host; `implemented-unverified`

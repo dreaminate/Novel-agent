@@ -1,0 +1,172 @@
+{
+  "host": "http://127.0.0.1:4780",
+  "screens": [
+    {
+      "view": "map",
+      "label": "故事地图",
+      "state": "rendered",
+      "head": "故事地图",
+      "bodyChars": 60,
+      "body": "故事地图\n人物、关系与进度一眼看清 · 点节点看摘要，双击开档案\n故事地图\nR5 · 7 个人物 · 3 条关系\n无势力",
+      "screenshot": "/Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/.novel-agent/run/sweep/map.png"
+    },
+    {
+      "view": "clues",
+      "label": "伏笔与线索",
+      "state": "rendered",
+      "head": "伏笔与线索板",
+      "bodyChars": 798,
+      "body": "伏笔与线索板\n未收束的伏笔 / 线索 / 谜团 · 点证据锚点回到正文\n全部\n伏笔\n线索\n谜团\n状态：已埋 / 推进中 / 已收 · 共 6 条，已接受 R5\npromise-forbidden-zone-to-taiqing\n伏笔\n推进中\npromise-forbidden-zone-to-taiqing\n首次出现：未标注\n回收窗口：未设定\n当前状态：推进中\n证据锚点：a-lore-forbidden-zone-detail\npromise-lord-weapons-win\n伏笔\n推进中\npromise-lord-weapons-win\n首次出现：未标注\n回收窗口：未设定\n当前状态：推进中\n证据锚点：a-factions-taiching-weapon\npromise-scope-wider-world\n伏笔\n推进中\npromise-scope-wider-world\n首次出现：未标注\n回收窗口：未设定\n当前状态：推进中\n证据锚点：a-factions-five-clans-note\nclue-qingdi-lotus-vessel\n线索\n推进中\nclue-qingdi-lotus-vessel\n首次出现：未标注\n回收窗口：未设定\n当前状态：推进中\n证据锚点：a-lore-datai-sources\nclue-qingshuying-mother\n线索\n推进中\nclue-qing",
+      "screenshot": "/Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/.novel-agent/run/sweep/clues.png"
+    },
+    {
+      "view": "debts",
+      "label": "未收束债务",
+      "state": "rendered",
+      "head": "未收束债务",
+      "bodyChars": 380,
+      "body": "未收束债务\n按「多久没推进」排序 · 临期项加提示色\n3\n未收束债务\n0 章\n最久未推进：天机阁推演、收徒返还与抽成的交易规则尚未讲透：代价口径与不可违背的边界只露了一角。\n0 条\n临期提醒（已超过 3 章未推进）\n开放中\n世界\n天机阁推演、收徒返还与抽成的交易规则尚未讲透：代价口径与不可违背的边界只露了一角。\n回收窗口：第 9–11 章\n第 1 章\n0 章未推进\n让 AI 推进\n看出处\n开放中\n关系\n顾辰与韩破天的约定尚未履行到底：逆袭路径已给出，对价未挑明，师徒名分与信任都还没真正建立。\n回收窗口：第 9–11 章\n第 1 章\n0 章未推进\n让 AI 推进\n看出处\n开放中\n谜团\n顾辰穿越来历与天机系统／小源的真正来源仍未揭底：读者只看到他绑定系统，不知道他为何会被选中。\n回收窗口：第 9–11 章\n第 1 章\n0 章未推进\n让 AI 推进\n看出处",
+      "screenshot": "/Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/.novel-agent/run/sweep/debts.png"
+    },
+    {
+      "view": "cast",
+      "label": "人物与关系",
+      "state": "rendered",
+      "head": "人物与关系",
+      "bodyChars": 1125,
+      "body": "人物与关系\n人物、势力与双向关系（每条两个方向各自独立）\n\n6 人物 · 4 势力 · 3 条双向关系（每条两个方向各自独立）\n\n人物\nguchen\n无势力\n1 条设定\n阁主初立\nstatus\n看档案\n让 AI 从这里继续写\njunlinyuan\n无势力\n1 条设定\n君家天骄兼为顾辰七徒弟，天帝转世重修并隐藏转世经历，通晓万古秘辛，修轮回之道，是君家下任家主候选。\nthread\n看档案\n让 AI 从这里继续写\nlinxuan\n无势力\n3 条设定\n已入天机阁\nconstitution · realm · status\n看档案\n让 AI 从这里继续写\nqingshuying\n无势力\n2 条设定\n武器为太初剑——女帝命格的剑，从不离身；法宝/本命印记为前世留下的泪痣。\nartifact · signature\n看档案\n让 AI 从这里继续写\nsumubai\n无势力\n1 条设定\n武器为折扇「算天扇」；无招牌神通，以情报推演与经营情报网为长；身世为落魄散修，被顾辰救下后死心塌地追随。\nartifact\n看档案\n让 AI 从这里继续写\nxiaoyuan\n无势力\n2 条设定\n器灵职能为发布榜单与结算天机点；自身无境界、无武器，法宝即系统本体；另有天机罗盘与万物母气鼎（帝兵）归于顾辰本尊，发布榜单与结算天机点皆由它执行…\nmechanism · persona\n看档案\n让 AI 从这里继续写\n势力",
+      "screenshot": "/Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/.novel-agent/run/sweep/cast.png"
+    },
+    {
+      "view": "timeline",
+      "label": "时间线",
+      "state": "rendered",
+      "head": "时间线",
+      "bodyChars": 273,
+      "body": "时间线\n故事内时间与章节交叉引用\n远古：八万年前（顾辰穿越前约八万年）·远古战场一带\n远古：八万年前（顾辰穿越前约八万年）·远古战场一带\n地点：location-ancient-battlefield　涉及：qingdi\n看这一段\n已发生\n远古：数万年前，远早于八万年前青帝陨落·生命禁区\n远古：数万年前，远早于八万年前青帝陨落·生命禁区\n地点：location-forbidden-zone　涉及：forbidden-zone-master\n看这一段\n当下\n故事内时间由数据给出，界面一律用「第 N 天」表述；真实时间只出现在线程与版本记录里。",
+      "screenshot": "/Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/.novel-agent/run/sweep/timeline.png"
+    },
+    {
+      "view": "memory",
+      "label": "写作记忆",
+      "state": "rendered",
+      "head": "写作记忆",
+      "bodyChars": 347,
+      "body": "写作记忆\nAI 记得什么 · 来源与新鲜度\n基于 R5，最新\nAI 写作前会读到的 2 条摘要；来源与写入版本都写在下面。\n远古：数万年前，远早于八万年前青帝陨落·生命禁区：在location-forbidden-zone，涉及 forbidden-zone-master\nR2 起生效\n新鲜度：基于 R5，最新\n来源：故事事件\n写入于 R2 · 远古：数万年前，远早于八万年前青帝陨落·生命禁区\n远古：八万年前（顾辰穿越前约八万年）·远古战场一带：在location-ancient-battlefield，涉及 qingdi\nR2 起生效\n新鲜度：基于 R5，最新\n来源：故事事件\n写入于 R2 · 远古：八万年前（顾辰穿越前约八万年）·远古战场一带\n看伏笔状态\n去线程里问 AI 记得什么",
+      "screenshot": "/Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/.novel-agent/run/sweep/memory.png"
+    },
+    {
+      "view": "contract",
+      "label": "本章合同",
+      "state": "rendered",
+      "head": "本章合同",
+      "bodyChars": 547,
+      "body": "本章合同\n这一章要写成什么样，先和 AI 对齐\n卷 1 · 第 1 章《开篇章：在具体场景压力下迫使主角做出第一个不可逆选择，并立稳全书核心张力与代价规则。》\n按此合同生成的提案待审\n视角\n限制性第三人称过去时，视角人物为已接受 Canon 的主角；叙述距离贴近其感官与内心。\n故事时间\n第一卷第一弧开篇，紧接主角现有常态处境的同一段连续时间。\n必须出现\n开篇三页内出现具体压力动作，且不先交代世界观设定。主角在本章内至少一次常规尝试失败，失败原因指向规则而非运气。章末主角已完成一个不可逆选择，且该选择的代价可被读者指着句子复述。章内新引入的地点、物件与关系均为后续章节必然复用的最小集。\n禁止矛盾\n不得出现主角以未定义的新能力或新设定解决冲突。不得提前揭示被信息政策排除的真相信息。不得让主角依靠巧合或对手无动机失误脱身。不得出现与已接受 Canon 事实冲突的人物动机或关系。\n长度范围\n2,800 – 3,600 字\n接受标准\n采用限制性第三人称过去时，贴紧主角感官与内心但不预支后续真相。以动作与可观察细节推进，不使用旁白式世界观说明。对话承担信息差与代价的交涉功能，不使用解释性长台词。段落节奏以场景进出状态变化为准，不为单章堆叠多线。\n场景\n尚未拆分场景\n去审阅提案\n读已接受正文",
+      "screenshot": "/Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/.novel-agent/run/sweep/contract.png"
+    },
+    {
+      "view": "simulation",
+      "label": "推演",
+      "state": "rendered",
+      "head": "推演",
+      "bodyChars": 646,
+      "body": "推演\n读者反应与人物压力实验 · 只作创作参考\n沙盒侧车未接入\n外部沙盒推演暂不可用\n读者反应与人物压力这两类推演已经可以用：它们由 Agent 工具在会话里执行，基于指定的固定版本运行，结果只作创作参考，不会直接写入故事事实——要写进故事，仍然必须经过提案审阅。外部沙盒侧车（MiroFish）尚未接入，所以这里不做独立的运行面板。\n去线程里发起推演\n固定版本 R5\n读者反应\n读者反应\n把已接受正文（或未接受的候选稿）给一个或多个读者 Persona 读，问一个明确的问题，得到反应与分歧；读者看不到隐藏设定。\n工具：simulate_novel_reader_response\nrevision\nunitId\nhypothesis\npersona\npersonas\nreadingHistory\ncandidate\ncandidates\nvariants\nfeedback\nseed\nseeds\n去线程里发起\n人物压力\n人物压力\n把一个人物（或一组人物）放进反事实处境，按顺序动作推进，观察代价、误读与未解决钩子；可比较多角色、多种子与显式分支。\n工具：simulate_novel_story_world\nmode\nrevision\nmaxActions\nstoryTime\nhypothesis\nassumptions\nactor\nactors\nseed\nseeds\nbranches\n去线",
+      "screenshot": "/Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/.novel-agent/run/sweep/simulation.png"
+    },
+    {
+      "view": "history",
+      "label": "版本历史",
+      "state": "rendered",
+      "head": "版本历史",
+      "bodyChars": 209,
+      "body": "版本历史\n每个已接受版本一句人话摘要 · 回滚会停用其后的变更\n版本历史\nR5\n设定推进\n3 条设定变更 · 0 个审阅问题\n当前版本\nR4\n开篇章\n约 213 字 · 6 条设定变更 · 0 个审阅问题\n回滚到此版本\nR3\n设定推进\n2 条设定变更 · 0 个审阅问题\n回滚到此版本\nR2\n设定推进\n22 条设定变更 · 0 个审阅问题\n回滚到此版本\nR1\n设定推进\n5 条设定变更 · 0 个审阅问题\n回滚到此版本",
+      "screenshot": "/Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/.novel-agent/run/sweep/history.png"
+    },
+    {
+      "view": "advanced",
+      "label": "进阶",
+      "state": "rendered",
+      "head": "进阶面",
+      "bodyChars": 6848,
+      "body": "进阶面\n内核 / Agent / 插件 / 任务 / 诊断 · 默认关闭，关闭后整组消失\n进阶\n内核\n作品\n9dd94176-ed3e-4630-a374-72258673546f\n工作区\nb7cc9537-2480-4f02-9d3d-6729f2efe980\n目录\n/private/tmp/nw-workspace/天机阁主\n版本\nR5\n锁定\n无\n线程\nsession-7e532900-e5d9-45e4-9634-242b94abfc41\n插件清单\ncordis:include\n运行中\n启用\n@deepseek-ai/cordis-plugin-timer\n运行中\n启用\n@deepseek-ai/cordis-plugin-hmr\n未运行\n已停用\n@deepseek-ai/dsh-llm\n运行中\n启用\n@deepseek-ai/dsh-deepseek-llm-api-extensions\n运行中\n启用\n@deepseek-ai/dsh-session\n运行中\n启用\n@deepseek-ai/dsh-session-log-deepseek\n运行中\n启用\n@deepseek-ai/dsh-typert-registry\n运行中\n启用\n@deepseek-ai/dsh-typert-loader\n运行中\n启用\n@deepseek-ai/dsh-api-gateway\n运行中\n启",
+      "screenshot": "/Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/.novel-agent/run/sweep/advanced.png",
+      "advancedItems": [
+        "cordis",
+        "plugins",
+        "presets",
+        "jobs",
+        "subagents",
+        "canon",
+        "log"
+      ]
+    },
+    {
+      "view": "review",
+      "label": "提案审阅",
+      "state": "skipped-no-proposal",
+      "head": ""
+    },
+    {
+      "view": "thread",
+      "label": "线程对话流",
+      "state": "rendered",
+      "head": "天机阁主",
+      "bodyChars": 85,
+      "body": "天机阁主\nR5\n探索未至之境\n预览版\n天机阁主\n标准模式\n描述你想要构建的内容… / 调用指令 @ 文件或对话\n工作区内修改\nDeepSeek-V4-Flash\nHigh",
+      "screenshot": "/Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/.novel-agent/run/sweep/thread.png",
+      "threadHeader": "天机阁主 · R5"
+    },
+    {
+      "view": "read",
+      "label": "正文阅读",
+      "state": "rendered",
+      "head": "正文阅读",
+      "bodyChars": 257,
+      "body": "正文阅读\n衬线 17px · 行高 1.85 · 行宽不超过 40 字\n开篇章\n\n顾辰在漏雨的屋檐下睁眼，喉咙里还堵着猝死前那口气。四合院不知荒了多少年，石阶缝里长满枯草，只有正屋地板上一圈微光在缓慢呼吸——天机系统就在那里等他。 「宿主苏醒。天机点：零。」一个懒洋洋的童声在他识海里翻了个身，「先说好，白手起家也是起家。」 他推开门，山风灌满袖口。远处青岚城的轮廓浮在雾上，像一张还没落笔的纸。顾辰笑了一下：命是白捡的，生意就从这座山开始。 他不知道，今日山下正有一纸休书落款；也不知道，这一笔，落的是别人的命。",
+      "screenshot": "/Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/.novel-agent/run/sweep/read.png",
+      "chapter": "vol01-ch0001"
+    },
+    {
+      "view": "night",
+      "label": "夜间关键屏",
+      "state": "rendered",
+      "head": "",
+      "screenshot": "/Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/.novel-agent/run/sweep/night.png",
+      "frameBackground": "rgb(48, 48, 46)"
+    },
+    {
+      "view": "narrow",
+      "label": "窄窗 1280",
+      "state": "rendered",
+      "head": "",
+      "screenshot": "/Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/.novel-agent/run/sweep/narrow.png",
+      "metrics": {
+        "viewport": 1280,
+        "documentWidth": 1280,
+        "frameWidth": 1280,
+        "railWidth": 247
+      }
+    }
+  ],
+  "failures": {
+    "console": [],
+    "page": [],
+    "requests": []
+  },
+  "railSegments": [
+    "works",
+    "threads",
+    "views"
+  ],
+  "viewEntries": [
+    "map",
+    "clues",
+    "debts",
+    "cast",
+    "timeline",
+    "memory",
+    "contract",
+    "simulation",
+    "history"
+  ]
+}

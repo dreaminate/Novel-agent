@@ -103,6 +103,31 @@ HEAD `02a48d8` —— 即本计划写的 `8926e31` **加本计划文件本身的
   - 验证：选型记录里每个数字都有可复现命令；`pnpm-lock.yaml` diff 已审阅；
     `corepack pnpm test`、`typecheck`、`lint` 仍绿。
 
+  > **🛑 阻塞（2026-09-17，§5 触发，等用户裁定）：体积预算破了，依赖未引入。**
+  > 证据全部落在 [`docs/open-source-evaluations/editor-stack-2026-09-17.md`](../docs/open-source-evaluations/editor-stack-2026-09-17.md)。
+  > - 基线（RED，实测）：`packages/novel-workbench/lib/client.js` = **645,428 B raw / 123,596 B gzip**，
+  >   sha256 `548d1124…`。**2 倍预算 = 1,290,856 B raw / 247,192 B gzip。**
+  > - GREEN（隔离实测，仓库外探针 `/tmp/editor-stack-probe`、`/tmp/tsdown-probe`，未污染仓库）：
+  >   trio（`@tiptap/react` + `@tiptap/starter-kit` + `@tiptap/pm` 子路径）用**仓库自己的 tsdown 0.22.2、
+  >   与真实构建同配置**测得 **957,103 B raw / 232,899 B gzip** → 引入后 **1,602,531 B = 2.48×（raw）/ 2.88×（gzip）**。
+  >   esbuild 口径（848,633 B 不 minify；399,877 B minify）互相印证，不是单一 bundler 偏差。
+  > - **给引入方最宽松的 minify 口径，gzip 仍是 2.02× → 也破。** 去掉 StarterKit 的 lean 组合 raw 1.96× 勉强过、
+  >   gzip 2.22× 仍破；只有退回裸 ProseMirror（`@tiptap/pm/*`）两项都过（1.57× / 1.75×）。
+  > - 顺带查实一个**规格错误**：`@tiptap/pm` **没有 `.` 导出**（只有 `/state`、`/view`、`/model`… 子路径）。
+  >   本计划与决定 11 里把「`@tiptap/pm`」当裸导入写是不成立的，落地必须写子路径。
+  > - 许可证侧**没问题**：57 个传递依赖**全部 MIT**，0 个 `preinstall`/`install`/`postinstall`；
+  >   15 个 `prepare` 全是构建脚本且不随 registry 安装执行。`@tiptap/react@3.31.3` 的 peer 含
+  >   `react ^17 || ^18 || ^19`，本仓库冻结的 React 18.3.1 **在范围内**。
+  > - **未做**（不得当已验证）：没有 `pnpm add`、没有 lockfile diff、没有改 `package.json`，
+  >   所以 `THIRD_PARTY_NOTICES.md` / `docs/upstream-sources.md` **故意未更新**；没有跑真实端到端构建；
+  >   没有在浏览器里加载过 Tiptap；隔离 Profile 加载 smoke 未做。
+  > - **要用户选一个**（详见选型记录 §5）：① 放宽 2× 预算；② **先给 workbench client 开 minify 再重算**
+  >   （当前产物未 minify，这条**未实测**，最可能改变结论）；③ 换 lean 配置（gzip 仍破）；④ 退回裸 ProseMirror
+  >   （改决定 11）；⑤ 砍首版编辑器能力范围。
+  >
+  > **I0.2 未完成**（还差 `pnpm-lock.yaml` 审阅那一步，因为它取决于上面选哪条）。后续增量**全部阻塞**在 I0.2 上，
+  > 因为 I3.x 的编辑器实现直接依赖这个选型。loop 已按 §5 停止。
+
 ### Phase 1 — 审批面（安全优先）
 
 - [ ] **I1.1 RED：确认审批回归** — 目标：用证据证明「现在没有审批渲染者」，而不是靠推断。

@@ -374,7 +374,9 @@ HEAD `02a48d8` —— 即本计划写的 `8926e31` **加本计划文件本身的
   >   不会写 `lastSubmission`（那是我们 novel bar 提交时才记的），没有「上一句」可重试 —— 行为正确。
   >   重试动作本身由 spec 点击并断言 `resend` 被调用，覆盖在单测里。
 
-- ~~**I2.3 `/` 与 `@` 候选菜单**~~ → **已重切为下面的 I2.4 + I2.5（换序）**。原条目保留为死锁的查证记录。  - 文件：`NovelComposer.tsx`、`novel-workbench-composer.spec.ts`（扩展）
+- ~~**I2.3 `/` 与 `@` 候选菜单**~~ → **已重切为下面的 I2.4 + I2.5（换序）**。原条目保留为死锁的查证记录，
+  原要求如下（已分别由 I2.4 的 `/` 与 I2.5 的 `@` 源覆盖）：
+  - 文件：`NovelComposer.tsx`、`novel-workbench-composer.spec.ts`（扩展）
   - 要求：`/` 列出官方全部命令（compact / export / feedback / goal / permission / plan / model）；
     `@` 在官方文件候选之外加一组「人物与章节」（来自 Canon）；候选数据来自官方触发管道，
     **不重建输入状态机**；键盘上下选、Enter 确认、Esc 取消。
@@ -485,7 +487,7 @@ HEAD `02a48d8` —— 即本计划写的 `8926e31` **加本计划文件本身的
   > 与 `probe-trigger-menus.mjs`（`/` `@` 候选）。审批未重跑真实会话 —— 但本条**从未改动**渲染官方
   > `conversation` 面这条路径，而 I1.2 通过的正是这条路径。
 
-- [ ] **I2.5 `@` 增加一组「人物与章节」** — 目标：在官方 `@` 候选之外，用**官方触发源机制**加一组来自 Canon
+- [x] **I2.5 `@` 增加一组「人物与章节」** — 目标：在官方 `@` 候选之外，用**官方触发源机制**加一组来自 Canon
   的人物与章节。`/` 那半不需要写代码 —— I2.4 让官方输入条回来之后，官方全部命令（compact / export /
   feedback / goal / permission / plan / model）自然就在 `/` 里。
   - 文件：新 `novel-input-source.ts`（一个 `InputTriggerSource` 注册）、`index.tsx`（挂到会话作用域）、spec
@@ -495,6 +497,32 @@ HEAD `02a48d8` —— 即本计划写的 `8926e31` **加本计划文件本身的
   - **`/` 那半已在 I2.4 连带完成并实测**：`/` 现在就有 compact / export / feedback / goal / permission /
     plan 等 45 行候选（探针 `probe-trigger-menus.mjs`）。本条只需补 `@` 的「人物与章节」。
   - 验证：spec 绿；真机 `@` 里能看到「人物与章节」组，选中能插入。
+
+  > **✅ 已完成（2026-09-17）。官方的缝这次是开的** —— 与前三轮相反：`InputTriggerSource` 是一份
+  > **开放契约**（`trigger` / `name` / `candidates()` / `onPick()` / 可选 `codec` / `warm` / `lexicon`），
+  > 而且明说「provider 用**自己插件的 root context** 访问 RPC 与服务」—— 正合我们所需。
+  >
+  > **实现：** 新 `packages/novel-workbench/src/client/novel-input-source.ts`，注册一个 `@` 源
+  > （`name: '人物与章节'`、`order: -10` 排在文件组之前），候选来自 Canon 的 `loadCast` + `loadOutline`
+  > （人物 + 卷章），按实时 query 过滤、上限 12 条；`onPick` 走官方的 `insert`（chip）并带 `codec`：
+  > 剪贴板投影 `@顾尘`，模型投影 `<人物>顾尘</人物>`（**自描述**，模型不必猜这是人还是章）。
+  > 缓存按 `sessionId#canonRevision` 键控 —— 管道每次按键都轮询候选，读取不能跟着按键走；
+  > Canon 被接受后 revision 变，列表自行失效。**读取失败一律返回空列表**：`@` 菜单绝不允许成为
+  > 发不出消息的原因。
+  >
+  > **§2 开源门禁（本轮唯一的新依赖）：** `@deepseek-ai/dsh-client-ui-input-trigger@0.1.2-rc.1`，
+  > **只作 devDependency 取类型**（运行期由 Host 提供，不打包、不转出）。MIT、无 install 生命周期脚本；
+  > 唯一依赖 `clsx@2.1.1`（MIT、无脚本、**本就在树里**）。lockfile **只新增 1 条 resolution、0 删除、
+  > 0 版本变更**。已同步 `THIRD_PARTY_NOTICES.md` 与 `docs/upstream-sources.md`。
+  >
+  > **真机验证**（探针 `docs/evidence/thread-2026-09-17/probe-trigger-menus.mjs`）：`/` 45 行候选；
+  > `@` 46 行，**首组就是「人物与章节」**，带真实人物与其 Canon 摘要；**选中能插入** ——
+  > 按 Enter 前草稿是 `@`，之后变成 `guchen `（官方管道替换了触发词）。spec 6 条绿。
+  >
+  > **已知问题（不带病声称）：** 人物显示的是 **Canon 实体 id**（`guchen`、`junlinyuan`…）而不是中文名 ——
+  > 因为 Canon 里**没有记录这些人的名字**，而 `NovelCastPerson.name` 的契约就是「否则回落到实体 id」。
+  > 这是全应用共有的「裸 id 当标题」问题（计划 I6.5 覆盖）；本条**只是把它多暴露在了一个新面上**，
+  > 不计为已修。
 
 ### Phase 3 — 编辑器成为主工作面
 

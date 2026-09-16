@@ -379,3 +379,22 @@ and are now external. Without that fix the same three dependencies cost
 The full measurement, the bundle-budget decision it forced and the rejected
 alternatives are recorded in
 `docs/open-source-evaluations/editor-stack-2026-09-17.md`.
+
+## Novel-mode `@` reference source (2026-09-17)
+
+`@novel-agent/novel-workbench` declares
+`@deepseek-ai/dsh-client-ui-input-trigger@0.1.2-rc.1` as a **development
+dependency, for its types only**. The package is a DSH platform plugin the host
+already loads and provides; this bundle neither bundles it nor re-exports it. It
+is declared so the `InputTriggerSource` contract and the `ctx.inputTriggers`
+Context augmentation resolve at build time, the same way `dsh-client-ui-layout`
+is declared for the `conversation` slot.
+
+That is one new resolved lockfile entry. It is MIT, declares no `preinstall`,
+`install` or `postinstall` script, and its only dependency `clsx@2.1.1` (MIT, no
+lifecycle script) was already resolved in this tree and is unchanged.
+
+The consumer is `packages/novel-workbench/src/client/novel-input-source.ts`: one
+`@` trigger source adding a 人物与章节 group read from accepted Canon. It adds no
+input machine, no second queue and no rival menu — the shipped trigger pipeline
+owns detection, the menu, keyboard arbitration and the insertion itself.

@@ -16,6 +16,7 @@
 import type { Context as ClientContext } from '@deepseek-ai/cordis'
 import type {} from '@deepseek-ai/dsh-api-workspace-controller/client'
 import type {} from '@deepseek-ai/dsh-client-locale/client'
+import type {} from '@deepseek-ai/dsh-client-ui-input-trigger/client'
 import type {} from '@deepseek-ai/dsh-client-ui-layout/client'
 import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
 import type {} from '@deepseek-ai/dsh-client-ui-session/client'
@@ -25,6 +26,7 @@ import type {} from '@deepseek-ai/dsh-cordis-host-runner/remote'
 import type {} from '@deepseek-ai/dsh-client-ui-workspace/client'
 import type {} from '@novel-agent/novel-project/remote'
 import { createNovelWorkFace } from './novel-data.js'
+import { createNovelReferenceSource } from './novel-input-source.js'
 import { NovelCanvas } from './NovelCanvas.js'
 import { NovelRail } from './NovelRail.js'
 import { NovelSide } from './NovelSide.js'
@@ -231,6 +233,7 @@ export function apply(ctx: ClientContext): () => void {
       'sessions',
       'uiWorkspace',
       'workspaces',
+      'inputTriggers',
       'remote',
       'remote.novelProject',
       'remote.pluginInventory',
@@ -245,6 +248,15 @@ export function apply(ctx: ClientContext): () => void {
         inventory: surfaceCtx.remote.pluginInventory,
         cordis: surfaceCtx.remote.dynamicCordisRunner,
       })
+      // The `@` source that puts 人物与章节 beside the shipped file candidates.
+      // Registered once for this plugin instance: the pipeline owns the menu,
+      // the keyboard and the insertion, and resolves the per-session controller
+      // itself, so this costs one source and no second input machine.
+      surfaceCtx.effect(() => surfaceCtx.inputTriggers.registerSource(createNovelReferenceSource({
+        face,
+        works: () => surfaceCtx.workspaces.list.getSnapshot().items,
+        revision: () => getWorkbenchState().revision,
+      })), 'novel-mode @ references')
       surfaceCtx.effect(() => surfaceCtx.slots.inject('sidebar', () => surfaceCtx.slots.register({
         name: 'sidebar',
         inject: () => face,

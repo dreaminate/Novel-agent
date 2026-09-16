@@ -121,6 +121,23 @@ try {
   await sleep(1800)
   out.at = await session.evaluate(MENU)
 
+  // A menu that lists candidates is only half the claim: picking one has to
+  // land in the composer. Enter settles the highlighted row through the
+  // shipped pipeline, so the draft is what proves the source is wired.
+  const draft = `(() => {
+    const el = document.querySelector('[data-slot="conversation.composer"] [contenteditable=true]')
+    if (el === null) return null
+    return { text: (el.innerText ?? '').slice(0, 160), mentions: (el.innerText ?? '').includes('@') }
+  })()`
+  out.beforePick = await session.evaluate(draft)
+  for (const type of ['keyDown', 'keyUp']) {
+    await session.send('Input.dispatchKeyEvent', {
+      type, key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13, nativeVirtualKeyCode: 13,
+    })
+  }
+  await sleep(1500)
+  out.afterPick = await session.evaluate(draft)
+
   console.log(JSON.stringify(out, null, 2))
 } finally {
   try { session?.close() } catch { /* ignore */ }

@@ -131,6 +131,8 @@ describe('novel-workbench novel navigation rail', () => {
     // The novel surfaces adopt folders through the Workspace Controller, so the
     // service has to exist before they take their seats.
     ctx.provide('workspaces', { create: vi.fn() } as never)
+    // The plugin registers its `@` reference source on the trigger pipeline.
+    ctx.provide('inputTriggers', { registerSource: () => () => {} } as never)
     ctx.provide('remote', {} as never)
     // The advanced panels read the Host's plugin inventory and the dynamic
     // Cordis inventory, so the surfaces fiber waits for both namespaces.
@@ -209,6 +211,8 @@ describe('novel-workbench novel navigation rail', () => {
     ctx.provide('sessions', { open: vi.fn(), list: { getSnapshot: () => ({ current: undefined }), subscribe: () => () => {} } } as never)
     ctx.provide('uiWorkspace', { startSession: vi.fn(), archiveSession: vi.fn() } as never)
     ctx.provide('workspaces', { create: vi.fn() } as never)
+    // The plugin registers its `@` reference source on the trigger pipeline.
+    ctx.provide('inputTriggers', { registerSource: () => () => {} } as never)
     ctx.provide('remote', {} as never)
     // The advanced panels read the Host's plugin inventory and the dynamic
     // Cordis inventory, so the surfaces fiber waits for both namespaces.

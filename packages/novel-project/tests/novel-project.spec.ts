@@ -183,6 +183,15 @@ describe('NovelProjectService', () => {
         .filter(section => section.name.startsWith('novel:'))
       expect(sections.map(section => section.name)).toEqual(['novel:canon'])
       expect(sections[0]?.text).toContain('Accept: author decision')
+      // The structural rule a proposal most often breaks: every level names a
+      // parent of exactly the level before it, and the packet is validated whole.
+      expect(sections[0]?.text).toContain('series → book → volume → arc → chapter → scene → beat → prose')
+      expect(sections[0]?.text).toContain('a Chapter hangs off an arc, an arc off a volume, a volume off a book')
+      expect(sections[0]?.text).toContain('every delta of the packet is validated together')
+      // Anchors stay optional: the model otherwise spends whole turns hunting for
+      // a hash it cannot compute, and never files the proposal.
+      expect(sections[0]?.text).toContain('Anchors are optional and never guessed')
+      expect(sections[0]?.text).toContain('sourceAnchors: []')
       expect(sections[0]?.text).not.toContain('- Plan:')
       expect(sections[0]?.text).not.toContain('- Write:')
       expect(sections[0]?.text).not.toContain('- Review:')

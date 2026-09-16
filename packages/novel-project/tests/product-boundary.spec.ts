@@ -185,7 +185,9 @@ describe('novel-agent product boundary', () => {
     expect(TYPERT.package).toBe('@novel-agent/novel-project')
     expect(TYPERT.face).toBe('host')
     expect(novelProjectRemote.package).toBe('@novel-agent/novel-project')
-    expect(TYPERT.invocations).toHaveLength(14)
+    // 15 since `chapterControlPack` joined the boundary: the 本章合同 canvas
+    // reads one Chapter's control pack through the same service namespace.
+    expect(TYPERT.invocations).toHaveLength(15)
     for (const invocation of TYPERT.invocations) {
       expect(invocation.service).toBe('novelProject')
       expect(invocation.namespace).toBe(invocation.service)

@@ -763,6 +763,10 @@ const NOVEL_CANON_GUIDANCE = `# Novel canon
 
 Use the accepted Novel Project revision as the only story authority. Keep these stages distinct:
 
+- Narrative structure is a strict ancestry, one level per step: \`series → book → volume → arc → chapter → scene → beat → prose\`. \`series\` is the only root, and every other level must name a parent of exactly the level before it (a Chapter hangs off an arc, an arc off a volume, a volume off a book). A packet that skips a level is rejected at acceptance, and the author cannot rescue it item by item: every delta of the packet is validated together.
+
+- Anchors are optional and never guessed. A Result Packet may carry \`sourceAnchors: []\` and empty per-delta \`sourceAnchorIds\`, which is the right answer for a change that is not tied to existing manuscript text. A source anchor that IS present must carry the exact SHA-256 of its byte range, so if you cannot compute that hash from the file you are reading, submit the change without an anchor instead of spending turns guessing one.
+
 - Ask: read only. Answer from the selected accepted revision and identify the revision and evidence used. Do not create authorization or mutate Canon.
 
 - Accept: author decision. Only the existing Novel Project Result Packet transaction may advance the expected revision after the author has decided every item and explicitly applies it.
@@ -1364,7 +1368,7 @@ export class NovelProjectService extends TypertRemoteService {
 
     this.ctx.tools.register(defineTool({
       name: 'propose_novel_result_packet',
-      description: 'Submit one complete, authorization-free Result Packet draft for author review. Write packets include manuscript and manuscriptDiff; project setup may omit both and propose only creative-profile / reader-contract Canon Deltas. The stock DSH tool call/result records the proposal and never advances accepted Canon.',
+      description: 'Submit one complete, authorization-free Result Packet draft for author review. Write packets include manuscript and manuscriptDiff; project setup may omit both and propose only creative-profile / reader-contract Canon Deltas. The stock DSH tool call/result records the proposal and never advances accepted Canon. Anchors are optional: `sourceAnchors: []` and an empty `sourceAnchorIds` are valid for a change that is not tied to existing manuscript text, and a source anchor must never carry a guessed hash — if you cannot compute the exact SHA-256 of the exact byte range, submit with no anchor instead of inventing one.',
       parameters: {
         packet: {
           type: 'json',
@@ -3257,6 +3261,24 @@ export class NovelProjectService extends TypertRemoteService {
   ): AcceptedNovelRevision | undefined {
     const workspace = this.requireWorkspace(workspaceId)
     return this.readRevision(workspace.id, revision)
+  }
+
+  /**
+   * Read one chapter's control pack through the generated Typert Remote boundary.
+   *
+   * The pack is the chapter contract the 本章合同 canvas renders: the scope it
+   * sits in, its scenes and beats, the accepted facts the contract resolves
+   * against, and the author locks that apply at this revision. Memory owns the
+   * assembly and Canon keeps the authority, so this stays a thin read.
+   */
+  @Remote('chapterControlPack')
+  remoteChapterControlPack(
+    workspaceId: NovelWorkspaceId,
+    revision: number,
+    chapterId: string,
+  ): NovelChapterControlPack {
+    const workspace = this.requireWorkspace(workspaceId)
+    return this.requireNovelMemoryRead().readChapterControlPack(workspace.id, revision, chapterId)
   }
 
   private requireMutationSession(sessionId: string): Session {

@@ -25,7 +25,7 @@
 [CmdletBinding()]
 param(
   [string]$Profile = 'web',
-  [string]$OutputDir = (Join-Path $env:TEMP 'novel-agent-packages'),
+  [string]$OutputDir = '',
   [string]$Dsh = 'dsh',
   [string]$DshHome = $env:DSH_HOME
 )
@@ -36,6 +36,13 @@ if (-not (Test-Path -LiteralPath (Join-Path $root 'pnpm-workspace.yaml'))) {
   throw 'repository root not found; keep scripts/install-plugins.ps1 inside the novel-agent checkout'
 }
 Set-Location -LiteralPath $root
+
+# Tarballs live inside the checkout, not in $env:TEMP: the installed profile's
+# lockfile pins the `file:` path it resolved, so a tarball under the OS temp
+# directory leaves the profile broken as soon as that directory is cleaned.
+if (-not $OutputDir) {
+  $OutputDir = Join-Path (Join-Path $root '.novel-agent') 'packages'
+}
 
 $patchKey = '@deepseek-ai/dsh-session@0.1.2-rc.1'
 $patchRelative = 'patches/@deepseek-ai__dsh-session@0.1.2-rc.1.patch'

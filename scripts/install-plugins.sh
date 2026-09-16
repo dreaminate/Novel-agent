@@ -25,7 +25,10 @@ root=$(cd "$(dirname "$0")/.." && pwd)
 profile='web'
 dsh='dsh'
 dsh_home="${DSH_HOME:-}"
-output_dir="${TMPDIR:-/tmp}/novel-agent-packages"
+# Tarballs live inside the checkout, not in $TMPDIR: the installed profile's
+# lockfile pins the `file:` path it resolved, so a tarball under the OS temp
+# directory leaves the profile broken as soon as that directory is cleaned.
+output_dir="${NOVEL_AGENT_DEV_HOME:-$root/.novel-agent}/packages"
 
 while [ "$#" -gt 0 ]; do
   case "$1" in

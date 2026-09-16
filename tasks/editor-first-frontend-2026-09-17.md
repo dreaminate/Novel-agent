@@ -75,11 +75,23 @@
 
 ### Phase 0 — 开工准备
 
-- [ ] **I0.1 基线确认** — 目标：确认主 checkout、host、测试与扫描基线，避免在错的地方开工。
+- [x] **I0.1 基线确认** — 目标：确认主 checkout、host、测试与扫描基线，避免在错的地方开工。
   - 文件：无（只读）
   - 验证：`git log --oneline -1` = `8926e31`；`git status --short`（**读第一列**，本 checkout 有预暂存内容）；
     `corepack pnpm test` 324 绿；`curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:4780/` = 401；
     `node scripts/smoke-workbench.mjs` exit 0。把结果写进本节下方一行基线记录。
+
+**基线记录（2026-09-17，I0.1 已完成）：** 主 checkout `/Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent`，
+HEAD `02a48d8` —— 即本计划写的 `8926e31` **加本计划文件本身的这一个提交**，不是分叉；`git status --short`
+干净、`git diff --cached --name-only` 空（本轮无预暂存内容，仍按 §4.1 读第一列）；`corepack pnpm test` →
+19 files / **324 passed**；`curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:4780/` → **401**；
+`node scripts/smoke-workbench.mjs` → **exit 0**（9 个 view 条目 rendered，`review` skipped-no-proposal）。
+
+**执行位置说明（I0.1 附带）：** 本 session 被 harness 钉在 worktree
+`.claude/worktrees/nostalgic-morse-d8d402`（与主 checkout 同在 `02a48d8`，**不是**计划警告的 `a3be81c` 旧树；
+另外三个 `a3be81c` 树才是）。`change_directory` 被 harness 拒绝，session 无法迁移。经用户当轮确认后，
+**以绝对路径在主 checkout 开工**，提交落在 `main` 分支。每轮 loop 的 bash 命令都显式
+`cd /Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent && …`，因为 harness 会在命令之间把 cwd 重置回 worktree。
 
 - [ ] **I0.2 编辑器选型记录** — 目标：Tiptap/ProseMirror 栈的选型证据，含**体积实测**，否则不许引依赖。
   - 文件：`docs/open-source-evaluations/editor-stack-2026-09-17.md`（新）、`THIRD_PARTY_NOTICES.md`、

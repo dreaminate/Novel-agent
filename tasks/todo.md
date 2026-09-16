@@ -1,5 +1,28 @@
 # Execution checklist
 
+## Editor-first front-end rework — plan of record, 2026-09-17
+
+**Status:** `not-started` as an implementation; the decisions are settled and the increment queue is written.
+
+- [x] Grilling settled fourteen decisions, several of which override the prototype: the hand-writing editor
+  becomes the main canvas (the prototype lands on the story map), the agent conversation moves into the
+  editor's collapsible right column, Tiptap/ProseMirror owns the prose, `/` and `@` reuse the official
+  trigger pipeline with our own menu, source anchors stay optional, and 正文阅读 merges into the editor's
+  reading mode instead of keeping its own canvas.
+- [x] New evidence, found while grilling: the client-side approval surface exists **only** in
+  `@deepseek-ai/dsh-client-ui-chat` (it contributes `conversation.approval.detail`), and our bundle patch
+  disables `ui-chat` — so the current build may have no way to approve a dangerous operation. Treated as a
+  suspected regression and queued first (`I1.1`), not assumed.
+- [x] Reference study: 阅文官方的 `/Applications/作家助手.app` v5.18.1 is Electron + React + TinyMCE. Its
+  editor is the axis (EditorWrap / EditorMenu / SideChapterPanel), 设定·角色·大纲·**伏笔** hang off the
+  editor menu, 伏笔 is first-class and binds to chapters, and its AI is 续写 with a 「情节灵感…按写作顺序
+  逐条输入」 box plus a 采用/评价 loop. Notably it has **no relationship graph at all** — the map is我们的.
+- [x] Full plan written to [`editor-first-frontend-2026-09-17.md`](editor-first-frontend-2026-09-17.md):
+  seven phases, increment queue with RED/GREEN/verification per item, the repo invariants every iteration
+  must respect, the prototype/CSS regeneration rule, and the stop conditions that require a human.
+- [ ] Execute it. Phase 0 first (baseline + the editor stack's bundle-cost selection record), then Phase 1
+  (the approval surface) ahead of everything visible.
+
 ## Front-end wrap-up: settings honesty and story-map scale, 2026-09-17
 
 **Status:** `verified` live on the rebuilt Host for both changes; two prototype features deliberately

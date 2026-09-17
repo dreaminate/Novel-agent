@@ -329,13 +329,19 @@ function renderWorks(
         '立项后这里会长出卷、章与状态徽标。'),
     ]
   }
-  return outline.groups.map(group => createElement(
-    'div',
-    { className: 'vol-head', key: group.id, 'data-novel-volume': group.id },
-    createElement('span', null, group.title),
-    createElement('span', { className: 'vol-meta' }, `${String(group.chapters.length)} 章`),
+  // The chapters are the header's siblings, not its children. The prototype
+  // closes `.vol-head` before emitting them, and nesting them made the header a
+  // flex row holding the volume name, its count and every chapter at once —
+  // measured live at 50px for the name and 27px for a chapter title.
+  return outline.groups.flatMap(group => [
+    createElement(
+      'div',
+      { className: 'vol-head', key: group.id, 'data-novel-volume': group.id },
+      createElement('span', null, group.title),
+      createElement('span', { className: 'vol-meta' }, `${String(group.chapters.length)} 章`),
+    ),
     ...group.chapters.map(chapter => renderChapter(chapter, chapterId)),
-  ))
+  ])
 }
 
 /** One chapter row: ordinal, status dot, debt mark, title and status word. */

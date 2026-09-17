@@ -1496,9 +1496,38 @@ HEAD `02a48d8` —— 即本计划写的 `8926e31` **加本计划文件本身的
   - **用户 2026-09-17 提到的下一项工作（导入一本完本小说、把它的设定面填满）会让这一条自然消失** ——
     有真实设定数据时人物就有名字了。届时先看数据，再决定要不要做 ①。
   - 验证（届时）：真机人物与关系 / 地图 / 人物档案上，作者读到的都是名字而不是 slug。
-- [ ] **I6.6 密度与观感微调** — 直接改 `workbench-css.ts`（并同步原型 CSS）。
-  - 已由 I6.3 处理、本条不必重做的：frame 底部那 88px 死区（原型 composer 行）已移除，
-    它属于 **frame 自己的绑定规则**（`FRAME_CSS`），不在生成物里。
+- [x] **I6.6 密度与观感微调** — 直接改 `workbench-css.ts`（并同步原型 CSS）。
+  - 文件：`packages/novel-workbench/src/client/NovelRail.tsx`、
+    `tests/novel-workbench-rail.spec.ts`（新增 1 条）
+
+  > **✅ 已完成（2026-09-17）。修掉的不是「观感」，是一个量出来的布局缺陷；没有做纯口味的改动。**
+  >
+  > **做法：先量再改。** 逐屏截图看不出问题在哪，于是写了一次性量测（`/tmp/measure-rail.mjs`）：
+  > 把左栏每一行的**每个子元素的宽度和是否溢出**打出来。数字直接指了位置：
+  > | | 修前 | 修后 |
+  > | --- | --- | --- |
+  > | 卷名宽度 | **50px**（截断成「卷一 · …」） | **183px** |
+  > | 章标题 `.t` 宽度 | **27px，`overflow: true`**（截断成「开…」） | **131px，不溢出**（「开篇章」完整） |
+  > | 章行总宽 | 127px | 231px（占满 248px 栏） |
+  >
+  > **根因不是 CSS，是我们的 DOM 与原型不一致。** 原型的 `renderWorks` 是
+  > `<div class="vol-head">卷名 + 章数</div>` **闭合之后**再逐个发章按钮；我们**把章塞进了卷头里面**，
+  > 而 `.vol-head` 是 `display: flex`，于是卷名、章数、每一个章都排在**同一行**上被互相挤
+  > （章越多越糟）。修法是把章渲染成卷头的**兄弟节点**——**这不是改设计，而是把 DOM 改回原型的形状**，
+  > 所以**一行 CSS 都没动**，原型与生成物都不需要改（§2 的设计来源规则不适用）。
+  >
+  > **RED → GREEN：** 新增一条断言钉住结构不变量：`[data-novel-volume]` 内**不得**含 `[data-novel-chapter]`、
+  > `.ch-item` 数为 0，且章行就是卷头的 `nextElementSibling`。先跑，如实失败（`expected <button …> to be null`）。
+  >
+  > **未做（如实记）：** 其余屏没有量出可证伪的缺陷，因此**没有为了「微调」而改样式**——
+  > 密度与观感的最后一关是作者的眼睛，parity matrix 里这一格一直是 `implemented-unverified`（没有作者过目记录），
+  > 不应该用一堆我看不出问题的像素改动去冒充它。
+  >
+  > 已由 I6.3 处理、本条不必重做的：frame 底部那 88px 死区（原型 composer 行）已移除，
+  > 它属于 **frame 自己的绑定规则**（`FRAME_CSS`），不在生成物里。
+  >
+  > **门禁：** **439 tests**（新增 1 条）、typecheck 0、lint 0、`git diff --check` 0、
+  > `dev-host.sh rebuild` + smoke **exit 0**。
 - [ ] **I6.7 记录收口** — 原型回写 + 重生成 CSS + 更新 `tasks/todo.md`、`docs/claude-desktop-parity-matrix.md`、
   本文件勾选与证据链接；跑 `node scripts/port-prototype-css.mjs --check`。
 

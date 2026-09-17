@@ -23,6 +23,24 @@
 - [ ] Execute it. Phase 0 first (baseline + the editor stack's bundle-cost selection record), then Phase 1
   (the approval surface) ahead of everything visible.
 
+## The work tree reads again, 2026-09-17 (I6.6)
+
+**Status:** `verified` — measured before and after, in the browser.
+
+- [x] **A measured layout defect, not a taste pass.** Screenshots did not say where the problem was, so the rail's
+  rows were measured instead: every child's width and whether it overflowed. The numbers named it — the volume
+  name had 50px and a chapter title 27px, both ellipsised. The cause was not CSS: the prototype closes
+  `.vol-head` after the volume name and its count and emits the chapters *after* it, while our renderer nested
+  them inside, so a flex row held the name, the count and every chapter at once. The chapters are siblings
+  again, and **no CSS changed at all** — the DOM simply went back to the prototype's shape.
+- [x] After: the volume name gets 183px and the chapter title 131px with no overflow, and the chapter row fills
+  the 248px rail. A spec pins the structure (`[data-novel-volume]` may contain no `[data-novel-chapter]`, and
+  the chapters are its next siblings); it failed before the fix and passes after.
+- [x] **Nothing else was changed.** No measurable defect was found on the other screens, and inventing pixel
+  tweaks to make a "polish" increment look busy would be dishonest — the last word on density and appearance
+  is the author's eye, and the parity matrix keeps that cell at `implemented-unverified` until they look.
+- [ ] Gates: **439/439** tests, `typecheck`, `lint`, `git diff --check`, rebuild + sweep `exit 0`.
+
 ## The screens speak the author's language, 2026-09-17 (I6.5a)
 
 **Status:** `verified` live for everything the front end can control; the rest is a content gap with evidence.

@@ -300,6 +300,47 @@ describe('novel-workbench novel navigation rail', () => {
     container.remove()
   })
 
+  it('keeps the volume header to itself, with its chapters as siblings', async () => {
+    // The prototype's `.vol-head` holds the volume name and its count and closes;
+    // the chapters are emitted after it. Nesting them put the name, the count and
+    // every chapter on one flex row, which squeezed the volume to 50px and the
+    // chapter title to 27px.
+    const { NovelRail } = await import('../src/client/NovelRail.js')
+    const work = {
+      workspaceId: 'ws-1', path: '/books/x', title: '天机阁主',
+      sessionIds: [], createdAt: '', updatedAt: '',
+    }
+    const container = document.createElement('div')
+    document.body.append(container)
+    const root = createRoot(container)
+    await act(async () => {
+      root.render(createElement(NovelRail as never, {
+        sessionId: undefined,
+        useWorkspaces: (selector: (value: unknown) => unknown) => selector({ items: [work] }),
+        useSessions: (selector: (value: unknown) => unknown) => selector({ current: undefined, ids: [], byId: {} }),
+        loadOutline: async () => outline,
+        openThread: () => {},
+        newThread: () => {},
+      } as never))
+    })
+    await act(async () => {})
+
+    const header = container.querySelector('[data-novel-volume]')
+    expect(header).not.toBeNull()
+    expect(header?.querySelector('[data-novel-chapter]')).toBeNull()
+    expect(header?.querySelectorAll('.ch-item')).toHaveLength(0)
+    // The header still carries the two things it is for.
+    expect(header?.textContent).toContain('卷二 · 冷库')
+    expect(header?.textContent).toContain('2 章')
+    // And the chapters are right below it, in order.
+    const rows = [...container.querySelectorAll('[data-novel-chapter]')]
+    expect(rows).toHaveLength(2)
+    expect(header?.nextElementSibling).toBe(rows[0])
+
+    await act(async () => { root.unmount() })
+    container.remove()
+  })
+
   it('names a thread the author has not written in yet', async () => {
     const { NovelRail } = await import('../src/client/NovelRail.js')
     const ids = ['t1', 't2']

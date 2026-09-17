@@ -905,6 +905,11 @@ HEAD `02a48d8` —— 即本计划写的 `8926e31` **加本计划文件本身的
   > **门禁：** **387 tests**（新增 8 条面板 + 7 条宿主 + 1 条采用）、typecheck 0、lint 0、
   > `git diff --check` 0、`dev-host.sh rebuild` + smoke **exit 0**；
   > `lib/client.js` **1,600,796 B**（+10,196）≤ 2,400,000 B 上限 → **PASS**。探针草稿已删除。
+  >
+  > **⚠️ 本轮 push 失败（环境问题，非代码问题）：** 提交 `47dd8a9` 已落在本地 `main`，
+  > 但 `git push origin main` 两次都连不上 github.com（`Failed to connect to github.com port 443`，
+  > 改用 HTTP/1.1 后报 `Error in the HTTP2 framing layer`）。**下一轮的第一件事是重试 push** ——
+  > 本地因此会累积到 2 个未推送提交（`8a68fc2`、`47dd8a9`）。没有为它反复重试浪费轮次。
 
 - [ ] **I4.3 设置项补齐** — 目标：把新能力接到设置面板，并让「工具活动」开关回来。
   - 文件：`NovelSettings.tsx`、`store.ts`、`novel-workbench-settings.spec.ts`

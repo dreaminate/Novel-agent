@@ -9,9 +9,10 @@
  * conversation keeps its own seat while a novel canvas is shown, so a thread
  * keeps its scroll position and draft across view switches.
  */
-import { createElement, useEffect, useRef, type ReactNode } from 'react'
+import { createElement, useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import type { PropsRenderSlots } from '@deepseek-ai/dsh-client-ui-slots'
 import { NovelTranscript } from './NovelTranscript.js'
+import { RAIL_COLLAPSED, RAIL_MAX, RAIL_MIN, SIDE_MAX, SIDE_MIN, solveColumns } from './frame-columns.js'
 import { useWorkbenchState, workbenchActions } from './store.js'
 import { WorkbenchStyleSheet } from './WorkbenchStyleSheet.js'
 
@@ -93,6 +94,49 @@ const FRAME_CSS = `
   overflow-y: auto;
 }
 /*
+ * The columns' boundaries are draggable. The handle straddles the seam — half in
+ * each column — so the hit area is where the cursor already is when the author
+ * reaches for the edge, and it stays invisible until they do.
+ */
+[data-novel-workbench="frame"] .rail,
+[data-novel-workbench="frame"] .side { position: relative; }
+[data-novel-workbench="frame"] .nw-column-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 9px;
+  z-index: 12;
+  cursor: col-resize;
+  background: transparent;
+  touch-action: none;
+}
+[data-novel-workbench="frame"] .nw-column-handle[data-novel-column-handle="rail"] { right: -4px; }
+[data-novel-workbench="frame"] .nw-column-handle[data-novel-column-handle="conversation"] { left: -4px; }
+[data-novel-workbench="frame"] .nw-column-handle::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 4px;
+  width: 1px;
+  background: transparent;
+  transition: background var(--t-fast);
+}
+[data-novel-workbench="frame"] .nw-column-handle:hover::after,
+[data-novel-workbench="frame"] .nw-column-handle:focus-visible::after,
+[data-novel-workbench="frame"] .nw-column-handle[data-dragging="true"]::after {
+  background: hsl(var(--accent-brand));
+}
+/*
+ * At the prototype's 窄窗 width the rail is the frame's business, not the
+ * author's, so its handle goes away. The conversation column floats there, and
+ * its width is still whatever the author dragged it to.
+ */
+[data-novel-workbench="frame"][data-narrow="1"] .nw-column-handle[data-novel-column-handle="rail"] {
+  display: none;
+}
+[data-novel-workbench="frame"][data-narrow="1"] .side.open { width: var(--nw-side); }
+/*
  * The frame renders the thread's prose itself (NovelTranscript) and sets it as
  * reading. The shipped conversation surface is left mounted because it still
  * owns what the novel mode has not replaced yet — the composer, the input
@@ -106,8 +150,14 @@ const FRAME_CSS = `
 /** The novel-mode frame: topbar / rail / canvas / side / composer, all seats declared. */
 export function WorkbenchFrame(props: WorkbenchFrameProps): ReactNode {
   const { panels, theme, sessionId, transcript, settings, window: viewport } = useWorkbenchState()
-  /** The conversation column: open when a session exists and the column is out. */
-  const conversationOpen = panels.details > 0 && sessionId !== undefined
+  /**
+   * The widths are solved, not read: the preferences are what the author dragged
+   * or toggled, and the solver is what keeps the manuscript its floor when the
+   * window cannot hold all three.
+   */
+  const columns = solveColumns(viewport.width, panels.sidebar, panels.details)
+  /** The conversation column: open when a session exists and the solver kept it room. */
+  const conversationOpen = columns.side > 0 && sessionId !== undefined
   const threadProps = sessionId === undefined ? { 'data-novel-thread': 'idle' } : {}
   const frame = useRef<HTMLDivElement | null>(null)
 
@@ -135,9 +185,12 @@ export function WorkbenchFrame(props: WorkbenchFrameProps): ReactNode {
       // key off this attribute and had never been switched on here.
       'data-narrow': viewport.nearLimit ? '1' : '0',
       'data-novel-workbench-sidebar': panels.sidebar === 0 ? 'collapsed' : 'expanded',
-      'data-novel-workbench-details': panels.details === 0 ? 'collapsed' : 'expanded',
+      'data-novel-workbench-details': columns.side === 0 ? 'collapsed' : 'expanded',
       className: 'app',
       ref: frame,
+      // The tracks come from the solver, so a drag or a narrow window changes
+      // what is drawn without a second set of rules deciding it again.
+      style: { '--nw-rail': `${String(columns.rail)}px`, '--nw-side': `${String(columns.side)}px` },
     },
     createElement(WorkbenchStyleSheet, { key: 'css' }),
         createElement('style', { key: 'frame-css' }, FRAME_CSS),
@@ -151,7 +204,16 @@ export function WorkbenchFrame(props: WorkbenchFrameProps): ReactNode {
       { key: 'rail', className: 'rail', 'data-novel-shell': 'left' },
       props.renderSlot('sidebar', {
         collapsed: panels.sidebar === 0,
+        width: columns.rail,
+      }),
+      createElement(ColumnHandle, {
+        key: 'rail-handle',
+        edge: 'rail',
         width: panels.sidebar === 0 ? RAIL_COLLAPSED : panels.sidebar,
+        min: RAIL_MIN,
+        max: RAIL_MAX,
+        label: '调整左栏宽度',
+        onWidth: (px: number) => { workbenchActions.setSidebarWidth(px) },
       }),
     ),
     createElement(
@@ -196,11 +258,81 @@ export function WorkbenchFrame(props: WorkbenchFrameProps): ReactNode {
             // transcript, which NovelTranscript above replaces.
             props.renderSlot('conversation', threadProps),
           ),
+          createElement(ColumnHandle, {
+            key: 'side-handle',
+            edge: 'conversation',
+            width: panels.details,
+            min: SIDE_MIN,
+            max: SIDE_MAX,
+            label: '调整对话栏宽度',
+            onWidth: (px: number) => { workbenchActions.setDetailsWidth(px) },
+          }),
         )
       : null,
     props.renderSlot('shell.overlay', {}),
   )
 }
 
-/** Width the frame gives the navigation column while it is collapsed. */
-const RAIL_COLLAPSED = 56
+/**
+ * The draggable boundary between two columns.
+ *
+ * The handle is a window splitter, not decoration: it takes the pointer, reports
+ * every width the drag passes through, and answers the arrow keys too — a
+ * resize that only a mouse can perform is a resize half the authors cannot
+ * perform at all.
+ */
+function ColumnHandle(props: {
+  /** Which column the handle resizes: the one on its left, or the one on its right. */
+  readonly edge: 'rail' | 'conversation'
+  readonly width: number
+  readonly min: number
+  readonly max: number
+  readonly label: string
+  readonly onWidth: (px: number) => void
+}): ReactNode {
+  const start = useRef<{ readonly x: number; readonly width: number } | null>(null)
+  const [dragging, setDragging] = useState(false)
+  // A drag rightwards grows the column on the left of the boundary and shrinks
+  // the one on the right of it.
+  const signed = useCallback((delta: number): number =>
+    props.edge === 'rail' ? props.width + delta : props.width - delta, [props.edge, props.width])
+
+  return createElement('div', {
+    className: 'nw-column-handle',
+    'data-novel-column-handle': props.edge,
+    role: 'separator',
+    tabIndex: 0,
+    'aria-orientation': 'vertical',
+    'aria-label': props.label,
+    'aria-valuenow': props.width,
+    'aria-valuemin': props.min,
+    'aria-valuemax': props.max,
+    'data-dragging': dragging ? 'true' : 'false',
+    onPointerDown: (event: { pointerId: number; clientX: number; currentTarget: { setPointerCapture(id: number): void } }) => {
+      start.current = { x: event.clientX, width: props.width }
+      setDragging(true)
+      event.currentTarget.setPointerCapture(event.pointerId)
+    },
+    onPointerMove: (event: { clientX: number }) => {
+      const from = start.current
+      if (from === null) return
+      props.onWidth(signed(event.clientX - from.x))
+    },
+    onPointerUp: (event: { pointerId: number; currentTarget: { releasePointerCapture(id: number): void } }) => {
+      start.current = null
+      setDragging(false)
+      event.currentTarget.releasePointerCapture(event.pointerId)
+    },
+    onPointerCancel: () => {
+      start.current = null
+      setDragging(false)
+    },
+    onKeyDown: (event: { key: string; shiftKey: boolean; preventDefault(): void }) => {
+      const step = event.shiftKey ? 48 : 16
+      const delta = event.key === 'ArrowRight' ? step : event.key === 'ArrowLeft' ? -step : 0
+      if (delta === 0) return
+      event.preventDefault()
+      props.onWidth(signed(delta))
+    },
+  })
+}

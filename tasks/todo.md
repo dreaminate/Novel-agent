@@ -23,6 +23,40 @@
 - [ ] Execute it. Phase 0 first (baseline + the editor stack's bundle-cost selection record), then Phase 1
   (the approval surface) ahead of everything visible.
 
+## The columns can be dragged, 2026-09-18
+
+**Status:** `verified` in the browser with real mouse, key and reload events.
+
+- [x] **What the user asked for was a capability we dropped.** "The columns can't be dragged wider" is true,
+  and the reason is that the official `@deepseek-ai/dsh-client-ui-layout` AppFrame — which we replace with our
+  own root occupant — *is* the thing that has drag handles. Our frame has had fixed 248/296 tracks since it was
+  written, and `workbenchActions` could only open or close a column, never size one.
+- [x] **The official contract, with our numbers.** `columns.d.ts` solves this with a pure function: the centre
+  column keeps a floor, the details column concedes first and then auto-closes, the rail never concedes.
+  `frame-columns.ts` is that contract with the prototype's 248/296 as defaults, because adopting theirs
+  (280/360) would have been a design change dressed up as a reuse. Widths are preferences (0 = closed), the
+  same shape the store already had, so a closed column stays closed however wide the window gets.
+- [x] **Handles, from the keyboard too.** Each boundary carries a `role="separator"` window splitter on the
+  seam: pointer drag with capture, arrow keys for 16px, shift for 48. A resize only a mouse can perform is a
+  resize half the authors cannot perform.
+- [x] **Real-machine evidence** (`docs/evidence/editor-2026-09-17/probe-columns.mjs`): rail 248 → 337 by drag;
+  conversation 296 → 386 by pulling the boundary left; over-dragging stops at the 360 ceiling; at a 1000px
+  window the conversation column **closes itself** and the canvas keeps 942 ≥ its 640 floor; back at 1440 it
+  returns with the **dragged** width, not the default; ArrowRight moves 200 → 216; a reload keeps both dragged
+  widths; no console errors.
+- [x] **The real machine caught a bug the unit tests had not asked about:** a dragged width was thrown away on
+  the next load, because the I6.2 hydrator validated panel widths against the set `{0, default}` — right when
+  the widths were only ever toggled, wrong the moment they became draggable. It validates against the panel's
+  range now, and a spec pins a dragged width surviving a reload.
+- [x] §4.3 not needed for RED here: the solver spec and the frame-wiring spec were both written first and both
+  failed before the implementation existed.
+- [ ] Gates: **452/452** tests (35 files; +12 columns), `typecheck`, `lint`, `git diff --check`, rebuild +
+  sweep `exit 0`; `lib/client.js` 1,593,441 B against the 2.4 MB ceiling.
+- [ ] **Next, and the other half of the complaint:** the official conversation chrome still looks like itself
+  rather than like this product. The fix is the seam the skins use — overriding `--dsw-alias-*` and the
+  `--dsh-composer-*` layout knobs inside our column — not a rebuild of the composer, whose input seams are
+  closed to plugins (re-verified against the shipped types, not memory).
+
 ## Phase 6 closed out, 2026-09-17 (I6.7)
 
 **Status:** `verified` — every gate re-run in full on the final tree.

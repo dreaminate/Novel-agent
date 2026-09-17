@@ -1,0 +1,231 @@
+{
+  "wide": {
+    "viewport": 1440,
+    "rail": {
+      "w": 247,
+      "x": 0
+    },
+    "canvas": {
+      "w": 896,
+      "x": 248
+    },
+    "side": {
+      "w": 296,
+      "x": 1144
+    },
+    "railTrack": "248px",
+    "sideTrack": "296px",
+    "railHandle": {
+      "x": 247,
+      "y": 472
+    },
+    "sideHandle": {
+      "x": 1146,
+      "y": 472
+    },
+    "documentWidth": 1440
+  },
+  "afterRailDrag": {
+    "viewport": 1440,
+    "rail": {
+      "w": 337,
+      "x": 0
+    },
+    "canvas": {
+      "w": 806,
+      "x": 338
+    },
+    "side": {
+      "w": 296,
+      "x": 1144
+    },
+    "railTrack": "338px",
+    "sideTrack": "296px",
+    "railHandle": {
+      "x": 337,
+      "y": 472
+    },
+    "sideHandle": {
+      "x": 1146,
+      "y": 472
+    },
+    "documentWidth": 1440
+  },
+  "afterSideDrag": {
+    "viewport": 1440,
+    "rail": {
+      "w": 337,
+      "x": 0
+    },
+    "canvas": {
+      "w": 716,
+      "x": 338
+    },
+    "side": {
+      "w": 386,
+      "x": 1054
+    },
+    "railTrack": "338px",
+    "sideTrack": "386px",
+    "railHandle": {
+      "x": 337,
+      "y": 472
+    },
+    "sideHandle": {
+      "x": 1056,
+      "y": 472
+    },
+    "documentWidth": 1440
+  },
+  "afterOverDrag": {
+    "viewport": 1440,
+    "rail": {
+      "w": 359,
+      "x": 0
+    },
+    "canvas": {
+      "w": 694,
+      "x": 360
+    },
+    "side": {
+      "w": 386,
+      "x": 1054
+    },
+    "railTrack": "360px",
+    "sideTrack": "386px",
+    "railHandle": {
+      "x": 359,
+      "y": 472
+    },
+    "sideHandle": {
+      "x": 1056,
+      "y": 472
+    },
+    "documentWidth": 1440
+  },
+  "narrow": {
+    "viewport": 1000,
+    "rail": {
+      "w": 57,
+      "x": 0
+    },
+    "canvas": {
+      "w": 942,
+      "x": 58
+    },
+    "side": null,
+    "railTrack": "360px",
+    "sideTrack": "0px",
+    "railHandle": {
+      "x": 0,
+      "y": 0
+    },
+    "sideHandle": null,
+    "documentWidth": 1000
+  },
+  "wideAgain": {
+    "viewport": 1440,
+    "rail": {
+      "w": 359,
+      "x": 0
+    },
+    "canvas": {
+      "w": 694,
+      "x": 360
+    },
+    "side": {
+      "w": 386,
+      "x": 1054
+    },
+    "railTrack": "360px",
+    "sideTrack": "386px",
+    "railHandle": {
+      "x": 359,
+      "y": 472
+    },
+    "sideHandle": {
+      "x": 1056,
+      "y": 472
+    },
+    "documentWidth": 1440
+  },
+  "beforeArrow": {
+    "viewport": 1440,
+    "rail": {
+      "w": 199,
+      "x": 0
+    },
+    "canvas": {
+      "w": 854,
+      "x": 200
+    },
+    "side": {
+      "w": 386,
+      "x": 1054
+    },
+    "railTrack": "200px",
+    "sideTrack": "386px",
+    "railHandle": {
+      "x": 199,
+      "y": 472
+    },
+    "sideHandle": {
+      "x": 1056,
+      "y": 472
+    },
+    "documentWidth": 1440
+  },
+  "afterArrow": {
+    "viewport": 1440,
+    "rail": {
+      "w": 215,
+      "x": 0
+    },
+    "canvas": {
+      "w": 838,
+      "x": 216
+    },
+    "side": {
+      "w": 386,
+      "x": 1054
+    },
+    "railTrack": "216px",
+    "sideTrack": "386px",
+    "railHandle": {
+      "x": 215,
+      "y": 472
+    },
+    "sideHandle": {
+      "x": 1056,
+      "y": 472
+    },
+    "documentWidth": 1440
+  },
+  "afterReload": {
+    "viewport": 1440,
+    "rail": {
+      "w": 215,
+      "x": 0
+    },
+    "canvas": {
+      "w": 838,
+      "x": 216
+    },
+    "side": {
+      "w": 386,
+      "x": 1054
+    },
+    "railTrack": "216px",
+    "sideTrack": "386px",
+    "railHandle": {
+      "x": 215,
+      "y": 472
+    },
+    "sideHandle": {
+      "x": 1056,
+      "y": 472
+    },
+    "documentWidth": 1440
+  },
+  "consoleErrors": []
+}

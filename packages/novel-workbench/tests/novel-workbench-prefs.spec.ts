@@ -74,6 +74,16 @@ describe('workbench preferences across a reload', () => {
     expect(state.settings.refineMode).toBe('while-writing')
   })
 
+  it('keeps a column width the author dragged', () => {
+    // A dragged width is not one of a fixed set of choices — it is any number in
+    // the panel's range, so validating against the defaults alone threw it away
+    // on the next load. The real machine found this; the unit test had not asked.
+    workbenchActions.setSidebarWidth(320)
+    workbenchActions.setDetailsWidth(410)
+    resetWorkbench()
+    expect(getWorkbenchState().panels).toEqual({ sidebar: 320, details: 410 })
+  })
+
   it('keeps nothing that belongs to a session', () => {
     workbenchActions.setCurrentSession('s-6' as never)
     workbenchActions.rememberSubmission('s-6' as never, '夜里风大')
@@ -103,7 +113,8 @@ describe('workbench preferences across a reload', () => {
     const state = hydrateWorkbench(JSON.stringify({
       view: 'storybook',
       theme: 'sepia',
-      panels: { sidebar: 'wide', details: -40 },
+      // 'wide' is not a width; 900 is outside every panel range this build draws.
+      panels: { sidebar: 'wide', details: 900 },
       settings: {
         readingSize: 99,
         readingMeasure: '40',

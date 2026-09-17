@@ -17,3 +17,8 @@ globalThis.ResizeObserver ??= class ResizeObserverStub {
   unobserve(): void {}
   disconnect(): void {}
 } as never
+// Pointer capture is how a column drag keeps receiving moves after the pointer
+// leaves the handle. jsdom has neither method; the drag logic under test does
+// not depend on what they do.
+Element.prototype.setPointerCapture ??= function setPointerCapture(): void {}
+Element.prototype.releasePointerCapture ??= function releasePointerCapture(): void {}

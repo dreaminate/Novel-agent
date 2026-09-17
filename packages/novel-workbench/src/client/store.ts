@@ -15,6 +15,7 @@
  */
 import { useSyncExternalStore } from 'react'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
+import { RAIL_MAX, RAIL_MIN, SIDE_MAX, SIDE_MIN, clampWidth } from './frame-columns.js'
 import type { TranscriptEntry } from './transcript-data.js'
 
 /** Live shell geometry (px; sidebar 0 = collapsed rail, details 0 = no context column). */
@@ -260,8 +261,8 @@ export function hydrateWorkbench(raw: string | null, base: WorkbenchState = DEFA
     view: oneOf(stored?.['view'], WORKBENCH_VIEWS.map(entry => entry.id), base.view),
     theme: oneOf(stored?.['theme'], THEMES, base.theme),
     panels: {
-      sidebar: oneOfNumber(panels['sidebar'], [0, SIDEBAR_DEFAULT], base.panels.sidebar),
-      details: oneOfNumber(panels['details'], [0, DETAILS_DEFAULT], base.panels.details),
+      sidebar: panelWidthOr(panels['sidebar'], RAIL_MIN, RAIL_MAX, base.panels.sidebar),
+      details: panelWidthOr(panels['details'], SIDE_MIN, SIDE_MAX, base.panels.details),
     },
     settings: {
       readingSize: oneOfNumber(settings['readingSize'], READING_SIZES, base.settings.readingSize),
@@ -308,6 +309,19 @@ function oneOf<T extends string>(value: unknown, allowed: readonly T[], fallback
 
 function oneOfNumber(value: unknown, allowed: readonly number[], fallback: number): number {
   return typeof value === 'number' && allowed.includes(value) ? value : fallback
+}
+
+/**
+ * A panel width preference: 0 is closed, anything else is a width the author
+ * dragged, so it has to sit in the same range the drag itself clamps to. A
+ * stored width outside that range is from another build's contract, not a value
+ * this one knows how to draw.
+ */
+function panelWidthOr(value: unknown, min: number, max: number, fallback: number): number {
+  if (value === 0) return 0
+  return typeof value === 'number' && Number.isFinite(value) && value >= min && value <= max
+    ? Math.round(value)
+    : fallback
 }
 
 function rangeOr(value: unknown, fallback: number): number {
@@ -571,9 +585,26 @@ export const workbenchActions = {
     })
   },
 
+  /**
+   * Drag the navigation column to a width. A drag never crosses the open/closed
+   * line — that is what the toggle is for — so it clamps into the panel's range.
+   */
+  setSidebarWidth(width: number): void {
+    const sidebar = clampWidth(width, RAIL_MIN, RAIL_MAX)
+    if (state.panels.sidebar === sidebar) return
+    publish({ ...state, panels: { ...state.panels, sidebar } })
+  },
+
   openDetails(): void {
     if (state.panels.details === DETAILS_DEFAULT) return
     publish({ ...state, panels: { ...state.panels, details: DETAILS_DEFAULT } })
+  },
+
+  /** Drag the conversation column to a width; same clamps, same rule. */
+  setDetailsWidth(width: number): void {
+    const details = clampWidth(width, SIDE_MIN, SIDE_MAX)
+    if (state.panels.details === details) return
+    publish({ ...state, panels: { ...state.panels, details } })
   },
 
   closeDetails(): void {

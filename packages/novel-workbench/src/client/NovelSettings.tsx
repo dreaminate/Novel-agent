@@ -13,7 +13,8 @@
  * so the switch has somewhere to land — the rule was never against the control,
  * only against shipping one that does nothing.
  */
-import { createElement, useEffect, type ReactNode } from 'react'
+import { createElement, useEffect, useRef, type ReactNode } from 'react'
+import { useDialogFocus } from './dialog-focus.js'
 import { useWorkbenchState, workbenchActions, type RefineMode, type WorkbenchTheme } from './store.js'
 
 /** Sheet rules: the frame's own overlay above the three columns. */
@@ -62,6 +63,8 @@ const THEMES: readonly { readonly id: WorkbenchTheme; readonly label: string }[]
 export function NovelSettings(): ReactNode {
   const state = useWorkbenchState()
   const open = state.settingsOpen
+  const sheet = useRef<HTMLDivElement | null>(null)
+  useDialogFocus(sheet, open)
 
   useEffect(() => {
     if (!open) return
@@ -99,6 +102,7 @@ export function NovelSettings(): ReactNode {
       role: 'dialog',
       'aria-modal': 'true',
       'aria-label': '设置',
+      ref: sheet,
       onClick: (event: { target: unknown; currentTarget: unknown }) => {
         if (event.target === event.currentTarget) workbenchActions.closeSettings()
       },

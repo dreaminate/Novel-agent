@@ -298,7 +298,11 @@ async function main() {
     const m = narrow.metrics
     console.log(`narrow 1280: data-narrow ${String(m.narrow)} · rail ${String(m.railWidth)}px`
       + ` · labels hidden ${String(m.railLabelsHidden)}`
-      + ` · column floats ${String(m.columnFloatsOverCanvas)} · canvas bottom ${String(m.mainBottom)}`)
+      + ` · column floats ${String(m.columnFloatsOverCanvas)}`
+      + ` · canvas reaches floor ${String(m.canvasReachesFloor)}`
+      + ` (main ${String(m.mainBottom)} vs frame ${String(m.frameBottom)}`
+      + `, ${String(m.mainCount)} main seats, sane ${String(m.mainLooksRight)})`
+      + ` · scrollY ${String(m.scrollY)} of ${String(m.scrollHeight)}`)
   }
   console.log(`out: ${outDir}`)
   const failures = report.failures
@@ -523,6 +527,11 @@ async function sweepThread(session) {
           tools: seat.querySelectorAll('[data-novel-transcript-entry="tool"]').length,
           empty: seat.querySelector('[data-novel-transcript="empty"]') !== null,
           streaming: seat.querySelector('[data-novel-transcript-streaming="true"]') !== null,
+          // A conversation taller than its column has to be scrollable *there*:
+          // with the frame clipping instead, the author cannot read past the fold.
+          overflowY: getComputedStyle(seat).overflowY,
+          scrolls: seat.scrollHeight <= seat.clientHeight
+            || ['auto', 'scroll'].includes(getComputedStyle(seat).overflowY),
           leaks,
           sample: text.trim().replace(/\\n+/g, ' ').slice(0, 160)
         } })()`)
@@ -542,6 +551,9 @@ async function sweepThread(session) {
   if (Array.isArray(transcript.leaks) && transcript.leaks.length > 0) {
     screen.state = 'transcript-leaks-tool-names'
   }
+  // A conversation taller than its column that cannot scroll is one the author
+  // cannot finish reading.
+  if (transcript.scrolls === false) screen.state = 'transcript-clipped'
   // 工具活动 has to do something, and the only honest way to know is to use it
   // where the transcript is: turn it off, count the tool lines again, put it
   // back. Skipped when there is no tool activity to hide — this is a check on
@@ -636,12 +648,20 @@ async function sweepNarrow(session) {
       const main = document.querySelector('[data-novel-shell="main"]')
       return { viewport: window.innerWidth,
         documentWidth: document.documentElement.scrollWidth,
+        scrollY: Math.round(window.scrollY),
+        scrollHeight: document.documentElement.scrollHeight,
         frameWidth: Math.round(rect.width),
         frameHeight: Math.round(rect.height),
+        frameBottom: Math.round(rect.bottom),
         narrow: frame.getAttribute('data-narrow'),
         railWidth: Math.round(rail?.getBoundingClientRect().width ?? 0),
         railLabelsHidden: labels.length > 0 && labels.every(node => getComputedStyle(node).display === 'none'),
-        mainBottom: Math.round(main?.getBoundingClientRect().bottom ?? 0),
+        // Both in viewport coordinates, so the difference survives a scroll.
+        mainBottom: main === null ? null : Math.round(main.getBoundingClientRect().bottom),
+        mainCount: document.querySelectorAll('[data-novel-shell="main"]').length,
+        mainLooksRight: main !== null && main.tagName === 'MAIN' && frame.contains(main),
+        canvasReachesFloor: main !== null
+          && Math.abs(main.getBoundingClientRect().bottom - rect.bottom) < 2,
         columnPresent: side !== null,
         columnFloatsOverCanvas: side !== null && main !== null
           && side.getBoundingClientRect().x < main.getBoundingClientRect().right } })()`)
@@ -659,7 +679,7 @@ async function sweepNarrow(session) {
   }
   // The frame no longer reserves the prototype's composer row: the canvas has to
   // reach the bottom of the seat rather than stop above it.
-  else if (metrics.mainBottom < metrics.frameHeight - 2) screen.state = 'dead-row-under-canvas'
+  else if (!metrics.canvasReachesFloor) screen.state = 'dead-row-under-canvas'
   await session.send('Emulation.setDeviceMetricsOverride', {
     width: 1440, height: 900, deviceScaleFactor: 1, mobile: false,
   })

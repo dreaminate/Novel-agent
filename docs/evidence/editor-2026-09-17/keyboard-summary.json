@@ -1,0 +1,304 @@
+{
+  "anchoredOnTopbar": true,
+  "tabOrder": [
+    {
+      "where": "button|跟随系统",
+      "ring": "2px rgb(217, 119, 87)",
+      "inDialog": false,
+      "inFrame": true
+    },
+    {
+      "where": "button|日间",
+      "ring": "2px rgb(217, 119, 87)",
+      "inDialog": false,
+      "inFrame": true
+    },
+    {
+      "where": "button|夜间",
+      "ring": "2px rgb(217, 119, 87)",
+      "inDialog": false,
+      "inFrame": true
+    },
+    {
+      "where": "button|settings-open=true|设置",
+      "ring": "2px rgb(217, 119, 87)",
+      "inDialog": false,
+      "inFrame": true
+    },
+    {
+      "where": "button|btn|左栏",
+      "ring": "2px rgb(217, 119, 87)",
+      "inDialog": false,
+      "inFrame": true
+    },
+    {
+      "where": "button|topbar-details=true|对话",
+      "ring": "2px rgb(217, 119, 87)",
+      "inDialog": false,
+      "inFrame": true
+    },
+    {
+      "where": "button|chapter=vol01-ch0001|1开篇章待审",
+      "ring": "2px rgb(217, 119, 87)",
+      "inDialog": false,
+      "inFrame": true
+    },
+    {
+      "where": "button|view=editor|写作",
+      "ring": "2px rgb(217, 119, 87)",
+      "inDialog": false,
+      "inFrame": true
+    },
+    {
+      "where": "button|view=map|故事地图",
+      "ring": "2px rgb(217, 119, 87)",
+      "inDialog": false,
+      "inFrame": true
+    },
+    {
+      "where": "button|view=clues|伏笔与线索",
+      "ring": "2px rgb(217, 119, 87)",
+      "inDialog": false,
+      "inFrame": true
+    },
+    {
+      "where": "button|view=debts|未收束债务",
+      "ring": "2px rgb(217, 119, 87)",
+      "inDialog": false,
+      "inFrame": true
+    },
+    {
+      "where": "button|view=cast|人物与关系",
+      "ring": "2px rgb(217, 119, 87)",
+      "inDialog": false,
+      "inFrame": true
+    },
+    {
+      "where": "button|view=timeline|时间线",
+      "ring": "2px rgb(217, 119, 87)",
+      "inDialog": false,
+      "inFrame": true
+    },
+    {
+      "where": "button|view=memory|写作记忆",
+      "ring": "2px rgb(217, 119, 87)",
+      "inDialog": false,
+      "inFrame": true
+    },
+    {
+      "where": "button|view=contract|本章合同",
+      "ring": "2px rgb(217, 119, 87)",
+      "inDialog": false,
+      "inFrame": true
+    },
+    {
+      "where": "button|view=simulation|推演",
+      "ring": "2px rgb(217, 119, 87)",
+      "inDialog": false,
+      "inFrame": true
+    },
+    {
+      "where": "button|view=history|版本历史",
+      "ring": "2px rgb(217, 119, 87)",
+      "inDialog": false,
+      "inFrame": true
+    },
+    {
+      "where": "button|thread=session-2642a8b2-c4d5-4ca3-80e5-45acb994a3b3",
+      "ring": "2px rgb(217, 119, 87)",
+      "inDialog": false,
+      "inFrame": true
+    },
+    {
+      "where": "button|thread=session-65f247e8-828e-4fb4-a13a-778afb43309f|提炼第1章写作记忆提",
+      "ring": "2px rgb(217, 119, 87)",
+      "inDialog": false,
+      "inFrame": true
+    },
+    {
+      "where": "button|thread=session-3b13f527-0b48-42fe-a18d-10cbc2a84daf|提交第一章草稿提案",
+      "ring": "2px rgb(217, 119, 87)",
+      "inDialog": false,
+      "inFrame": true
+    },
+    {
+      "where": "button|thread=session-b2a61a2a-fd14-45a4-bcf6-6380510a140d|把 ok 写入指定文",
+      "ring": "2px rgb(217, 119, 87)",
+      "inDialog": false,
+      "inFrame": true
+    },
+    {
+      "where": "button|thread=session-7e532900-e5d9-45e4-9634-242b94abfc41|将文本 ok 写入指",
+      "ring": "2px rgb(217, 119, 87)",
+      "inDialog": false,
+      "inFrame": true
+    },
+    {
+      "where": "button|item|展开其余 16 条",
+      "ring": "2px rgb(217, 119, 87)",
+      "inDialog": false,
+      "inFrame": true
+    },
+    {
+      "where": "button|item|新建线程",
+      "ring": "2px rgb(217, 119, 87)",
+      "inDialog": false,
+      "inFrame": true
+    },
+    {
+      "where": "button|item|进阶关",
+      "ring": "2px rgb(217, 119, 87)",
+      "inDialog": false,
+      "inFrame": true
+    },
+    {
+      "where": "button|nw-thread-pending|待审提案 6",
+      "ring": "2px rgb(217, 119, 87)",
+      "inDialog": false,
+      "inFrame": true
+    },
+    {
+      "where": "button|pXSMma_workspace|天机阁主",
+      "ring": "2px rgb(217, 119, 87)",
+      "inDialog": false,
+      "inFrame": true
+    },
+    {
+      "where": "button|cubgiG_seat|标准模式",
+      "ring": "2px rgb(217, 119, 87)",
+      "inDialog": false,
+      "inFrame": true
+    },
+    {
+      "where": "div|uV2eYG_input",
+      "ring": "2px rgb(217, 119, 87)",
+      "inDialog": false,
+      "inFrame": true
+    },
+    {
+      "where": "button|uV2eYG_add",
+      "ring": "2px rgb(217, 119, 87)",
+      "inDialog": false,
+      "inFrame": true
+    },
+    {
+      "where": "button|Sh0Q9G_trigger|工作区内修改",
+      "ring": "2px rgb(217, 119, 87)",
+      "inDialog": false,
+      "inFrame": true
+    },
+    {
+      "where": "button|_7KE1Ra_trigger|DeepSeek-V",
+      "ring": "2px rgb(217, 119, 87)",
+      "inDialog": false,
+      "inFrame": true
+    },
+    {
+      "where": "button|btn|进阶",
+      "ring": "2px rgb(217, 119, 87)",
+      "inDialog": false,
+      "inFrame": true
+    },
+    {
+      "where": "button|跟随系统",
+      "ring": "2px rgb(217, 119, 87)",
+      "inDialog": false,
+      "inFrame": true
+    },
+    {
+      "where": "button|日间",
+      "ring": "2px rgb(217, 119, 87)",
+      "inDialog": false,
+      "inFrame": true
+    },
+    {
+      "where": "button|夜间",
+      "ring": "2px rgb(217, 119, 87)",
+      "inDialog": false,
+      "inFrame": true
+    },
+    {
+      "where": "button|settings-open=true|设置",
+      "ring": "2px rgb(217, 119, 87)",
+      "inDialog": false,
+      "inFrame": true
+    },
+    {
+      "where": "button|btn|左栏",
+      "ring": "2px rgb(217, 119, 87)",
+      "inDialog": false,
+      "inFrame": true
+    },
+    {
+      "where": "button|topbar-details=true|对话",
+      "ring": "2px rgb(217, 119, 87)",
+      "inDialog": false,
+      "inFrame": true
+    },
+    {
+      "where": "button|chapter=vol01-ch0001|1开篇章待审",
+      "ring": "2px rgb(217, 119, 87)",
+      "inDialog": false,
+      "inFrame": true
+    }
+  ],
+  "ringOnEveryStop": true,
+  "stops": [
+    "button|跟随系统",
+    "button|日间",
+    "button|夜间",
+    "button|settings-open=true|设置",
+    "button|btn|左栏",
+    "button|topbar-details=true|对话",
+    "button|chapter=vol01-ch0001|1开篇章待审",
+    "button|view=editor|写作",
+    "button|view=map|故事地图",
+    "button|view=clues|伏笔与线索",
+    "button|view=debts|未收束债务",
+    "button|view=cast|人物与关系",
+    "button|view=timeline|时间线",
+    "button|view=memory|写作记忆",
+    "button|view=contract|本章合同",
+    "button|view=simulation|推演",
+    "button|view=history|版本历史",
+    "button|thread=session-2642a8b2-c4d5-4ca3-80e5-45acb994a3b3",
+    "button|thread=session-65f247e8-828e-4fb4-a13a-778afb43309f|提炼第1章写作记忆提",
+    "button|thread=session-3b13f527-0b48-42fe-a18d-10cbc2a84daf|提交第一章草稿提案",
+    "button|thread=session-b2a61a2a-fd14-45a4-bcf6-6380510a140d|把 ok 写入指定文",
+    "button|thread=session-7e532900-e5d9-45e4-9634-242b94abfc41|将文本 ok 写入指",
+    "button|item|展开其余 16 条",
+    "button|item|新建线程",
+    "button|item|进阶关",
+    "button|nw-thread-pending|待审提案 6",
+    "button|pXSMma_workspace|天机阁主",
+    "button|cubgiG_seat|标准模式",
+    "div|uV2eYG_input",
+    "button|uV2eYG_add",
+    "button|Sh0Q9G_trigger|工作区内修改",
+    "button|_7KE1Ra_trigger|DeepSeek-V",
+    "button|btn|进阶",
+    "button|跟随系统",
+    "button|日间",
+    "button|夜间",
+    "button|settings-open=true|设置",
+    "button|btn|左栏",
+    "button|topbar-details=true|对话",
+    "button|chapter=vol01-ch0001|1开篇章待审"
+  ],
+  "bodyStops": 0,
+  "stopsInsideFrame": 40,
+  "sheetOpenedAt": {
+    "where": "button|settings-close=true|完成",
+    "ring": "2px rgb(217, 119, 87)",
+    "inDialog": true,
+    "inFrame": true
+  },
+  "sheetTabStaysInside": true,
+  "focusAfterClose": {
+    "where": "button|settings-open=true|设置",
+    "ring": "2px rgb(217, 119, 87)",
+    "inDialog": false,
+    "inFrame": true
+  },
+  "consoleErrors": []
+}

@@ -80,6 +80,19 @@ const FRAME_CSS = `
   display: contents;
 }
 /*
+ * The transcript is the part of the conversation column that scrolls: the
+ * header stays at the top and the composer stays at the bottom, where the author
+ * left them. The seat is display:contents for every other purpose, so it has to
+ * become a box here — without one, a long conversation overflows the grid row
+ * and the frame clips it, and the author cannot read past the fold at all.
+ */
+[data-novel-workbench="frame"] [data-novel-transcript-seat] {
+  display: block;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+/*
  * The frame renders the thread's prose itself (NovelTranscript) and sets it as
  * reading. The shipped conversation surface is left mounted because it still
  * owns what the novel mode has not replaced yet — the composer, the input

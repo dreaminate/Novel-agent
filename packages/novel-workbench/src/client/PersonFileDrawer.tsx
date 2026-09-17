@@ -6,7 +6,8 @@
  * their relations stand in each direction, and where have they appeared — then
  * offers the one action that matters: keep writing from this person.
  */
-import { createElement, useEffect, type ReactNode } from 'react'
+import { createElement, useEffect, useRef, type ReactNode } from 'react'
+import { useDialogFocus } from './dialog-focus.js'
 import type { NovelPersonFile } from './novel-data.js'
 
 /** Drawer rules: a right-hand panel above the columns, like the prototype's sheet. */
@@ -61,6 +62,8 @@ export interface PersonFileDrawerProps {
 /** The drawer. */
 export function PersonFileDrawer(props: PersonFileDrawerProps): ReactNode {
   const { file } = props
+  const drawer = useRef<HTMLDivElement | null>(null)
+  useDialogFocus(drawer, file !== undefined)
 
   useEffect(() => {
     if (file === undefined) return
@@ -80,6 +83,7 @@ export function PersonFileDrawer(props: PersonFileDrawerProps): ReactNode {
       role: 'dialog',
       'aria-modal': 'true',
       'aria-label': `人物档案 ${file.name}`,
+      ref: drawer,
       onClick: (event: { target: unknown; currentTarget: unknown }) => {
         if (event.target === event.currentTarget) props.onClose()
       },

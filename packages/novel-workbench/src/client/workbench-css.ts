@@ -118,7 +118,7 @@ svg { display: block; }
   background: hsl(var(--bg-000));
   border: 1px solid hsl(var(--border-100));
   border-radius: var(--r-card);
-  overflow: hidden;
+  overflow: clip;
   box-shadow: var(--sh-2);
 }
 

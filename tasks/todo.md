@@ -23,6 +23,37 @@
 - [ ] Execute it. Phase 0 first (baseline + the editor stack's bundle-cost selection record), then Phase 1
   (the approval surface) ahead of everything visible.
 
+## The keyboard can use the dialogs, and the column can be read, 2026-09-17 (I6.4a)
+
+**Status:** `verified` in the browser; two defects worse than the increment's own subject came out of it.
+
+- [x] **Both modal surfaces declared `aria-modal` and kept none of it.** The 设置 sheet and the 人物档案 drawer
+  took no focus, let Tab walk out, and never gave focus back — and inside the shipped host that means Tab
+  lands in whatever other plugin is mounted behind us. One hook (`dialog-focus.ts`) now does all three for
+  both, listening on the document rather than the dialog, because a trap attached to the element cannot see
+  the Tab that starts outside it — which is the one that has to be caught.
+- [x] **Tab order and focus rings needed measuring, not fixing.** Driven with real key events, the cycle is
+  topbar → rail (chapter, ten views, threads) → conversation column (header, official controls, composer) →
+  wrap: the visual order, with our accent ring on every stop. Two probe mistakes are recorded rather than
+  papered over: `body.focus()` does not reset Chrome's sequential-navigation starting point, and a synthetic
+  Enter needs its `text` or a button never activates.
+- [x] **A defect the sweep found by failing:** the whole frame could be scrolled programmatically. `main`'s box
+  came back 15523px above the viewport and the narrow screenshot had no topbar or rail in it at all — because
+  `.app` is `overflow: hidden`, which still scrolls, and the conversation column was taller than its grid row.
+  Any `focus()` could slide the entire application. It is `overflow: clip` now, in the generated stylesheet and
+  the prototype together, with the port gate re-run.
+- [x] **And the reason it was taller:** the transcript seat is `display: contents`, so a 59-message conversation
+  had no scroll container and was clipped by the frame — the author could not read past the fold. The seat is a
+  box now, with the header pinned above it and the composer below. Verified live: `overflow-y: auto`, `scrolls: true`.
+- [x] §4.3 targeted breakage: four mutations on the focus hook all bitten, restored byte-for-byte; and the new
+  `transcript-clipped` sweep check was shown to bite by putting `overflow-y: visible` back and watching the
+  thread screen report exactly that.
+- [x] Gates: **428/428** tests, `typecheck`, `lint`, `git diff --check`, the port-CSS gate, rebuild + sweep
+  `exit 0`; `lib/client.js` 1,580,329 B against the 2.4 MB ceiling.
+- [ ] **I6.4b is the rest of the keyboard work, and it has a real conflict to resolve first:** the prototype's
+  map is focusable SVG nodes, and our map is sigma on WebGL, so there are no nodes to focus. The options are
+  recorded in the plan rather than guessed at here.
+
 ## The frame fits a narrow window, 2026-09-17 (I6.3)
 
 **Status:** `verified` at 1280 and 1440 in the browser, with measurements rather than impressions.

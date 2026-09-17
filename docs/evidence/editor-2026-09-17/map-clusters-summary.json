@@ -1,0 +1,131 @@
+{
+  "initial": {
+    "people": 7,
+    "clusters": 1,
+    "folded": 3,
+    "axis": "faction",
+    "clusterLabels": [
+      "无势力"
+    ],
+    "bubbles": [
+      {
+        "cluster": "无势力",
+        "label": "无势力：还有 3 位未展开（junlinyuan、qingshuying、xiaoyuan）",
+        "text": "+3"
+      }
+    ],
+    "stageBox": {
+      "w": 894,
+      "h": 492
+    },
+    "overlayBox": {
+      "w": 894,
+      "h": 492
+    },
+    "discs": [
+      {
+        "cx": 447,
+        "cy": 246,
+        "r": 153
+      }
+    ],
+    "unpin": null,
+    "meta": "R5 · 7 个人物 · 3 条关系 · 折叠 3 位"
+  },
+  "fits": {
+    "overlayCoversStage": true,
+    "discsInside": true
+  },
+  "expand": {
+    "cluster": "无势力",
+    "foldedBefore": 3,
+    "foldedAfter": 0,
+    "bubbleGone": true,
+    "peopleUnchanged": true
+  },
+  "byPlace": {
+    "people": 7,
+    "clusters": 1,
+    "folded": 3,
+    "axis": "place",
+    "clusterLabels": [
+      "地点未知"
+    ],
+    "bubbles": [
+      {
+        "cluster": "地点未知",
+        "label": "地点未知：还有 3 位未展开（junlinyuan、qingshuying、xiaoyuan）",
+        "text": "+3"
+      }
+    ],
+    "stageBox": {
+      "w": 894,
+      "h": 492
+    },
+    "overlayBox": {
+      "w": 894,
+      "h": 492
+    },
+    "discs": [
+      {
+        "cx": 447,
+        "cy": 246,
+        "r": 153
+      }
+    ],
+    "unpin": null,
+    "meta": "R5 · 7 个人物 · 3 条关系 · 折叠 3 位"
+  },
+  "pan": {
+    "movedBy": {
+      "x": 70,
+      "y": 50
+    },
+    "expected": {
+      "x": 70,
+      "y": 50
+    },
+    "unpinned": null
+  },
+  "pin": {
+    "seat": [
+      0,
+      -1
+    ],
+    "unpin": "解除全部钉位（1）"
+  },
+  "released": {
+    "people": 7,
+    "clusters": 1,
+    "folded": 3,
+    "axis": "faction",
+    "clusterLabels": [
+      "无势力"
+    ],
+    "bubbles": [
+      {
+        "cluster": "无势力",
+        "label": "无势力：还有 3 位未展开（junlinyuan、qingshuying、xiaoyuan）",
+        "text": "+3"
+      }
+    ],
+    "stageBox": {
+      "w": 894,
+      "h": 492
+    },
+    "overlayBox": {
+      "w": 894,
+      "h": 492
+    },
+    "discs": [
+      {
+        "cx": 507,
+        "cy": 286,
+        "r": 153
+      }
+    ],
+    "unpin": null,
+    "meta": "R5 · 7 个人物 · 3 条关系 · 折叠 3 位"
+  },
+  "consoleErrors": []
+}

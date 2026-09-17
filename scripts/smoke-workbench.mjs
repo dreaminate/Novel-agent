@@ -274,6 +274,16 @@ async function main() {
       console.log(`thread sample: ${thread.transcript.sample}`)
     }
   }
+  const story = report.screens.find(screen => screen.view === 'map')
+  if (story?.map !== undefined && story.map !== null) {
+    const clusters = `[${story.map.labels.join(' / ')}]`
+    const tail = `· ${String(story.map.people)} 人物 · 折叠 ${String(story.map.folded)}`
+    const axis = `· 轴 ${String(story.map.axis)} · canvas ${String(story.map.canvases)}`
+    console.log(`story map: ${String(story.map.clusters)} 簇 ${clusters} ${tail} ${axis}`)
+    if (Array.isArray(story.map.bubbles) && story.map.bubbles.length > 0) {
+      console.log(`story map folded clusters: ${story.map.bubbles.join(' / ')}`)
+    }
+  }
   console.log(`out: ${outDir}`)
   const failures = report.failures
   // A skip is a truthful record (no proposal, no accepted chapter), not a
@@ -305,13 +315,80 @@ async function sweepView(session, id, label) {
     `document.querySelector('[data-novel-canvas="map"] canvas') !== null`)
   await sleep(settleMs)
   const screen = await record(session, id, label)
-  if (id === 'map') {
-    // How much of the accepted cast the map folded off the story web.
-    screen.folded = await session.evaluate(
-      `(() => { const node = document.querySelector('[data-novel-story-map-folded]')
-        return node === null ? null : node.innerText.trim() })()`)
-  }
+  if (id === 'map') await sweepMap(session, screen)
   return screen
+}
+
+/**
+ * How the map scales the accepted cast: one disc per cluster, and any cluster
+ * whose loose ends are folded behind a `+N`. Read from the attributes the view
+ * publishes rather than by parsing its text — the header re-renders on its own
+ * schedule, and a count read out of prose has already produced one false
+ * "nothing happened" in this project.
+ */
+async function sweepMap(session, screen) {
+  const read = async () => await session.evaluate(`(() => {
+    const root = document.querySelector('[data-novel-story-map]')
+    if (root === null) return null
+    const stage = document.querySelector('[data-novel-story-map-canvas]')
+    const overlay = document.querySelector('[data-novel-story-map-overlay]')
+    const disc = document.querySelector('.nw-map-disc')
+    const box = stage === null ? null : stage.getBoundingClientRect()
+    const paint = overlay === null ? null : overlay.getBoundingClientRect()
+    return {
+      people: Number(root.getAttribute('data-novel-story-map-people') ?? '0'),
+      clusters: Number(root.getAttribute('data-novel-story-map-clusters') ?? '0'),
+      folded: Number(root.getAttribute('data-novel-story-map-folded') ?? '0'),
+      labels: Array.from(document.querySelectorAll('[data-novel-story-map-cluster]'))
+        .map(node => node.getAttribute('data-novel-story-map-cluster')),
+      bubbles: Array.from(document.querySelectorAll('[data-novel-story-map-bubble]'))
+        .map(node => node.getAttribute('data-novel-story-map-bubble')),
+      axis: (document.querySelector('[data-novel-story-map-axis]') ?? { getAttribute: () => null })
+        .getAttribute('data-novel-story-map-axis'),
+      canvases: document.querySelectorAll('[data-novel-story-map-canvas] canvas').length,
+      overlayCoversStage: box !== null && paint !== null
+        && Math.abs(paint.width - box.width) < 2 && Math.abs(paint.height - box.height) < 2,
+      discInsideOverlay: disc === null || paint === null ? null
+        : Number(disc.getAttribute('cx')) >= 0 && Number(disc.getAttribute('cx')) <= paint.width
+          && Number(disc.getAttribute('cy')) >= 0 && Number(disc.getAttribute('cy')) <= paint.height,
+    } })()`)
+  const before = await read()
+  if (before === null) {
+    screen.state = 'map-missing-root'
+    return
+  }
+  screen.map = before
+  if (before.axis === null) screen.state = 'map-missing-axis'
+  // A cast with no disc means the ring layout never ran, whatever the canvas painted.
+  if (before.people > 0 && before.clusters === 0) screen.state = 'map-no-clusters'
+  // The discs are positioned in the overlay's own pixel space, so an overlay that
+  // does not cover the stage puts every one of them somewhere the author cannot see.
+  if (!before.overlayCoversStage) screen.state = 'map-overlay-misplaced'
+  if (before.discInsideOverlay === false) screen.state = 'map-disc-off-overlay'
+  const first = before.bubbles[0]
+  if (first === undefined) return
+  // Opening a `+N` has to bring its cast back, in the real browser, not just in
+  // the unit test: the bubble is chrome drawn in the overlay, so this is the only
+  // place its click lands. SVG elements have no `click()`, hence the event.
+  await session.evaluate(
+    `document.querySelector('[data-novel-story-map-bubble=${JSON.stringify(first)}] .nw-map-bubble')
+      .dispatchEvent(new MouseEvent('click', { bubbles: true }))`)
+  await sleep(250)
+  const after = await read()
+  screen.mapOpened = after
+  if (after !== null && after.bubbles.includes(first)) screen.state = 'map-bubble-ignored'
+  if (after !== null && after.folded >= before.folded) screen.state = 'map-bubble-ignored'
+  // Put the fold back so the rest of the sweep — and the screenshot — shows the
+  // map as an author first meets it. Switching the axis away and back is the
+  // view's own way of closing what was opened, and it exercises that too.
+  await session.evaluate(
+    `document.querySelector('[data-novel-story-map-axis-option="place"]')?.click()`)
+  await session.evaluate(
+    `document.querySelector('[data-novel-story-map-axis-option="faction"]')?.click()`)
+  await sleep(200)
+  await session.send('Page.captureScreenshot', { format: 'png' }).then(shot => {
+    writeFileSync(screen.screenshot, Buffer.from(shot.data, 'base64'))
+  })
 }
 
 /**

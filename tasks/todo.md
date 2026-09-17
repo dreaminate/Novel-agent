@@ -23,6 +23,38 @@
 - [ ] Execute it. Phase 0 first (baseline + the editor stack's bundle-cost selection record), then Phase 1
   (the approval surface) ahead of everything visible.
 
+## Story map becomes a cluster map, 2026-09-17 (I6.1a)
+
+**Status:** `verified` live on the rebuilt Host; the one prototype feature still not built (只看本卷) has a
+checked reason rather than an assumption.
+
+- [x] **The force-directed map is gone; the cast is laid out on cluster discs.** Faction clustering is the
+  default axis and places are the other; each disc carries its own `+N` for the cast no accepted relationship
+  line reaches, and dragging a character pins it where the author dropped it. The geometry is a pure function
+  (`packages/novel-workbench/src/client/story-map-layout.ts`) so the ring maths, the folding rule and the pin
+  rule are asserted without WebGL; the view only feeds sigma and translates mouse events into state.
+  `graphology-layout` and `graphology-layout-forceatlas2` left the bundle, the dependencies and the lockfile
+  (46 deletions, 0 additions) — `lib/client.js` 1,611,088 B → **1,569,730 B**.
+- [x] **Three defects that only the real browser showed, all fixed.** ① The disc overlay was an SVG sized by
+  `inset: 0` alone, which leaves a replaced element at its intrinsic 300×150, so every disc was drawn off the
+  visible strip; ② sigma frames the nodes it is handed while a disc is wider than the members it holds, so the
+  rims were cut and any Canon change rescaled the whole map — the graph now carries two zero-size framing
+  anchors on the layout's own content box; ③ the `+N` sat inside the rim and collided with member labels.
+  A fourth defect was in my own new smoke check, which compared the overlay against the stage's *border* box.
+- [x] **Real-machine evidence** (`docs/evidence/editor-2026-09-17/probe-map-clusters.mjs`): overlay and sigma
+  canvas both 894×492 with the disc fully inside; `+3` opens to 0 folded with the cast count unchanged; the
+  axis switch really regroups; a drag that misses the cast pans the camera by exactly the drag delta (so the
+  overlay does not swallow the gesture); a drag on a character raises `解除全部钉位（1）`; 0 console errors.
+- [x] §4.3 targeted breakage: **10/10 mutations bitten**, three source files restored byte-for-byte. One of them
+  hung vitest instead of failing, which exposed a wasted re-render in the search path — now guarded.
+- [x] **Not built, on purpose: 只看本卷.** Both accepted story events carry `manuscriptOrder: null` and the
+  work has one volume, so a volume filter cannot change a single pixel today. Building it would be a control
+  that honors nothing, which is the rule this project keeps relearning. Recorded in `I6.1b` with the path to do
+  it honestly once the data exists (extend the projection, do not fake the filter).
+- [x] Gates: **411/411** tests (27 files; +10 layout, +2 view), `typecheck`, `lint`, `git diff --check`, and the
+  sweep's map screen now asserts the framing, the discs, the axis and a `+N` that really reopens.
+- [ ] Author review of the map's look is still outstanding, as it is for every ported screen.
+
 ## Front-end wrap-up: settings honesty and story-map scale, 2026-09-17
 
 **Status:** `verified` live on the rebuilt Host for both changes; two prototype features deliberately
@@ -47,6 +79,8 @@ not built, with reasons recorded.
   does not carry — that is a projection gap, not a front-end gap, and a fake filter would be worse than none.
   钉位 is pure UI state with no persistence home yet, so it first needs a decision on whether pins survive
   reload; that is a design question, not wrap-up, and it is left open rather than half-built.
+  *(Superseded in part, 2026-09-17: `I6.1a` builds pins as session state, explicitly without persistence;
+  按卷筛选 stays open for a sharper reason — see the entry above.)*
 - [x] Live re-verification on the rebuilt profile (`pid 63093`): 16 screens — **15 `rendered`, 1 honest
   `skipped-no-proposal`**, zero console/page/request failures; the map reports `+3 位未连线人物` and the settings
   sheet reports `unhonorableControl: false`. Record and sweep JSON refreshed.

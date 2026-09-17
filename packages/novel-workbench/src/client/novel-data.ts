@@ -536,6 +536,12 @@ export interface NovelStoryNode {
   readonly label: string
   /** Faction or affiliation the node is coloured by; absent means unaffiliated. */
   readonly group: string | undefined
+  /**
+   * Where Canon last placed this character: the location of their latest
+   * accepted story event, as Canon recorded it. Absent means no accepted event
+   * names them — the map then reads them as 地点未知 rather than guessing.
+   */
+  readonly place: string | undefined
   /** Unresolved relationship debts touching this character. */
   readonly debts: number
 }
@@ -1551,10 +1557,30 @@ export function buildStoryMap(input: NovelStoryMapInput): NovelStoryMap {
       id,
       label: person.label,
       group: person.group,
+      place: lastKnownPlace(input.canon, id),
       debts: debts.get(id) ?? 0,
     })),
     edges,
   }
+}
+
+/**
+ * Where one character currently is, as Canon last recorded it: the location of
+ * their latest accepted story event. Canon writes locations one event at a
+ * time, so the newest event wins; a character no event names has no place, and
+ * the map says so instead of inventing one.
+ */
+function lastKnownPlace(canon: NovelCanonProjection, personId: string): string | undefined {
+  let newest: { readonly place: string; readonly order: number } | undefined
+  for (const entity of canon.entities) {
+    if (entity.kind !== 'story-event') continue
+    const event = readStoryEvent(entity.fields)
+    if (event === undefined || event.location === undefined) continue
+    if (!event.participants.includes(personId)) continue
+    if (newest !== undefined && newest.order >= event.startOrder) continue
+    newest = { place: event.location, order: event.startOrder }
+  }
+  return newest?.place
 }
 
 /** One pending proposal as plain author-facing rows. */

@@ -1104,10 +1104,92 @@ HEAD `02a48d8` —— 即本计划写的 `8926e31` **加本计划文件本身的
 
 ### Phase 6 — 其余画布与收尾
 
-- [ ] **I6.1 地图规模化对齐原型** — 分簇（按势力/地点）、只看本卷、钉位、簇内「+N」。当前实现只有
-  我自己加的「未连线折叠 + 搜索」，缺分簇/钉位/过滤。注意「按卷筛选」需要节点带卷弧归属——
-  没有这个数据就先改投影或用别的可实现口径，**不许做假筛选**。
+- [x] **I6.1a 地图规模化：分簇 + 簇内「+N」+ 钉位**（原 I6.1 拆出的前半，2026-09-17 按 §0 拆）——
+  目标：把「40 人变毛球」的力导向换成原型的分簇环布局，簇内未连线人物折叠成各自的 `+N`，节点可拖拽钉位。
+  - 文件：`packages/novel-workbench/src/client/story-map-layout.ts`（新，纯几何）、
+    `StoryMapView.tsx`（重写渲染与交互）、`novel-data.ts`（`NovelStoryNode.place` + `lastKnownPlace`）、
+    `tests/novel-workbench-story-map-layout.spec.ts`（新）、`tests/novel-workbench-story-map.spec.ts`（重写）、
+    `scripts/smoke-workbench.mjs`（`sweepMap`）、`docs/evidence/editor-2026-09-17/probe-map-clusters.mjs`（新）
+  - 要求：分簇轴（势力 / 地点）可切换；未连线人物按簇折叠成 `+N`，展开后回来；节点可拖拽钉位，
+    钉位优先于环位；簇盘与 `+N` 完整可见、不与成员标签打架。
+  - 验证：spec 绿；真机盘完整、`+N` 可展开、拖拽确实写下钉位。
+
+  > **✅ 已完成（2026-09-17）。真机抓到三个只有浏览器才看得见的缺陷，全部已修。**
+  >
+  > **实现（拆成可单测的纯几何 + 只负责画与交互的视图）：**
+  > `story-map-layout.ts` 是纯函数：按轴分簇 → 簇盘排在外环、成员排在盘内环 →
+  > 未连线成员按簇折叠成 `+N` → 有钉位的走钉位。`StoryMapView` 只做三件事：把布局喂给 sigma、
+  > 用 SVG overlay 画簇盘与 `+N`、把鼠标事件翻译成状态。**布局因此可以脱离 WebGL 断言**，
+  > 决策（折叠规则、钉位优先级、内容包围盒）都有测试钉住。
+  >
+  > **与 I6.1 原写法的两处偏差，理由都写进了代码：**
+  > ① **不再用 forceAtlas2。** 力导向正是「规模化」要修的那个毛病；原型的分簇几何是确定性的，
+  >   上游没有提供，所以**布局自研、渲染仍用 sigma**（§2 门禁禁的是自造渲染，不是自造布局）。
+  >   连带把 `graphology-layout` 与 `graphology-layout-forceatlas2` 移出 bundle、依赖与 lockfile。
+  > ② **「只看本卷」拆出去归 I6.1b**，理由见下。
+  >
+  > **🐛 真机验证抓到的三个缺陷（类型检查与 411 个单测全都看不见）：**
+  > ① **整个簇盘画在画布外。** SVG 是 replaced element，`position: absolute; inset: 0`（**没有**显式
+  >   `width`/`height`）不会把它拉伸，它停在内在尺寸 **300×150**，于是盘被裁在左上角一小条。
+  > ② **sigma 按「给它的节点」取景，而盘比盘内的人宽**（盘沿在 ring+52）。所以盘沿上下被切掉，
+  >   而且**任何 Canon 变化都会让整张地图重新缩放**。修法是给图两个**取景锚点**（位于布局自己算出的
+  >   内容包围盒两角，无 label、无 size：画不出来，也点不到、拖不动）——sigma 自己就会把内容框居中。
+  > ③ **`+N` 落在盘沿以内**，压在成员标签上（真机截图里 `+3` 与 `linxuan` 的标签叠在一起）。
+  >   移到盘沿之外 30 个图单位。
+  > 另：**smoke 里我自己新加的那条「overlay 要盖住 stage」检查一开始判错了基准** —— 比的是 stage 的
+  > **边框盒**（含 1px 边框），而 overlay 贴的是**内容盒**，于是报了假失败。基准改为 sigma 自己的画布容器。
+  >
+  > **真机验证（探针 `docs/evidence/editor-2026-09-17/probe-map-clusters.mjs`，产物 `map-clusters-summary.json`
+  > + `map-clusters.png`）：**
+  > | 断言 | 实测 |
+  > | --- | --- |
+  > | 盘画在盘上、且完整可见 | overlay 与 sigma 画布同尺寸 **894×492**；盘 `cx 447 / cy 246 / r 153`，全在框内 |
+  > | `+N` 折叠且能展开 | 无势力簇 `+3`（名字在 `aria-label` 与 `title` 里：junlinyuan、qingshuying、xiaoyuan）；点击后 **折叠 3 → 0**、气泡消失、人数不变 |
+  > | 切换分簇轴 | 势力 → 地点：簇名从「无势力」变「地点未知」，`aria-pressed` 真的翻 |
+  > | overlay 不吃手势 | 从盘心拖 (+70,+50)：盘**正好**移动 (+70,+50)（相机平移），说明拖拽穿透 overlay 到达 sigma |
+  > | 拖拽钉位 | 从成员座位拖 (+60,+40) → **`解除全部钉位（1）`** 出现；点它 → 按钮消失 |
+  > | console | **0 报错** |
+  >
+  > **§4.3 定点破坏：10 处全被咬住，脚本结束时三个源文件 sha256 与破坏前逐字节相同。**
+  > 覆盖：分簇轴、空盘不折叠、钉位优先、`hidden` 只收折叠者、轴切换重置折叠、`upNode` 写钉位、
+  > `place` 派生、**布局变化不重建 renderer**（保相机）、内容包围盒含盘沿、`+N` 在盘沿之外。
+  > （「重建 renderer」那条第一次跑时**把 vitest 挂死**而不是失败 —— 视图在搜索路径上反复 setState；
+  > 顺手把 `setExpanded` 改成「已开则原样返回」，循环与无谓重渲染一起消掉。）
+  >
+  > **§2 开源门禁：** `graphology-layout@0.6.1` 与 `graphology-layout-forceatlas2@0.10.1`
+  > **移出**依赖与 bundle。lockfile **46 行删除、0 行新增**（`pandemonium` / `mnemonist` / `obliterator`
+  > 随之离开）；`lib/client.js` 1,611,088 B → **1,569,730 B**。已同步 `THIRD_PARTY_NOTICES.md`、
+  > `docs/upstream-sources.md` 与 `docs/open-source-evaluations/frontend-stack-2026-09-16.md`。
+  >
+  > **门禁：** **411 tests**（新增 10 条布局 + 2 条视图）、typecheck 0、lint 0、`git diff --check` 0、
+  > `dev-host.sh rebuild` + smoke **exit 0**（`map` 屏 `rendered`，扫描会点开一个 `+N` 并复验它真的收回了人）；
+  > `lib/client.js` **1,569,730 B** ≤ 2,400,000 B 上限 → **PASS**。
+  >
+  > **⚠️ 如实记一个实测事实：今天这份 Canon 让两个轴都只分出一簇。**
+  > Canon 里**没有任何 character-state 带 `faction`/`affiliation`/`sect` 字段**（人物的 aspects 是
+  > `constitution` / `realm` / `persona` 这类），所以「按势力分簇」= 一簇「无势力」；
+  > 两条 accepted story-event 的参与者是**远古人物**（`qingdi`、`forbidden-zone-master`），
+  > 所以「按地点分布」= 一簇「地点未知」。**控件是诚实的**（照实说 Canon 记着几个组，
+  > 人物一旦带上 faction 就自动分组），今天它只是还没有可分的两组。
+  > 这是**投影的既有契约**（`buildStoryMap` / `buildCastBoard` 一直都读 `fields.faction`），不是本轮新加的口径。
+  > 另：节点标签是**实体 id**（`sumubai`、`linxuan`…）——全应用共有的「裸 id 当标题」问题，归 I6.5，本轮未修。
+
+- [ ] **I6.1b 只看本卷**（原 I6.1 拆出的后半）—— 目标：地图只画本卷出场的人物。
+  - **🛑 未做，而且这不是「没排上」，是查证后判定「今天做不了诚实版本」。**
+    2026-09-17 查了这份 Canon 的原始存储（`.novel-agent/dsh-home/storages/novel_project.json`）：
+    - 卷弧归属的**唯一来源**是 story-event 的 `manuscriptOrder`（章号）配 `projectNarrative` 的章→卷映射；
+      而**两条 story-event 的 `manuscriptOrder` 都是 `null`**；
+    - 这份作品**只有 1 卷 1 章**（outline 实测 `1 卷 · 1 章`），narrative-unit 只有 series 一条。
+    - 也就是说：**只有一个卷时，按卷筛选按定义改不了任何东西**。做一个今天不可能改变画面的控件，
+      与 I4.3 / I5.1a 反复确立的原则（面板不许携带兑现不了的控件）直接冲突。
+  - 因此本条**留空并记下口径**，等作品真的多出一卷、或 story-event 开始带 `manuscriptOrder` 时再做。
+    届时的实现路径是「**先改投影**」：`loadStoryMap` 一并取 `projectNarrative`，
+    给 `NovelStoryNode` 加卷归属再筛选——**不许用别的字段假装**。
+  - 验证（届时）：spec 绿；真机在 2 卷以上的作品里，切换后图上的人真的变少。
+
 - [ ] **I6.2 刷新保留** — 当前屏幕 / 主题 / 字号 / 折叠状态写 `localStorage`（现在全仓 0 处）。
+  - 注（I6.1a 附带）：**钉位目前是会话内状态，不持久化**（刷新即失效）。I6.1a 没有假装它记住了；
+    钉位要不要跨刷新，属于本条的范围。
 - [ ] **I6.3 窄窗 1280** — 左栏折成 58px 图标 + tooltip、右栏浮层；现在 `.app[data-narrow="1"]`
   这条规则永远不会命中我们的 frame。
 - [ ] **I6.4 键盘可达** — Tab 顺序、图谱节点可聚焦（Enter 选定、D 开档案）、焦点环、弹层 Tab 循环。

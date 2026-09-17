@@ -88,3 +88,19 @@ ClientModuleSystem 每个插件只提供一个 `client.js`，切分包会破坏�
 
 **未完成**：40–120 节点规模下的分簇折叠（「+N」气泡）、按卷/弧过滤、拖拽钉位、搜索定位；当前实现是
 全量人物 + 每条关系一条边 + 势力配色 + 选中淡出。
+
+### 补充（2026-09-17，I6.1a）
+
+上面「未完成」那条里的**分簇折叠（+N 气泡）与拖拽钉位已落地**，但**没有沿用 forceAtlas2**：
+原型的分簇环布局（簇盘 + 盘内环 + `+N`）是确定性的，而力导向恰好是「40 人变毛球」的那个成因。
+布局因此改为本仓库的纯函数 `packages/novel-workbench/src/client/story-map-layout.ts`，
+sigma 只负责渲染、缩放、平移与拖拽。
+
+- 这正是本文 §4 那条门禁的例外情形：**不是自造渲染**（渲染仍是 sigma），而是**自造布局**，
+  理由是实现与原型一致的分簇几何，上游没有提供。几何是纯函数，因此可以脱离 WebGL 单测。
+- **`graphology-layout@0.6.1` 与 `graphology-layout-forceatlas2@0.10.1` 已从依赖与 bundle 中移除**。
+  先是视图不再 import 它们（`lib/client.js` 1,611,088 B → 1,568,475 B），
+  随后两个包离开 `package.json` 与 lockfile（46 行删除、0 行新增；`pandemonium` / `mnemonist` /
+  `obliterator` 随之离开）。上表第 62 行的 165.8 kB 对照值**不再代表当前依赖组合**，保留为选型当时的口径。
+- **仍未完成**：按卷/弧过滤（`I6.1b`）—— 查实这份 Canon 里 story-event 的 `manuscriptOrder` 全是 `null`，
+  而作品只有一卷，所以这个筛选今天按定义改不了任何东西，做成控件就是「按了没反应」。

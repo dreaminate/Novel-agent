@@ -195,14 +195,14 @@ export function NovelRail(props: NovelRailProps): ReactNode {
             className: 'item',
             'data-novel-thread': summary.id,
             'aria-current': current === summary.id ? 'true' : 'false',
-            title: summary.title,
+            title: threadLabel(summary.title),
             onClick: () => {
               props.openThread(summary.id)
               workbenchActions.openDetails()
             },
           },
           railIcon(THREAD_ICON),
-          createElement('span', { className: 'lbl' }, summary.title),
+          createElement('span', { className: 'lbl' }, threadLabel(summary.title)),
         )),
         threads.length > VISIBLE_THREADS
           ? createElement(
@@ -382,8 +382,19 @@ function railIcon(path: string): ReactNode {
 }
 
 /** One row of the thread group: a real session this work owns, in Host order. */
-function threadRows(
-  work: WorkspaceView,
+/**
+ * What a thread row is called.
+ *
+ * The session's title comes from the host, and a thread the author has not
+ * written in yet has none — which used to leave a nameless icon in the rail, and
+ * at a narrow width an icon row with nothing to identify it at all.
+ */
+function threadLabel(title: string | undefined): string {
+  const trimmed = (title ?? '').trim()
+  return trimmed.length === 0 ? '未命名线程' : trimmed
+}
+
+function threadRows(  work: WorkspaceView,
   ids: readonly SessionId[],
   byId: Readonly<Record<SessionId, SessionSummary>>,
 ): readonly SessionSummary[] {

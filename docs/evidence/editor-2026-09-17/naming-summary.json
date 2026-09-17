@@ -1,0 +1,37 @@
+{
+  "cast": {
+    "leaksKeys": [],
+    "zeroChips": [],
+    "factionCards": [
+      "dange-pavilion 尚无已接受的成员",
+      "kunlun-palace 尚无已接受的成员",
+      "taiyi-holyland 尚无已接受的成员",
+      "zhuxian-holyland 尚无已接受的成员"
+    ],
+    "relationLines": [
+      "guchen<->han-potian 无未了债务 guchen→han-potian 师徒（阁主→大徒弟），前期更接近",
+      "guchen<->linxuan 无未了债务 guchen→linxuan 师徒（阁主→二徒弟），前期更接近投资人对标的",
+      "linxuan<->sumubai 无未了债务 linxuan→sumubai 弟子→大管家（事务与资源对接）（初次共事"
+    ],
+    "sample": "6 人物 · 4 势力 · 3 条双向关系（每条两个方向各自独立） 人物 guchen 无势力 1 条设定 阁主初立 状态 看档案 让 AI 从这里继续写 junlinyuan 无势力 1 条设定 君家天骄兼为顾辰七徒弟，天帝转世重修并隐藏转世经历，通晓万古秘辛，修轮回之道，是君家下任家主候选。 身份背景 看档案 让 AI 从这里继续写 linxuan 无势力 3 条设定 已入天机阁 体质 · 境界 · 状态 看档案 让 AI 从这里继续写 qingshuying 无势力 2"
+  },
+  "drawer": {
+    "leaksKeys": [],
+    "labels": [
+      "状态"
+    ],
+    "sample": "guchen 无势力 关闭 档案：1 条已接受设定 状态 阁主初立 关系：2 条（两个方向各自独立） guchen<->han-potian guchen→han-potian 师徒（阁主→大徒弟），前期更接近试探、利用与投资（试探与利用：韩破天尚未正式拜师，顾辰正在验证自己的师父资格） han-potian→guchen 感恩者→恩人，尚未进入师徒名分（感恩起步、怀疑潜伏：先信他的判断，再问他为"
+  },
+  "threads": {
+    "count": 5,
+    "nameless": 0,
+    "named": [
+      "未命名线程",
+      "提炼第1章写作记忆提案",
+      "提交第一章草稿提案",
+      "把 ok 写入指定文件",
+      "将文本 ok 写入指定文件"
+    ]
+  },
+  "consoleErrors": []
+}

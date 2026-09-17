@@ -299,4 +299,48 @@ describe('novel-workbench novel navigation rail', () => {
     await act(async () => { root.unmount() })
     container.remove()
   })
+
+  it('names a thread the author has not written in yet', async () => {
+    const { NovelRail } = await import('../src/client/NovelRail.js')
+    const ids = ['t1', 't2']
+    const sessions = {
+      current: 't1',
+      ids,
+      byId: {
+        t1: { id: 't1', title: '', running: false, updatedAt: 0 },
+        // A host that simply omits the title is the same case.
+        t2: { id: 't2', running: false, updatedAt: 0 },
+      },
+    }
+    const work = {
+      workspaceId: 'ws-1', path: '/books/x', title: '天机阁主',
+      sessionIds: ids, createdAt: '', updatedAt: '',
+    }
+
+    const container = document.createElement('div')
+    document.body.append(container)
+    const root = createRoot(container)
+    await act(async () => {
+      root.render(createElement(NovelRail as never, {
+        sessionId: undefined,
+        useWorkspaces: (selector: (value: unknown) => unknown) => selector({ items: [work] }),
+        useSessions: (selector: (value: unknown) => unknown) => selector(sessions),
+        loadOutline: async () => outline,
+        openThread: () => {},
+        newThread: () => {},
+      } as never))
+    })
+    await act(async () => {})
+
+    // An empty label left an unnamed icon: unusable by name, and at a narrow
+    // width an icon row with nothing to identify it at all.
+    for (const id of ids) {
+      const row = container.querySelector(`[data-novel-thread="${id}"]`)
+      expect(row?.textContent).toContain('未命名线程')
+      expect(row?.getAttribute('title')).toBe('未命名线程')
+    }
+
+    await act(async () => { root.unmount() })
+    container.remove()
+  })
 })

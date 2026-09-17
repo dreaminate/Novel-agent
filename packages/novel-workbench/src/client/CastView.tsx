@@ -8,11 +8,21 @@
  * so the board shows both.
  */
 import { createElement, type ReactNode } from 'react'
+import { aspectLabel } from './novel-copy.js'
 import type { NovelCastBoard } from './novel-data.js'
 
 /** Keep one aspect line inside a column card. */
 function truncate(text: string, limit: number): string {
   return text.length <= limit ? text : `${text.slice(0, limit)}…`
+}
+
+/**
+ * The aspects Canon holds, in the author's words. A key with no author-facing
+ * name is dropped rather than printed: the count chip already says how much
+ * Canon holds, and an English key is not a label a Chinese author can read.
+ */
+function personAspectLabels(names: readonly string[]): readonly string[] {
+  return names.map(name => aspectLabel(name)).filter((label): label is string => label !== undefined)
 }
 
 /** Everything the board receives: the mapped cast plus the node actions. */
@@ -71,10 +81,10 @@ export function CastView(props: CastViewProps): ReactNode {
               { className: 'note' },
               `情绪：${person.emotion}`,
             ),
-            person.aspectNames.length > 0 && createElement(
+            personAspectLabels(person.aspectNames).length > 0 && createElement(
               'div',
               { className: 'note', style: { marginTop: '4px' } },
-              person.aspectNames.join(' · '),
+              personAspectLabels(person.aspectNames).join(' · '),
             ),
             createElement(
               'div',
@@ -110,7 +120,13 @@ export function CastView(props: CastViewProps): ReactNode {
           { className: 'card', key: faction.id, 'data-novel-faction': faction.id },
           createElement('div', { className: 'row', style: { gap: '6px', display: 'flex', alignItems: 'center' } },
             createElement('span', { style: { fontWeight: 600 } }, faction.name),
-            createElement('span', { className: 'chip num' }, `${String(faction.people.length)} 人`)),
+            // A faction Canon records but has not given members yet is not a
+            // zero: saying so is information, and "0 人" is a placeholder.
+            createElement(
+              'span',
+              { className: 'chip num' },
+              faction.people.length === 0 ? '尚无已接受的成员' : `${String(faction.people.length)} 人`,
+            )),
           faction.agenda !== undefined && createElement('div', { className: 'note', style: { marginTop: '6px' } }, faction.agenda),
         )),
       ),

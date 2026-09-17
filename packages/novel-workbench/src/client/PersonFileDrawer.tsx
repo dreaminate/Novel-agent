@@ -8,6 +8,7 @@
  */
 import { createElement, useEffect, useRef, type ReactNode } from 'react'
 import { useDialogFocus } from './dialog-focus.js'
+import { aspectLabel } from './novel-copy.js'
 import type { NovelPersonFile } from './novel-data.js'
 
 /** Drawer rules: a right-hand panel above the columns, like the prototype's sheet. */
@@ -115,12 +116,20 @@ export function PersonFileDrawer(props: PersonFileDrawerProps): ReactNode {
         { className: 'side-title' },
         `档案：${String(file.aspects.length)} 条已接受设定`,
       ),
-      file.aspects.map(aspect => createElement(
-        'div',
-        { className: 'aspect', key: aspect.field, 'data-novel-person-aspect': aspect.field },
-        createElement('span', { className: 'field' }, aspect.field),
-        createElement('span', null, aspect.value),
-      )),
+      file.aspects.map(aspect => {
+        const label = aspectLabel(aspect.field)
+        return createElement(
+          'div',
+          { className: 'aspect', key: aspect.field, 'data-novel-person-aspect': aspect.field },
+          // An aspect Canon keys with a word we have no name for shows its value
+          // alone — across the whole row, or the label column would hold the
+          // sentence and the reading column would be empty.
+          label === undefined
+            ? null
+            : createElement('span', { className: 'field' }, label),
+          createElement('span', { style: label === undefined ? { gridColumn: '1 / -1' } : undefined }, aspect.value),
+        )
+      }),
       createElement(
         'div',
         { className: 'side-title', style: { marginTop: '18px' } },

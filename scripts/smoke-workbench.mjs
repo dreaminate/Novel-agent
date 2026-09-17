@@ -308,6 +308,11 @@ async function main() {
       + `, ${String(m.mainCount)} main seats, sane ${String(m.mainLooksRight)})`
       + ` · scrollY ${String(m.scrollY)} of ${String(m.scrollHeight)}`)
   }
+  const cast = report.screens.find(screen => screen.view === 'cast')
+  if (cast?.cast !== undefined && cast.cast !== null) {
+    console.log(`cast board: canon keys leaked ${String(cast.cast.leaks.length)}`
+      + ` · zero chips ${String(cast.cast.zeroChips)}`)
+  }
   console.log(`out: ${outDir}`)
   const failures = report.failures
   // A skip is a truthful record (no proposal, no accepted chapter), not a
@@ -340,7 +345,36 @@ async function sweepView(session, id, label) {
   await sleep(settleMs)
   const screen = await record(session, id, label)
   if (id === 'map') await sweepMap(session, screen)
+  if (id === 'cast') await sweepCast(session, screen)
   return screen
+}
+
+/** Canon's own words, which must never reach the author's screen. */
+const CANON_KEYS = ['constitution', 'realm', 'persona', 'mechanism', 'artifact', 'signature',
+  'thread', 'status', 'faction', 'name', 'role', 'emotion', 'agenda', 'assets', 'leadership']
+
+/**
+ * The cast board has to speak the author's language. Canon keys it, the model
+ * chose them, and they are not words anyone reads a character sheet in.
+ */
+async function sweepCast(session, screen) {
+  screen.cast = await session.evaluate(`(() => {
+    const board = document.querySelector('[data-novel-cast]')
+    if (board === null) return null
+    const text = board.innerText
+    const keys = ${JSON.stringify(CANON_KEYS)}
+    return {
+      leaks: keys.filter(key => new RegExp('(^|[^a-z-])' + key + '($|[^a-z-])').test(text)),
+      zeroChips: Array.from(board.querySelectorAll('[data-novel-faction]'))
+        .filter(card => card.innerText.includes('0 人')).length,
+    } })()`)
+  if (screen.cast === null) {
+    screen.state = 'cast-missing-board'
+    return
+  }
+  // A zero is not information; "no accepted members yet" is.
+  if (screen.cast.zeroChips > 0) screen.state = 'cast-prints-a-zero'
+  else if (screen.cast.leaks.length > 0) screen.state = 'cast-prints-canon-keys'
 }
 
 /**

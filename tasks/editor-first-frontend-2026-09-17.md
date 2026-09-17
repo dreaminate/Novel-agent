@@ -1428,11 +1428,74 @@ HEAD `02a48d8` —— 即本计划写的 `8926e31` **加本计划文件本身的
   >
   > **门禁：** **431 tests**（新增 3 条）、typecheck 0、lint 0、`git diff --check` 0、
   > `dev-host.sh rebuild` + smoke **exit 0**；`lib/client.js` **1,583,707 B** ≤ 2,400,000 B → **PASS**。
-- [ ] **I6.5 信息去术语化** — 裸 id 当标题（`guchen`）、英文键名直出（`status`、`constitution · realm`）、
-  空行白占位（「0 人」势力、右栏「字数进度 —」）全部改成作者语言。
-  - **I6.3 追加一条（2026-09-17 实测发现）：** 左栏有一个**空标题的线程行** —— 那个 session 没有消息，
-    于是行内无文字、`title` 也为空，宽窗窄窗都只剩一个**没有名字的图标按钮**。
-    修它要先决定「没有消息的线程该叫什么」（`新线程`？`未命名`？），属于本条的产品判断。
+- [x] **I6.5a 前端自己的术语泄漏**（原 I6.5 拆出的前半，2026-09-17 按 §0 拆）——
+  目标：凡是**前端**能把关的机器话，全部改成作者语言。
+  - 文件：`packages/novel-workbench/src/client/novel-copy.ts`（`aspectLabel` 词表）、
+    `novel-data.ts`（关系句用名字写）、`CastView.tsx`、`PersonFileDrawer.tsx`、`NovelRail.tsx`（线程名）、
+    `tests/novel-workbench-naming.spec.ts`（新）、`tests/novel-workbench-rail.spec.ts`（新增 1 条）、
+    `scripts/smoke-workbench.mjs`（`sweepCast`）、`docs/evidence/editor-2026-09-17/probe-naming.mjs`（新）
+  - 要求：关系线用人物名写；aspect 键不直出；空占位改成作者话；无名线程有名字。
+  - 验证：spec 绿；真机人物与关系 / 人物档案里搜不到任何 Canon 键。
+
+  > **✅ 已完成（2026-09-17）。真机实测：人物与关系与人物档案里，Canon 的键名命中数都是 0。**
+  >
+  > **四处泄漏，逐条修：**
+  > ① **关系线用实体 id 写**（`guchen→han-potian 师徒（初试）`）。`describeDirection` / `describeLine` 现在收一个
+  >   名字解析器（`personNames(canon)`），三处调用点各自传入。这同时修好了**地图的边标签**与**人物档案里的关系**——
+  >   同一条线过去在三个面上都是 id。
+  > ② **aspect 键直出**（人物卡的 `constitution · realm`、档案里的 `realm` 一列）。新增 `aspectLabel(field)`。
+  >   **它与 `kindLabel` / `severityLabel` 有一个刻意的不同：没有「回落到原键」这一手。** 那三个的词表**是我们自己的、
+  >   封闭的**；aspect 的键是**模型自己起的、开放的**，所以给一个从没见过的键编一个中文标签，比不显示标签更糟。
+  >   未知键**只显示取值**——取值是作者语言写的一句完整中文，本来就说清了它是什么。
+  >   ⚠️ **顺带修掉一个我自己引入的视觉缺陷：** 无标签时取值会落进 96px 的标签列，把它撑成一句话。
+  >   ⚠️ **词表的来源是证据不是猜：** 我把这份 Canon 里每个键的**取值**都读了一遍才起名
+  >   （`signature` 装的是招牌神通、`artifact` 是兵器与法宝、`mechanism` 是器灵职能、`thread` 是出身与来路）。
+  > ③ **「0 人」势力**。这份 Canon 里四个势力都没有成员记录，于是四张卡都写「0 人」——
+  >   是事实，但不是信息。改为**「尚无已接受的成员」**。
+  > ④ **空标题的线程行**（I6.3 实测发现）。官方 session summary 的 `title` 可以为空，
+  >   于是那一行**没有文字、`title` 也为空**，宽窄窗都只剩一个没有名字的图标。
+  >   现在统一说**「未命名线程」**。
+  >
+  > **真机验证（探针 `docs/evidence/editor-2026-09-17/probe-naming.mjs`，产物 `naming-summary.json`
+  > + `naming-drawer.png`）：**
+  > | 断言 | 实测 |
+  > | --- | --- |
+  > | 人物与关系屏的 Canon 键命中 | **0**（搜 15 个键：constitution / realm / persona / mechanism / artifact / signature / thread / status / faction / name / role / emotion / agenda / assets / leadership） |
+  > | 「0 人」势力卡 | **0 张**；四张势力卡全部写「尚无已接受的成员」 |
+  > | 人物档案的键命中 | **0**；标签列显示的是 `状态`（其余 7 个键无作者语言名，按规则只显示取值） |
+  > | 无名字的线程行 | **0 行**（5 条线程，第一条显示「未命名线程」） |
+  > | console | **0 报错** |
+  >
+  > **§4.3 定点破坏：6 处全被咬住，五个源文件逐字节还原。** 覆盖：未知键回落成键名、关系线回到 id、
+  > 人物卡直出键名、势力回到「0 人」、线程回到无名、无标签取值落回标签列。
+  >
+  > **扫描新增的常驻断言：** 人物与关系屏搜 15 个 Canon 键，命中即失败（`cast-prints-canon-keys`），
+  > 出现「0 人」也失败（`cast-prints-a-zero`）。实测打印 `cast board: canon keys leaked 0 · zero chips 0`。
+  >
+  > **一处如实说明：** 在这份 Canon 上，**关系线仍然显示 id** —— 因为**它一个人名都没有**。
+  > 原始存储实测：character-state 的字段只有 `constitution` / `realm` / `persona` / `mechanism` /
+  > `artifact` / `signature` / `thread` / `status`，**没有 `name`**。前端现在会**优先用名字**，
+  > 只是没有名字可用。这属于下一条（内容缺口），不是本条没做完。
+  >
+  > **门禁：** **438 tests**（新增 6 条 + 1 条 rail）、typecheck 0、lint 0、`git diff --check` 0、
+  > `dev-host.sh rebuild` + smoke **exit 0**；`lib/client.js` **1,586,948 B** ≤ 2,400,000 B → **PASS**。
+
+- [ ] **I6.5b 裸 id 当标题**（原 I6.5 拆出的后半）—— 目标：人物/势力/地点在界面上有**作者认得的名字**。
+  - **🛑 本轮查证结论：这不是前端问题，是内容缺口，前端补不了诚实版本。**
+    原始存储（`.novel-agent/dsh-home/storages/novel_project.json`）实测：**没有任何 character-state 带 `name`
+    字段**（字段只有 `constitution` / `realm` / `persona` / `mechanism` / `artifact` / `signature` /
+    `thread` / `status`），faction-state 也只有 `leadership` / `assets`。所以 `NovelStoryNode.label` /
+    `NovelCastPerson.name` 契约里的「否则回落到实体 id」**在这份作品上永远命中**。
+    前端**不能凭空造名字**（那是编造作品事实），所以今天的最优解就是 I6.5a 做的：
+    优先用名字 + 对「这其实是 id」给一个排版提示（人物卡对 `name === id` 用等宽字体，已有）。
+  - **两条可能的路径，都要动前端之外的东西，因此留给有真实作品数据时再定：**
+    ① **让提炼/记忆那一侧把名字写进 Canon**（organizer 的 character-state 契约里加 `name` 一类的方面）——
+       这是根治，且作者接受后 Canon 仍然是唯一事实源；
+    ② 投影层扩大名字查找范围（已经查 `name` / `display-name` / `full-name` / `label` / `title`，再扩也只能扩到
+       模型恰好写过的键）。**不许**从前端猜、不许从工作区文件里读名字来覆盖 Canon。
+  - **用户 2026-09-17 提到的下一项工作（导入一本完本小说、把它的设定面填满）会让这一条自然消失** ——
+    有真实设定数据时人物就有名字了。届时先看数据，再决定要不要做 ①。
+  - 验证（届时）：真机人物与关系 / 地图 / 人物档案上，作者读到的都是名字而不是 slug。
 - [ ] **I6.6 密度与观感微调** — 直接改 `workbench-css.ts`（并同步原型 CSS）。
   - 已由 I6.3 处理、本条不必重做的：frame 底部那 88px 死区（原型 composer 行）已移除，
     它属于 **frame 自己的绑定规则**（`FRAME_CSS`），不在生成物里。

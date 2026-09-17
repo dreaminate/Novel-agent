@@ -23,6 +23,35 @@
 - [ ] Execute it. Phase 0 first (baseline + the editor stack's bundle-cost selection record), then Phase 1
   (the approval surface) ahead of everything visible.
 
+## The screens speak the author's language, 2026-09-17 (I6.5a)
+
+**Status:** `verified` live for everything the front end can control; the rest is a content gap with evidence.
+
+- [x] **Four places where Canon's vocabulary reached the screen.** Relationship lines were written between
+  entity ids (`guchen→han-potian 师徒（初识）`) on the cast board, in the person drawer *and* on the map's edges
+  — one line, three screens, all machine pairs. The builders now take a name resolver. Character aspects were
+  printed raw (`constitution · realm` on a card, `realm` as a drawer column), which is Canon's key and the
+  model's choice of word, not a label. A faction Canon records without members showed `0 人` on all four
+  cards: true, and not information. And a thread the author has not written in yet had no title, so the rail
+  rendered an icon with nothing to identify it — worst at the narrow width, where the label is hidden anyway.
+- [x] **`aspectLabel` deliberately has no fallback to the key**, unlike its `kindLabel` / `severityLabel`
+  siblings: theirs are our own closed vocabularies, while aspects are whatever word the model chose, and
+  inventing a Chinese translation for a key we have never seen is worse than showing the value alone — the
+  value is a Chinese sentence that already says what it is. The keys that do have names were named only after
+  reading every one of their values in this Canon's own store.
+- [x] A defect introduced and caught inside this increment: an unlabelled aspect fell into the 96px label
+  column and squeezed the sentence there. It spans the row now, and a spec pins that.
+- [x] Real-machine evidence (`docs/evidence/editor-2026-09-17/probe-naming.mjs`): searching both surfaces for
+  fifteen Canon keys finds **zero**; no `0 人` chip remains; no thread row is nameless; no console errors.
+  The sweep now fails the cast screen on `cast-prints-canon-keys` or `cast-prints-a-zero`.
+- [x] §4.3 targeted breakage: 6/6 bitten, five source files restored byte-for-byte.
+- [ ] **Honestly still showing ids:** relationship lines, because this Canon records no character names at all
+  — its `character-state` deltas carry `constitution` / `realm` / `persona` / … and never `name`. The front end
+  now prefers a name and has none to prefer. Fixing that means writing names into Canon, which is a pipeline
+  change recorded as I6.5b, and the novel the user is bringing will likely make it moot.
+- [ ] Gates: **438/438** tests, `typecheck`, `lint`, `git diff --check`, rebuild + sweep `exit 0`;
+  `lib/client.js` 1,586,948 B against the 2.4 MB ceiling.
+
 ## The map can be walked from the keyboard, 2026-09-17 (I6.4b)
 
 **Status:** `verified` in the browser, keyboard and mouse both.

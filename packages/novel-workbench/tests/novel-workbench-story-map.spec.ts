@@ -220,7 +220,7 @@ describe('novel-mode story map', () => {
       ...relationships, relationships: [],
     } }).nodes).toEqual([])
     expect(map.edges).toHaveLength(1)
-    expect(map.edges[0]?.label).toBe('chen-mo→zhou-yan 旧同僚（试探） · zhou-yan→chen-mo 旧同僚（戒备）')
+    expect(map.edges[0]?.label).toBe('陈默→周砚 旧同僚（试探） · 周砚→陈默 旧同僚（戒备）')
     expect(map.edges[0]?.turns).toBe(1)
     // Both ends of a line carrying an unresolved debt are flagged.
     expect(map.nodes.map(node => node.debts)).toEqual([1, 1])

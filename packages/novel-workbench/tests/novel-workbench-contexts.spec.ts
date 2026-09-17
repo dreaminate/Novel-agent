@@ -620,8 +620,11 @@ describe('novel-mode cast board', () => {
     expect(board.relations).toHaveLength(1)
     expect(board.relations[0]).toMatchObject({
       id: 'guchen~han-potian',
-      forward: 'guchen→han-potian 师徒（初识）',
-      backward: 'han-potian→guchen 师徒（试探）',
+      // A relationship line is stored between entity ids but written for the
+      // author: the ends are the names Canon holds, and an id only where it
+      // holds none.
+      forward: '顾辰→han-potian 师徒（初识）',
+      backward: 'han-potian→顾辰 师徒（试探）',
       debts: 1,
     })
   })

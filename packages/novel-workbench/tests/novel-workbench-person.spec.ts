@@ -108,8 +108,8 @@ describe('novel-mode person file', () => {
     expect(file?.aspects.find(aspect => aspect.field === 'artifact[]')?.value).toBe('天机罗盘 · 万物母气鼎')
     // Only the line that names this person, and both of its directions.
     expect(file?.relations.map(relation => relation.id)).toEqual(['guchen~han-potian'])
-    expect(file?.relations[0]?.forward).toBe('guchen→han-potian 师徒（初识）')
-    expect(file?.relations[0]?.backward).toBe('han-potian→guchen 师徒（立誓）')
+    expect(file?.relations[0]?.forward).toBe('顾辰→han-potian 师徒（初识）')
+    expect(file?.relations[0]?.backward).toBe('han-potian→顾辰 师徒（立誓）')
     // Appearances come from accepted story events that list them as a participant.
     expect(file?.appearances).toEqual([{ chapter: 1, label: '第 1 天' }])
   })
@@ -134,7 +134,7 @@ describe('novel-mode person file', () => {
     expect(drawer).not.toBeNull()
     expect(drawer?.textContent).toContain('顾辰')
     expect(drawer?.textContent).toContain('本尊虚无体')
-    expect(drawer?.textContent).toContain('guchen→han-potian 师徒（初识）')
+    expect(drawer?.textContent).toContain('顾辰→han-potian 师徒（初识）')
     expect(drawer?.textContent).toContain('第 1 天')
     await act(async () => {
       drawer?.querySelector<HTMLButtonElement>('[data-novel-person-continue]')?.click()

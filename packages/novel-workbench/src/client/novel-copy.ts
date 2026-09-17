@@ -127,6 +127,49 @@ export function severityLabel(severity: AnchoredIssue['severity']): string {
   return SEVERITY_LABELS[severity] ?? severity
 }
 
+/**
+ * Author-facing name for one accepted character aspect, or nothing.
+ *
+ * Canon's aspects are keyed by whatever word the model chose and the set is
+ * open — every character writes its own (`constitution`, `realm`, `persona`, …).
+ * Unlike {@link kindLabel} and its siblings, whose vocabularies are ours and
+ * closed, there is deliberately no fallback to the key: an English word is not
+ * something a Chinese author can read, and inventing a translation for a key we
+ * have never seen would be worse than showing the value on its own. The keys
+ * below are the ones this Canon actually holds — grow them from real data, the
+ * same way the tool phrases were collected.
+ */
+export function aspectLabel(field: string): string | undefined {
+  return ASPECT_LABELS[field]
+}
+
+const ASPECT_LABELS: Readonly<Record<string, string>> = {
+  name: '名字',
+  faction: '势力',
+  realm: '境界',
+  constitution: '体质',
+  persona: '性情',
+  status: '状态',
+  state: '状态',
+  role: '身份',
+  emotion: '情绪',
+  // These four are here because this Canon's own values were read before they
+  // were named: `signature` holds 招牌神通, `artifact` 兵器与法宝, `mechanism`
+  // 器灵职能, `thread` 出身与来路. A key whose value has not been seen gets no
+  // invented translation.
+  signature: '招牌神通',
+  artifact: '兵器法宝',
+  mechanism: '机制',
+  thread: '身份背景',
+  weapon: '兵器',
+  technique: '神通',
+  origin: '身世',
+  appearance: '外貌',
+  agenda: '目的',
+  assets: '家底',
+  leadership: '掌事',
+}
+
 /** Dimension label for one review issue. */
 export function dimensionLabel(dimension: string): string {
   return DIMENSION_LABELS[dimension] ?? dimension

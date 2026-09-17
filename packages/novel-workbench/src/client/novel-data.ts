@@ -871,14 +871,15 @@ export function buildPersonFile(input: NovelPersonFileInput): NovelPersonFile | 
     .map(([field, value]) => ({ field, value: describeAspect(value) }))
     .filter(aspect => aspect.value.length > 0)
 
+  const nameOf = personNames(input.canon)
   const relations: NovelCastRelation[] = input.relationships.relationships
     .filter(line => line.participants.includes(input.personId))
     .map(line => {
       const [first, second] = line.directions
       return {
         id: line.line,
-        forward: first === undefined ? '尚未确立关系' : describeDirection(first.from, first.to, first.fields),
-        backward: second === undefined ? '尚未确立关系' : describeDirection(second.from, second.to, second.fields),
+        forward: first === undefined ? '尚未确立关系' : describeDirection(first.from, first.to, first.fields, nameOf),
+        backward: second === undefined ? '尚未确立关系' : describeDirection(second.from, second.to, second.fields, nameOf),
         debts: line.directions.reduce((total, direction) => total + unresolvedDebtsOf(direction).length, 0),
       }
     })
@@ -952,12 +953,15 @@ export function buildCastBoard(input: NovelCastBoardInput): NovelCastBoard {
     }))
     .sort((left, right) => left.name.localeCompare(right.name, 'zh-Hans-CN'))
 
+  const castNameOf = (id: string): string =>
+    people.find(person => person.id === id)?.name ?? id
+
   const relations: NovelCastRelation[] = input.relationships.relationships.map(line => {
     const [first, second] = line.directions
     return {
       id: line.line,
-      forward: first === undefined ? '尚未确立关系' : describeDirection(first.from, first.to, first.fields),
-      backward: second === undefined ? '尚未确立关系' : describeDirection(second.from, second.to, second.fields),
+      forward: first === undefined ? '尚未确立关系' : describeDirection(first.from, first.to, first.fields, castNameOf),
+      backward: second === undefined ? '尚未确立关系' : describeDirection(second.from, second.to, second.fields, castNameOf),
       debts: line.directions.reduce((total, direction) => total + unresolvedDebtsOf(direction).length, 0),
     }
   })
@@ -1546,7 +1550,7 @@ export function buildStoryMap(input: NovelStoryMapInput): NovelStoryMap {
       id: line.line,
       source,
       target,
-      label: describeLine(line),
+      label: describeLine(line, id => people.get(id)?.label ?? id),
       turns: line.directions.reduce((total, direction) => total + turnsOf(direction), 0),
     })
   }
@@ -1669,17 +1673,35 @@ function truncate(text: string, limit: number): string {
   return text.length <= limit ? text : `${text.slice(0, limit)}…`
 }
 
-function describeLine(line: NovelRelationshipLine): string {
+function describeLine(line: NovelRelationshipLine, nameOf: (id: string) => string): string {
   const directions = line.directions
-    .map(direction => describeDirection(direction.from, direction.to, direction.fields))
+    .map(direction => describeDirection(direction.from, direction.to, direction.fields, nameOf))
     .filter(text => text.length > 0)
   return directions.length === 0 ? '尚未确立关系' : directions.join(' · ')
+}
+
+/**
+ * Display names for every person Canon records, keyed by entity id.
+ *
+ * A relationship line is stored between entity ids, but every sentence about one
+ * has to be written with the name the author reads everywhere else. An id Canon
+ * never gave a name to stays as it is — it is all anyone has.
+ */
+function personNames(canon: NovelCanonProjection): (id: string) => string {
+  const names = new Map<string, string>()
+  for (const entity of canon.entities) {
+    if (entity.kind !== 'character-state') continue
+    names.set(entity.targetId, readText(entity.fields, ['name', 'display-name', 'full-name'])
+      ?? entity.targetId)
+  }
+  return id => names.get(id) ?? id
 }
 
 function describeDirection(
   from: string,
   to: string,
   fields: Readonly<Record<string, unknown>>,
+  nameOf: (id: string) => string,
 ): string {
   const state = fields['line-state']
   if (state === null || typeof state !== 'object') return ''
@@ -1687,7 +1709,7 @@ function describeDirection(
   const form = typeof record['form'] === 'string' ? record['form'].trim() : ''
   const stage = typeof record['stage'] === 'string' ? record['stage'].trim() : ''
   const head = form.length === 0 ? stage : stage.length === 0 ? form : `${form}（${stage}）`
-  return head.length === 0 ? '' : `${from}→${to} ${head}`
+  return head.length === 0 ? '' : `${nameOf(from)}→${nameOf(to)} ${head}`
 }
 
 function turnsOf(direction: { readonly fields: Readonly<Record<string, unknown>> }): number {

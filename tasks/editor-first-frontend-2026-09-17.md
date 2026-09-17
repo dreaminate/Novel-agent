@@ -1175,6 +1175,7 @@ HEAD `02a48d8` —— 即本计划写的 `8926e31` **加本计划文件本身的
   > 另：节点标签是**实体 id**（`sumubai`、`linxuan`…）——全应用共有的「裸 id 当标题」问题，归 I6.5，本轮未修。
 
 - [ ] **I6.1b 只看本卷**（原 I6.1 拆出的后半）—— 目标：地图只画本卷出场的人物。
+  **🛑 本轮判定它现在做不了诚实版本，因此它不阻塞后续增量 —— 队列请从 I6.2 往下走。**
   - **🛑 未做，而且这不是「没排上」，是查证后判定「今天做不了诚实版本」。**
     2026-09-17 查了这份 Canon 的原始存储（`.novel-agent/dsh-home/storages/novel_project.json`）：
     - 卷弧归属的**唯一来源**是 story-event 的 `manuscriptOrder`（章号）配 `projectNarrative` 的章→卷映射；
@@ -1187,9 +1188,65 @@ HEAD `02a48d8` —— 即本计划写的 `8926e31` **加本计划文件本身的
     给 `NovelStoryNode` 加卷归属再筛选——**不许用别的字段假装**。
   - 验证（届时）：spec 绿；真机在 2 卷以上的作品里，切换后图上的人真的变少。
 
-- [ ] **I6.2 刷新保留** — 当前屏幕 / 主题 / 字号 / 折叠状态写 `localStorage`（现在全仓 0 处）。
-  - 注（I6.1a 附带）：**钉位目前是会话内状态，不持久化**（刷新即失效）。I6.1a 没有假装它记住了；
-    钉位要不要跨刷新，属于本条的范围。
+- [x] **I6.2 刷新保留** — 当前屏幕 / 主题 / 字号 / 折叠状态写 `localStorage`（本轮之前全仓 0 处）。
+  - 文件：`packages/novel-workbench/src/client/store.ts`（`hydrateWorkbench` / `dehydrateWorkbench` /
+    `WORKBENCH_PREFS_KEY` + 写入判据）、`tests/novel-workbench-prefs.spec.ts`（新，8 条）、
+    `tests/novel-workbench-settings.spec.ts`（beforeEach 清空存储）、`scripts/smoke-workbench.mjs`
+    （`sweepSettings` 增加落盘检查）、`docs/evidence/editor-2026-09-17/probe-prefs-reload.mjs`（新）
+  - 要求：当前屏幕 / 主题 / 字号 / 折叠状态跨刷新保留；保留的只是作者的选择。
+
+  > **✅ 已完成（2026-09-17）。真机刷新后四项选择全部回来，且存储里没有会话状态。**
+  >
+  > **写什么：** 一个切片 —— `view`（当前屏幕）、`theme`、`panels`（左右两栏的折叠）、`settings`
+  > （字号 / 行宽 / 缩进 / 行高 / 补全 / 工具活动 / 提炼时机）。**不写**：会话 id、transcript、
+  > `lastSubmission`、人物档案抽屉、设置面板是否开着 —— 那些是**作者此刻站在哪里**，不是他做过什么选择；
+  > 重开应用不该重开一张面板。
+  >
+  > **两处刻意的设计：**
+  > ① **读取按字段校验，不是整体信任。** `localStorage` 是不可信输入（可能是旧版本留下的、被手改的、
+  >   同源别的脚本写的）。本 build 画不出来的值**逐字段回落到出厂默认**，而不是「夹取」成一个作者从没选过的值：
+  >   `readingSize: 99` → 17（不是 18）、`view: 'storybook'` → editor、`theme: 'sepia'` → auto。
+  >   `hydrateWorkbench` / `dehydrateWorkbench` 都是纯函数，所以这条边界不用起浏览器就能断言。
+  > ② **只在作者真的做选择时写。** `publish` 里比较 prefs 切片的**引用**（`settings` / `panels` 每次都是新对象），
+  >   写入不落在 transcript 追加、Canon 刷新这类热路径上。存储被拒（隐私模式、被封的来源）时整个帧照常跑，
+  >   只是不记得 —— `prefsStorage()` 把「拿不到存储」当成一种正常状态。
+  >
+  > **RED → GREEN：** 新增 `novel-workbench-prefs.spec.ts`（8 条）：干净浏览器从出厂默认起步 /
+  > 选择被写下来 / 下次加载带回来 / 不写会话状态 / 解析不了的存储被忽略 / 逐字段回落 / 能认的字段照收 /
+  > **不因非选择的变化而写**。先跑，5 条红。
+  >
+  > **§4.3 定点破坏：7 处全被咬住，脚本结束时 `store.ts` sha256 与破坏前逐字节相同。**
+  > 覆盖：不读回存储、view 不做校验、字号不做校验、不写入、**每次 publish 都写**、reload 丢选择、
+  > 存整个 state。**第 5 条第一次是 MISS** —— 我原来的断言只比「存下来的内容没变」，而重复写同样的内容也满足它；
+  > 改成**数写入次数**（`vi.spyOn(Storage.prototype, 'setItem')`）才咬得住。**这是我自己断言的漏洞，不是实现的。**
+  >
+  > **真机验证（探针 `docs/evidence/editor-2026-09-17/probe-prefs-reload.mjs`，产物 `prefs-reload-summary.json`）：**
+  > 先记下**干净状态**（editor / 跟随系统 / 17px / 两栏都展开 / **存储为空**），再让作者做四个选择
+  > （故事地图 / 夜间 / 收起两栏 / 字号 16），读取存储，然后 **`Page.reload` 真的重载页面**：
+  > | 选择 | 刷新后 |
+  > | --- | --- |
+  > | 当前屏幕 = 故事地图 | `map` ✅ |
+  > | 主题 = 夜间 | 夜间按钮 `aria-pressed="true"` ✅ |
+  > | 左栏收起 | `true` ✅ |
+  > | 对话列收起 | `true` ✅ |
+  > | 字号 = 16 | 设置面板里 16 被按下 ✅ |
+  >
+  > 存下来的字符串就是那个切片，`leaksSessionState: false`（正则搜 `transcript` / `lastSubmission` /
+  > `sessionId` / `personFileId` 全部未命中）。**console 0 报错。** 探针结尾清掉存储并再次重载，
+  > 复验回到出厂默认（editor / 跟随系统 / 17px），**没有把测试的选择留在作者的 host 上**。
+  > 这同时回答了一个只能真机回答的问题：**frame 里 `localStorage` 确实可用**（Host 的页面没有封掉它）。
+  >
+  > **smoke 里的常驻检查：** `sweepSettings` 现在读 `localStorage['novel-workbench/prefs']`，
+  > 缺失或没有 `view` 即判该屏失败（`prefs-not-stored`），并在汇总里打印
+  > `choices kept for the next load: view advanced · theme auto · columns 248/296`。
+  >
+  > **未做、不许当已验证：** 钉位仍**不持久化**（I6.1a 起就是会话内状态，本轮没有改它）——
+  > 要不要让钉位跨刷新，是产品决定而不是实现缺口；左栏线程列表的「展开其余 N 条」也没持久化，
+  > 那是一次浏览动作，不是偏好。存储版本迁移（旧键 → 新键）没有做：本轮是第一次引入，没有旧键可迁。
+  >
+  > **门禁：** **419 tests**（新增 8 条）、typecheck 0、lint 0、`git diff --check` 0、
+  > `dev-host.sh rebuild` + smoke **exit 0**（16 屏 rendered，`settings` 屏含落盘检查）；
+  > `lib/client.js` **1,575,040 B** ≤ 2,400,000 B → **PASS**。
 - [ ] **I6.3 窄窗 1280** — 左栏折成 58px 图标 + tooltip、右栏浮层；现在 `.app[data-narrow="1"]`
   这条规则永远不会命中我们的 frame。
 - [ ] **I6.4 键盘可达** — Tab 顺序、图谱节点可聚焦（Enter 选定、D 开档案）、焦点环、弹层 Tab 循环。

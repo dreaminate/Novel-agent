@@ -2,7 +2,7 @@
 import { createElement } from 'react'
 import { createRoot } from 'react-dom/client'
 import { act } from 'react-dom/test-utils'
-import { describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { NovelSettings } from '../src/client/NovelSettings.js'
 import { getWorkbenchState, resetWorkbench, workbenchActions } from '../src/client/store.js'
 
@@ -18,6 +18,10 @@ import { getWorkbenchState, resetWorkbench, workbenchActions } from '../src/clie
  * test has to show is that it is *honoured*, not merely stored.
  */
 describe('novel-mode settings sheet', () => {
+  // These choices are persisted now, so a fresh `resetWorkbench()` is only a
+  // fresh load when the browser is empty too.
+  beforeEach(() => { localStorage.clear() })
+
   it('offers only the choices the frame applies, and writes them to the frame store', async () => {
     resetWorkbench()
     workbenchActions.openSettings()

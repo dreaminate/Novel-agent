@@ -1,0 +1,43 @@
+{
+  "fresh": {
+    "view": "editor",
+    "theme": "跟随系统",
+    "sidebarCollapsed": "false",
+    "detailsCollapsed": "false",
+    "stored": null,
+    "readingSize": "17"
+  },
+  "chosen": {
+    "view": "map",
+    "theme": "夜间",
+    "sidebarCollapsed": "true",
+    "detailsCollapsed": "true",
+    "stored": "{\"view\":\"map\",\"theme\":\"night\",\"panels\":{\"sidebar\":0,\"details\":0},\"settings\":{\"readingSize\":16,\"readingMeasure\":40,\"readingIndent\":2,\"readingLeading\":1.85,\"completionEnabled\":true,\"completionDelayMs\":900,\"toolActivity\":true,\"refineMode\":\"on-submit\"}}",
+    "readingSize": "16"
+  },
+  "afterReload": {
+    "view": "map",
+    "theme": "夜间",
+    "sidebarCollapsed": "true",
+    "detailsCollapsed": "true",
+    "stored": "{\"view\":\"map\",\"theme\":\"night\",\"panels\":{\"sidebar\":0,\"details\":0},\"settings\":{\"readingSize\":16,\"readingMeasure\":40,\"readingIndent\":2,\"readingLeading\":1.85,\"completionEnabled\":true,\"completionDelayMs\":900,\"toolActivity\":true,\"refineMode\":\"on-submit\"}}",
+    "readingSize": "16"
+  },
+  "roundTrip": {
+    "view": true,
+    "theme": true,
+    "sidebar": true,
+    "details": true,
+    "readingSize": true
+  },
+  "leaksSessionState": false,
+  "restored": {
+    "view": "editor",
+    "theme": "跟随系统",
+    "sidebarCollapsed": "false",
+    "detailsCollapsed": "false",
+    "stored": null,
+    "readingSize": "17"
+  },
+  "consoleErrors": []
+}

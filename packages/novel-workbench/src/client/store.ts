@@ -4,7 +4,11 @@
  * Exactly two kinds live here — the geometry and switches the frame shares with
  * the columns and the composer, and which canvas the main column shows. All of
  * it is pure UI state: DSH keeps the source of truth for sessions, workspaces
- * and Canon, and nothing in this module is persisted.
+ * and Canon.
+ *
+ * The author's own choices outlive a page load and are written to the browser's
+ * storage; see {@link hydrateWorkbench} for why that is a boundary that has to
+ * be validated rather than trusted.
  *
  * `view` is `thread` or `advanced` whenever the main column belongs to the
  * conversation surface rather than to a novel canvas.
@@ -216,11 +220,151 @@ const DEFAULT_STATE: WorkbenchState = {
   revision: 0,
 }
 
-let state: WorkbenchState = DEFAULT_STATE
+/**
+ * Where the author's choices wait for the next page load.
+ *
+ * Only choices live here: the canvas they were on, the theme, the two column
+ * widths and the 设置 sheet's own values. A session, a transcript, a drawer and
+ * the last submission are where the author *is*, not what they decided, and
+ * reopening the workbench should not reopen them.
+ */
+export const WORKBENCH_PREFS_KEY = 'novel-workbench/prefs'
+
+const THEMES: readonly WorkbenchTheme[] = ['auto', 'day', 'night']
+const REFINE_MODES: readonly RefineMode[] = ['on-submit', 'while-writing']
+const READING_SIZES = [16, 17, 18] as const
+const READING_MEASURES = [34, 40] as const
+const READING_INDENTS = [0, 2] as const
+const READING_LEADINGS = [1.6, 1.85, 2.1] as const
+const COMPLETION_DELAYS = { min: 300, max: 2000 } as const
+
+/**
+ * Read the author's choices back, one field at a time.
+ *
+ * What is in a browser's storage is not trusted input: it can be left over from
+ * an older build, edited by hand, or written by something else on the origin.
+ * A field this build cannot render falls back to the shipped default rather
+ * than being coerced into a value the author never picked.
+ */
+export function hydrateWorkbench(raw: string | null, base: WorkbenchState = DEFAULT_STATE): WorkbenchState {
+  const stored = parsePrefs(raw)
+  const panels = isRecord(stored?.['panels']) ? stored['panels'] : {}
+  const settings = isRecord(stored?.['settings']) ? stored['settings'] : {}
+  return {
+    ...base,
+    view: oneOf(stored?.['view'], WORKBENCH_VIEWS.map(entry => entry.id), base.view),
+    theme: oneOf(stored?.['theme'], THEMES, base.theme),
+    panels: {
+      sidebar: oneOfNumber(panels['sidebar'], [0, SIDEBAR_DEFAULT], base.panels.sidebar),
+      details: oneOfNumber(panels['details'], [0, DETAILS_DEFAULT], base.panels.details),
+    },
+    settings: {
+      readingSize: oneOfNumber(settings['readingSize'], READING_SIZES, base.settings.readingSize),
+      readingMeasure: oneOfNumber(settings['readingMeasure'], READING_MEASURES, base.settings.readingMeasure),
+      readingIndent: oneOfNumber(settings['readingIndent'], READING_INDENTS, base.settings.readingIndent),
+      readingLeading: oneOfNumber(settings['readingLeading'], READING_LEADINGS, base.settings.readingLeading),
+      completionEnabled: booleanOr(settings['completionEnabled'], base.settings.completionEnabled),
+      completionDelayMs: rangeOr(settings['completionDelayMs'], base.settings.completionDelayMs),
+      toolActivity: booleanOr(settings['toolActivity'], base.settings.toolActivity),
+      refineMode: oneOf(settings['refineMode'], REFINE_MODES, base.settings.refineMode),
+    },
+  }
+}
+
+/** The slice that outlives a page load, as the stored string. */
+export function dehydrateWorkbench(state: WorkbenchState): string {
+  return JSON.stringify({
+    view: state.view,
+    theme: state.theme,
+    panels: { sidebar: state.panels.sidebar, details: state.panels.details },
+    settings: state.settings,
+  })
+}
+
+function parsePrefs(raw: string | null): Record<string, unknown> | undefined {
+  if (raw === null) return undefined
+  try {
+    const parsed: unknown = JSON.parse(raw)
+    return isRecord(parsed) ? parsed : undefined
+  } catch {
+    return undefined
+  }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value)
+}
+
+function oneOf<T extends string>(value: unknown, allowed: readonly T[], fallback: T): T {
+  return typeof value === 'string' && (allowed as readonly string[]).includes(value)
+    ? value as T
+    : fallback
+}
+
+function oneOfNumber(value: unknown, allowed: readonly number[], fallback: number): number {
+  return typeof value === 'number' && allowed.includes(value) ? value : fallback
+}
+
+function rangeOr(value: unknown, fallback: number): number {
+  return typeof value === 'number' && Number.isFinite(value)
+    && value >= COMPLETION_DELAYS.min && value <= COMPLETION_DELAYS.max
+    ? Math.round(value)
+    : fallback
+}
+
+function booleanOr(value: unknown, fallback: boolean): boolean {
+  return typeof value === 'boolean' ? value : fallback
+}
+
+/**
+ * The author's storage, or nothing.
+ *
+ * A browser can refuse storage outright (private mode, a blocked origin), and
+ * reaching for it is where that shows up — so a frame that cannot persist
+ * still runs, it just forgets.
+ */
+function prefsStorage(): Storage | undefined {
+  try {
+    return typeof localStorage === 'undefined' ? undefined : localStorage
+  } catch {
+    return undefined
+  }
+}
+
+function loadWorkbench(): WorkbenchState {
+  const store = prefsStorage()
+  return hydrateWorkbench(store === undefined ? null : store.getItem(WORKBENCH_PREFS_KEY))
+}
+
+function saveWorkbench(state: WorkbenchState): void {
+  try {
+    prefsStorage()?.setItem(WORKBENCH_PREFS_KEY, dehydrateWorkbench(state))
+  } catch {
+    // A full or blocked store is not a reason to fail the author's click.
+  }
+}
+
+/**
+ * Whether this change was one the author made.
+ *
+ * `settings` and `panels` are replaced wholesale on every write, so identity is
+ * enough — and it keeps the store's storage off the hot path: a transcript
+ * append or a Canon refresh must not rewrite anything.
+ */
+function prefsChanged(before: WorkbenchState, after: WorkbenchState): boolean {
+  return before.view !== after.view
+    || before.theme !== after.theme
+    || before.panels !== after.panels
+    || before.settings !== after.settings
+}
+
+let state: WorkbenchState = loadWorkbench()
 const listeners = new Set<() => void>()
 
 function publish(next: WorkbenchState): void {
+  const before = state
   state = next
+  if (prefsChanged(before, next)) saveWorkbench(next)
   for (const listener of listeners) listener()
 }
 
@@ -445,8 +589,13 @@ export interface WorkbenchThreadBinding {
   readonly label: string
 }
 
-/** Drop every frame-local listener and reset the geometry (plugin unload). */
+/**
+ * Drop every frame-local listener and come back as a freshly loaded plugin.
+ *
+ * The author's choices stay: an unload and reload of the plugin is a reload of
+ * the page as far as they are concerned.
+ */
 export function resetWorkbench(): void {
-  state = DEFAULT_STATE
+  state = loadWorkbench()
   listeners.clear()
 }

@@ -152,6 +152,9 @@ function text(items = []) {
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
 
+/** Must match `WORKBENCH_PREFS_KEY`: where the frame keeps the author's choices. */
+const PREFS_KEY = 'novel-workbench/prefs'
+
 /**
  * Stop headless Chrome and drop its throwaway profile. The profile removal is
  * best-effort: Chrome flushes into it while shutting down, and a busy temp
@@ -283,6 +286,12 @@ async function main() {
     if (Array.isArray(story.map.bubbles) && story.map.bubbles.length > 0) {
       console.log(`story map folded clusters: ${story.map.bubbles.join(' / ')}`)
     }
+  }
+  const kept = report.screens.find(screen => screen.view === 'settings')
+  if (kept?.stored !== undefined && kept.stored !== null) {
+    console.log(`choices kept for the next load: view ${String(kept.stored.view)}`
+      + ` · theme ${String(kept.stored.theme)}`
+      + ` · columns ${String(kept.stored.panels?.sidebar)}/${String(kept.stored.panels?.details)}`)
   }
   console.log(`out: ${outDir}`)
   const failures = report.failures
@@ -654,6 +663,14 @@ async function sweepSettings(session) {
   const offerable = await session.evaluate(
     `document.querySelector('[data-novel-settings-activity]') !== null`)
   if (!offerable) screen.state = 'missing-expected-control'
+  // The choices this run has been making belong to the next page load, so the
+  // sweep checks they actually landed where that load will look for them.
+  screen.stored = await session.evaluate(
+    `(() => { try { return JSON.parse(localStorage.getItem(${JSON.stringify(PREFS_KEY)}) ?? 'null') }
+      catch { return null } })()`)
+  if (screen.stored === null || typeof screen.stored.view !== 'string') {
+    screen.state = 'prefs-not-stored'
+  }
   await session.evaluate(`document.querySelector('[data-novel-settings-close]').click()`)
   await sleep(200)
   return screen

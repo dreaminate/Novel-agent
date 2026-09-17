@@ -23,6 +23,32 @@
 - [ ] Execute it. Phase 0 first (baseline + the editor stack's bundle-cost selection record), then Phase 1
   (the approval surface) ahead of everything visible.
 
+## The author's choices survive a reload, 2026-09-17 (I6.2)
+
+**Status:** `verified` on a real page reload in the browser.
+
+- [x] **The frame's own choices are written to the browser's storage and read back.** One slice: the canvas
+  the author was on, the theme, the two column folds, and the 设置 sheet's values. Deliberately *not* stored:
+  the session, the transcript, the last submission, the open drawer — those are where the author is standing,
+  not what they decided, and reopening the app should not reopen a sheet.
+- [x] **Storage is treated as untrusted input.** It can be left over from an older build or edited by hand, so
+  `hydrateWorkbench` validates field by field and falls back to the shipped default for anything this build
+  cannot render — `readingSize: 99` becomes 17, not a clamped 18 the author never chose. Writes happen only
+  when the preference slice changes, so a transcript append or a Canon refresh never touches storage, and a
+  browser that refuses storage leaves the frame working and merely forgetful.
+- [x] **A real `Page.reload` in the browser returns all four choices** (canvas, theme, both folds, reading
+  size), the stored string carries no session state, and the probe clears it afterwards so the dev host is left
+  as it was found. This is also what proved `localStorage` is reachable from inside the frame at all.
+- [x] The standing sweep now checks the same thing: `sweepSettings` reads the prefs key and fails the screen as
+  `prefs-not-stored` if the next load would find nothing, printing what it would restore.
+- [x] §4.3 targeted breakage: **7/7 mutations bitten**, `store.ts` restored byte-for-byte. The fifth was a MISS
+  first time — my assertion compared stored contents, which a redundant rewrite also satisfies — so it now
+  counts `setItem` calls instead. The gap was in my test, not the implementation.
+- [x] Gates: **419/419** tests (28 files; +8 prefs), `typecheck`, `lint`, `git diff --check`, rebuild + sweep
+  `exit 0`; `lib/client.js` 1,575,040 B against the 2.4 MB ceiling.
+- [ ] Pins still do not survive a reload, and the rail's 「展开其余 N 条」 is not remembered: whether pins cross
+  a reload is a product decision, and expanding a list is a browsing action rather than a preference.
+
 ## Story map becomes a cluster map, 2026-09-17 (I6.1a)
 
 **Status:** `verified` live on the rebuilt Host; the one prototype feature still not built (只看本卷) has a

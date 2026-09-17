@@ -911,11 +911,44 @@ HEAD `02a48d8` —— 即本计划写的 `8926e31` **加本计划文件本身的
   > 改用 HTTP/1.1 后报 `Error in the HTTP2 framing layer`）。**下一轮的第一件事是重试 push** ——
   > 本地因此会累积到 2 个未推送提交（`8a68fc2`、`47dd8a9`）。没有为它反复重试浪费轮次。
 
-- [ ] **I4.3 设置项补齐** — 目标：把新能力接到设置面板，并让「工具活动」开关回来。
+- [x] **I4.3 设置项补齐** — 目标：把新能力接到设置面板，并让「工具活动」开关回来。
   - 文件：`NovelSettings.tsx`、`store.ts`、`novel-workbench-settings.spec.ts`
   - 说明：上一轮删掉「线程里的工具活动」是因为当时由官方会话面渲染、我们兑现不了；
     对话面自研后**这个开关重新可兑现**，属于回归而非新增。
   - 验证：spec 绿（含「面板不得携带无法兑现的控件」这条不变量仍然成立）。
+
+  > **✅ 已完成（2026-09-17）。开关回来了，而且证明的是「它真的有效」，不是「它存在」。**
+  >
+  > **实现（4 个源文件）：** `store.ts` 加 `toolActivity`（默认**显示**）与 `setToolActivity`；
+  > `NovelTranscript` 加 `showTools`；`WorkbenchFrame` 把设置接进对话列；`NovelSettings` 加控件。
+  > 句级/段级续写两项新能力早已在 I4.1a / I4.2 接上（`completionEnabled` / `completionDelayMs`），
+  > **本轮没有新能力需要接**，所以这一条的实质就是回归那一项。
+  >
+  > **不变量被改写成正面的表述，而不是被放宽。** 旧写法是「面板不得携带兑现不了的控件」，
+  > 于是两处门禁都写成**断言控件缺席**：settings spec 断言 `[data-novel-settings-activity]` 为 null，
+  > smoke 里则把「控件出现」判为失败（`offers-unhonorable-control`）。**这两条断言的根据已经过时** ——
+  > I2.1/I2.2 之后对话面由我们自渲染，工具行也是我们画的，开关有地方落。
+  > 现在改成：**控件必须在，且必须真的有效**。三处证据：
+  > - `novel-workbench-settings.spec.ts`：控件存在、点击写入 store、设置键表含 `toolActivity`；
+  > - `novel-workbench-transcript.spec.ts`（新增 2 条）：开着时工具行是**人话**（`整理成提案`），
+  >   关掉后**工具行全部消失、正文一字不少**；
+  > - `scripts/smoke-workbench.mjs`：**真机在对话屏上实测** —— 打开设置 → 点「收起」→ 回来数一遍。
+  >   smoke 的旧断言也一并反过来（缺少该控件才是失败：`missing-expected-control`），
+  >   并新增 `tool-activity-switch-ignored` / `tool-activity-hid-everything` 两个失败态。
+  >
+  > **真机实测（`sweep.json`）：** 收起前 **43 条 / 31 条工具行** → 收起后 **0 条工具行 / 12 条**
+  > —— **正好是那 31 条工具行消失、正文一条没少**，thread 屏 state 仍是 `rendered`（不是失败）。
+  > 测完自动恢复成「显示」，后面的扫描沿用出厂默认。
+  >
+  > **一处刻意的取舍：** `NovelTranscript` 的**空态按「未过滤」的条目判定**。否则一篇只有工具行的线程
+  > 在收起后会显示「这个线程还没有对话」，等于替作者否认他写过话 —— 收起的是**动作**，不是**对话**。
+  >
+  > **顺带更正的三处过时注释**（都写着「对话面属于官方、这个开关兑现不了」）：`NovelSettings` 头部、
+  > settings spec 头部、smoke 的 `sweepSettings` 头部。规则本身保留，只把根据换成了现在的样子。
+  >
+  > **门禁：** **389 tests**（新增 2 条）、typecheck 0、lint 0、`git diff --check` 0、
+  > `dev-host.sh rebuild` + smoke **exit 0**；`lib/client.js` **1,602,548 B**（+1,752）
+  > ≤ 2,400,000 B 上限 → **PASS**。
 
 ### Phase 5 — 自动提炼（模式）
 

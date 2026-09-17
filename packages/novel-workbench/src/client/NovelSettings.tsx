@@ -2,12 +2,16 @@
  * 设置: the sheet behind the topbar's 设置 button.
  *
  * The prototype keeps four author choices here — theme, 正文字号, 阅读行宽 and
- * whether threads show tool activity. Only the first three are offered: the
- * transcript belongs to the shipped conversation surface, so a 工具活动 switch
- * could be remembered but never honored, and this sheet does not carry controls
- * it cannot deliver. The reading choices are not decoration: the 正文阅读 canvas
- * reads them from the same store, so what the author picks here is what the text
- * does.
+ * whether threads show tool activity — and all four are offered again. The
+ * reading choices are not decoration: the editor's reading state reads them from
+ * this same store, so what the author picks is what the text does.
+ *
+ * 工具活动 used to be the exception, and the reason is worth keeping: the
+ * transcript belonged to the shipped conversation surface, so the switch would
+ * have been remembered and never applied, and this sheet does not carry controls
+ * it cannot deliver. The frame renders the thread itself now (NovelTranscript),
+ * so the switch has somewhere to land — the rule was never against the control,
+ * only against shipping one that does nothing.
  */
 import { createElement, useEffect, type ReactNode } from 'react'
 import { useWorkbenchState, workbenchActions, type WorkbenchTheme } from './store.js'
@@ -281,6 +285,31 @@ export function NovelSettings(): ReactNode {
           'div',
           { className: 'setting-note' },
           '等得越久越不容易打扰你，但也越像在等它。',
+        ),
+      ),
+      createElement(
+        'div',
+        { className: 'setting' },
+        createElement('div', { className: 'setting-label' }, '工具活动'),
+        createElement(
+          'div',
+          { className: 'seg', role: 'group' },
+          [[true, '显示'], [false, '收起']].map(([value, label]) => createElement(
+            'button',
+            {
+              key: String(value),
+              type: 'button',
+              'data-novel-settings-activity': String(value),
+              'aria-pressed': settings.toolActivity === value ? 'true' : 'false',
+              onClick: () => { workbenchActions.setToolActivity(value as boolean) },
+            },
+            label as string,
+          )),
+        ),
+        createElement(
+          'div',
+          { className: 'setting-note' },
+          '对话里除了 AI 说的话，还会写它做了什么（读了哪个文件、整理成提案）。收起后只留文字 —— 那些动作本来也不进你的稿子。',
         ),
       ),
     ),

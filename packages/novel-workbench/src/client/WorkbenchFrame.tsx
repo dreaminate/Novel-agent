@@ -79,7 +79,7 @@ const FRAME_CSS = `
 
 /** The novel-mode frame: topbar / rail / canvas / side / composer, all seats declared. */
 export function WorkbenchFrame(props: WorkbenchFrameProps): ReactNode {
-  const { panels, theme, sessionId, transcript } = useWorkbenchState()
+  const { panels, theme, sessionId, transcript, settings } = useWorkbenchState()
   /** The conversation column: open when a session exists and the column is out. */
   const conversationOpen = panels.details > 0 && sessionId !== undefined
   const threadProps = sessionId === undefined ? { 'data-novel-thread': 'idle' } : {}
@@ -136,7 +136,7 @@ export function WorkbenchFrame(props: WorkbenchFrameProps): ReactNode {
             createElement(
               'div',
               { key: 'transcript', className: 'seat', 'data-novel-transcript-seat': 'true' },
-              createElement(NovelTranscript, { entries: transcript }),
+              createElement(NovelTranscript, { entries: transcript, showTools: settings.toolActivity }),
               props.renderSlot('novel.thread.notice', threadProps),
             ),
             // The shipped conversation surface stays: it owns the composer, and

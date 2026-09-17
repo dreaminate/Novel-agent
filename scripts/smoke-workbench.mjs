@@ -449,6 +449,49 @@ async function sweepThread(session) {
   if (Array.isArray(transcript.leaks) && transcript.leaks.length > 0) {
     screen.state = 'transcript-leaks-tool-names'
   }
+  // 工具活动 has to do something, and the only honest way to know is to use it
+  // where the transcript is: turn it off, count the tool lines again, put it
+  // back. Skipped when there is no tool activity to hide — this is a check on
+  // the switch, not on whether the model happened to call a tool.
+  if (transcript.tools > 0) {
+    const openSheet = async () => {
+      await session.evaluate(`(() => {
+        const node = document.querySelector('[data-novel-settings-open="true"]')
+        if (node !== null) node.click() })()`)
+      return await session.until(`document.querySelector('[data-novel-settings]') !== null`)
+    }
+    const closeSheet = async () => {
+      await session.evaluate(`document.querySelector('[data-novel-settings-close]').click()`)
+      await sleep(250)
+    }
+    if (await openSheet()) {
+      await session.evaluate(`(() => {
+        const button = document.querySelector('[data-novel-settings-activity="false"]')
+        if (button !== null) button.click() })()`)
+      await sleep(250)
+      await closeSheet()
+      const hidden = await session.evaluate(
+        `(() => { const seat = document.querySelector('[data-novel-transcript-seat]')
+          if (seat === null) return null
+          return {
+            tools: seat.querySelectorAll('[data-novel-transcript-entry="tool"]').length,
+            entries: seat.querySelectorAll('[data-novel-transcript-entry]').length } })()`)
+      screen.toolActivity = hidden
+      if (screen.state === 'rendered') {
+        if (hidden === null || hidden.tools !== 0) screen.state = 'tool-activity-switch-ignored'
+        // Hiding the work must not hide the author's own conversation with it.
+        else if (hidden.entries === 0) screen.state = 'tool-activity-hid-everything'
+      }
+      // Back to the default, so the rest of the sweep sees the frame as shipped.
+      if (await openSheet()) {
+        await session.evaluate(`(() => {
+          const button = document.querySelector('[data-novel-settings-activity="true"]')
+          if (button !== null) button.click() })()`)
+        await sleep(250)
+        await closeSheet()
+      }
+    }
+  }
   screen.threadHeader = await session.evaluate(
     `(() => { const node = document.querySelector('[data-novel-thread-header]')
       return node === null ? '' : node.innerText.trim().replace(/\\n+/g, ' · ') })()`)
@@ -515,9 +558,11 @@ async function shot(session, id, label) {
 }
 
 /**
- * 设置 is a sheet over the frame. It must offer only choices the frame applies:
- * the transcript belongs to the shipped conversation surface, so a tool-activity
- * switch here would be a control with no effect, and its presence is a failure.
+ * 设置 is a sheet over the frame. It must offer only choices the frame applies —
+ * and that rule has to be read forwards, not as "hide anything awkward". The
+ * tool-activity switch is offered because the frame renders the thread itself
+ * now, so its *absence* is the failure here; whether it is honored is checked
+ * where the transcript is, in `sweepThread`.
  */
 async function sweepSettings(session) {
   const opened = await session.evaluate(
@@ -529,9 +574,9 @@ async function sweepSettings(session) {
   }
   await sleep(settleMs)
   const screen = await record(session, 'settings', '设置', '[data-novel-settings]')
-  screen.unhonorableControl = await session.evaluate(
+  const offerable = await session.evaluate(
     `document.querySelector('[data-novel-settings-activity]') !== null`)
-  if (screen.unhonorableControl) screen.state = 'offers-unhonorable-control'
+  if (!offerable) screen.state = 'missing-expected-control'
   await session.evaluate(`document.querySelector('[data-novel-settings-close]').click()`)
   await sleep(200)
   return screen

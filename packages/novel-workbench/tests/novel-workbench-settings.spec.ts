@@ -11,9 +11,11 @@ import { getWorkbenchState, resetWorkbench, workbenchActions } from '../src/clie
  * theme, 正文字号 and 阅读行宽. The reading choices have to reach the reading
  * canvas, so the sheet writes the same store the canvas reads.
  *
- * The sheet offers nothing it cannot honor: the transcript belongs to the
- * shipped conversation surface, so a 工具活动 switch here would be a control
- * with no effect, and the sheet must not carry one.
+ * The sheet offers nothing it cannot honor. That rule used to exclude 工具活动 —
+ * the transcript belonged to the shipped conversation surface, so the switch
+ * would have been remembered and never applied. It is not excluded any more:
+ * the frame renders the thread itself now, so the switch is back and what this
+ * test has to show is that it is *honoured*, not merely stored.
  */
 describe('novel-mode settings sheet', () => {
   it('offers only the choices the frame applies, and writes them to the frame store', async () => {
@@ -29,13 +31,13 @@ describe('novel-mode settings sheet', () => {
     expect(sheet?.textContent).toContain('正文大小')
     expect(sheet?.textContent).toContain('阅读行宽')
 
-    // A control whose effect it cannot deliver is worse than no control: the
-    // transcript is rendered by the shipped conversation surface, not here.
-    expect(sheet?.querySelector('[data-novel-settings-activity]')).toBeNull()
+    // Back, and no longer a control with no effect: NovelTranscript is ours, so
+    // 工具活动 has somewhere to land. Its own spec shows the lines disappearing.
+    expect(sheet?.querySelector('[data-novel-settings-activity]')).not.toBeNull()
     expect(Object.keys(getWorkbenchState().settings))
       .toEqual([
         'readingSize', 'readingMeasure', 'readingIndent', 'readingLeading',
-        'completionEnabled', 'completionDelayMs',
+        'completionEnabled', 'completionDelayMs', 'toolActivity',
       ])
 
     await act(async () => {
@@ -66,6 +68,12 @@ describe('novel-mode settings sheet', () => {
     })
     expect(getWorkbenchState().settings.completionEnabled).toBe(false)
     expect(getWorkbenchState().settings.completionDelayMs).toBe(1500)
+
+    // And this one by the frame's own transcript.
+    await act(async () => {
+      sheet?.querySelector<HTMLButtonElement>('[data-novel-settings-activity="false"]')?.click()
+    })
+    expect(getWorkbenchState().settings.toolActivity).toBe(false)
 
     await act(async () => {
       sheet?.querySelector<HTMLButtonElement>('[data-novel-settings-close]')?.click()

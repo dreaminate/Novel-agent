@@ -40,6 +40,11 @@ export interface WorkbenchSettings {
   readonly completionEnabled: boolean
   /** How long the author has to stop typing before that request goes out. */
   readonly completionDelayMs: number
+  /**
+   * Whether the thread shows tool activity. Honoured by `NovelTranscript`, which
+   * the frame renders itself — which is what makes this offerable again.
+   */
+  readonly toolActivity: boolean
 }
 
 /** Live width of the seat the frame renders into. */
@@ -173,6 +178,12 @@ const DEFAULT_STATE: WorkbenchState = {
     // the moment a continuation is welcome and the moment it is least in the way.
     completionEnabled: true,
     completionDelayMs: 900,
+    /**
+     * Whether the thread shows what the model did, not only what it said. On by
+     * default: an author who cannot see that work is happening is being asked to
+     * trust a blank page.
+     */
+    toolActivity: true,
   },
   settingsOpen: false,
   personFileId: undefined,
@@ -325,6 +336,12 @@ export const workbenchActions = {
     const next = Math.min(2000, Math.max(300, Math.round(completionDelayMs)))
     if (state.settings.completionDelayMs === next) return
     publish({ ...state, settings: { ...state.settings, completionDelayMs: next } })
+  },
+
+  /** Whether the thread shows what the model did, or only what it said. */
+  setToolActivity(toolActivity: boolean): void {
+    if (state.settings.toolActivity === toolActivity) return
+    publish({ ...state, settings: { ...state.settings, toolActivity } })
   },
 
   /** Open one person's 人物档案 drawer. */

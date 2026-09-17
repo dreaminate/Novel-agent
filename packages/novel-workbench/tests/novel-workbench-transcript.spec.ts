@@ -197,3 +197,43 @@ describe('NovelTranscript', () => {
     container.remove()
   })
 })
+
+/**
+ * 工具活动 is the author's switch over other people's work in their thread. It
+ * has to remove the tool lines and nothing else: turning it off must never take
+ * the prose with it.
+ */
+describe('NovelTranscript tool activity', () => {
+  const entries = transcriptOf([
+    event('user/message', userMessage('u1', '写一段开场。')),
+    event('tool/call', { id: 't1', name: 'propose_novel_result_packet', arguments: { description: '整理成提案' } }),
+    event('tool/result', { id: 't1', ok: true }),
+    assistantMessage(1, 1, '风起于青萍之末。'),
+  ])
+
+  async function render(props: Record<string, unknown>) {
+    const container = document.createElement('div')
+    document.body.append(container)
+    const root = createRoot(container)
+    await act(async () => { root.render(createElement(NovelTranscript as never, props)) })
+    return { container, root }
+  }
+
+  it('shows the humanised tool line while tool activity is on', async () => {
+    const rendered = await render({ entries })
+    expect(rendered.container.querySelectorAll('[data-novel-transcript-entry="tool"]').length).toBeGreaterThan(0)
+    expect(rendered.container.textContent).toContain('整理成提案')
+    await act(async () => { rendered.root.unmount() })
+    rendered.container.remove()
+  })
+
+  it('drops the tool lines and keeps the prose when the author turns it off', async () => {
+    const rendered = await render({ entries, showTools: false })
+    expect(rendered.container.querySelectorAll('[data-novel-transcript-entry="tool"]')).toHaveLength(0)
+    expect(rendered.container.textContent).toContain('写一段开场。')
+    expect(rendered.container.textContent).toContain('风起于青萍之末。')
+    expect(rendered.container.textContent).not.toContain('整理成提案')
+    await act(async () => { rendered.root.unmount() })
+    rendered.container.remove()
+  })
+})

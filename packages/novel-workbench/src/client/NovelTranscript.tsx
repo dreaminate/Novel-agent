@@ -76,11 +76,22 @@ function toolLine(entry: TranscriptEntry): { readonly lead: string, readonly det
 /** Everything the transcript needs: the lines, already reduced. */
 export interface NovelTranscriptProps {
   readonly entries: readonly TranscriptEntry[]
+  /**
+   * Whether to show what the model did, or only what it said.
+   *
+   * The empty state is decided from the unfiltered lines: a thread whose only
+   * entries are tool calls still had a conversation, and turning this off must
+   * not make the transcript claim the author never wrote anything.
+   */
+  readonly showTools?: boolean
 }
 
 /** Render the transcript. */
 export function NovelTranscript(props: NovelTranscriptProps): ReactNode {
   const { entries } = props
+  const lines = props.showTools === false
+    ? entries.filter(entry => entry.kind !== 'tool')
+    : entries
   return createElement(
     'div',
     { className: 'novel-transcript', 'data-novel-transcript': entries.length === 0 ? 'empty' : 'true' },
@@ -91,7 +102,7 @@ export function NovelTranscript(props: NovelTranscriptProps): ReactNode {
           { key: 'empty', className: 'novel-transcript-empty' },
           '这个线程还没有对话。写下第一句，或者从右栏挑一条待审提案。',
         )
-      : entries.map(entry =>
+      : lines.map(entry =>
           createElement(
             'article',
             {

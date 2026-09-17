@@ -3,6 +3,7 @@ import {
   chapterDraftPath,
   draftFromRead,
   proposalRequest,
+  refineRequest,
   saveResultFromWrite,
   type ChapterDraft,
   type ChapterDraftSave,
@@ -83,6 +84,45 @@ describe('the chapter proposal request', () => {
     expect(text).toContain('1200 字')
     // The boundary is the whole reason this sentence exists: the draft reaches
     // Canon through a proposal the author reviews, never through this request.
+    expect(text).toContain('不要直接改动 Canon')
+  })
+})
+
+/**
+ * Refinement is the second sentence this product sends to the agent, and it is
+ * the one that asks for *setting* deltas rather than the chapter itself. It has
+ * to name the skill that knows those shapes, and it has to say the two things
+ * the model otherwise gets wrong.
+ */
+describe('the chapter refinement request', () => {
+  it('names the organizer, the accepted lineage, and every delta shape it may use', () => {
+    const text = refineRequest({ number: 1, title: '开篇章' }, 5)
+
+    // The skill that owns these shapes, so the agent does not invent its own.
+    expect(text).toContain('novel-writing-memory-organizer')
+    // The lineage the proposal must be made against.
+    expect(text).toContain('第1章《开篇章》')
+    expect(text).toContain('R5')
+    // The shapes the organizer produces, named so a run cannot silently drop one.
+    expect(text).toContain('chapter-state')
+    expect(text).toContain('post-check')
+    expect(text).toContain('narrative-debt')
+    expect(text).toContain('relationship')
+    expect(text).toContain('knowledge')
+    expect(text).toContain('arc-hypothesis')
+  })
+
+  it('allows an empty anchor list, because demanding one makes the model spin', () => {
+    // Known trap: told nothing, the model burns its budget trying to hash anchors
+    // that do not exist, and produces no proposal at all.
+    const text = refineRequest({ number: 1, title: '开篇章' }, 5)
+    expect(text).toContain('sourceAnchors')
+    expect(text).toContain('[]')
+  })
+
+  it('keeps refinement proposal-only, and says so', () => {
+    const text = refineRequest({ number: 1, title: '开篇章' }, 5)
+    expect(text).toContain('propose_novel_result_packet')
     expect(text).toContain('不要直接改动 Canon')
   })
 })

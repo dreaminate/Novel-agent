@@ -985,12 +985,66 @@ HEAD `02a48d8` —— 即本计划写的 `8926e31` **加本计划文件本身的
   - **前置：I5.2 / I5.3 已绿** —— 两种模式都有真实行为可切，控件才不是空的。
   - 验证：spec 绿；**把 I5.1a 里那条「控件缺席」的断言反过来**（控件必须在，且切换真的改变行为）。
 
-- [ ] **I5.2 提交时提炼** — 目标：整章文本 → 提炼 → **只产出提案**进收件箱。
+- [x] **I5.2 提交时提炼** — 目标：整章文本 → 提炼 → **只产出提案**进收件箱。
   - 文件：`packages/novel-writing/src/`（提炼入口）、`packages/novel-project/src/`（若需边界）、spec
   - 要求：复用既有 writing-memory organizer 的 post-check/debt/relationship/knowledge/arc Delta 形状；
     无锚点时必须允许 `sourceAnchors: []`（模型会为了算 hash 空转，这是已知坑）；
     提炼失败不得污染 Canon；提案在既有「提案审阅」面逐条接受。
   - 验证：spec + 真机「写一段 → 提交 → 收件箱出现设定提案」；拒绝后 Canon hash 不变。
+
+  > **✅ 已完成（2026-09-17）。真机走通，且模型的产出证实了这条提示词的设计。**
+  >
+  > **落点改了，理由是一条硬约束（如实记）：** 计划写的是 `novel-writing/src`（提炼入口），但这句
+  > 「话」必须由**客户端**发出 —— `novel-copy.ts` 里已写明 **client plugin 之间不能互相 import 模块**
+  > （各自打包），所以客户端拿不到 `novel-writing` 的任何运行期导出；而**形状的所有者其实已经存在**：
+  > `novel-memory` 的 `novel-writing-memory-organizer` **skill** 第 5/7 条就规定了
+  > `chapter-state/post-check`、`narrative-debt/set`、`relationship/line-state`、`knowledge/state`、
+  > `character-state/arc-hypothesis` 这五种 contract。所以本条**不需要新的宿主入口**，
+  > 只需要一句说清楚的话 + 接线。改动落在 `chapter-files.ts`（与 I3.3 的 `proposalRequest` 同处，
+  > 那已经是「本产品发给 Agent 的话」的家）、`novel-data.ts`（face）、`NovelEditor.tsx`、`NovelCanvas.tsx`。
+  >
+  > **实现：** `refineRequest(chapter, revision)` 产出提示词 —— **点名 organizer 技能**（否则这一轮会自造形状，
+  > 被严格 parser 打回）、给出章节与**对齐版本 R5**、把五种 contract **逐条列名**（跑一轮不可能悄悄漏掉一种）、
+  > 并**明写「没有锚点就把 `sourceAnchors` 写成 `[]`」**（已知坑：什么都不说，模型会为了凑锚点硬算 hash，
+  > 把预算烧光、一条提案都不交）。face 加 `refineChapter`（与 `submitChapterProposal` **同一条通路**：
+  > `beginSubmission` + `prompt`），**不新建投递机制**。编辑器在**提交成功后**自动跑一次，并给一个
+  > 「重新提炼」手动入口。
+  >
+  > **一处刻意的取舍：两种模式都在提交时提炼。** `while-writing` 是**额外**的触发，不是替代 ——
+  > 一章的 post-check 恰恰在它写完时最要紧，作者切了模式就不该悄悄丢掉它。I5.3 在这之上再加节流触发。
+  >
+  > **RED → GREEN：** 新增 5 条断言（3 条钉提示词文本：点名技能与五种形状、允许空锚点、保持只提案；
+  > 2 条钉编辑器行为：**提交后才发**（未提交时一次都不发）、手动重跑能发）。先跑，5 条全红。
+  >
+  > **真机验证 —— 写一段 → 提交 → 提炼（两次真实模型回合）：**
+  > 手打「夜里风大，吹得窗纸哗哗作响。他站在门口，没有推门。」→ 提交 → 提炼。
+  > 结果：**收件箱 0 → 5**；**Canon 一动不动（R5 → R5）**，agent 自己也复述「`revision` / `headRevision` 仍为 5」。
+  > 它交出的三份提案是 **`chapter-state / post-check`（含 contractAssessment 的 5 条 deviations、
+  > changes 6 条、costs 3 条、newlyPossible/Impossible 各 4 条、readerNowKnows/Suspects、
+  > characterCarryForward、三条 `debtTransitions` 全 `created`、clock 分别 world/mystery/relationship）**
+  > 与两份 **`knowledge`**（`reader->fact-*`、`guchen->fact-*`，带 beliefStatus/derivation/mode/accuracy）。
+  >
+  > **模型的行为反过来验证了提示词：它拒绝编造。** 它**没有**新建 `narrative-debt`、**没有**新建
+  > `relationship`（"凭空建新关系行就是造假"），也**把 `arc-hypothesis` 退回待确认清单**并从契约上解释了原因
+  > （该 contract 每项要真实 `storyEventId`，而这一章没有任何 story-event）。这正是「逐条列名形状 + 不许造」
+  > 想要的结果：**形状给了它，来源真不真由它自己按契约判断**。三条交付说明写在 durable transcript 里，
+  > 证据 `docs/evidence/editor-2026-09-17/refine-turn.json`。
+  >
+  > **🔧 探针第一次跑崩了（如实记）：** `probe-refine.mjs` 的轮询把「待审提案 N」**从文本里解析**，
+  > 而那个节点更新得晚 —— 谓词永远不为真，进程卡过了它自己所有 deadline，**它自己的 summary 没写成**。
+  > 但**那两次回合是真的发生了**，所以证据不是靠它：收件箱数与 R 取自 `probe-inbox.mjs`
+  > （`refine-inbox.json`：`待审提案 5`、`R5`），提炼回合的产出取自 **durable session transcript**
+  > （`probe-refine-turn.mjs` → `refine-turn.json`）。探针已改成**读控件的属性**而不是解析文本
+  > （`[data-novel-thread-pending]`），并注明「重跑请用这一版」。**没有重跑** —— 那会再花两个回合，
+  > 而它要回答的问题已经被上面两份证据回答了。
+  >
+  > **留在现场的（作者自己决定）：** 收件箱里**多了 5 条待审提案**（本次验证的产物），
+  > 以及本次手打的草稿文件 `第1章《开篇章》.草稿.md`（提案引用的源）。都可以在审阅面逐条丢弃/删文件。
+  > **未做：** `while-writing` 的触发与节流（I5.3）；设置面板里的模式控件（I5.1b，等 I5.3）。
+  >
+  > **门禁：** **395 tests**（新增 5 条）、typecheck 0、lint 0、`git diff --check` 0、
+  > `dev-host.sh rebuild` + smoke **exit 0**；`lib/client.js` **1,608,061 B**（+5,205）
+  > ≤ 2,400,000 B → **PASS**。
 
 - [ ] **I5.3 边写边提炼模式** — 目标：该模式下写作过程中也提炼，但不打扰。
   - 文件：同 I5.2 + 节流逻辑、spec

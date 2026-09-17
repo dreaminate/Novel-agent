@@ -122,6 +122,15 @@ export interface NovelEditorProps {
     inspiration: readonly string[],
     signal: AbortSignal,
   ) => Promise<NovelContinuationResult>
+  /**
+   * The refinement seam: ask the agent to draw setting deltas out of the accepted
+   * chapter. Absent means the action is not offered at all.
+   */
+  readonly requestRefine?: (
+    sessionId: SessionId,
+    chapter: ChapterIdentity,
+    revision: number,
+  ) => Promise<void>
 }
 
 /** ProseMirror blocks back to the file's shape: blank line between paragraphs. */
@@ -152,6 +161,12 @@ export function NovelEditor(props: NovelEditorProps): ReactNode {
   const [confirming, setConfirming] = useState(false)
   const [submitState, setSubmitState] = useState<'idle' | 'sending' | 'sent'>('idle')
   const [submitProblem, setSubmitProblem] = useState<string | undefined>(undefined)
+  /**
+   * Refinement is a request into the thread, so the editor reports that it went
+   * and nothing more — the proposals appear in the inbox, which already exists.
+   */
+  const [refineState, setRefineState] = useState<'idle' | 'asking' | 'asked'>('idle')
+  const [refineProblem, setRefineProblem] = useState<string | undefined>(undefined)
 
   // Refs, not state: the debounce timer and the newest version must be readable
   // from the timer callback without re-registering it on every keystroke.
@@ -326,6 +341,35 @@ export function NovelEditor(props: NovelEditorProps): ReactNode {
     setStatus('failed')
   }, [editor, saveChapterDraft, workId])
 
+  /**
+   * Ask the agent to refine the accepted chapter into setting proposals.
+   *
+   * Runs after a submission and whenever the author asks again — in both refine
+   * modes, deliberately. Refining while writing is an *extra* trigger, not a
+   * replacement: the end of a chapter is when its post-check matters most, and
+   * an author who switched modes should not silently stop getting it.
+   */
+  const refine = useCallback(async (): Promise<void> => {
+    const target = chapterRef.current
+    const sessionId = props.sessionId
+    const revision = props.revision
+    const seam = props.requestRefine
+    if (seam === undefined || workId === undefined || target === undefined) return
+    if (sessionId === undefined || revision === undefined) {
+      setRefineProblem('还没有选定线程，先在左栏开一条线再提炼。')
+      return
+    }
+    setRefineState('asking')
+    setRefineProblem(undefined)
+    try {
+      await seam(sessionId, target, revision)
+      setRefineState('asked')
+    } catch (error) {
+      setRefineProblem(error instanceof Error ? error.message : String(error))
+      setRefineState('idle')
+    }
+  }, [props.requestRefine, props.revision, props.sessionId, workId])
+
   const submit = useCallback(async (): Promise<void> => {
     const target = chapterRef.current
     const sessionId = props.sessionId
@@ -343,11 +387,15 @@ export function NovelEditor(props: NovelEditorProps): ReactNode {
       await props.submitChapterProposal(sessionId, target, revision, chars)
       setSubmitState('sent')
       setConfirming(false)
+      // The chapter is in the inbox now; refinement is what turns it into
+      // settings. It is a separate request, so a failure here does not undo the
+      // submission the author already made.
+      void refine()
     } catch (error) {
       setSubmitProblem(error instanceof Error ? error.message : String(error))
       setSubmitState('idle')
     }
-  }, [chars, flush, props, workId])
+  }, [chars, flush, props, refine, workId])
 
   /**
    * Ask for a paragraph, with the manuscript as it stands right now. Reading the
@@ -486,6 +534,23 @@ export function NovelEditor(props: NovelEditorProps): ReactNode {
         )}
         {submitState === 'sent' && (
           <span className="novel-editor-state" data-novel-editor-submitted="true">已交给 AI 起草提案</span>
+        )}
+        {props.requestRefine !== undefined && (
+          <button
+            type="button"
+            className="btn sm"
+            data-novel-editor-refine="true"
+            disabled={refineState === 'asking'}
+            onClick={() => { void refine() }}
+          >
+            {refineState === 'asking' ? '正在提炼…' : '重新提炼'}
+          </button>
+        )}
+        {refineState === 'asked' && (
+          <span className="novel-editor-state" data-novel-editor-refined="true">已请 AI 提炼这一章</span>
+        )}
+        {refineProblem !== undefined && (
+          <span className="novel-editor-state" role="alert">{refineProblem}</span>
         )}
       </div>
       {confirming && (

@@ -73,6 +73,44 @@ export function proposalRequest(
 }
 
 /**
+ * What 重新提炼 asks the agent to do.
+ *
+ * The second sentence in the product whose effect can reach Canon, and the one
+ * that asks for *setting* deltas instead of the chapter. Two things it has to
+ * get right, both learned from what the model does when they are missing:
+ *
+ * 1. **Name the skill.** `novel-writing-memory-organizer` owns the post-check
+ *    and the debt / relationship / knowledge / arc shapes. Without naming it the
+ *    run invents its own shapes, which the strict parser then rejects.
+ * 2. **Say that no anchors is allowed.** Told nothing, a model asked for
+ *    provenance burns its budget trying to hash anchors it does not have — the
+ *    known trap — and files nothing at all.
+ *
+ * The boundary is the same as the chapter request: a proposal the author
+ * reviews, never a direct write.
+ */
+export function refineRequest(
+  chapter: ChapterIdentity,
+  revision: number,
+): string {
+  return [
+    '请对已接受的这一章做一次写作记忆提炼，用 novel-writing-memory-organizer 技能。',
+    '',
+    `- 章节：第${String(chapter.number)}章《${chapter.title}》`,
+    `- 对齐版本：R${String(revision)}（current accepted revision）`,
+    '',
+    '按该技能的章节后写回约定，产出一份提案，用 propose_novel_result_packet：',
+    '- chapter-state / post-check：本章实际造成的变化、付过的代价、新可行与新不可行、读者已知与可疑、角色携带、债务转变；',
+    '- narrative-debt、relationship、knowledge、character-state / arc-hypothesis：',
+    '  post-check 之外的真实变化各自用它自己的严格 contract，不要塞进 post-check 的自由文本。',
+    '',
+    '没有可指向的正文锚点时，sourceAnchors 就直接写 [] —— 不要为了凑锚点去硬算 hash。',
+    '',
+    '只产出提案、放进提案收件箱等作者逐条审阅：不要直接改动 Canon，也不要自动接受任何一条。',
+  ].join('\n')
+}
+
+/**
  * Translate one read.
  * @param read - the host's answer.
  * @returns what the editor shows.

@@ -37,6 +37,7 @@ import {
   chapterDraftPath,
   draftFromRead,
   proposalRequest,
+  refineRequest,
   saveResultFromWrite,
   type ChapterDraft,
   type ChapterDraftSave,
@@ -176,6 +177,16 @@ export interface NovelWorkFace {
     before: string,
     signal: AbortSignal,
   ) => Promise<string>
+  /**
+   * Ask the agent to refine an accepted chapter into setting proposals. The same
+   * transport as the chapter request — a prompt into the thread — and the same
+   * boundary: what comes back is a proposal the author reviews, not a write.
+   */
+  readonly refineChapter: (
+    sessionId: SessionId,
+    chapter: ChapterIdentity,
+    revision: number,
+  ) => Promise<void>
   /**
    * Ask for the next stretch of prose, from the author's beats and the draft so
    * far. Unlike the sentence suggestion, a failure comes back as a state the
@@ -1455,6 +1466,21 @@ export function createNovelWorkFace(deps: NovelFaceDeps): NovelWorkFace {
       const handle = session.beginSubmission({ mode: 'queue', text, images: [] })
       const result = await session.prompt([{ type: 'text', text }], 'queue', undefined, handle.requestId)
       if (!result.ok) throw new Error(`提交失败：${result.error.message}`)
+    },
+    /**
+     * Refinement asks the agent to read the accepted chapter and propose the
+     * setting deltas. Failure is a thrown error rather than silence: the author
+     * asked for it, and the editor says so.
+     */
+    async refineChapter(sessionId, chapter, revision) {
+      const session = deps.sessions.binding(sessionId)?.session
+      if (session === undefined) {
+        throw new Error('这条线程在 Host 上没有可用的会话绑定，没法提炼这一章。')
+      }
+      const text = refineRequest(chapter, revision)
+      const handle = session.beginSubmission({ mode: 'queue', text, images: [] })
+      const result = await session.prompt([{ type: 'text', text }], 'queue', undefined, handle.requestId)
+      if (!result.ok) throw new Error(`提炼失败：${result.error.message}`)
     },
     /**
      * The continuation seam. The host already turns every failure into an empty

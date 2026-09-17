@@ -1,0 +1,21 @@
+{
+  "proposals": [],
+  "endpoints": [
+    "http://127.0.0.1:4780/api/settings/describe",
+    "http://127.0.0.1:4780/api/dynamicCordisRunner/syncInspectManifest",
+    "http://127.0.0.1:4780/api/credentials/describe",
+    "http://127.0.0.1:4780/api/dynamicCordisRunner/inventory",
+    "http://127.0.0.1:4780/api/session/modelCatalog",
+    "http://127.0.0.1:4780/api/agentPresets/list",
+    "http://127.0.0.1:4780/api/novelProject/open",
+    "http://127.0.0.1:4780/api/novelProject/projectNarrative",
+    "http://127.0.0.1:4780/api/novelProject/projectManuscripts",
+    "http://127.0.0.1:4780/api/novelProject/pendingProposals",
+    "http://127.0.0.1:4780/api/session/list",
+    "http://127.0.0.1:4780/api/subagents/list",
+    "http://127.0.0.1:4780/api/commands/list",
+    "http://127.0.0.1:4780/api/skills/list"
+  ],
+  "envelope": null,
+  "count": 0
+}

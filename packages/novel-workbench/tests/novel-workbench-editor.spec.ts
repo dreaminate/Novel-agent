@@ -15,7 +15,7 @@ import { NovelEditor } from '../src/client/NovelEditor.js'
  */
 const chapter = { number: 1, title: '开篇章' }
 
-function mount(options: { text?: string, state?: 'loaded' | 'missing', onSubmit?: (sessionId: string, chapter: unknown, revision: number, chars: number) => Promise<void>, continuation?: string, saves?: string[] } = {}) {
+function mount(options: { text?: string, state?: 'loaded' | 'missing', onSubmit?: (sessionId: string, chapter: unknown, revision: number, chars: number) => Promise<void>, continuation?: string, saves?: string[], refines?: unknown[][] } = {}) {
   const container = document.createElement('div')
   document.body.append(container)
   const root = createRoot(container)
@@ -38,6 +38,7 @@ function mount(options: { text?: string, state?: 'loaded' | 'missing', onSubmit?
       revision: 7,
       submitChapterProposal: options.onSubmit ?? (async () => {}),
       requestContinuation: async () => ({ state: 'ok', text: options.continuation ?? '' }),
+      requestRefine: async (...args: unknown[]) => { options.refines?.push(args) },
     } as never))
   })
   return { ready, container, root }
@@ -162,6 +163,47 @@ describe('novel-mode writing surface', () => {
     await act(async () => { await new Promise(resolve => setTimeout(resolve, 900)) })
 
     expect(saves.at(-1)).toBe('第一段。\n\n第二段。')
+
+    await act(async () => { rendered.root.unmount() })
+    rendered.container.remove()
+  })
+
+  it('refines the chapter after the author submits it, and not before', async () => {
+    const refines: unknown[][] = []
+    const rendered = mount({ text: '第一段。', refines })
+    await rendered.ready
+    await act(async () => {})
+
+    // Refinement reads an accepted chapter. Asking before it is accepted would
+    // ask the organizer to work from a lineage that does not exist yet.
+    expect(refines).toHaveLength(0)
+
+    await act(async () => {
+      rendered.container.querySelector<HTMLButtonElement>('[data-novel-editor-submit]')?.click()
+    })
+    await act(async () => {})
+    await act(async () => {
+      rendered.container.querySelector<HTMLButtonElement>('[data-novel-editor-confirm-submit]')?.click()
+    })
+    await act(async () => {})
+
+    expect(refines).toHaveLength(1)
+
+    await act(async () => { rendered.root.unmount() })
+    rendered.container.remove()
+  })
+
+  it('offers a manual re-run, so refinement is not a one-shot', async () => {
+    const refines: unknown[][] = []
+    const rendered = mount({ text: '第一段。', refines })
+    await rendered.ready
+    await act(async () => {})
+
+    await act(async () => {
+      rendered.container.querySelector<HTMLButtonElement>('[data-novel-editor-refine]')?.click()
+    })
+
+    expect(refines).toHaveLength(1)
 
     await act(async () => { rendered.root.unmount() })
     rendered.container.remove()

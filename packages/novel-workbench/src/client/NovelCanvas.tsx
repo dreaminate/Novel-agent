@@ -687,6 +687,7 @@ export function NovelCanvas(props: NovelCanvasProps): ReactNode {
             }
             return await props.continueWriting(sessionId, workId, { inspiration, before }, signal)
           }}
+          requestRefine={props.refineChapter}
         />
       </Shell>
     )

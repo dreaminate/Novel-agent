@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import {
+  WHILE_WRITING_MIN_CHARS,
   chapterDraftPath,
   draftFromRead,
   proposalRequest,
   refineRequest,
   saveResultFromWrite,
+  shouldRefineWhileWriting,
   type ChapterDraft,
   type ChapterDraftSave,
 } from '../src/client/chapter-files.js'
@@ -124,5 +126,42 @@ describe('the chapter refinement request', () => {
     const text = refineRequest({ number: 1, title: '开篇章' }, 5)
     expect(text).toContain('propose_novel_result_packet')
     expect(text).toContain('不要直接改动 Canon')
+  })
+})
+
+/**
+ * 边写边提炼 is the expensive mode: every refinement is an agent turn that can
+ * file several proposals. The throttle is what keeps it from spending the
+ * author's money and filling their inbox with the same chapter over and over.
+ */
+describe('the while-writing refine throttle', () => {
+  it('never fires in the submit-time mode, however much was written', () => {
+    expect(shouldRefineWhileWriting({
+      whileWriting: false, asking: false, chars: 40_000, refinedAt: 0,
+    })).toBe(false)
+  })
+
+  it('waits for enough new prose, and then asks', () => {
+    const below = WHILE_WRITING_MIN_CHARS - 1
+    expect(shouldRefineWhileWriting({
+      whileWriting: true, asking: false, chars: below, refinedAt: 0,
+    })).toBe(false)
+    expect(shouldRefineWhileWriting({
+      whileWriting: true, asking: false, chars: WHILE_WRITING_MIN_CHARS, refinedAt: 0,
+    })).toBe(true)
+  })
+
+  it('never asks twice for the same text, which is what keeps the inbox quiet', () => {
+    // A refinement just ran at this length: nothing has been written since, so
+    // asking again would re-propose the same chapter.
+    expect(shouldRefineWhileWriting({
+      whileWriting: true, asking: false, chars: 5000, refinedAt: 5000,
+    })).toBe(false)
+  })
+
+  it('does not stack turns on top of each other', () => {
+    expect(shouldRefineWhileWriting({
+      whileWriting: true, asking: true, chars: 9000, refinedAt: 0,
+    })).toBe(false)
   })
 })

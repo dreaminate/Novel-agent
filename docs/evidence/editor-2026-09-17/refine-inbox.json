@@ -1,21 +1,10 @@
 {
-  "proposals": [],
-  "endpoints": [
-    "http://127.0.0.1:4780/api/settings/describe",
-    "http://127.0.0.1:4780/api/dynamicCordisRunner/syncInspectManifest",
-    "http://127.0.0.1:4780/api/credentials/describe",
-    "http://127.0.0.1:4780/api/dynamicCordisRunner/inventory",
-    "http://127.0.0.1:4780/api/session/modelCatalog",
-    "http://127.0.0.1:4780/api/agentPresets/list",
-    "http://127.0.0.1:4780/api/novelProject/open",
-    "http://127.0.0.1:4780/api/novelProject/projectNarrative",
-    "http://127.0.0.1:4780/api/novelProject/projectManuscripts",
-    "http://127.0.0.1:4780/api/novelProject/pendingProposals",
-    "http://127.0.0.1:4780/api/session/list",
-    "http://127.0.0.1:4780/api/subagents/list",
-    "http://127.0.0.1:4780/api/commands/list",
-    "http://127.0.0.1:4780/api/skills/list"
-  ],
-  "envelope": null,
-  "count": 0
+  "thread": "session-65f247e8-828e-4fb4-a13a-778afb43309f",
+  "revision": 5,
+  "threadHeader": "天机阁主 | R5 | 待审提案 6",
+  "lastAssistant": "提案已提交进收件箱（`packetId: wmo-vol01-ch0001-postcheck-r5`，`expectedRevision: 5`），**未改动 Canon、未添加任何授权、未 Apply**。等待你逐条决定。\n## 一个必须先说的事实\nR5 里**没有已接受的《开篇章》正文单元**：该 revision 的 `recentManuscripts`、`recentPostChapterChecks`、`knowledgeBoundaries`、`characterCarryForward` 全为空。章节 id 也不是 `chapter-1`（在 R5 不存在），而是叙事单元 **`vol01-ch0001`**。\n我实际能用的证据只有两档，且已在提案里分档标明：\n- **已接受正文片段**：`unitId vol01-ch0001`、标题「开篇章」、`sourceRevision 4`——即开篇苏醒场景与章末休书预叙各一句；\n- **已接受事实层**：R2–R5 的 `character-state`／`relationship`／`narrative-debt`（林玄已入天机阁、顾辰阁主初立、六条关系线、三条债务）。\n`第1章《开篇章》.草稿.md` 仍在工作区且**未被接受**，我没有把它当作本章正文证据。\n## 提案里真实提交的内容\n**1 个 Delta — `chapter-state` / `post-check`（targetId `vol01-ch0001`）**\n- `contractAssessment`：`contractRevision 1`、`contractSourceDeltaId nu-05`、`outcome: \"changed\"`（不是 `met`），三条 `deviations` 说明为何只能判 changed——已接受片段覆盖不到合同的「升级场景／抉择场景」，acceptanceGates 逐条标注未验证；\n- `manuscriptSourceRevision: 4`；`changes` / `costs` / `newlyPossible` / `newlyImpossible` / `readerNowKnows` / `readerNowSuspects` / `characterCarryForward`（顾辰、韩破天、林玄、苏沐白）全部按约定显式给出，空数组也没有省略；\n- `debtTransitions` 三条，`clock` 分别 `world` / `relationship` / `mystery`，精确引用已接受债务 Delta `debt-vol01-ch0001-world-tianji-rules`、`debt-vol01-ch0001-relationship-hanpotian-pact`、`debt-vol01-ch0001-mystery-guchen-origin`。\n**7 条 issue**（不是塞进 post-check 自由文本的伪事实）：1 条 `major` + 6 条 `minor`，每条都带真实锚点。\n## 三件我没能合法提交的事（已在 issue 里列清）\n1. **`character-state/arc-hypothesis` 提交不了**——该 strict contract 的 `decisionChain` 每项必须带**非空 `storyEventId`**（我用探针验证过，空串被拒）。R5 的 `story-event` 家族只有 `event-forbidden-zone-self-cut`（禁区之主）和 `event-qingdi-fall-lotus`（青帝）两条远古事件，**本章一个 story-event ",
+  "pendingControl": "6",
+  "canvas": "review",
+  "reviewText": "提案审阅\n作者是决策者，AI 是稿手：逐条决定，再写入故事事实\nR5 → R6 · 开篇章 · 约 23 字\n开篇章\n正文预览\n风起于青萍之末。他合上门，把袖中的信压得更深。\n设定变更 0 条\n没有设定变更。\n审阅问题 0 个\n没有审阅问题。\n影响预览\nR5 → R6：正文 1 篇 · 设定变更 0 条 · 未采纳建议 0 条\n接受本章\n暂不处理\n丢弃提案",
+  "proposalRows": 0
 }

@@ -1,0 +1,24 @@
+{
+  "steps": [
+    {
+      "step": "mode set back to 提交时",
+      "pressed": "true"
+    },
+    {
+      "step": "wrote 2600 more characters with the mode off",
+      "focused": true,
+      "before": {
+        "inbox": 6,
+        "chars": 1600
+      },
+      "after": {
+        "inbox": 6,
+        "chars": 4200,
+        "asked": false
+      }
+    }
+  ],
+  "ok": true,
+  "wrote": true,
+  "consoleErrors": []
+}

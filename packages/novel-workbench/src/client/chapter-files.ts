@@ -111,6 +111,41 @@ export function refineRequest(
 }
 
 /**
+ * How much new prose earns a while-writing refinement.
+ *
+ * Deliberately large. Every refinement is an agent turn that can file several
+ * proposals, so a small threshold would spend the author's money and fill their
+ * inbox with the same chapter again and again. This is the number that decides
+ * whether 边写边提炼 is useful or a nuisance.
+ */
+export const WHILE_WRITING_MIN_CHARS = 1200
+
+/** What the while-writing throttle needs to decide. */
+export interface RefineThrottle {
+  /** True only in the 边写边提炼 mode; the submit-time mode never fires here. */
+  readonly whileWriting: boolean
+  /** A refinement already in flight. One at a time, always. */
+  readonly asking: boolean
+  /** Characters in the draft now. */
+  readonly chars: number
+  /** Characters at the last refinement; 0 when none has run for this chapter. */
+  readonly refinedAt: number
+}
+
+/**
+ * Whether writing has earned another refinement.
+ *
+ * The condition is *new prose since the last one*, not prose in total: that is
+ * what stops the same chapter being proposed twice, and it is the whole reason
+ * the inbox can be trusted to stay readable in this mode.
+ */
+export function shouldRefineWhileWriting(throttle: RefineThrottle): boolean {
+  if (!throttle.whileWriting) return false
+  if (throttle.asking) return false
+  return throttle.chars - throttle.refinedAt >= WHILE_WRITING_MIN_CHARS
+}
+
+/**
  * Translate one read.
  * @param read - the host's answer.
  * @returns what the editor shows.

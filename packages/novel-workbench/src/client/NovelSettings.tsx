@@ -14,7 +14,7 @@
  * only against shipping one that does nothing.
  */
 import { createElement, useEffect, type ReactNode } from 'react'
-import { useWorkbenchState, workbenchActions, type WorkbenchTheme } from './store.js'
+import { useWorkbenchState, workbenchActions, type RefineMode, type WorkbenchTheme } from './store.js'
 
 /** Sheet rules: the frame's own overlay above the three columns. */
 const SETTINGS_CSS = `
@@ -310,6 +310,31 @@ export function NovelSettings(): ReactNode {
           'div',
           { className: 'setting-note' },
           '对话里除了 AI 说的话，还会写它做了什么（读了哪个文件、整理成提案）。收起后只留文字 —— 那些动作本来也不进你的稿子。',
+        ),
+      ),
+      createElement(
+        'div',
+        { className: 'setting' },
+        createElement('div', { className: 'setting-label' }, '提炼时机'),
+        createElement(
+          'div',
+          { className: 'seg', role: 'group' },
+          [['on-submit', '提交时'], ['while-writing', '边写边']].map(([value, label]) => createElement(
+            'button',
+            {
+              key: value,
+              type: 'button',
+              'data-novel-settings-refine': value,
+              'aria-pressed': settings.refineMode === value ? 'true' : 'false',
+              onClick: () => { workbenchActions.setRefineMode(value as RefineMode) },
+            },
+            label,
+          )),
+        ),
+        createElement(
+          'div',
+          { className: 'setting-note' },
+          '提交时：你把这一章交出去时，AI 把设定变化整理成提案。边写边：写到一定量也顺手整理一次 —— 会更及时，也可能一次攒下好几份待你审。两种都只产出提案，随时可以换回来。',
         ),
       ),
     ),

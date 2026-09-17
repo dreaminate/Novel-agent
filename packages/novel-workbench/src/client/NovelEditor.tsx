@@ -25,6 +25,7 @@ import { countCharacters } from './novel-copy.js'
 import { COMPLETION_PLUGIN_KEY, NovelCompletion, completionInsertion, shouldAskForCompletion } from './novel-completion.js'
 import { ContinueWritingPanel } from './ContinueWritingPanel.js'
 import type { ChapterDraft, ChapterDraftSave, ChapterIdentity } from './chapter-files.js'
+import { shouldRefineWhileWriting } from './chapter-files.js'
 
 /** How long the author has to stop typing before a save goes out. */
 const AUTOSAVE_MS = 700
@@ -131,6 +132,11 @@ export interface NovelEditorProps {
     chapter: ChapterIdentity,
     revision: number,
   ) => Promise<void>
+  /**
+   * Which refine mode the author chose. Only 边写边提炼 adds a trigger here —
+   * both modes refine on submit.
+   */
+  readonly refineMode?: 'on-submit' | 'while-writing'
 }
 
 /** ProseMirror blocks back to the file's shape: blank line between paragraphs. */
@@ -174,6 +180,14 @@ export function NovelEditor(props: NovelEditorProps): ReactNode {
   const versionRef = useRef('')
   const chapterRef = useRef<ChapterIdentity | undefined>(chapter)
   chapterRef.current = chapter
+  /**
+   * The draft length at the last refinement, and the length now. Read from refs
+   * because the throttle decision is made from a timer-ish effect, where the
+   * state values would be the ones captured at render.
+   */
+  const charsRef = useRef(0)
+  charsRef.current = chars
+  const refinedAt = useRef(0)
 
   // The suggestion lives in a ref, not state: the ghost is painted by a
   // ProseMirror decoration, so a React render is neither how it appears nor how
@@ -361,6 +375,9 @@ export function NovelEditor(props: NovelEditorProps): ReactNode {
     }
     setRefineState('asking')
     setRefineProblem(undefined)
+    // Whichever trigger asked, this is the length that has now been refined —
+    // which is what stops the same text being proposed a second time.
+    refinedAt.current = charsRef.current
     try {
       await seam(sessionId, target, revision)
       setRefineState('asked')
@@ -439,6 +456,8 @@ export function NovelEditor(props: NovelEditorProps): ReactNode {
 
   const load = useCallback((target: ChapterIdentity) => {
     if (workId === undefined) return
+    // A different chapter starts its own count: its prose has never been refined.
+    refinedAt.current = 0
     setStatus('loading')
     setProblem(undefined)
     setConflict(undefined)
@@ -469,6 +488,25 @@ export function NovelEditor(props: NovelEditorProps): ReactNode {
     // and re-loading on every keystroke would fight the author's cursor.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editor, chapter?.number, chapter?.title, workId])
+
+  /**
+   * 边写边提炼: refine while the author writes, without interrupting them.
+   *
+   * The decision itself is a pure function, so the throttle rules are asserted
+   * without an editor; this only feeds it and acts on the answer. Nothing here
+   * touches the document — refinement is a request into the thread, and what
+   * comes back waits in the inbox like any other proposal.
+   */
+  useEffect(() => {
+    if (editor === undefined || editor === null) return
+    if (!shouldRefineWhileWriting({
+      whileWriting: props.refineMode === 'while-writing',
+      asking: refineState === 'asking',
+      chars,
+      refinedAt: refinedAt.current,
+    })) return
+    void refine()
+  }, [chars, editor, props.refineMode, refine, refineState])
 
   if (chapter === undefined || workId === undefined) {
     return (

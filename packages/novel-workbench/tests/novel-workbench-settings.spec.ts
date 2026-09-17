@@ -85,15 +85,12 @@ describe('novel-mode settings sheet', () => {
   })
 
   /**
-   * The refine mode is state before it is a control, and that order is the point.
-   *
-   * The sheet may not carry a switch that does nothing — the same rule that kept
-   * 工具活动 out until the frame rendered the thread itself. Neither refine mode
-   * can be honoured yet, because the refinement path they choose between does not
-   * exist (I5.2 / I5.3 build it). So the mode is remembered here and the control
-   * waits; I5.1b offers it, and inverts the absence assertion below.
+   * 提炼时机 is the switch I5.1a deliberately withheld. It is offered now because
+   * both modes finally do something: 提交时 refines when the chapter is handed
+   * over, 边写边 also refines as the author writes, throttled. Until I5.3 landed
+   * there was nothing for the second option to mean.
    */
-  it('remembers the refine mode, and does not yet offer a switch for it', async () => {
+  it('offers the refine timing switch, and writes it to the frame store', async () => {
     resetWorkbench()
     workbenchActions.openSettings()
     const container = document.createElement('div')
@@ -101,17 +98,23 @@ describe('novel-mode settings sheet', () => {
     const root = createRoot(container)
     await act(async () => { root.render(createElement(NovelSettings as never, {})) })
 
+    const sheet = container.querySelector('[data-novel-settings]')
+    expect(sheet?.querySelector('[data-novel-settings-refine]')).not.toBeNull()
+
     // Default: the world catches up when the author hands the chapter over.
     expect(getWorkbenchState().settings.refineMode).toBe('on-submit')
 
-    workbenchActions.setRefineMode('while-writing')
+    await act(async () => {
+      sheet?.querySelector<HTMLButtonElement>('[data-novel-settings-refine="while-writing"]')?.click()
+    })
     expect(getWorkbenchState().settings.refineMode).toBe('while-writing')
-    workbenchActions.setRefineMode('on-submit')
-    expect(getWorkbenchState().settings.refineMode).toBe('on-submit')
 
-    // Honest absence, with a reason that is still true: there is nothing to
-    // switch yet. Not the old reason — the transcript is ours now.
-    expect(container.querySelector('[data-novel-settings-refine]')).toBeNull()
+    // And it can be turned off again at any time, which is what makes the mode
+    // safe to try.
+    await act(async () => {
+      sheet?.querySelector<HTMLButtonElement>('[data-novel-settings-refine="on-submit"]')?.click()
+    })
+    expect(getWorkbenchState().settings.refineMode).toBe('on-submit')
 
     await act(async () => { root.unmount() })
     resetWorkbench()

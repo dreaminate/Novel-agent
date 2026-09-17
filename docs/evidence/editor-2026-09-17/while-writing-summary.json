@@ -1,0 +1,39 @@
+{
+  "steps": [
+    {
+      "step": "turned 边写边 on from the sheet",
+      "controlPresent": true,
+      "pressed": "true"
+    },
+    {
+      "step": "baseline",
+      "inbox": 5,
+      "chars": 0
+    },
+    {
+      "step": "wrote under the threshold",
+      "chars": 700,
+      "inbox": 5,
+      "asked": false
+    },
+    {
+      "step": "crossed the threshold",
+      "fired": true,
+      "inboxGrew": false,
+      "afterFirst": {
+        "chars": 1600,
+        "inbox": 5
+      },
+      "added": 0
+    },
+    {
+      "step": "turned it off, then wrote a lot more",
+      "chars": 1600,
+      "inboxBefore": 5,
+      "inboxAfter": 5,
+      "addedAfterOff": 0
+    }
+  ],
+  "ok": false,
+  "consoleErrors": []
+}

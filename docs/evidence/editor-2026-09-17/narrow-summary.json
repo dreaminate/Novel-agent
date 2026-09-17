@@ -1,0 +1,304 @@
+{
+  "wide": {
+    "narrow": "0",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "rail": {
+      "x": 0,
+      "w": 247,
+      "top": 44,
+      "bottom": 853
+    },
+    "railLabelsHidden": false,
+    "railItems": 18,
+    "railItemsWithoutName": [
+      "<button type=\"button\" class=\"item\" data-novel-thread=\"session-2642a8b2-c4d5-4ca3-80e5-45acb994a3b3\" aria-current=\"true\"><svg class=\"ico\" viewBox=\"0 0 16 16\" fil"
+    ],
+    "spill": [],
+    "main": {
+      "x": 248,
+      "w": 896,
+      "top": 44,
+      "bottom": 900
+    },
+    "side": {
+      "x": 1144,
+      "w": 296,
+      "top": 44,
+      "bottom": 900
+    },
+    "sideClasses": "side",
+    "sideOverlapsMain": false,
+    "gridRows": "44px 856px",
+    "composerRowFilled": false,
+    "frameHeight": 900,
+    "areas": [
+      {
+        "cls": "",
+        "area": "auto",
+        "top": 0,
+        "bottom": 0
+      },
+      {
+        "cls": "",
+        "area": "auto",
+        "top": 0,
+        "bottom": 0
+      },
+      {
+        "cls": "topbar",
+        "area": "top",
+        "top": 0,
+        "bottom": 44
+      },
+      {
+        "cls": "rail",
+        "area": "rail",
+        "top": 44,
+        "bottom": 900
+      },
+      {
+        "cls": "main",
+        "area": "main",
+        "top": 44,
+        "bottom": 900
+      },
+      {
+        "cls": "side",
+        "area": "side",
+        "top": 44,
+        "bottom": 900
+      },
+      {
+        "cls": "",
+        "area": "auto",
+        "top": 0,
+        "bottom": 0
+      }
+    ]
+  },
+  "narrow": {
+    "narrow": "1",
+    "viewport": 1280,
+    "documentWidth": 1280,
+    "rail": {
+      "x": 0,
+      "w": 57,
+      "top": 44,
+      "bottom": 852
+    },
+    "railLabelsHidden": true,
+    "railItems": 18,
+    "railItemsWithoutName": [
+      "<button type=\"button\" class=\"item\" data-novel-thread=\"session-2642a8b2-c4d5-4ca3-80e5-45acb994a3b3\" aria-current=\"true\"><svg class=\"ico\" viewBox=\"0 0 16 16\" fil"
+    ],
+    "spill": [],
+    "main": {
+      "x": 58,
+      "w": 1222,
+      "top": 44,
+      "bottom": 900
+    },
+    "side": {
+      "x": 984,
+      "w": 296,
+      "top": 88,
+      "bottom": 900
+    },
+    "sideClasses": "side open",
+    "sideOverlapsMain": true,
+    "gridRows": "44px 856px",
+    "composerRowFilled": false,
+    "frameHeight": 900,
+    "areas": [
+      {
+        "cls": "",
+        "area": "auto",
+        "top": 0,
+        "bottom": 0
+      },
+      {
+        "cls": "",
+        "area": "auto",
+        "top": 0,
+        "bottom": 0
+      },
+      {
+        "cls": "topbar",
+        "area": "top",
+        "top": 0,
+        "bottom": 44
+      },
+      {
+        "cls": "rail",
+        "area": "rail",
+        "top": 44,
+        "bottom": 900
+      },
+      {
+        "cls": "main",
+        "area": "main",
+        "top": 44,
+        "bottom": 900
+      },
+      {
+        "cls": "side open",
+        "area": "side",
+        "top": 88,
+        "bottom": 900
+      },
+      {
+        "cls": "",
+        "area": "auto",
+        "top": 0,
+        "bottom": 0
+      }
+    ]
+  },
+  "narrowClosed": {
+    "narrow": "1",
+    "viewport": 1280,
+    "documentWidth": 1280,
+    "rail": {
+      "x": 0,
+      "w": 57,
+      "top": 44,
+      "bottom": 852
+    },
+    "railLabelsHidden": true,
+    "railItems": 18,
+    "railItemsWithoutName": [
+      "<button type=\"button\" class=\"item\" data-novel-thread=\"session-2642a8b2-c4d5-4ca3-80e5-45acb994a3b3\" aria-current=\"true\"><svg class=\"ico\" viewBox=\"0 0 16 16\" fil"
+    ],
+    "spill": [],
+    "main": {
+      "x": 58,
+      "w": 1222,
+      "top": 44,
+      "bottom": 900
+    },
+    "side": null,
+    "sideClasses": null,
+    "sideOverlapsMain": false,
+    "gridRows": "44px 856px",
+    "composerRowFilled": false,
+    "frameHeight": 900,
+    "areas": [
+      {
+        "cls": "",
+        "area": "auto",
+        "top": 0,
+        "bottom": 0
+      },
+      {
+        "cls": "",
+        "area": "auto",
+        "top": 0,
+        "bottom": 0
+      },
+      {
+        "cls": "topbar",
+        "area": "top",
+        "top": 0,
+        "bottom": 44
+      },
+      {
+        "cls": "rail",
+        "area": "rail",
+        "top": 44,
+        "bottom": 900
+      },
+      {
+        "cls": "main",
+        "area": "main",
+        "top": 44,
+        "bottom": 900
+      },
+      {
+        "cls": "",
+        "area": "auto",
+        "top": 0,
+        "bottom": 0
+      }
+    ]
+  },
+  "wideAgain": {
+    "narrow": "0",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "rail": {
+      "x": 0,
+      "w": 247,
+      "top": 44,
+      "bottom": 853
+    },
+    "railLabelsHidden": false,
+    "railItems": 18,
+    "railItemsWithoutName": [
+      "<button type=\"button\" class=\"item\" data-novel-thread=\"session-2642a8b2-c4d5-4ca3-80e5-45acb994a3b3\" aria-current=\"true\"><svg class=\"ico\" viewBox=\"0 0 16 16\" fil"
+    ],
+    "spill": [],
+    "main": {
+      "x": 248,
+      "w": 896,
+      "top": 44,
+      "bottom": 900
+    },
+    "side": {
+      "x": 1144,
+      "w": 296,
+      "top": 44,
+      "bottom": 900
+    },
+    "sideClasses": "side",
+    "sideOverlapsMain": false,
+    "gridRows": "44px 856px",
+    "composerRowFilled": false,
+    "frameHeight": 900,
+    "areas": [
+      {
+        "cls": "",
+        "area": "auto",
+        "top": 0,
+        "bottom": 0
+      },
+      {
+        "cls": "",
+        "area": "auto",
+        "top": 0,
+        "bottom": 0
+      },
+      {
+        "cls": "topbar",
+        "area": "top",
+        "top": 0,
+        "bottom": 44
+      },
+      {
+        "cls": "rail",
+        "area": "rail",
+        "top": 44,
+        "bottom": 900
+      },
+      {
+        "cls": "main",
+        "area": "main",
+        "top": 44,
+        "bottom": 900
+      },
+      {
+        "cls": "side",
+        "area": "side",
+        "top": 44,
+        "bottom": 900
+      },
+      {
+        "cls": "",
+        "area": "auto",
+        "top": 0,
+        "bottom": 0
+      }
+    ]
+  },
+  "consoleErrors": []
+}

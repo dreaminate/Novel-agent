@@ -211,6 +211,14 @@ export function NovelRail(props: NovelRailProps): ReactNode {
                 type: 'button',
                 className: 'item',
                 'data-novel-threads-toggle': expanded === true ? 'collapse' : 'expand',
+                // A narrow rail hides the label, so the row has to carry its own
+                // name for the tooltip and for a screen reader alike.
+                title: expanded === true
+                  ? '收起线程'
+                  : `展开其余 ${String(threads.length - VISIBLE_THREADS)} 条`,
+                'aria-label': expanded === true
+                  ? '收起线程'
+                  : `展开其余 ${String(threads.length - VISIBLE_THREADS)} 条`,
                 onClick: () => { setExpanded(expanded !== true) },
               },
               railIcon(expanded === true ? MINUS_ICON : PLUS_ICON),
@@ -227,6 +235,8 @@ export function NovelRail(props: NovelRailProps): ReactNode {
             type: 'button',
             className: 'item',
             'data-novel-new-thread': 'true',
+            title: '新建线程',
+            'aria-label': '新建线程',
             onClick: () => {
               if (workId !== undefined) props.newThread(workId)
               workbenchActions.requestNewThread()
@@ -256,6 +266,8 @@ export function NovelRail(props: NovelRailProps): ReactNode {
                 className: 'item',
                 'data-novel-advanced-item': item.id,
                 'aria-current': state.advancedGroup === group.id ? 'true' : 'false',
+                title: item.label,
+                'aria-label': item.label,
                 onClick: () => {
                   workbenchActions.setAdvancedGroup(group.id)
                   workbenchActions.setView('advanced')
@@ -277,6 +289,8 @@ export function NovelRail(props: NovelRailProps): ReactNode {
           className: 'item',
           'data-novel-advanced-toggle': 'true',
           'aria-pressed': state.advanced ? 'true' : 'false',
+          title: '进阶',
+          'aria-label': '进阶',
           onClick: () => { workbenchActions.toggleAdvanced() },
         },
         railIcon(ADVANCED_ICON),

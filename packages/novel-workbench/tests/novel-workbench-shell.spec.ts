@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import './webgl-env.js'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { createElement } from 'react'

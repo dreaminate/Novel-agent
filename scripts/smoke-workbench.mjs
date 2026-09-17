@@ -293,6 +293,13 @@ async function main() {
       + ` · theme ${String(kept.stored.theme)}`
       + ` · columns ${String(kept.stored.panels?.sidebar)}/${String(kept.stored.panels?.details)}`)
   }
+  const narrow = report.screens.find(screen => screen.view === 'narrow')
+  if (narrow?.metrics !== undefined) {
+    const m = narrow.metrics
+    console.log(`narrow 1280: data-narrow ${String(m.narrow)} · rail ${String(m.railWidth)}px`
+      + ` · labels hidden ${String(m.railLabelsHidden)}`
+      + ` · column floats ${String(m.columnFloatsOverCanvas)} · canvas bottom ${String(m.mainBottom)}`)
+  }
   console.log(`out: ${outDir}`)
   const failures = report.failures
   // A skip is a truthful record (no proposal, no accepted chapter), not a
@@ -621,13 +628,38 @@ async function sweepNarrow(session) {
   })
   await sleep(settleMs)
   const metrics = await session.evaluate(
-    `(() => ({ viewport: window.innerWidth,
-      documentWidth: document.documentElement.scrollWidth,
-      frameWidth: Math.round(document.querySelector('[data-novel-workbench="frame"]').getBoundingClientRect().width),
-      railWidth: Math.round(document.querySelector('[data-novel-rail="nav"]')?.getBoundingClientRect().width ?? 0) }))()`)
+    `(() => { const frame = document.querySelector('[data-novel-workbench="frame"]')
+      const rect = frame.getBoundingClientRect()
+      const rail = document.querySelector('[data-novel-rail="nav"]')
+      const labels = rail === null ? [] : Array.from(rail.querySelectorAll('.lbl'))
+      const side = document.querySelector('[data-novel-conversation-column]')
+      const main = document.querySelector('[data-novel-shell="main"]')
+      return { viewport: window.innerWidth,
+        documentWidth: document.documentElement.scrollWidth,
+        frameWidth: Math.round(rect.width),
+        frameHeight: Math.round(rect.height),
+        narrow: frame.getAttribute('data-narrow'),
+        railWidth: Math.round(rail?.getBoundingClientRect().width ?? 0),
+        railLabelsHidden: labels.length > 0 && labels.every(node => getComputedStyle(node).display === 'none'),
+        mainBottom: Math.round(main?.getBoundingClientRect().bottom ?? 0),
+        columnPresent: side !== null,
+        columnFloatsOverCanvas: side !== null && main !== null
+          && side.getBoundingClientRect().x < main.getBoundingClientRect().right } })()`)
   const screen = await shot(session, 'narrow', '窄窗 1280')
   screen.metrics = metrics
-  screen.state = metrics.documentWidth > metrics.viewport ? 'overflows-viewport' : 'rendered'
+  if (metrics.documentWidth > metrics.viewport) screen.state = 'overflows-viewport'
+  // The narrow rules are the prototype's; they only help if something switches
+  // them on for this frame.
+  else if (metrics.narrow !== '1') screen.state = 'narrow-not-applied'
+  else if (!metrics.railLabelsHidden || metrics.railWidth > 100) screen.state = 'narrow-rail-not-folded'
+  // With a conversation open, the column has to float over the canvas instead of
+  // taking a track back from it.
+  else if (metrics.columnPresent && !metrics.columnFloatsOverCanvas) {
+    screen.state = 'narrow-column-takes-a-track'
+  }
+  // The frame no longer reserves the prototype's composer row: the canvas has to
+  // reach the bottom of the seat rather than stop above it.
+  else if (metrics.mainBottom < metrics.frameHeight - 2) screen.state = 'dead-row-under-canvas'
   await session.send('Emulation.setDeviceMetricsOverride', {
     width: 1440, height: 900, deviceScaleFactor: 1, mobile: false,
   })

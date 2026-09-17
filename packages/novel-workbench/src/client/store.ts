@@ -172,11 +172,16 @@ export interface WorkbenchState {
 /** Default geometry: the prototype's 248 / 296 columns. */
 const SIDEBAR_DEFAULT = 248
 const DETAILS_DEFAULT = 296
-const NARROW_LIMIT = 1120
+/**
+ * The prototype's 窄窗 width, and the one the sweep resizes to. At or below it
+ * the rail folds to icons and the conversation column floats, so the manuscript
+ * keeps the page instead of paying for two fixed columns.
+ */
+export const NARROW_AT = 1280
 
-/** Render inside a seat narrower than the prototype's comfortable canvas. */
+/** Render inside a seat at or below {@link NARROW_AT}. */
 function narrowAt(width: number): boolean {
-  return width < NARROW_LIMIT
+  return width <= NARROW_AT
 }
 
 const DEFAULT_STATE: WorkbenchState = {
@@ -576,8 +581,11 @@ export const workbenchActions = {
     publish({ ...state, panels: { ...state.panels, details: 0 } })
   },
 
-  /** Mirror the rendered width; the columns collapse by themselves near the limit. */
+  /** Mirror the rendered width; the columns fold by themselves near the limit. */
   resize(width: number): void {
+    // A frame measured before layout reports 0, which is not an author on a tiny
+    // window: acting on it would fold the rail on every load.
+    if (width <= 0) return
     if (state.window.width === width) return
     publish({ ...state, window: { width, nearLimit: narrowAt(width) } })
   },

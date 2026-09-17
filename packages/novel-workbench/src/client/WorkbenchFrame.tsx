@@ -9,10 +9,10 @@
  * conversation keeps its own seat while a novel canvas is shown, so a thread
  * keeps its scroll position and draft across view switches.
  */
-import { createElement, type ReactNode } from 'react'
+import { createElement, useEffect, useRef, type ReactNode } from 'react'
 import type { PropsRenderSlots } from '@deepseek-ai/dsh-client-ui-slots'
 import { NovelTranscript } from './NovelTranscript.js'
-import { useWorkbenchState } from './store.js'
+import { useWorkbenchState, workbenchActions } from './store.js'
 import { WorkbenchStyleSheet } from './WorkbenchStyleSheet.js'
 
 /** Bound panel actions handed to `ctx.layout` consumers. */
@@ -44,6 +44,10 @@ const FRAME_CSS = `
  * track back, or the editor keeps paying for a column that is not there — which
  * is what "收起对话后正文拿到全宽" means literally. Driving both side tracks from
  * variables keeps the four combinations from needing four rules.
+ *
+ * The third row goes with it: the prototype docks its own composer there, and the
+ * frame renders none (the conversation column brings the shipped composer with
+ * it), so keeping the track would leave 88px of dead page under every screen.
  */
 [data-novel-workbench="frame"] {
   --nw-rail: 248px;
@@ -56,12 +60,21 @@ const FRAME_CSS = `
   font-family: var(--font-ui);
   color: hsl(var(--text-000));
   grid-template-columns: var(--nw-rail) minmax(0, 1fr) var(--nw-side);
+  grid-template-rows: 44px minmax(0, 1fr);
+  grid-template-areas: "top top top" "rail main side";
 }
 [data-novel-workbench="frame"][data-novel-workbench-sidebar="collapsed"] {
   --nw-rail: 56px;
 }
 [data-novel-workbench="frame"][data-novel-workbench-details="collapsed"] {
   --nw-side: 0px;
+}
+/*
+ * The prototype reserves the bottom of its floating column for a composer of its
+ * own; the shipped one lives inside this column, so it reaches the floor.
+ */
+[data-novel-workbench="frame"][data-narrow="1"] .side.open {
+  bottom: 0;
 }
 [data-novel-workbench="frame"] .seat {
   display: contents;
@@ -79,19 +92,39 @@ const FRAME_CSS = `
 
 /** The novel-mode frame: topbar / rail / canvas / side / composer, all seats declared. */
 export function WorkbenchFrame(props: WorkbenchFrameProps): ReactNode {
-  const { panels, theme, sessionId, transcript, settings } = useWorkbenchState()
+  const { panels, theme, sessionId, transcript, settings, window: viewport } = useWorkbenchState()
   /** The conversation column: open when a session exists and the column is out. */
   const conversationOpen = panels.details > 0 && sessionId !== undefined
   const threadProps = sessionId === undefined ? { 'data-novel-thread': 'idle' } : {}
+  const frame = useRef<HTMLDivElement | null>(null)
+
+  /**
+   * The frame measures itself rather than reading `window`: the host can seat it
+   * in a narrower column than the viewport, and it is the seat the columns have
+   * to fit inside.
+   */
+  useEffect(() => {
+    const element = frame.current
+    if (element === null) return
+    const report = (): void => { workbenchActions.resize(element.getBoundingClientRect().width) }
+    report()
+    const observer = new ResizeObserver(report)
+    observer.observe(element)
+    return () => { observer.disconnect() }
+  }, [])
 
   return createElement(
     'div',
     {
       'data-novel-workbench': 'frame',
       'data-nw-theme': theme,
+      // The prototype's own narrow rules — icon rail, floating conversation —
+      // key off this attribute and had never been switched on here.
+      'data-narrow': viewport.nearLimit ? '1' : '0',
       'data-novel-workbench-sidebar': panels.sidebar === 0 ? 'collapsed' : 'expanded',
       'data-novel-workbench-details': panels.details === 0 ? 'collapsed' : 'expanded',
       className: 'app',
+      ref: frame,
     },
     createElement(WorkbenchStyleSheet, { key: 'css' }),
         createElement('style', { key: 'frame-css' }, FRAME_CSS),
@@ -125,7 +158,10 @@ export function WorkbenchFrame(props: WorkbenchFrameProps): ReactNode {
           'aside',
           {
             key: 'conversation',
-            className: 'side',
+            // `open` is what the prototype's narrow rules turn into a floating
+            // column; without it a narrow frame would `display: none` the
+            // conversation and leave the author no way back to it.
+            className: viewport.nearLimit ? 'side open' : 'side',
             'data-novel-shell': 'right',
             'data-novel-conversation-column': 'true',
           },

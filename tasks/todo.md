@@ -23,6 +23,39 @@
 - [ ] Execute it. Phase 0 first (baseline + the editor stack's bundle-cost selection record), then Phase 1
   (the approval surface) ahead of everything visible.
 
+## The frame fits a narrow window, 2026-09-17 (I6.3)
+
+**Status:** `verified` at 1280 and 1440 in the browser, with measurements rather than impressions.
+
+- [x] **The prototype's narrow rules were never switched on, and the reason was not the stylesheet.** The rules
+  had shipped with the ported CSS all along, and our frame root carries the `.app` class they key off — but
+  nothing ever set `data-narrow`, because `workbenchActions.resize` was **never called anywhere**: the window
+  size in the store was dead state I wired up in I3.4 and never connected. So this increment was connecting a
+  signal, not writing styles.
+- [x] The frame now measures **its own seat** with a `ResizeObserver` rather than reading `window.innerWidth` —
+  the host can seat it in a narrower column than the viewport — ignores a pre-layout width of 0, and at or
+  below 1280 folds the rail to icons, floats the conversation column over the canvas, and gives every icon-only
+  row its own `title` and `aria-label` (a hidden `.lbl` also leaves the accessibility tree). Not adding the
+  `open` class would have `display: none`d the conversation with no way back, which is a regression, not a
+  feature. The 1280 threshold is a recorded judgement: three columns still fit there, so it is a preference for
+  the manuscript over permanently docked chrome, and it makes the sweep's existing 1280 screen a real check.
+- [x] **A defect that was on every screen, found by measuring for this one:** the frame inherited the
+  prototype's third grid row, the composer dock, and stopped rendering its own composer in I2.4 — so every
+  screen had 88 dead pixels under it. `grid-template-rows: 44px 768px 88px` with the topbar, rail, canvas and
+  column **all ending at y=812**. The frame now declares its own rows; the canvas reaches 900.
+- [x] Real-machine measurements (`docs/evidence/editor-2026-09-17/probe-narrow.mjs`): 1440 → rail 247, canvas
+  896, column 296 not overlapping; 1280 → rail 57, canvas 1222, column floating over it; closing the column
+  leaves the canvas at 1222; no rail item spills its text; 0 console errors.
+- [x] §4.3 targeted breakage: four mutations caught by the unit specs, and **two that only the browser can
+  catch were actually run through the browser** — removing `observer.observe()` leaves `data-narrow` at 0 in a
+  1280 window, and restoring the composer row drops the canvas bottom back to 812.
+- [x] The sweep's 1280 screen now fails on `narrow-not-applied`, `narrow-rail-not-folded`,
+  `narrow-column-takes-a-track` or `dead-row-under-canvas` instead of only checking for overflow.
+- [ ] **Found and deliberately not fixed here:** one thread row has an empty title (a session with no messages),
+  so it is an unnamed icon button at both widths. Naming it is a product judgement and belongs to I6.5.
+- [ ] Gates: **424/424** tests (28 files; +5 narrow), `typecheck`, `lint`, `git diff --check`, rebuild + sweep
+  `exit 0`; `lib/client.js` 1,576,982 B against the 2.4 MB ceiling.
+
 ## The author's choices survive a reload, 2026-09-17 (I6.2)
 
 **Status:** `verified` on a real page reload in the browser.

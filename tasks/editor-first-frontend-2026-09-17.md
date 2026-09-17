@@ -1247,12 +1247,80 @@ HEAD `02a48d8` —— 即本计划写的 `8926e31` **加本计划文件本身的
   > **门禁：** **419 tests**（新增 8 条）、typecheck 0、lint 0、`git diff --check` 0、
   > `dev-host.sh rebuild` + smoke **exit 0**（16 屏 rendered，`settings` 屏含落盘检查）；
   > `lib/client.js` **1,575,040 B** ≤ 2,400,000 B → **PASS**。
-- [ ] **I6.3 窄窗 1280** — 左栏折成 58px 图标 + tooltip、右栏浮层；现在 `.app[data-narrow="1"]`
-  这条规则永远不会命中我们的 frame。
+- [x] **I6.3 窄窗 1280** — 左栏折成 58px 图标 + tooltip、右栏浮层；原写「`.app[data-narrow="1"]`
+  这条规则永远不会命中我们的 frame」。
+  - 文件：`packages/novel-workbench/src/client/WorkbenchFrame.tsx`（`data-narrow` + 自量宽度 + 行轨道）、
+    `store.ts`（窄窗阈值 + 零宽守卫）、`NovelRail.tsx`（图标行的 title / aria-label）、
+    `tests/novel-workbench-narrow.spec.ts`（新）、`tests/webgl-env.ts`（ResizeObserver 桩）、
+    `tests/novel-workbench-shell.spec.ts`（引入桩）、`scripts/smoke-workbench.mjs`（窄窗断言）、
+    `docs/evidence/editor-2026-09-17/probe-narrow.mjs`（新）
+  - 要求：窄窗左栏折成图标 + tooltip、右栏浮层；宽窗维持三栏。
+
+  > **✅ 已完成（2026-09-17）。真机 1280 实测：rail 57px、正文 1222px、对话列浮在正文之上。**
+  >
+  > **查实：原型的窄窗规则一直没命中的原因不是我猜的那个。** 规则本身没问题（`.app[data-narrow="1"] …`
+  > 早就随原型 CSS 一起生成好了，`--check` 门禁还盯着它与原型一致），我们 frame 的类名也是 `.app`；
+  > **真正的原因是没有任何东西把 `data-narrow` 打开**：`workbenchActions.resize` **全仓从未被调用**，
+  > 所以 `state.window`（`width` / `nearLimit`）是**死状态** —— 我 I3.4 时算好却从没接上。
+  > 这一条因此不是「加样式」，是「把信号接上」。
+  >
+  > **实现：**
+  > - **frame 自己量自己**（`ResizeObserver` 观察它自己的盒子），而不是读 `window.innerWidth` ——
+  >   宿主可以把 frame 放进比视口更窄的一列，而三栏要适配的是**座位**的宽度。宽度 ≤ 0 的读数被忽略：
+  >   布局前的 0 不是「作者在用很小的窗口」，照做会让左栏每次加载都闪一下折叠态。
+  > - **阈值取 1280**（原型 `窄窗 1280` 的那个宽度），语义是 `width <= 1280`。**这是一个取舍，写在这里：**
+  >   1280 下三栏其实还放得下（正文 736px），所以这不是修一个坏掉的布局，而是**让正文优先于常驻的两条栏**
+  >   的选择；同时它让扫描里那屏 1280 变成真检查。作者若要在 1280 保留三栏，改这一个常量即可。
+  > - **对话列加 `open` 类**：原型窄窗规则里 `.side { display: none }` 配上 `.side.open` 才是浮层。
+  >   不给它 `open`，窄窗下作者会**彻底失去对话**且没有回去的路 —— 那是回归，不是特性。
+  > - **图标行自带名字**（`title` + `aria-label`）：`.lbl` 在窄窗被 `display: none`，
+  >   文字从可访问性树里也一起消失了，所以每个交互项都要自己带上名字。
+  >
+  > **🐛 顺带量到一个每屏都在的缺陷（同一根因，已修）：frame 底部 88px 死区。**
+  > 原型的网格是**三行**（顶栏 / 主体 / composer），而我们 I2.4 之后**不再渲染自己的 composer**
+  > （输入条在官方对话列里）。于是每一屏底部都空着 88px —— 正文白白少一屏的高度。
+  > 量到的证据：`grid-template-rows: 44px 768px 88px`，而 topbar / rail / main / side **一律止于 y=812**，
+  > 没有任何元素落在第三行。修法是 frame 覆盖自己的行轨道（与它早已覆盖列轨道同一个位置，属 §2 说的
+  > 「把原型网格绑到宿主页面」那一类，不是改原型设计）。修后 `44px 856px`、画布底 = 900。
+  >
+  > **真机验证（探针 `docs/evidence/editor-2026-09-17/probe-narrow.mjs`，产物 `narrow-summary.json`
+  > + `narrow-window.png`）：**
+  > | 状态 | 实测 |
+  > | --- | --- |
+  > | 宽窗 1440 | `data-narrow 0` · rail **247** · 正文 896 @248 · 对话列 296 @1144（**不**覆盖正文）· 文档宽 1440 |
+  > | 窄窗 1280 | `data-narrow 1` · rail **57** · 正文 **1222 @58** · 对话列 296 @984（**覆盖**正文，`overlaps: true`）· 文档宽 1280 |
+  > | 窄窗关掉对话 | 对话列消失，正文**仍是 1222** |
+  > | 回到 1440 | 三栏恢复 |
+  > | 行轨道 | `44px 856px`，画布底 **900**（修前 812） |
+  > | rail 溢出 / 无名项 | `spill: []`；**18 项里 1 项既无文字也无 title/aria-label** —— 见下 |
+  > | console | **0 报错** |
+  >
+  > **§4.3 定点破坏：单测咬住 4 处，另 2 处只能在真机咬住 —— 两处都真的跑了真机。**
+  > 单测咬住：阈值恒为 0、零宽守卫被删、frame 不报 narrow、对话列不给 `open`。
+  > **真机咬住的两处**（用「改 → rebuild → 跑探针 → 还原 → rebuild」的方式实测，不是声称）：
+  > ① 去掉 `observer.observe(element)` → **1280 下 `data-narrow` 仍是 0**（帧在加载时量一次就再不更新）；
+  > ② 恢复原型的三行 → **画布底从 900 掉回 812**。脚本结束时 `WorkbenchFrame.tsx` sha256 与破坏前逐字节相同。
+  >
+  > **扫描里新增的常驻断言：** 1280 屏现在不只查「没溢出」，还查 `data-narrow` 必须是 `1`、
+  > rail 标签必须隐藏且宽度 ≤ 100、对话列必须**浮在**正文之上、画布底必须触到 frame 底；
+  > 实测打印 `narrow 1280: data-narrow 1 · rail 57px · labels hidden true · column floats true · canvas bottom 900`。
+  >
+  > **⚠️ 发现但未修（不属本条，记给 I6.5）：左栏有一个线程行是空标题。** 该 session 没有消息，
+  > 于是 `summary.title` 为空 → 行内没有文字、`title` 也为空 → **宽窗窄窗都只是一个没有名字的图标按钮**。
+  > 它属于 I6.5「信息去术语化」的同类问题（作者语言缺失），且修它要决定「没有消息的线程该叫什么」，
+  > 所以按 §4.2 一次只做一个增量，本轮只记录不改。
+  >
+  > **门禁：** **424 tests**（新增 5 条）、typecheck 0、lint 0、`git diff --check` 0、
+  > `dev-host.sh rebuild` + smoke **exit 0**；`lib/client.js` **1,576,982 B** ≤ 2,400,000 B → **PASS**。
 - [ ] **I6.4 键盘可达** — Tab 顺序、图谱节点可聚焦（Enter 选定、D 开档案）、焦点环、弹层 Tab 循环。
 - [ ] **I6.5 信息去术语化** — 裸 id 当标题（`guchen`）、英文键名直出（`status`、`constitution · realm`）、
   空行白占位（「0 人」势力、右栏「字数进度 —」）全部改成作者语言。
+  - **I6.3 追加一条（2026-09-17 实测发现）：** 左栏有一个**空标题的线程行** —— 那个 session 没有消息，
+    于是行内无文字、`title` 也为空，宽窗窄窗都只剩一个**没有名字的图标按钮**。
+    修它要先决定「没有消息的线程该叫什么」（`新线程`？`未命名`？），属于本条的产品判断。
 - [ ] **I6.6 密度与观感微调** — 直接改 `workbench-css.ts`（并同步原型 CSS）。
+  - 已由 I6.3 处理、本条不必重做的：frame 底部那 88px 死区（原型 composer 行）已移除，
+    它属于 **frame 自己的绑定规则**（`FRAME_CSS`），不在生成物里。
 - [ ] **I6.7 记录收口** — 原型回写 + 重生成 CSS + 更新 `tasks/todo.md`、`docs/claude-desktop-parity-matrix.md`、
   本文件勾选与证据链接；跑 `node scripts/port-prototype-css.mjs --check`。
 

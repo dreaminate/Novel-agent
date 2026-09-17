@@ -23,6 +23,34 @@
 - [ ] Execute it. Phase 0 first (baseline + the editor stack's bundle-cost selection record), then Phase 1
   (the approval surface) ahead of everything visible.
 
+## Phase 6 closed out, 2026-09-17 (I6.7)
+
+**Status:** `verified` — every gate re-run in full on the final tree.
+
+- [x] **The generated stylesheet still matches the prototype** (`port-prototype-css.mjs --check`), and nothing
+  needed regenerating: the only prototype change this round was `overflow: clip` on `.app`, made on both sides
+  at the time. No new prototype file, so `prototypePath` is untouched.
+- [x] **The records agree with the code**: `tasks/todo.md` has a section per increment, the parity matrix's
+  frame and canvas rows were rewritten as the facts changed — including marking the old "at 1280 the rail is
+  247px" line as superseded — and the plan file carries a checkbox and a pointer to repo-internal evidence for
+  each one.
+- [x] **One boundary stated rather than glossed:** the prototype's *demo page* was not written back. The
+  product deliberately departs from it in several places that §1 agreed — the editor is the landing instead of
+  the map, the conversation lives in the right column, there is no composer dock of ours, and the map is a
+  sigma cluster layout. Those are decisions, not drift, but the demo still shows the pre-consensus flow. The
+  *CSS* is generated from the prototype and in sync; the *HTML* demo and the product flow still differ, and
+  that predates this round.
+- [x] **Final gate run on the final tree:** **439/439** tests (31 files), `typecheck`, `lint`,
+  `git diff --check`, the port gate, rebuild + sweep `exit 0` with 16 screens rendered (`review` honestly
+  `skipped-no-proposal`); `lib/client.js` 1,586,954 B against the 2.4 MB ceiling. The standing real-machine
+  assertions all report: narrow at 57px with a floating column, four map keyboard stops with one in the tab
+  order, zero Canon keys on the cast board, and the author's choices kept for the next load.
+- [ ] **Two Phase 6 items are deliberately not built, each with a checked reason:** 只看本卷 (one volume, and
+  every accepted story event carries a null manuscript order, so the filter could not change a pixel) and
+  裸 id 当标题 (no character in this Canon records a `name`, so the front end has no name to prefer). Both are
+  recorded with the precondition that would make an honest version possible — the novel the user is bringing
+  is likely to supply the second one.
+
 ## The work tree reads again, 2026-09-17 (I6.6)
 
 **Status:** `verified` — measured before and after, in the browser.

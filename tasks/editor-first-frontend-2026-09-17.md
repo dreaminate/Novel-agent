@@ -1528,8 +1528,42 @@ HEAD `02a48d8` —— 即本计划写的 `8926e31` **加本计划文件本身的
   >
   > **门禁：** **439 tests**（新增 1 条）、typecheck 0、lint 0、`git diff --check` 0、
   > `dev-host.sh rebuild` + smoke **exit 0**。
-- [ ] **I6.7 记录收口** — 原型回写 + 重生成 CSS + 更新 `tasks/todo.md`、`docs/claude-desktop-parity-matrix.md`、
+- [x] **I6.7 记录收口** — 原型回写 + 重生成 CSS + 更新 `tasks/todo.md`、`docs/claude-desktop-parity-matrix.md`、
   本文件勾选与证据链接；跑 `node scripts/port-prototype-css.mjs --check`。
+
+  > **✅ 已完成（2026-09-17）。**
+  >
+  > **CSS 生成物与原型一致：** `node scripts/port-prototype-css.mjs --check` →
+  > **`workbench-css.ts matches the prototype`**。本轮对**原型 CSS** 只改过一处（I6.4a 的
+  > `overflow: hidden` → `clip`），当时就同步改了两边并复验了门禁；**没有需要重新生成的东西**。
+  > `docs/prototypes/2026-09-16-novel-mode/` 下新增文件 0 个，`port-prototype-css.mjs` 的
+  > `prototypePath` 未变（没有换原型文件）。
+  >
+  > **记录三处都写了本轮：** `tasks/todo.md`（每个增量一节）、`docs/claude-desktop-parity-matrix.md`
+  > （frame 行与 canvas 行按新事实改写，包括把「1280 下 rail 247px」这条**已被推翻的旧记录**就地标注）、
+  > 本文件（每个增量勾选 + 证据链接）。
+  >
+  > **⚠️ 一处必须说清楚的边界：原型的 HTML 演示本身没有回写。** 本轮（以及 §1 共识以来的几轮）
+  > 让产品在若干处**有意偏离**原型演示：落地页是编辑器不是地图（决定 10）、对话并进右栏、
+  > 不再有我们自己的 composer 底栏、地图改用 sigma 分簇布局。这些**是共识里的决定，不是漂移**，
+  > 但**原型演示页仍停在共识之前的流程**。`workbench-css.ts` 是**CSS**生成物、与原型一致；
+  > **HTML 演示与产品流程的差异仍然存在，且这是既有状态，不是本轮引入的。** 谁再来动原型，
+  > 要么按共识更新演示，要么在文件头写明它只是一份历史设计稿。
+  >
+  > **本轮（Phase 6 全部 7 条）的最终状态：**
+  > - **已做 7 条**：I6.1a / I6.2 / I6.3 / I6.4a / I6.4b / I6.5a / I6.6 —— 各自的提交见下，
+  >   加上 I6.7 本提交，Phase 6 共 **8** 个提交。
+  > - **明确不做 2 条，且都有查证结论**：I6.1b（这份 Canon 只有一卷、story-event 的章号全为 null，
+  >   按卷筛选改不了任何画面）、I6.5b（Canon 里没有任何人物带 `name` 字段，前端不能凭空造名字）。
+  >   两条都不是「没排上」，是**今天做不了诚实版本**；解法的前置条件都写在各自条目里。
+  >
+  > **最终门禁（全量复跑）：** **439 tests / 31 files**、typecheck 0、lint 0、`git diff --check` 0、
+  > `port-prototype-css.mjs --check` 一致、`dev-host.sh rebuild` + smoke **exit 0**（16 屏 rendered，
+  > 其中 `review` 是诚实的 `skipped-no-proposal`）；`lib/client.js` **1,586,954 B** ≤ 2,400,000 B → **PASS**。
+  > 常驻真机断言一并打印：`narrow 1280: data-narrow 1 · rail 57px …`、
+  > `story map keyboard: 4 stops (1 in the tab order, 4 named)`、
+  > `cast board: canon keys leaked 0 · zero chips 0`、
+  > `choices kept for the next load: view advanced · theme auto · columns 248/296`。
 
 ---
 

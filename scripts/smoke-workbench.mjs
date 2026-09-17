@@ -286,6 +286,10 @@ async function main() {
     if (Array.isArray(story.map.bubbles) && story.map.bubbles.length > 0) {
       console.log(`story map folded clusters: ${story.map.bubbles.join(' / ')}`)
     }
+    if (story.mapNodes !== undefined) {
+      console.log(`story map keyboard: ${String(story.mapNodes.count)} stops`
+        + ` (${String(story.mapNodes.inTabOrder)} in the tab order, ${String(story.mapNodes.named)} named)`)
+    }
   }
   const kept = report.screens.find(screen => screen.view === 'settings')
   if (kept?.stored !== undefined && kept.stored !== null) {
@@ -378,9 +382,21 @@ async function sweepMap(session, screen) {
     return
   }
   screen.map = before
+  // The keyboard's copy of the cast: the WebGL nodes are not focusable, so the
+  // overlay has to carry one real element per drawn character — and exactly one
+  // of them may sit in the tab order, or a long cast becomes a tab marathon.
+  screen.mapNodes = await session.evaluate(`(() => {
+    const nodes = Array.from(document.querySelectorAll('[data-novel-story-map-node]'))
+    return { count: nodes.length,
+      inTabOrder: nodes.filter(node => node.getAttribute('tabindex') === '0').length,
+      named: nodes.filter(node => (node.getAttribute('aria-label') ?? '') !== '').length } })()`)
   if (before.axis === null) screen.state = 'map-missing-axis'
   // A cast with no disc means the ring layout never ran, whatever the canvas painted.
   if (before.people > 0 && before.clusters === 0) screen.state = 'map-no-clusters'
+  // Everyone drawn has to be reachable, and everyone folded has to not be here.
+  if (screen.mapNodes.count !== before.people - before.folded) screen.state = 'map-keyboard-cast-mismatch'
+  else if (screen.mapNodes.inTabOrder > 1) screen.state = 'map-keyboard-tab-marathon'
+  else if (screen.mapNodes.named !== screen.mapNodes.count) screen.state = 'map-keyboard-unnamed'
   // The discs are positioned in the overlay's own pixel space, so an overlay that
   // does not cover the stage puts every one of them somewhere the author cannot see.
   if (!before.overlayCoversStage) screen.state = 'map-overlay-misplaced'

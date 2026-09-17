@@ -1,0 +1,67 @@
+{
+  "stops": [
+    {
+      "id": "guchen",
+      "label": "guchen",
+      "tabindex": "0"
+    },
+    {
+      "id": "linxuan",
+      "label": "linxuan",
+      "tabindex": "-1"
+    },
+    {
+      "id": "sumubai",
+      "label": "sumubai",
+      "tabindex": "-1"
+    },
+    {
+      "id": "han-potian",
+      "label": "han-potian",
+      "tabindex": "-1"
+    }
+  ],
+  "drawnCast": 4,
+  "clusterDiscs": 1,
+  "discsHiddenFromAT": true,
+  "overlayNamed": "故事地图上的人物",
+  "reachedByTab": {
+    "afterTabs": 20,
+    "node": "guchen",
+    "label": "guchen",
+    "here": "circle",
+    "ring": "rgb(217, 119, 87)"
+  },
+  "walk": [
+    {
+      "node": "guchen",
+      "label": "guchen",
+      "here": "circle",
+      "ring": "rgb(217, 119, 87)"
+    },
+    {
+      "node": "linxuan",
+      "label": "linxuan",
+      "here": "circle",
+      "ring": "rgb(217, 119, 87)"
+    },
+    {
+      "node": "sumubai",
+      "label": "sumubai",
+      "here": "circle",
+      "ring": "rgb(217, 119, 87)"
+    },
+    {
+      "node": "linxuan",
+      "label": "linxuan",
+      "here": "circle",
+      "ring": "rgb(217, 119, 87)"
+    }
+  ],
+  "selection": "linxuan",
+  "personFile": "linxuan",
+  "discsHiddenAfterDialog": true,
+  "dragReachesSigma": true,
+  "nodesFollowTheCamera": true,
+  "consoleErrors": []
+}

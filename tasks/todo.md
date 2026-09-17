@@ -23,6 +23,34 @@
 - [ ] Execute it. Phase 0 first (baseline + the editor stack's bundle-cost selection record), then Phase 1
   (the approval surface) ahead of everything visible.
 
+## The map can be walked from the keyboard, 2026-09-17 (I6.4b)
+
+**Status:** `verified` in the browser, keyboard and mouse both.
+
+- [x] **The cast is drawn on WebGL, where nothing is focusable and a screen reader sees nothing.** The overlay
+  that already carried the cluster discs is now also the map's accessible twin: one real element per drawn
+  character, positioned by `graphToViewport` so the focus ring sits on the actual dot. The other option on the
+  table — a separate cast list beside the map — was rejected because 人物与关系 already is that list; this way
+  the spatial experience and the enumerable one are the same implementation.
+- [x] Roving tabindex, so a forty-character cast is not forty Tab presses; arrow keys walk the cast and wrap,
+  Enter selects, `d` opens the profile. `pointer-events: none` leaves the mouse story untouched — dragging a
+  character to pin it still reaches sigma, which the probe re-measures every run. The discs and their labels
+  are `aria-hidden`; the `+N` deliberately is not, since hiding it would delete the folded cast from the
+  accessibility tree as well.
+- [x] A character folded behind a `+N` is not drawn and so is not offered; search is the path to them, and it
+  opens the cluster that hid them.
+- [x] Real-machine evidence (`docs/evidence/editor-2026-09-17/probe-map-keyboard.mjs`): four stops for seven
+  characters with three folded, exactly one in the tab order, all named; twenty Tabs from the view segment
+  reach `guchen` with the accent ring drawn; the arrows walk guchen → linxuan → sumubai and back; Enter
+  selects; `d` opens the drawer; a drag still pans by exactly its own delta; no console errors.
+- [x] §4.3 targeted breakage: 6/6 bitten, `StoryMapView.tsx` restored byte-for-byte. The sweep now also fails
+  the map screen on `map-keyboard-cast-mismatch`, `map-keyboard-tab-marathon` or `map-keyboard-unnamed`, and
+  prints `4 stops (1 in the tab order, 4 named)`.
+- [ ] **Recorded, not fixed:** the accessible names are Canon entity ids (`guchen`) because these characters
+  carry no `name` field, so a screen reader reads an id aloud. Same root cause as the visible labels; I6.5.
+- [ ] Gates: **431/431** tests, `typecheck`, `lint`, `git diff --check`, rebuild + sweep `exit 0`;
+  `lib/client.js` 1,583,707 B against the 2.4 MB ceiling.
+
 ## The keyboard can use the dialogs, and the column can be read, 2026-09-17 (I6.4a)
 
 **Status:** `verified` in the browser; two defects worse than the increment's own subject came out of it.

@@ -136,6 +136,18 @@ const MAP_CSS = `
   fill: hsl(var(--text-200) / .8);
   text-anchor: middle;
 }
+/* The keyboard's twin of a WebGL dot. It draws nothing until it has focus, and
+   it never takes a pointer event: the mouse story belongs to sigma. */
+[data-novel-story-map] .nw-map-node-focus {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 2;
+  pointer-events: none;
+}
+[data-novel-story-map] .nw-map-node-focus:focus {
+  stroke: hsl(var(--accent-brand));
+  stroke-width: 2.5;
+}
 [data-novel-story-map] .nw-map-bubble {
   fill: hsl(var(--bg-200));
   stroke: hsl(var(--border-200));
@@ -223,7 +235,8 @@ export function StoryMapView({ map, onOpenPerson }: StoryMapViewProps): ReactNod
     })
   }, [])
 
-  // Discs and `+N` bubbles: built once per layout, then kept on the camera.
+  // Discs, their `+N`, and the cast's accessible twin: built once per layout,
+  // then kept on the camera.
   useEffect(() => {
     const svg = overlay.current
     if (svg === null) return
@@ -234,6 +247,55 @@ export function StoryMapView({ map, onOpenPerson }: StoryMapViewProps): ReactNod
       id => labels.get(id) ?? id,
       () => { setExpanded(current => new Set(current).add(cluster.id)) },
     ))
+    // sigma draws the cast on WebGL, where nothing is focusable and a screen
+    // reader sees nothing at all. These are the same characters as real elements
+    // in the overlay, sitting exactly where they are on screen — so the map can
+    // be walked from the keyboard and read out loud. A character folded behind a
+    // `+N` is not drawn and so is not offered; search is how the author reaches
+    // one (and it opens the cluster that hid them).
+    const seats: DrawnCharacter[] = []
+    for (const cluster of layout.clusters) {
+      for (const id of cluster.drawn) {
+        const node = map.nodes.find(entry => entry.id === id)
+        const at = layout.positions.get(id)
+        if (node === undefined || at === undefined) continue
+        seats.push(drawCharacter(svg, node, at, () => { setSelected(id) }, () => { onOpenPerson?.(id) }))
+      }
+    }
+    let roving = 0
+    const setRoving = (next: number): void => {
+      roving = next
+      seats.forEach((seat, index) => {
+        seat.circle.setAttribute('tabindex', index === roving ? '0' : '-1')
+      })
+    }
+    setRoving(0)
+
+    const onKeyDown = (event: KeyboardEvent): void => {
+      const active = document.activeElement
+      const at = seats.findIndex(seat => seat.circle === active)
+      if (at < 0) return
+      if (event.key === 'Enter') {
+        event.preventDefault()
+        seats[at]?.select()
+        return
+      }
+      if (event.key === 'd' || event.key === 'D') {
+        event.preventDefault()
+        seats[at]?.open()
+        return
+      }
+      const step = event.key === 'ArrowRight' || event.key === 'ArrowDown'
+        ? 1
+        : event.key === 'ArrowLeft' || event.key === 'ArrowUp' ? -1 : 0
+      if (step === 0) return
+      event.preventDefault()
+      const next = (at + step + seats.length) % seats.length
+      setRoving(next)
+      seats[next]?.circle.focus()
+    }
+    svg.addEventListener('keydown', onKeyDown)
+
     syncOverlay.current = () => {
       const instance = renderer.current
       if (instance === null) return
@@ -254,9 +316,18 @@ export function StoryMapView({ map, onOpenPerson }: StoryMapViewProps): ReactNod
           part.bubble.text.setAttribute('y', String(at.y + 4))
         }
       }
+      for (const seat of seats) {
+        const at = instance.graphToViewport(seat.at)
+        seat.circle.setAttribute('cx', String(at.x))
+        seat.circle.setAttribute('cy', String(at.y))
+        seat.circle.setAttribute('r', String(nodeRadius(seat.debts) * ratio + FOCUS_RING_GAP))
+      }
     }
     syncOverlay.current()
-  }, [layout, labels])
+    return () => {
+      svg.removeEventListener('keydown', onKeyDown)
+    }
+  }, [layout, labels, map, onOpenPerson])
 
   useEffect(() => {
     const element = host.current
@@ -412,7 +483,8 @@ export function StoryMapView({ map, onOpenPerson }: StoryMapViewProps): ReactNod
                   className="nw-map-overlay"
                   ref={overlay}
                   data-novel-story-map-overlay=""
-                  aria-hidden="true"
+                  role="group"
+                  aria-label="故事地图上的人物"
                 />
                 {chosen !== undefined && (
                   <div className="nw-map-selection" data-novel-story-map-selection={chosen.id}>
@@ -473,9 +545,11 @@ function drawCluster(
   }
   const disc = document.createElementNS(SVG_NS, 'circle')
   disc.setAttribute('class', 'nw-map-disc')
+  disc.setAttribute('aria-hidden', 'true')
   group.append(disc)
   const label = document.createElementNS(SVG_NS, 'text')
   label.setAttribute('class', 'nw-map-disc-label')
+  label.setAttribute('aria-hidden', 'true')
   label.textContent = cluster.label
   group.append(label)
   if (cluster.bubble === undefined) {
@@ -503,6 +577,47 @@ function drawCluster(
 }
 
 const SVG_NS = 'http://www.w3.org/2000/svg'
+
+/** How far outside the drawn dot the focus ring sits, in screen pixels. */
+const FOCUS_RING_GAP = 5
+
+/** A drawn character's dot radius in graph units, sized by its open debts. */
+function nodeRadius(debts: number): number {
+  return 7 + Math.min(debts, 3) * 2
+}
+
+interface DrawnCharacter {
+  readonly id: string
+  readonly debts: number
+  readonly at: MapPoint
+  readonly circle: SVGCircleElement
+  readonly select: () => void
+  readonly open: () => void
+}
+
+/**
+ * One character as a real, focusable element over the WebGL canvas.
+ *
+ * `pointer-events: none` keeps the mouse story exactly as it was — dragging a
+ * character to pin it still reaches sigma, and the overlay still swallows
+ * nothing — while Tab and the arrow keys can still land on it.
+ */
+function drawCharacter(
+  svg: SVGSVGElement,
+  node: NovelStoryMap['nodes'][number],
+  at: MapPoint,
+  select: () => void,
+  open: () => void,
+): DrawnCharacter {
+  const circle = document.createElementNS(SVG_NS, 'circle')
+  circle.setAttribute('class', 'nw-map-node-focus')
+  circle.setAttribute('data-novel-story-map-node', node.id)
+  circle.setAttribute('role', 'button')
+  circle.setAttribute('aria-label', node.label)
+  circle.setAttribute('tabindex', '-1')
+  svg.append(circle)
+  return { id: node.id, debts: node.debts, at, circle, select, open }
+}
 
 /** Characters whose accepted name or id carries the query. */
 function matches(map: NovelStoryMap, query: string): NovelStoryMap['nodes'] {
@@ -533,7 +648,7 @@ function buildGraph(
       x: at.x,
       y: at.y,
       label: node.label,
-      size: 7 + Math.min(node.debts, 3) * 2,
+      size: nodeRadius(node.debts),
       color: colours.get(node.group ?? UNAFFILIATED) ?? UNAFFILIATED_COLOR,
     })
   }

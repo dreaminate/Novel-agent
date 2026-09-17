@@ -441,3 +441,94 @@ describe('novel-mode story map', () => {
     await act(async () => { root.unmount() })
   })
 })
+
+/**
+ * The cast is drawn on WebGL, where nothing is focusable and nothing reaches a
+ * screen reader. The overlay that already carries the discs is the map's
+ * accessible twin: one element per drawn character, sitting exactly where that
+ * character is on screen.
+ */
+describe('novel-mode story map keyboard', () => {
+  const cast = {
+    revision: 5,
+    nodes: [
+      { id: 'chen-mo', label: '陈默', group: '港务局', place: undefined, debts: 0 },
+      { id: 'chen-an', label: '陈安', group: '港务局', place: undefined, debts: 0 },
+      { id: 'zhou-yan', label: '周砚', group: '雾灯帮', place: undefined, debts: 0 },
+    ],
+    edges: [{ id: 'line-1', source: 'chen-mo', target: 'zhou-yan', label: '旧同僚', turns: 1 }],
+  }
+
+  const stops = (container: HTMLElement): Element[] =>
+    [...container.querySelectorAll('[data-novel-story-map-node]')]
+
+  const key = (target: Element, name: string): void => {
+    target.dispatchEvent(new KeyboardEvent('keydown', { key: name, bubbles: true, cancelable: true }))
+  }
+
+  it('offers every drawn character as a named stop, and only one in the tab order', async () => {
+    const { container, root } = await mountMap(vi.fn(async () => cast))
+    const drawn = stops(container)
+
+    // 陈安 is folded: the map does not draw them, so the map does not offer them.
+    expect(drawn.map(node => node.getAttribute('data-novel-story-map-node'))).toEqual(['chen-mo', 'zhou-yan'])
+    expect(drawn.map(node => node.getAttribute('aria-label'))).toEqual(['陈默', '周砚'])
+    // Roving tabindex: a long cast must not become fifty Tab presses.
+    expect(drawn.map(node => node.getAttribute('tabindex'))).toEqual(['0', '-1'])
+    // The group is in the accessibility tree, and so is its `+N`; the disc and
+    // its label are decoration and stay out of it.
+    const overlay = container.querySelector('[data-novel-story-map-overlay]')
+    expect(overlay?.getAttribute('aria-hidden')).toBeNull()
+    expect(overlay?.getAttribute('aria-label')).toBe('故事地图上的人物')
+    expect(container.querySelector('.nw-map-disc')?.getAttribute('aria-hidden')).toBe('true')
+    expect(container.querySelector('.nw-map-disc-label')?.getAttribute('aria-hidden')).toBe('true')
+
+    await act(async () => { root.unmount() })
+  })
+
+  it('walks the cast with the arrow keys, and wraps at the ends', async () => {
+    const { container, root } = await mountMap(vi.fn(async () => cast))
+    const drawn = stops(container)
+    const overlay = container.querySelector('[data-novel-story-map-overlay]')!
+    const [first, second] = drawn as [Element, Element]
+
+    expect(first.getAttribute('tabindex')).toBe('0')
+    await act(async () => {
+      first.focus()
+      key(first, 'ArrowRight')
+    })
+    expect(document.activeElement).toBe(second)
+    expect(second.getAttribute('tabindex')).toBe('0')
+    expect(first.getAttribute('tabindex')).toBe('-1')
+
+    await act(async () => { key(second, 'ArrowRight') })
+    expect(document.activeElement).toBe(first)
+    await act(async () => { key(first, 'ArrowLeft') })
+    expect(document.activeElement).toBe(second)
+    expect(overlay.querySelectorAll('[data-novel-story-map-node]').length).toBe(2)
+
+    await act(async () => { root.unmount() })
+  })
+
+  it('selects on Enter and opens the 人物档案 on D', async () => {
+    const { container, root } = await mountMap(vi.fn(async () => cast))
+    const store = await import('../src/client/store.js')
+    const [first, second] = stops(container) as [Element, Element]
+
+    await act(async () => {
+      first.focus()
+      key(first, 'Enter')
+    })
+    expect(container.querySelector('[data-novel-story-map-selection]')?.getAttribute('data-novel-story-map-selection'))
+      .toBe('chen-mo')
+
+    await act(async () => {
+      second.focus()
+      key(second, 'd')
+    })
+    expect(store.getWorkbenchState().personFileId).toBe('zhou-yan')
+    store.workbenchActions.closePersonFile()
+
+    await act(async () => { root.unmount() })
+  })
+})

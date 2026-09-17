@@ -23,6 +23,30 @@
 - [ ] Execute it. Phase 0 first (baseline + the editor stack's bundle-cost selection record), then Phase 1
   (the approval surface) ahead of everything visible.
 
+## The conversation chrome wears this product's colours, 2026-09-18
+
+**Status:** `verified` in the browser, day and night, with the pixels measured.
+
+- [x] **The clash is a palette, not a layout.** The shipped composer, hero and header render inside our column and are written entirely in the host
+  theme's variables — cool greys and a blue accent (`#4176e6`), against this product's warm greys and orange. Its class names are build hashes
+  (`wSkVaW_root`), so restyling its internals was never on the table; what was on the table is *answering the variables it is written in*, which is
+  the same seam the community skins use. Forty of them are now defined inside our frame in terms of our own tokens, so day and night follow the
+  frame automatically.
+- [x] **Measured, not eyeballed** (`docs/evidence/editor-2026-09-17/probe-conversation-chrome.mjs`): in night mode the composer card's own background
+  is **`rgb(48, 48, 46)`** — this product's warm dark — where the host palette would have been `#151517`; in day the accent it resolves is
+  `hsl(15 63.1% 59.6%)`, our orange, not the host's blue; the font is ours; and the host's palette **outside** the frame is untouched (`body` still
+  resolves `#fff`), so the bridge is scoped rather than global.
+- [x] A first measurement read the tokens off `documentElement` and found them all empty, which looked like "the official tokens are missing
+  entirely". They are written on `body` (custom properties do not inherit upwards) — the *answer* was right and the *reading* was wrong, and the
+  wrong reading would have led to a much bigger change than the one needed.
+- [x] A shell-spec assertion pins the four variables an author actually sees, so deleting the bridge fails a test rather than quietly returning the
+  conversation to the host palette.
+- [x] **Not done, and deliberately:** the composer's *structure* is untouched. An earlier round established, and the shipped types re-establish today,
+  that the draft lives in the shell's Lexical editor, `InputActions` is write-only, and the one official package that does take over the composer
+  (`user-questions`) can do so only because a question card needs no draft.
+- [ ] Gates: **453/453** tests, `typecheck`, `lint`, `git diff --check`, rebuild + sweep `exit 0`; `lib/client.js` 1,596,323 B against the 2.4 MB
+  ceiling.
+
 ## The columns can be dragged, 2026-09-18
 
 **Status:** `verified` in the browser with real mouse, key and reload events.

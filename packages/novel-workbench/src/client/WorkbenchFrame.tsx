@@ -137,6 +137,60 @@ const FRAME_CSS = `
 }
 [data-novel-workbench="frame"][data-narrow="1"] .side.open { width: var(--nw-side); }
 /*
+ * The shipped conversation surface renders inside this frame — it owns the
+ * composer, the input menus and the approval panel — and it is drawn in the host
+ * theme's tokens: cool greys and a blue accent, next to this product's warm
+ * greys and orange. Its own class names are build hashes, so restyling its
+ * internals is not an option; what is an option is answering the variables it is
+ * written in, which is the same seam the community skins use. Every value below
+ * is one of our own tokens, so day and night follow the frame automatically and
+ * a theme switch needs nothing here to change.
+ */
+[data-novel-workbench="frame"] {
+  --dsw-alias-bg-base: hsl(var(--bg-000));
+  --dsw-alias-bg-layer-1: hsl(var(--bg-000));
+  --dsw-alias-bg-module-platform: hsl(var(--bg-100));
+  --dsw-alias-interactive-bg-hover: hsl(var(--bg-100));
+  --dsw-alias-interactive-bg-hover-solid: hsl(var(--bg-200));
+  --dsw-alias-border-l1: hsl(var(--border-100) / .45);
+  --dsw-alias-border-l2: hsl(var(--border-100) / .7);
+  --dsw-alias-border-l3: hsl(var(--border-100));
+  --dsw-alias-border-l4: hsl(var(--border-200));
+  --dsw-alias-separator-primary: hsl(var(--border-100));
+  --dsw-alias-label-primary: hsl(var(--text-000));
+  --dsw-alias-label-primary-bluish: hsl(var(--text-000));
+  --dsw-alias-label-primary-dimmed: hsl(var(--text-100) / .72);
+  --dsw-alias-label-secondary: hsl(var(--text-100) / .8);
+  --dsw-alias-label-tertiary: hsl(var(--text-200) / .72);
+  --dsw-alias-label-caption: hsl(var(--text-200) / .58);
+  --dsw-alias-label-dimmed: hsl(var(--text-200) / .3);
+  --dsw-alias-state-business-primary: hsl(var(--accent-brand));
+  --dsw-alias-state-business-tertiary: hsl(var(--accent-brand) / .16);
+  --dsw-alias-state-error-primary: hsl(var(--err));
+  --dsw-alias-state-success-primary: hsl(var(--ok));
+  --dsw-alias-state-warn-primary: hsl(var(--warn));
+  --dsw-alias-state-warn-label: hsl(var(--warn));
+  --dsw-alias-button-floating-fill: hsl(var(--bg-000));
+  --dsw-alias-button-floating-hover: hsl(var(--bg-100));
+  --dsw-alias-button-info-fill: hsl(var(--accent-brand));
+  --dsw-alias-button-info-hover: hsl(var(--accent-brand-deep));
+  --dsw-alias-markdown-code-block: hsl(var(--bg-100));
+  --dsw-alias-scrollbar-bg-l1: hsl(var(--border-100) / .45);
+  --dsw-alias-scrollbar-bg-l2: hsl(var(--border-100) / .45);
+  --dsw-alias-scrollbar-hover-l1: hsl(var(--border-200));
+  --dsw-alias-scrollbar-hover-l2: hsl(var(--border-200));
+  --dsw-specific-bubble: hsl(var(--bg-100));
+  --dsw-specific-input-major: hsl(var(--bg-100));
+  --dsw-specific-menu: hsl(var(--bg-000));
+  --dsw-specific-selector: hsl(var(--bg-100));
+  --dsw-specific-tip: hsl(var(--bg-000));
+  --dsw-font-family: var(--font-ui);
+  --dsw-elevation-soft: var(--sh-1);
+  --dsw-elevation-panel: var(--sh-2);
+  --dsw-elevation-prominent: var(--sh-3);
+  --dsw-elevation-stroke-color: hsl(var(--border-100));
+}
+/*
  * The frame renders the thread's prose itself (NovelTranscript) and sets it as
  * reading. The shipped conversation surface is left mounted because it still
  * owns what the novel mode has not replaced yet — the composer, the input

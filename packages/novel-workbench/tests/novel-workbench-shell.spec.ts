@@ -99,4 +99,32 @@ describe('novel-mode frame carries the prototype design language', () => {
     expect(frame?.querySelector('[data-novel-composer]')).toBeNull()
     await act(async () => { root.unmount() })
   })
+
+  it('answers the shipped surfaces in this product tokens, not the host palette', async () => {
+    // The conversation surface renders inside this frame and is written in the
+    // host theme's variables — cool greys and a blue accent, against this
+    // product's warm greys and orange. Its own class names are build hashes, so
+    // the frame answers the variables instead, which is also the seam community
+    // skins use. These are the ones an author actually sees.
+    const container = document.createElement('div')
+    document.body.append(container)
+    const root = createRoot(container)
+    await act(async () => {
+      const { workbenchActions } = await import('../src/client/store.js')
+      workbenchActions.setCurrentSession('session-novel' as never)
+      root.render(createElement(WorkbenchFrame as never, {
+        renderSlot: () => null,
+        actions: { toggleSidebar() {}, openDetails() {}, closeDetails() {} },
+      }))
+    })
+    const frame = container.querySelector('[data-novel-workbench="frame"]')
+    const style = getComputedStyle(frame!)
+
+    expect(style.getPropertyValue('--dsw-alias-bg-base')).toBe('hsl(var(--bg-000))')
+    expect(style.getPropertyValue('--dsw-alias-label-primary')).toBe('hsl(var(--text-000))')
+    expect(style.getPropertyValue('--dsw-alias-state-business-primary')).toBe('hsl(var(--accent-brand))')
+    expect(style.getPropertyValue('--dsw-font-family')).toBe('var(--font-ui)')
+
+    await act(async () => { root.unmount() })
+  })
 })

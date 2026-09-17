@@ -37,7 +37,7 @@ describe('novel-mode settings sheet', () => {
     expect(Object.keys(getWorkbenchState().settings))
       .toEqual([
         'readingSize', 'readingMeasure', 'readingIndent', 'readingLeading',
-        'completionEnabled', 'completionDelayMs', 'toolActivity',
+        'completionEnabled', 'completionDelayMs', 'toolActivity', 'refineMode',
       ])
 
     await act(async () => {
@@ -79,6 +79,39 @@ describe('novel-mode settings sheet', () => {
       sheet?.querySelector<HTMLButtonElement>('[data-novel-settings-close]')?.click()
     })
     expect(getWorkbenchState().settingsOpen).toBe(false)
+
+    await act(async () => { root.unmount() })
+    resetWorkbench()
+  })
+
+  /**
+   * The refine mode is state before it is a control, and that order is the point.
+   *
+   * The sheet may not carry a switch that does nothing — the same rule that kept
+   * 工具活动 out until the frame rendered the thread itself. Neither refine mode
+   * can be honoured yet, because the refinement path they choose between does not
+   * exist (I5.2 / I5.3 build it). So the mode is remembered here and the control
+   * waits; I5.1b offers it, and inverts the absence assertion below.
+   */
+  it('remembers the refine mode, and does not yet offer a switch for it', async () => {
+    resetWorkbench()
+    workbenchActions.openSettings()
+    const container = document.createElement('div')
+    document.body.append(container)
+    const root = createRoot(container)
+    await act(async () => { root.render(createElement(NovelSettings as never, {})) })
+
+    // Default: the world catches up when the author hands the chapter over.
+    expect(getWorkbenchState().settings.refineMode).toBe('on-submit')
+
+    workbenchActions.setRefineMode('while-writing')
+    expect(getWorkbenchState().settings.refineMode).toBe('while-writing')
+    workbenchActions.setRefineMode('on-submit')
+    expect(getWorkbenchState().settings.refineMode).toBe('on-submit')
+
+    // Honest absence, with a reason that is still true: there is nothing to
+    // switch yet. Not the old reason — the transcript is ours now.
+    expect(container.querySelector('[data-novel-settings-refine]')).toBeNull()
 
     await act(async () => { root.unmount() })
     resetWorkbench()

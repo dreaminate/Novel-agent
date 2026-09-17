@@ -22,6 +22,16 @@ export interface WorkbenchPanels {
 /** Modifier both slot renderers and key handlers set; `auto` follows the host theme. */
 export type WorkbenchTheme = 'auto' | 'day' | 'night'
 
+/**
+ * When refinement runs.
+ *
+ * `on-submit` is the default: the author writes, and the settings are drawn out
+ * of what they wrote when they hand the chapter over — plus whenever they ask
+ * again. `while-writing` runs it during writing too, for authors who want the
+ * world to keep up as they go.
+ */
+export type RefineMode = 'on-submit' | 'while-writing'
+
 /** The choices the 设置 sheet owns: they change how the workbench reads, not the story. */
 export interface WorkbenchSettings {
   /** Reading body size in px (the prototype offers 16 / 17 / 18). */
@@ -45,6 +55,12 @@ export interface WorkbenchSettings {
    * the frame renders itself — which is what makes this offerable again.
    */
   readonly toolActivity: boolean
+  /**
+   * When refinement runs. The state exists ahead of the control on purpose: the
+   * sheet does not offer a switch until there is something for it to switch, and
+   * the refinement path itself is I5.2 / I5.3.
+   */
+  readonly refineMode: RefineMode
 }
 
 /** Live width of the seat the frame renders into. */
@@ -184,6 +200,10 @@ const DEFAULT_STATE: WorkbenchState = {
      * trust a blank page.
      */
     toolActivity: true,
+    // The author writes first and the world catches up when they hand the
+    // chapter over. Refining while they write is the option, not the default:
+    // proposals arriving mid-sentence are nobody's idea of help.
+    refineMode: 'on-submit',
   },
   settingsOpen: false,
   personFileId: undefined,
@@ -342,6 +362,12 @@ export const workbenchActions = {
   setToolActivity(toolActivity: boolean): void {
     if (state.settings.toolActivity === toolActivity) return
     publish({ ...state, settings: { ...state.settings, toolActivity } })
+  },
+
+  /** When refinement runs: with the submission, or while the author writes. */
+  setRefineMode(refineMode: RefineMode): void {
+    if (state.settings.refineMode === refineMode) return
+    publish({ ...state, settings: { ...state.settings, refineMode } })
   },
 
   /** Open one person's 人物档案 drawer. */

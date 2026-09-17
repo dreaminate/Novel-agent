@@ -26273,6 +26273,15 @@ async function bootRuntime(
     await host.plugin(SqliteSessionQueryEngine, { path: ':memory:', openAt: 'never' }),
     await host.plugin(SessionController),
   ] : []
+  // The continuation seam is injected but never exercised here: a test that
+  // reaches the model should fail loudly rather than silently call one. Only the
+  // native-session path loads the real LlmRuntime, so the default boot supplies
+  // its own refusal instead of leaving the service unable to load.
+  const disposeLlm = nativeSessions
+    ? undefined
+    : host.provide('llm' as never, {
+        stream: () => { throw new Error('unexpected model call') },
+      } as never)
   let projectFiber = await host.plugin(NovelProjectService)
   const planningFiber = await host.plugin(NovelPlanning)
   const writingFiber = await host.plugin(NovelWriting)
@@ -26338,6 +26347,7 @@ async function bootRuntime(
       await writingFiber.dispose()
       await planningFiber.dispose()
       await projectFiber.dispose()
+      disposeLlm?.()
       disposeSandboxPolicy()
       disposeFileSystem()
       disposeApproval?.()

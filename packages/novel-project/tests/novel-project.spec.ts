@@ -50,6 +50,9 @@ async function boot(
     resolve: async () => { throw new Error('unexpected filesystem resolve') },
     writeText: async () => { throw new Error('unexpected filesystem write') },
   } as never)
+  // The continuation seam is injected but never exercised here: a test that
+  // reaches the model should fail loudly rather than silently call one.
+  const _llm = ctx.provide('llm', { stream: () => { throw new Error('unexpected model call') } } as never)
   const disposeSandboxPolicy = ctx.provide('sandboxPolicy', {
     resolve: () => { throw new Error('unexpected sandbox policy resolve') },
   } as never)

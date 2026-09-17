@@ -777,12 +777,82 @@ HEAD `02a48d8` —— 即本计划写的 `8926e31` **加本计划文件本身的
   > 「真机手写时出现灰字并能 Tab 接受」**没有完成**，归 I4.1b。
   > - 门禁：**364 tests**（新增 11）、lint 0、typecheck 0、`diff --check` 0、rebuild + smoke **exit 0**。
 
-- [ ] **I4.1b 句级补全的模型接缝** — 目标：把 `requestCompletion` 接到真实模型，真机看到灰字。
+- [x] **I4.1b 句级补全的模型接缝** — 目标：把 `requestCompletion` 接到真实模型，真机看到灰字。
   - 文件：`packages/novel-project/src/`（宿主方法，走 `ctx.llm.stream`）、`novel-data.ts`、`index.tsx`、spec
   - 前置：I4.1a 已绿（机制与策略都有断言）。
   - 要求：宿主方法只在**当前工作区**范围内请求续写；提示只要"接下这一句"，不要改写已有文字；
     返回空/超时/失败一律让机制**静默无建议**；**绝不写 Canon**。
   - 验证：真机手写时出现灰字并能 Tab 接受；请求失败时不打扰作者。
+
+  > **✅ 已完成（2026-09-17）。真机首试即出灰字并 Tab 接受；过程中抓到一个只有真机才看得见的缺陷。**
+  >
+  > **本轮开工状态（如实记）：** 主 checkout 的工作区里躺着**这个增量自己的半成品** —— 一次被中断的上一轮
+  > 留下的未提交改动（宿主方法、face、接线、依赖都写了，但 **126 个测试是红的**）。按 §4.1 读第一列确认
+  > 暂存区为空后，本轮**把它做完并提交**，而不是推倒重来。这是「门禁绿 ≠ 做完了」的反面例子：
+  > 那批改动**编译得过**，只是从来没跑过测试。
+  >
+  > **实现（新增/补齐）：** `novelProject` Remote 上新增 `completeSentence(sessionId, workspaceId, before, signal)`；
+  > 它用**发起会话自己的** `agent.options` 里的 provider/model 调 `ctx.llm.stream` ——
+  > 一句话的 system、一条 user 消息（只带草稿尾部 1500 字）、无 tools、无 history、`stop: ['\n']`。
+  > 客户端侧：face 加 `completeSentence`（传输失败也变成空串，**永不抛**）、`NovelCanvas` 把它接成
+  > `requestCompletion`。**没有第二套 provider、没有第二套 transport、没有任何写 Canon 的路径** ——
+  > 返回值只到 decoration，只有作者的 Tab 才让它变成文字。
+  >
+  > **修掉半成品留下的三处问题：**
+  > ① **它把默认测试启动路径弄挂了。** 给服务加 `llm` inject 之后，集成 spec 的 `bootRuntime` 默认路径
+  >   （只有 `nativeSessions=true` 才装 `LlmRuntime`）**构造不出服务**，138 个用例里 125 个直接红。
+  >   照同文件另两处已有的写法，给该路径补一个**被调用就抛**的 llm 替身 —— 测试真去碰模型时应当响亮地失败。
+  > ② `product-boundary.spec.ts` 的 typert 调用数 17 → **18**，并写明理由（第 15→17 条也是同样处理）。
+  > ③ **`dsh-llm` 在 `dependencies` 与 `devDependencies` 里各有一份。** 宿主方法运行期真的调它，所以保留
+  >   `dependencies`、删掉 dev 那份。`pnpm install --frozen-lockfile` 通过，lockfile 无 resolution 增减。
+  >
+  > **§2 开源复用门禁：** `@deepseek-ai/dsh-llm@0.1.2-rc.1` 由「仅类型用的 devDependency」升为**运行期依赖**。
+  > MIT、无 install 生命周期脚本、依赖闭包全部已在树里且版本未变、**不打包进任何 client bundle**。
+  > 已同步 `THIRD_PARTY_NOTICES.md`（新增「Sentence continuation seam」小节）与 `docs/upstream-sources.md`（表格新增一行）。
+  >
+  > **RED → 证明测试能咬人：** 新增 `packages/novel-project/tests/novel-project-completion.spec.ts`（7 条断言：
+  > 返回并裁掉尾随空白 / 模型失败 → 空串 / 无模型路由 → 空串且**不发起调用** / 非本工作区的 agent → 拒绝
+  > 且不发起调用 / 只送草稿尾部 / 不推进 Canon / **预算不得小到饿死答案**）。
+  > 实现是半成品里已有的，所以我**没有**假装看到第一次失败 —— 按 §4.3「若首次就绿，先证明它能捕获缺口」，
+  > 对实现做了 **5 处定点破坏**（catch 改成抛出、删掉无路由守卫、删掉工作区归属校验、把 `slice(-1500)` 去掉、
+  > 去掉尾随空白裁剪），**5 处全部让对应断言失败**，且脚本结束时文件 sha256 与破坏前**逐字节相同**。
+  >
+  > **🐛 真机验证抓到的缺陷（类型检查与 371 个单测全都看不见）：`maxTokens: 80` 把答案饿死了。**
+  > 表述：宿主**每一次都返回 `{ok:true, value:""}`**，作者看到的是一个**从来不提示**的补全 ——
+  > 没有报错、没有日志、没有任何可观察的区别（静默是设计要求）。真机实测：**80 → `""`（4.8 s）、
+  > 256 → `""`（2.0 s）、1024 → `"吹得院里的"`（6.5 s）**。原因是这条路由**先推理再出字**，
+  > 80/256 的预算在**第一个 text delta 之前就花光了**（`reasoning-delta` 不进正文，见 I2.1）。
+  > 改为 **1024** 并在 spec 里钉住下限，注释写明为什么这个数字不能再压小。
+  >
+  > **这个缺陷是怎么被逼出来的（方法值得记）：** 客户端静默是设计要求，所以从外面**分不清**
+  > 「客户端根本没问」和「问了但模型没答」。两个**零模型开销**的 CDP 探针把它切开了：
+  > `probe-completion-rpc.mjs` 盯 RPC 传输，看到 `POST /api/novelProject/completeSentence` **确实发出了**、
+  > 读到宿主**原样的回答** `{ok:true,value:""}`、量到**往返 4861 ms**（而不是毫秒级的「无路由直接返回」）⇒
+  > 客户端与 Remote 都健康，空答案出自宿主方法内部。**没有这一步就只能靠猜。**
+  >
+  > **真机验证（探针 `docs/evidence/editor-2026-09-17/probe-completion.mjs`，产物 `completion-summary.json` +
+  > `completion-ghost.png`）：** 打开「写作」→ 敲入「夜里风大，」→ 停顿后**灰字首试即出现**
+  > （`吹得窗纸哗哗作响。`，带 `aria-hidden`）→ 且**它不是正文**：把 ghost 从克隆节点里摘掉之后，
+  > 文档文本仍是「夜里风大，」（`isDocumentText: false`）→ 按 **Tab** → ghost 消失、正文变为
+  > 「夜里风大，吹得窗纸哗哗作响。」、状态回到 `clean`；**磁盘上的草稿文件内容一字不差**；console 0 报错。
+  >
+  > **一个探针口径的教训（与 I4.1a 同类）：** 第一版探针用 `.ProseMirror` 的 `innerText` 判断
+  > 「建议是不是正文」，结论是 `true` —— **错的**：widget 本身就是 DOM 节点，`innerText` 当然包含它。
+  > 改成**先把 ghost 从克隆节点里摘掉再读**，才得到诚实的 `false`。
+  >
+  > **⚠️ 一处真实成本，留给用户定（本轮只记录，不自作主张）：** 作者当前这条路由是**高推理档**，
+  > 所以一次续写要 **2–6.5 秒**、并且**每次停顿都是一次带推理的调用**；而编辑器的过期判据会让
+  > 「作者已经往下写了」的建议被丢弃 —— 也就是**可能花钱而作者什么都看不到**。
+  > 本轮**保留作者自己的路由**、不新建第二条，把实测数字记在这里。若要更快更省，
+  > 该动的是这条调用用什么档位（`reasoningEffort` 在 dsh-llm 里是 **adapter 私有的不透明串**，
+  > 猜一个 id 塞进去会把调用打失败，所以没有在本轮擅自改）。
+  >
+  > **未做、不许当已验证：** 失败路径**没有宿主侧可观测性** —— `catch` 是静默的，
+  > 这正是上面那个缺陷难找的原因；本轮没有加日志。真实中断（`signal`）传播也没有验证过。
+  >
+  > **门禁：** **371 tests**（新增 7 条）、typecheck 0、lint 0、`git diff --check` 0、`dev-host.sh rebuild` +
+  > smoke **exit 0**；`lib/client.js` **1,590,597 B**（本轮只改宿主，客户端字节数与 I4.1a 相同）
+  > ≤ 2,400,000 B 上限 → **PASS**。探针产生的草稿文件测完已删除。
 
 - [ ] **I4.2 段级续写面板** — 目标：参考应用那种「情节灵感 → 生成 → 采用」。
   - 文件：`packages/novel-workbench/src/client/ContinueWritingPanel.tsx`（新）、spec（新）

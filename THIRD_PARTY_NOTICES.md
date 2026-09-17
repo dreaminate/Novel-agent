@@ -413,3 +413,28 @@ place in that package's importer block.
 These methods are a transport for the editor's draft medium only. A draft file
 is not Canon state and reading or writing one advances nothing; only an accepted
 Result Packet moves the accepted revision.
+
+## Sentence continuation seam (2026-09-17)
+
+`@novel-agent/novel-project` already resolved
+`@deepseek-ai/dsh-llm@0.1.2-rc.1` at the locked DSH version, but as a
+**development dependency for types only**. It is now also a runtime dependency
+of that package, because `completeSentence` calls `ctx.llm.stream` — the same
+context a shipped DSH host plugin uses, no second provider registry and no
+second transport. The lockfile gains no new resolution and removes none: the
+entry only changes which section of that package's importer block it sits in.
+
+It is MIT and ships no `preinstall` / `install` / `postinstall` script. Its
+dependencies — `zod`, `@deepseek-ai/schemastery` and five `@deepseek-ai/dsh-*`
+packages — were all already resolved in this tree at unchanged versions, so
+nothing new enters the install closure. It is a host package and therefore adds
+nothing to any client bundle.
+
+The call is deliberately the narrowest model request in the product: one system
+prompt, one user message carrying only the tail of the author's draft, no tools,
+no conversation history, `maxTokens: 80` and a stop at the first newline. It
+returns one sentence of text or the empty string — a failed, timed-out or
+unrouted request is silence rather than an error, because a message the author
+has to read mid-sentence costs more than the suggestion was worth. Nothing it
+returns can reach Canon: the editor paints it as a decoration and only the
+author's Tab turns it into draft text.

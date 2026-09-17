@@ -1,0 +1,53 @@
+{
+  "steps": [
+    {
+      "step": "picked a thread with a conversation",
+      "rows": 5,
+      "picked": "session-3b13f527-0b48-42fe-a18d-10cbc2a84daf"
+    },
+    {
+      "step": "open 写作",
+      "chapter": "vol01-ch0001"
+    },
+    {
+      "step": "opened blank",
+      "blank": "\n"
+    },
+    {
+      "step": "typed",
+      "doc": "夜里风大，",
+      "status": "clean",
+      "ok": true
+    },
+    {
+      "step": "grey text after the pause",
+      "appeared": true,
+      "attempts": [
+        {
+          "attempt": 1,
+          "appeared": true,
+          "ghost": {
+            "text": "吹得窗纸哗哗作响。",
+            "ariaHidden": "true",
+            "documentTextWithoutGhost": "夜里风大，"
+          }
+        }
+      ],
+      "ghost": {
+        "text": "吹得窗纸哗哗作响。",
+        "ariaHidden": "true",
+        "documentTextWithoutGhost": "夜里风大，"
+      },
+      "isDocumentText": false
+    },
+    {
+      "step": "after Tab",
+      "ghost": false,
+      "doc": "夜里风大，吹得窗纸哗哗作响。",
+      "status": "clean",
+      "inserted": true
+    }
+  ],
+  "ok": true,
+  "consoleErrors": []
+}

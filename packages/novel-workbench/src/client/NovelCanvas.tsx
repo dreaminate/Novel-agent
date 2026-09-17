@@ -676,6 +676,11 @@ export function NovelCanvas(props: NovelCanvasProps): ReactNode {
           submitChapterProposal={props.submitChapterProposal}
           completionEnabled={state.settings.completionEnabled}
           completionDelayMs={state.settings.completionDelayMs}
+          requestCompletion={async (before: string) => {
+            if (workId === undefined || sessionId === undefined) return undefined
+            const text = await props.completeSentence(sessionId, workId, before, new AbortController().signal)
+            return text === '' ? undefined : text
+          }}
         />
       </Shell>
     )

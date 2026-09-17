@@ -164,6 +164,17 @@ export interface NovelWorkFace {
     chars: number,
   ) => Promise<void>
   /**
+   * Ask the model for one sentence of continuation after `before`. An empty
+   * answer and a failed one are the same thing here — no suggestion — so a
+   * failure never reaches the author mid-sentence.
+   */
+  readonly completeSentence: (
+    sessionId: SessionId,
+    workspaceId: WorkspaceId,
+    before: string,
+    signal: AbortSignal,
+  ) => Promise<string>
+  /**
    * Character count of one chapter's accepted manuscript, or `undefined` while
    * Canon holds no accepted text for it.
    */
@@ -1431,6 +1442,14 @@ export function createNovelWorkFace(deps: NovelFaceDeps): NovelWorkFace {
       const handle = session.beginSubmission({ mode: 'queue', text, images: [] })
       const result = await session.prompt([{ type: 'text', text }], 'queue', undefined, handle.requestId)
       if (!result.ok) throw new Error(`提交失败：${result.error.message}`)
+    },
+    /**
+     * The continuation seam. The host already turns every failure into an empty
+     * answer, so this only has to unwrap the transport.
+     */
+    async completeSentence(sessionId, workspaceId, before, signal) {
+      const result = await deps.project.completeSentence(sessionId, workspaceId, before, signal)
+      return result.ok ? result.value : ''
     },
   }
 }

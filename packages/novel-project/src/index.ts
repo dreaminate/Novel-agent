@@ -8,6 +8,8 @@ import {
 } from '@deepseek-ai/dsh-session'
 import type { SubagentResult, SubagentRun } from '@deepseek-ai/dsh-subagent'
 import { FsVersion, type FsWriteIntent } from '@deepseek-ai/dsh-fs'
+import { MessageId } from '@deepseek-ai/dsh-llm/brand'
+import type {} from '@deepseek-ai/dsh-llm'
 import type {} from '@deepseek-ai/dsh-sandbox-policy'
 import type {
   NovelChapterFileRead,
@@ -1093,6 +1095,20 @@ declare module '@deepseek-ai/dsh-session' {
 
 
 /**
+ * What a sentence continuation is asked with.
+ *
+ * Terse on purpose: the model is continuing the author's sentence, not editing
+ * it, and anything it adds beyond the next sentence is text the author has to
+ * read and delete.
+ */
+const COMPLETION_SYSTEM = [
+  '你在给一位作者的中文小说续写一句。',
+  '只接下这一句，不要复述、改写、解释或评论作者已经写下的内容。',
+  '保持人称、时态与文风一致；写完一句就停，不要接第二句。',
+  '拿不准就返回空字符串，不要硬编。',
+].join('\n')
+
+/**
  * The filesystem service's own failure code, read structurally.
  *
  * Deliberately not `instanceof FsError`. The store can hold more than one
@@ -1147,6 +1163,7 @@ export class NovelProjectService extends TypertRemoteService {
     'sessionProjections',
     'fs',
     'sandboxPolicy',
+    'llm',
   ]
 
   private projects?: KvTable<DshWorkspaceId, NovelProjectRecord>
@@ -2765,6 +2782,62 @@ export class NovelProjectService extends TypertRemoteService {
       }
       return { state: 'unwritable', reason: describeFsFailure(error) }
     }
+  }
+
+  /**
+   * Ask the model to continue one sentence of the author's own draft.
+   *
+   * This is the narrowest model call in the product: one sentence, no tools, no
+   * history, and the author's existing model route — the agent's own `options`,
+   * so no second provider is introduced. It writes nothing: a continuation is a
+   * suggestion the editor paints as a decoration, and only the author's Tab turns
+   * it into text. Nothing here can reach Canon.
+   */
+  @Remote('completeSentence')
+  async remoteCompleteSentence(
+    sessionId: string,
+    workspaceId: NovelWorkspaceId,
+    before: string,
+    signal: AbortSignal,
+  ): Promise<string> {
+    const agent = await this.ctx.typert.lookups.get('agent')!.resolve(SessionId(sessionId)) as Agent
+    // The same scope guarantee every other call makes: this agent serves this work.
+    await this.requireAgentWorkspace(agent, workspaceId)
+    // A session with no model route has nothing to ask; silence, not an error.
+    const { provider, model } = agent.options
+    if (provider === undefined || model === undefined) return ''
+    let text = ''
+    try {
+      const stream = this.ctx.llm.stream({
+        provider,
+        model,
+        system: COMPLETION_SYSTEM,
+        messages: [{
+          id: MessageId(randomUUID()),
+          role: 'user',
+          content: [{ type: 'text', text: before.slice(-1500) }],
+          source: { kind: 'user' },
+        }],
+        temperature: 0.3,
+        // Enough room for the route to think *and* answer. This is not slack the
+        // author pays for: `stop` ends generation at the first newline, so the
+        // text that can come back is one line. A tight cap is what starves it —
+        // 80 and 256 both returned nothing on a reasoning route, because the
+        // budget was spent before the first text delta was ever emitted, and the
+        // author saw a feature that simply never suggested anything.
+        maxTokens: 1024,
+        stop: ['\n'],
+        signal,
+      })
+      for await (const chunk of stream) {
+        if (chunk.type === 'text-delta') text += chunk.text
+      }
+    } catch {
+      // A continuation is a nicety. Any failure is silence: an error the author
+      // has to read while writing costs more than the suggestion was worth.
+      return ''
+    }
+    return text.replace(/\s+$/u, '')
   }
 
   /** Read the current project head without creating a project record. */

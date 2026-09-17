@@ -1,0 +1,18 @@
+{
+  "ok": true,
+  "steps": {
+    "chapter": "vol01-ch0001",
+    "framesSent": 0,
+    "httpRequests": 2,
+    "framesMentioningCompleteSentence": 0,
+    "httpMentioningCompleteSentence": 1,
+    "frameSample": null,
+    "httpSample": [
+      "POST http://127.0.0.1:4780/api/novelProject/writeChapterFile",
+      "POST http://127.0.0.1:4780/api/novelProject/completeSentence"
+    ],
+    "answer": "{\"type\":\"server-response\",\"rpcId\":\"6974ffb0-11ca-476e-8982-04f2bd13f497\",\"result\":{\"ok\":true,\"value\":\"\"}}",
+    "roundTripMs": 2001,
+    "loadingFailed": null
+  }
+}

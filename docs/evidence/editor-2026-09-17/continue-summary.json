@@ -1,0 +1,37 @@
+{
+  "steps": [
+    {
+      "step": "open 写作",
+      "picked": "session-3b13f527-0b48-42fe-a18d-10cbc2a84daf",
+      "chapter": "vol01-ch0001"
+    },
+    {
+      "step": "open 续写",
+      "panel": true
+    },
+    {
+      "step": "wrote two beats",
+      "beats": "先写风声\n再写脚步声"
+    },
+    {
+      "step": "asked for prose",
+      "state": "working",
+      "stoppable": true
+    },
+    {
+      "step": "prose came back",
+      "ready": true,
+      "prose": "风从北边来，穿过教学楼的连廊，发出低沉的呜咽声，像是有人把一本厚书合上了却不收走，任由纸页在风里翻动。走廊尽头的窗户没有关严，缝隙里挤进来的风溜过玻璃边缘，吹出一声细长的哨音。操场边的杨树开始哗哗作响，叶子翻出银白色的一面，整排树都在抖动。风卷着灰尘和细碎的枯叶跑过水泥地面，发出沙沙的摩擦声。\n\n然后风声里嵌进了别的什么。\n\n脚步声。从楼梯口那边传来的，一步一步，不紧不慢。皮鞋跟敲在水磨石地面上，节奏很稳，带着一种不需要赶路的从容。那声音顺着走廊一路过来，经过每一扇关着的门，经过每一间空着的教室，越来越近。",
+      "draftUnchangedWhileWaiting": true,
+      "draftHasProse": null
+    },
+    {
+      "step": "adopted",
+      "docHasProse": true,
+      "draftHasProse": true,
+      "state": "idle"
+    }
+  ],
+  "ok": true,
+  "consoleErrors": []
+}

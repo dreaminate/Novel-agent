@@ -185,16 +185,15 @@ describe('novel-agent product boundary', () => {
     expect(TYPERT.package).toBe('@novel-agent/novel-project')
     expect(TYPERT.face).toBe('host')
     expect(novelProjectRemote.package).toBe('@novel-agent/novel-project')
-    // 18 since `completeSentence` joined the boundary: the editor's grey-text
-    // continuation is one sentence of the author's own draft, asked with the
-    // agent's own model route, and there is no llm Remote a client plugin can
-    // reach, so it rides this same namespace rather than a second transport.
-    // (17 before it, when `readChapterFile`/`writeChapterFile` joined: the
-    // editor's chapter drafts are files in the author's workdir, and there is no
-    // fs Remote a client plugin can reach, so they ride this same namespace
-    // rather than a second transport. (15 before them, when `chapterControlPack`
-    // joined; the 本章合同 canvas reads one Chapter's control pack here too.))
-    expect(TYPERT.invocations).toHaveLength(18)
+    // 19 since `continueWriting` joined the boundary: the editor's paragraph
+    // continuation (the author's beats in, prose out) is asked with the agent's
+    // own model route, and there is no llm Remote a client plugin can reach, so
+    // it rides this same namespace rather than a second transport. 18 before it,
+    // when `completeSentence` joined for the same reason; 17 when
+    // `readChapterFile`/`writeChapterFile` joined, because the editor's draft
+    // files have no fs Remote a client plugin can reach either; 15 before them,
+    // when `chapterControlPack` joined for the 本章合同 canvas.
+    expect(TYPERT.invocations).toHaveLength(19)
     for (const invocation of TYPERT.invocations) {
       expect(invocation.service).toBe('novelProject')
       expect(invocation.namespace).toBe(invocation.service)

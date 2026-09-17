@@ -3199,3 +3199,28 @@ export type NovelChapterFileWrite =
   | { readonly state: 'ok'; readonly version: string }
   | { readonly state: 'conflict'; readonly version: string }
   | { readonly state: 'unwritable'; readonly reason: string }
+
+/**
+ * What a paragraph-level continuation is asked with.
+ *
+ * `inspiration` is the author's own beats for the next stretch, kept in the
+ * order they were written — the panel is not a prompt box, it is a place to say
+ * what happens next. `before` is the manuscript so far: the model continues from
+ * the end of it and is told not to retell what is already written.
+ */
+export interface NovelContinuationRequest {
+  readonly inspiration: readonly string[]
+  readonly before: string
+}
+
+/**
+ * The outcome of asking for one.
+ *
+ * Unlike the sentence-level suggestion — where any failure is silence, because
+ * the author never asked and being interrupted costs more than a suggestion is
+ * worth — this request was deliberate. A failure is therefore said out loud, in
+ * words the author can act on.
+ */
+export type NovelContinuationResult =
+  | { readonly state: 'ok'; readonly text: string }
+  | { readonly state: 'failed'; readonly message: string }

@@ -681,6 +681,12 @@ export function NovelCanvas(props: NovelCanvasProps): ReactNode {
             const text = await props.completeSentence(sessionId, workId, before, new AbortController().signal)
             return text === '' ? undefined : text
           }}
+          requestContinuation={async (before, inspiration, signal) => {
+            if (workId === undefined || sessionId === undefined) {
+              return { state: 'failed', message: '还没有选定线程，先在左栏开一条线再续写。' }
+            }
+            return await props.continueWriting(sessionId, workId, { inspiration, before }, signal)
+          }}
         />
       </Shell>
     )

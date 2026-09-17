@@ -20,8 +20,10 @@ import { EditorContent, useEditor, type Editor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import type { WorkspaceId } from '@deepseek-ai/dsh-api-workspace-controller/client'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
+import type { NovelContinuationResult } from '@novel-agent/novel-project/types'
 import { countCharacters } from './novel-copy.js'
 import { COMPLETION_PLUGIN_KEY, NovelCompletion, completionInsertion, shouldAskForCompletion } from './novel-completion.js'
+import { ContinueWritingPanel } from './ContinueWritingPanel.js'
 import type { ChapterDraft, ChapterDraftSave, ChapterIdentity } from './chapter-files.js'
 
 /** How long the author has to stop typing before a save goes out. */
@@ -111,6 +113,15 @@ export interface NovelEditorProps {
    * the mechanism runs without it and simply never gets an answer.
    */
   readonly requestCompletion?: (before: string) => Promise<string | undefined>
+  /**
+   * The paragraph seam. Absent means the panel is not offered at all, rather than
+   * offering a button that cannot work.
+   */
+  readonly requestContinuation?: (
+    before: string,
+    inspiration: readonly string[],
+    signal: AbortSignal,
+  ) => Promise<NovelContinuationResult>
 }
 
 /** ProseMirror blocks back to the file's shape: blank line between paragraphs. */
@@ -127,6 +138,12 @@ export function NovelEditor(props: NovelEditorProps): ReactNode {
   const [chars, setChars] = useState(0)
   /** Writing or reading: one document, two states — not two screens. */
   const [mode, setMode] = useState<'write' | 'read'>('write')
+  /**
+   * The paragraph panel is opened on request. Until then it is not part of the
+   * writing surface at all — the author came here to write, not to look at a
+   * form.
+   */
+  const [continuing, setContinuing] = useState(false)
   /**
    * Submitting is the one action here whose effect can reach Canon, so it is two
    * steps: the author sees exactly what will be proposed, and against which
@@ -332,6 +349,46 @@ export function NovelEditor(props: NovelEditorProps): ReactNode {
     }
   }, [chars, flush, props, workId])
 
+  /**
+   * Ask for a paragraph, with the manuscript as it stands right now. Reading the
+   * live editor here rather than keeping a copy is what makes the model continue
+   * from what the author actually sees.
+   */
+  const requestContinuation = useCallback(
+    (inspiration: readonly string[], signal: AbortSignal): Promise<NovelContinuationResult> => {
+      const seam = props.requestContinuation
+      const live = editRef.current
+      if (seam === undefined) return Promise.resolve({ state: 'failed', message: '这里现在还接不上续写。' })
+      return seam(live === null ? '' : serialize(live), inspiration, signal)
+    },
+    [props.requestContinuation],
+  )
+
+  /**
+   * Take generated prose into the draft. This is the only path from the model to
+   * the author's manuscript, and it is still only the draft: Canon moves when the
+   * author submits this chapter and accepts the proposal, not before.
+   */
+  const adoptContinuation = useCallback((text: string): void => {
+    const live = editRef.current
+    if (live === null) return
+    const html = text
+      .split(/\n{2,}/)
+      .map(paragraph => paragraph.trim())
+      .filter(paragraph => paragraph !== '')
+      .map(paragraph => `<p>${escapeHtml(paragraph)}</p>`)
+      .join('')
+    if (html === '') return
+    // An empty chapter opens on Tiptap's one empty paragraph. Appending after it
+    // would put a blank line at the top of the author's file, so the first
+    // adoption into a blank chapter replaces it instead.
+    if (live.getText().trim() === '') {
+      live.commands.setContent(html)
+      return
+    }
+    live.chain().focus().insertContentAt(live.state.doc.content.size, html).run()
+  }, [])
+
   const load = useCallback((target: ChapterIdentity) => {
     if (workId === undefined) return
     setStatus('loading')
@@ -407,6 +464,16 @@ export function NovelEditor(props: NovelEditorProps): ReactNode {
         </span>
         {conflict !== undefined && <span className="novel-editor-state" role="alert">{conflict}</span>}
         <span className="novel-editor-count" data-novel-editor-count={chars}>{`${String(chars)} 字`}</span>
+        {props.requestContinuation !== undefined && mode === 'write' && (
+          <button
+            type="button"
+            className={continuing ? 'btn sm on' : 'btn sm'}
+            data-novel-editor-continue="true"
+            onClick={() => { setContinuing(open => !open) }}
+          >
+            续写
+          </button>
+        )}
         {chars > 0 && submitState !== 'sent' && (
           <button
             type="button"
@@ -455,6 +522,9 @@ export function NovelEditor(props: NovelEditorProps): ReactNode {
             </button>
           </div>
         </div>
+      )}
+      {continuing && mode === 'write' && props.requestContinuation !== undefined && (
+        <ContinueWritingPanel onGenerate={requestContinuation} onAdopt={adoptContinuation} />
       )}
       {mode === 'read' ? (
         // Reading is the same text, set as a manuscript: the author should not

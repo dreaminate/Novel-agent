@@ -18,6 +18,8 @@ import type {
   NovelCanonEntity,
   NovelChapterControlPack,
   NovelCanonProjection,
+  NovelContinuationRequest,
+  NovelContinuationResult,
   NovelManuscriptProjection,
   NovelNarrativeUnit,
   NovelNarrativeProjection,
@@ -174,6 +176,17 @@ export interface NovelWorkFace {
     before: string,
     signal: AbortSignal,
   ) => Promise<string>
+  /**
+   * Ask for the next stretch of prose, from the author's beats and the draft so
+   * far. Unlike the sentence suggestion, a failure comes back as a state the
+   * panel can say out loud — the author asked for this one.
+   */
+  readonly continueWriting: (
+    sessionId: SessionId,
+    workspaceId: WorkspaceId,
+    request: NovelContinuationRequest,
+    signal: AbortSignal,
+  ) => Promise<NovelContinuationResult>
   /**
    * Character count of one chapter's accepted manuscript, or `undefined` while
    * Canon holds no accepted text for it.
@@ -1450,6 +1463,16 @@ export function createNovelWorkFace(deps: NovelFaceDeps): NovelWorkFace {
     async completeSentence(sessionId, workspaceId, before, signal) {
       const result = await deps.project.completeSentence(sessionId, workspaceId, before, signal)
       return result.ok ? result.value : ''
+    },
+    /**
+     * The paragraph seam. A transport failure is turned into the same shape as a
+     * failed generation, because either way the author is owed a sentence.
+     */
+    async continueWriting(sessionId, workspaceId, request, signal) {
+      const result = await deps.project.continueWriting(sessionId, workspaceId, request, signal)
+      return result.ok
+        ? result.value
+        : { state: 'failed', message: '这次续写没能完成，可以再试一次。' }
     },
   }
 }

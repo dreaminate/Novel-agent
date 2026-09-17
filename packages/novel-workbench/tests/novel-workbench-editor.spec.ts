@@ -15,7 +15,7 @@ import { NovelEditor } from '../src/client/NovelEditor.js'
  */
 const chapter = { number: 1, title: '开篇章' }
 
-function mount(options: { text?: string, state?: 'loaded' | 'missing', onSubmit?: (sessionId: string, chapter: unknown, revision: number, chars: number) => Promise<void> } = {}) {
+function mount(options: { text?: string, state?: 'loaded' | 'missing', onSubmit?: (sessionId: string, chapter: unknown, revision: number, chars: number) => Promise<void>, continuation?: string, saves?: string[] } = {}) {
   const container = document.createElement('div')
   document.body.append(container)
   const root = createRoot(container)
@@ -26,7 +26,10 @@ function mount(options: { text?: string, state?: 'loaded' | 'missing', onSubmit?
       loadChapterDraft: async () => (options.state === 'missing'
         ? { state: 'missing' }
         : { state: 'loaded', text: options.text ?? '', version: 'v1' }),
-      saveChapterDraft: async () => ({ state: 'saved', version: 'v2' }),
+      saveChapterDraft: async (_workId: unknown, _chapter: unknown, text: string) => {
+        options.saves?.push(text)
+        return { state: 'saved', version: 'v2' }
+      },
       readingSize: 18,
       readingMeasure: 34,
       readingIndent: 2,
@@ -34,6 +37,7 @@ function mount(options: { text?: string, state?: 'loaded' | 'missing', onSubmit?
       sessionId: 'session-1',
       revision: 7,
       submitChapterProposal: options.onSubmit ?? (async () => {}),
+      requestContinuation: async () => ({ state: 'ok', text: options.continuation ?? '' }),
     } as never))
   })
   return { ready, container, root }
@@ -131,6 +135,33 @@ describe('novel-mode writing surface', () => {
 
     expect(rendered.container.querySelector('[data-novel-editor-confirm]')).toBeNull()
     expect(calls).toHaveLength(0)
+
+    await act(async () => { rendered.root.unmount() })
+    rendered.container.remove()
+  })
+
+  it('takes generated prose into a blank chapter without a blank line above it', async () => {
+    // A chapter with no draft opens on Tiptap's one empty paragraph. Appending
+    // after it would put an empty line at the top of the author's file, so the
+    // first adoption into a blank chapter has to replace it.
+    const saves: string[] = []
+    const rendered = mount({ state: 'missing', saves, continuation: '第一段。\n\n第二段。' })
+    await rendered.ready
+    await act(async () => {})
+
+    await act(async () => {
+      rendered.container.querySelector<HTMLButtonElement>('[data-novel-editor-continue]')?.click()
+    })
+    await act(async () => {
+      rendered.container.querySelector<HTMLButtonElement>('[data-novel-continue-generate]')?.click()
+    })
+    await act(async () => {
+      rendered.container.querySelector<HTMLButtonElement>('[data-novel-continue-adopt]')?.click()
+    })
+    // Autosave is debounced; let it land before the unmount clears the timer.
+    await act(async () => { await new Promise(resolve => setTimeout(resolve, 900)) })
+
+    expect(saves.at(-1)).toBe('第一段。\n\n第二段。')
 
     await act(async () => { rendered.root.unmount() })
     rendered.container.remove()

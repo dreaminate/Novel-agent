@@ -304,3 +304,183 @@ describe('NovelProjectService sentence continuation', () => {
     }
   })
 })
+
+/** The brief the host actually sent, as text. */
+function briefOf(call: unknown): string {
+  const messages = (call as { readonly messages: readonly { readonly content: readonly { readonly text: string }[] }[] }).messages
+  return messages[0]!.content[0]!.text
+}
+
+describe('NovelProjectService paragraph continuation', () => {
+  it('answers with the prose the model wrote, trimmed', async () => {
+    const runtime = await boot('paragraph')
+    try {
+      await runtime.ctx.novelProject.open(runtime.workspace)
+      const agent = runtime.registerAgent('fixture-paragraph', runtime.cwd, {
+        provider: 'fixture',
+        model: 'scripted',
+      })
+      runtime.script(async () => [
+        { type: 'text-delta', text: '\n门开了，' },
+        { type: 'text-delta', text: '风灌进来。\n' },
+      ])
+
+      await expect(runtime.ctx.novelProject.remoteContinueWriting(
+        agent.id,
+        runtime.workspace.id,
+        { inspiration: ['先写风声'], before: '他站在门口。' },
+        new AbortController().signal,
+      )).resolves.toEqual({ state: 'ok', text: '门开了，风灌进来。' })
+    } finally {
+      await runtime.dispose()
+    }
+  })
+
+  it('sends the beats in the author order, numbered, ahead of the manuscript', async () => {
+    const runtime = await boot('paragraph-brief')
+    try {
+      await runtime.ctx.novelProject.open(runtime.workspace)
+      const agent = runtime.registerAgent('fixture-brief', runtime.cwd, {
+        provider: 'fixture',
+        model: 'scripted',
+      })
+      runtime.script(async () => [{ type: 'text-delta', text: '门开了。' }])
+
+      await runtime.ctx.novelProject.remoteContinueWriting(
+        agent.id,
+        runtime.workspace.id,
+        { inspiration: ['先写风声', '再写脚步声'], before: '他站在门口。' },
+        new AbortController().signal,
+      )
+
+      const brief = briefOf(runtime.calls[0])
+      const first = brief.indexOf('1. 先写风声')
+      const second = brief.indexOf('2. 再写脚步声')
+      expect(first).toBeGreaterThan(-1)
+      expect(second).toBeGreaterThan(first)
+      expect(brief).toContain('他站在门口。')
+      // The manuscript has to come after the beats, or the model has read the
+      // instructions before it knows what it is continuing.
+      expect(brief.indexOf('他站在门口。')).toBeGreaterThan(second)
+    } finally {
+      await runtime.dispose()
+    }
+  })
+
+  it('reports a failing model instead of staying silent, because the author asked', async () => {
+    const runtime = await boot('paragraph-fail')
+    try {
+      await runtime.ctx.novelProject.open(runtime.workspace)
+      const agent = runtime.registerAgent('fixture-paragraph-fail', runtime.cwd, {
+        provider: 'fixture',
+        model: 'scripted',
+      })
+      runtime.script(async () => { throw new Error('provider is unreachable') })
+
+      const answer = await runtime.ctx.novelProject.remoteContinueWriting(
+        agent.id,
+        runtime.workspace.id,
+        { inspiration: [], before: '他站在门口。' },
+        new AbortController().signal,
+      )
+
+      expect(answer.state).toBe('failed')
+      // Nothing the author cannot act on: no provider string, no stack.
+      expect(answer.state === 'failed' ? answer.message : '').not.toContain('unreachable')
+    } finally {
+      await runtime.dispose()
+    }
+  })
+
+  it('treats an empty answer as a failure rather than as prose that happens to be blank', async () => {
+    const runtime = await boot('paragraph-empty')
+    try {
+      await runtime.ctx.novelProject.open(runtime.workspace)
+      const agent = runtime.registerAgent('fixture-paragraph-empty', runtime.cwd, {
+        provider: 'fixture',
+        model: 'scripted',
+      })
+      runtime.script(async () => [{ type: 'text-delta', text: '   \n  ' }])
+
+      const answer = await runtime.ctx.novelProject.remoteContinueWriting(
+        agent.id,
+        runtime.workspace.id,
+        { inspiration: ['先写风声'], before: '他站在门口。' },
+        new AbortController().signal,
+      )
+
+      expect(answer.state).toBe('failed')
+    } finally {
+      await runtime.dispose()
+    }
+  })
+
+  it('asks nothing when the agent has no model route, and says why', async () => {
+    const runtime = await boot('paragraph-no-route')
+    try {
+      await runtime.ctx.novelProject.open(runtime.workspace)
+      const agent = runtime.registerAgent('fixture-paragraph-no-route', runtime.cwd, {})
+
+      const answer = await runtime.ctx.novelProject.remoteContinueWriting(
+        agent.id,
+        runtime.workspace.id,
+        { inspiration: [], before: '他站在门口。' },
+        new AbortController().signal,
+      )
+
+      expect(answer).toEqual({ state: 'failed', message: '这条线程还没有可用的模型，先在输入框上选一个再续写。' })
+      expect(runtime.calls).toHaveLength(0)
+    } finally {
+      await runtime.dispose()
+    }
+  })
+
+  it('refuses to write for an agent that does not own the workspace', async () => {
+    const runtime = await boot('paragraph-foreign')
+    try {
+      await runtime.ctx.novelProject.open(runtime.workspace)
+      const outside = join(runtime.home, 'elsewhere-paragraph')
+      await mkdir(outside)
+      const agent = runtime.registerAgent('fixture-paragraph-outsider', outside, {
+        provider: 'fixture',
+        model: 'scripted',
+      })
+      runtime.script(async () => [{ type: 'text-delta', text: '不该发生' }])
+
+      await expect(runtime.ctx.novelProject.remoteContinueWriting(
+        agent.id,
+        runtime.workspace.id,
+        { inspiration: [], before: '他站在门口。' },
+        new AbortController().signal,
+      )).rejects.toThrow(/does not own Workspace/u)
+      expect(runtime.calls).toHaveLength(0)
+    } finally {
+      await runtime.dispose()
+    }
+  })
+
+  it('advances nothing: prose the author has not adopted cannot reach Canon', async () => {
+    const runtime = await boot('paragraph-no-canon')
+    try {
+      await runtime.ctx.novelProject.open(runtime.workspace)
+      const agent = runtime.registerAgent('fixture-paragraph-no-canon', runtime.cwd, {
+        provider: 'fixture',
+        model: 'scripted',
+      })
+      runtime.script(async () => [{ type: 'text-delta', text: '门开了，风灌进来。' }])
+      const before = runtime.ctx.novelProject.current(runtime.workspace.id)
+
+      await runtime.ctx.novelProject.remoteContinueWriting(
+        agent.id,
+        runtime.workspace.id,
+        { inspiration: ['先写风声'], before: '他站在门口。' },
+        new AbortController().signal,
+      )
+
+      expect(runtime.ctx.novelProject.current(runtime.workspace.id)).toEqual(before)
+      expect(runtime.ctx.novelProject.pendingProposals(runtime.workspace.id)).toHaveLength(0)
+    } finally {
+      await runtime.dispose()
+    }
+  })
+})

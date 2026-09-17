@@ -14,6 +14,8 @@ import type {} from '@deepseek-ai/dsh-sandbox-policy'
 import type {
   NovelChapterFileRead,
   NovelChapterFileWrite,
+  NovelContinuationRequest,
+  NovelContinuationResult,
 } from './types.js'
 import type {} from '@deepseek-ai/dsh-system-prompt'
 import {
@@ -1106,6 +1108,20 @@ const COMPLETION_SYSTEM = [
   '只接下这一句，不要复述、改写、解释或评论作者已经写下的内容。',
   '保持人称、时态与文风一致；写完一句就停，不要接第二句。',
   '拿不准就返回空字符串，不要硬编。',
+].join('\n')
+
+/**
+ * What a paragraph-level continuation is asked with.
+ *
+ * The author supplies the beats; the model's job is prose in between, in their
+ * order. Telling it not to retell what is already written is what keeps the
+ * result something the author can append rather than something they must edit.
+ */
+const CONTINUATION_SYSTEM = [
+  '你在替一位作者接着写他的中文小说：从他的稿子结尾往下写。',
+  '不要复述、改写、总结或评论他已经写下的内容；不要写标题、解释或大纲，直接给正文。',
+  '严格按作者给出的情节灵感顺序推进：不要跳过任何一条，也不要提前用掉后面的。',
+  '保持人称、时态、文风与人物口吻一致。',
 ].join('\n')
 
 /**
@@ -2838,6 +2854,77 @@ export class NovelProjectService extends TypertRemoteService {
       return ''
     }
     return text.replace(/\s+$/u, '')
+  }
+
+  /**
+   * Ask the model for the next stretch of the author's manuscript.
+   *
+   * The deliberate counterpart of the sentence suggestion: here the author says
+   * what happens next, waits, and decides whether to keep the prose. It writes
+   * nothing either — the result goes back as text, reaches the draft only when
+   * the author adopts it, and reaches Canon only through an accepted proposal.
+   *
+   * A failure *is* reported, unlike the suggestion's silence: the author asked
+   * for this one, so saying nothing would just look like the button doing
+   * nothing.
+   */
+  @Remote('continueWriting')
+  async remoteContinueWriting(
+    sessionId: string,
+    workspaceId: NovelWorkspaceId,
+    request: NovelContinuationRequest,
+    signal: AbortSignal,
+  ): Promise<NovelContinuationResult> {
+    const agent = await this.ctx.typert.lookups.get('agent')!.resolve(SessionId(sessionId)) as Agent
+    // The same scope guarantee every other call makes: this agent serves this work.
+    await this.requireAgentWorkspace(agent, workspaceId)
+    const { provider, model } = agent.options
+    if (provider === undefined || model === undefined) {
+      return { state: 'failed', message: '这条线程还没有可用的模型，先在输入框上选一个再续写。' }
+    }
+    const beats = request.inspiration.map(beat => beat.trim()).filter(beat => beat !== '')
+    const brief = [
+      beats.length === 0
+        ? '【情节灵感】\n作者这次没有给灵感，按上文自然地往下写。'
+        : ['【情节灵感，请按这个顺序写】', ...beats.map((beat, index) => `${String(index + 1)}. ${beat}`)].join('\n'),
+      '',
+      '【已经写到这里，从它的结尾往下写】',
+      request.before.slice(-6000),
+    ].join('\n')
+    let text = ''
+    try {
+      const stream = this.ctx.llm.stream({
+        provider,
+        model,
+        system: CONTINUATION_SYSTEM,
+        messages: [{
+          id: MessageId(randomUUID()),
+          role: 'user',
+          content: [{ type: 'text', text: brief }],
+          source: { kind: 'user' },
+        }],
+        temperature: 0.7,
+        // A stretch of prose, so thinking and writing both have to fit — the
+        // budget that starved the sentence suggestion would starve this worse.
+        maxTokens: 2048,
+        signal,
+      })
+      for await (const chunk of stream) {
+        if (chunk.type === 'text-delta') text += chunk.text
+      }
+    } catch {
+      // The author is told; the host's own words are not. What they can act on is
+      // "it did not work, try again", not a provider failure string.
+      return {
+        state: 'failed',
+        message: signal.aborted
+          ? '已经停止。'
+          : '这次续写没能完成，可以再试一次；一直不行的话，看看这条线程选的模型。',
+      }
+    }
+    const prose = text.trim()
+    if (prose === '') return { state: 'failed', message: '这次没有写出内容，可以再试一次。' }
+    return { state: 'ok', text: prose }
   }
 
   /** Read the current project head without creating a project record. */

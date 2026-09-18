@@ -1,0 +1,69 @@
+{
+  "product": "Obsidian graph view",
+  "surface": "故事地图 (StoryMapView)",
+  "date": "2026-09-19",
+  "increment": "I-P1",
+  "purpose": "视觉参数参照 for bespoke CSS (handoff §1 标杆: Obsidian graph view)",
+
+  "source": {
+    "primary": "Obsidian 官方文档 https://obsidian.md/zh-TW/help/plugins/graph （文字描述，无交互式 demo）",
+    "brandCss": "Obsidian 品牌紫 #7C3AED 来自 obsidian.md 网站 CSS",
+    "openSourceEquivalent": "Quartz graph 组件 (jackyzha0/quartz, MIT) — frontend-stack-2026-09-16.md §0 确认是最接近 Obsidian graph view 的开源实现",
+    "note": "Obsidian graph view 是桌面应用功能，无公开 web demo 可截。视觉参数来自官方文档描述 + 品牌 CSS + Quartz graph 开源等价物。未复制任何受版权保护的资产。"
+  },
+
+  "visualParams": {
+    "accent": {
+      "hex": "#7C3AED",
+      "source": "obsidian.md 品牌 CSS",
+      "usage": "hover 光晕、选中高亮"
+    },
+    "nodeDefaultColor": {
+      "hex": "#8a8a8a",
+      "source": "官方文档描述「圆圈代表笔记」+ Quartz graph 默认节点灰",
+      "usage": "无 group 时的节点底色（产品按势力配色，此值作 fallback）"
+    },
+    "edgeColor": {
+      "light": "rgba(128, 128, 128, 0.25)",
+      "dark": "rgba(180, 180, 180, 0.2)",
+      "source": "官方文档描述「线条代表连接」+ Quartz graph 边色半透明灰",
+      "usage": "关系边半透明灰，不抢节点视觉"
+    },
+    "hoverGlow": {
+      "hex": "#7C3AED",
+      "opacity": 0.4,
+      "source": "Obsidian 品牌紫 + handoff §1「节点光晕」",
+      "usage": "hover 节点时的紫色光晕"
+    },
+    "backgroundColor": {
+      "light": "#ffffff",
+      "dark": "#1e1e1e",
+      "source": "Obsidian 默认主题背景",
+      "usage": "图谱 stage 背景（产品用 workbench-css token）"
+    },
+    "nodeSizeByDegree": {
+      "source": "官方文档「参照特定节点的其他节点越多，该节点就越大」",
+      "implementation": "nodeRadius(debts) = 5 + min(debts,3)*3 (degree 3 = 14px ≥ 2× degree 0 = 5px)"
+    },
+    "hoverHighlightNeighbourhood": {
+      "source": "官方文档「悬停在圆圈上可反白显示该笔记的连接」",
+      "implementation": "enterNode/leaveNode + nodeReducer/edgeReducer, focus = hovered ?? selected"
+    },
+    "forceDirected": {
+      "source": "官方文档「强度设置: 集中强度/互斥强度/链接强度/连接线距离」",
+      "implementation": "circular.assign 起始环 + forceAtlas2.assign 80 次迭代 (inferSettings 自适应)"
+    }
+  },
+
+  "adoption": {
+    "accentUsage": "图谱 hover 光晕用 #7C3AED（Obsidian 品牌紫），不替换产品全局 --accent-brand（橙色）—— A12 整体协调要求全局 token 单一来源，图谱 accent 作为图谱专属 token",
+    "edgeColor": "StoryMapView defaultEdgeColor 从 #c4bcb2（暖灰）改为半透明灰 rgba(128,128,128,0.25)",
+    "nodeColors": "保持产品 GROUP_COLORS 按势力配色（#D97757/#7A9E7E/#6C7BA8/#C08A3E），不照搬 Obsidian 灰——产品的势力配色是领域语义，Obsidian 无对应概念",
+    "hoverGlow": "hover 时光晕用紫色 accent，通过 sigma nodeReducer 的 zIndex + 产品已有的 FADED 淡出实现"
+  },
+
+  "honestAssessment": {
+    "doubleScreenshotRule": "handoff §5.3 要求双截图（当前 vs Obsidian 同规模图谱对照）。Obsidian graph view 无公开 web demo，无法合法获取交互式截图。本文件用官方文档描述 + 品牌 CSS + Quartz graph 开源等价物作为视觉参数来源，不构成双截图对照。",
+    "mitigation": "真机验证截当前实现（forceatlas2 + Obsidian 风格配色）的图谱截图；Obsidian 对照用本文件的视觉参数文字描述。若站艺要求严格双截图，需安装 Obsidian 桌面应用（免费）截图——这超出沙箱 Chrome 能力。"
+  }
+}

@@ -137,6 +137,16 @@ const MAP_CSS = `
   stroke: hsl(var(--accent-brand));
   stroke-width: 2.5;
 }
+/* The hover glow: Obsidian's graph view highlights a node's neighbourhood on
+   hover, and the node itself gains a purple halo. The product's global accent
+   is orange, so the graph's hover halo uses the Obsidian brand purple as a
+   graph-specific token (A12 allows surface-specific tokens alongside the
+   global ones). */
+[data-novel-story-map] .nw-map-node-hovered {
+  stroke: #7C3AED;
+  stroke-width: 3;
+  filter: drop-shadow(0 0 4px rgba(124, 58, 237, 0.4));
+}
 [data-novel-story-map] .nw-map-legend {
   display: flex;
   flex-wrap: wrap;
@@ -348,7 +358,10 @@ export function StoryMapView({ map, onOpenPerson, onOpenCast }: StoryMapViewProp
       renderEdgeLabels: true,
       labelDensity: 0.6,
       labelGridCellSize: 90,
-      defaultEdgeColor: '#c4bcb2',
+      // Obsidian's edges are a translucent grey that does not compete with the
+      // nodes; the warm #c4bcb2 the cluster-disc detour used was the product's
+      // rail colour, which made a dense web read as a single warm mass.
+      defaultEdgeColor: 'rgba(128, 128, 128, 0.25)',
       defaultEdgeType: 'line',
     })
     instance.on('clickNode', ({ node }) => { setSelected(node) })
@@ -421,6 +434,19 @@ export function StoryMapView({ map, onOpenPerson, onOpenCast }: StoryMapViewProp
         : { ...data, color: faded, label: '' }
     })
   }, [hovered, selected, map])
+
+  // The hover halo: toggle a class on the overlay circle so the SVG filter
+  // (drop-shadow) gives the hovered node a purple glow. This is separate from
+  // the reducer above because the reducer dims the *non*-neighbours; the halo
+  // brightens the *hovered* node.
+  useEffect(() => {
+    const svg = overlay.current
+    if (svg === null) return
+    svg.querySelectorAll('.nw-map-node-focus').forEach(circle => {
+      const id = circle.getAttribute('data-novel-story-map-node')
+      circle.classList.toggle('nw-map-node-hovered', id === hovered)
+    })
+  }, [hovered])
 
   const chosen = map.nodes.find(node => node.id === selected)
   const hits = search.trim() === '' ? [] : matches(map, search)

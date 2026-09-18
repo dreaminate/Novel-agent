@@ -1,0 +1,38 @@
+{
+  "purpose": "I-P1 forceatlas2 回归 + Obsidian 视觉化真机验证",
+  "date": "2026-09-18T17:04:42.276Z",
+  "results": {
+    "withGpu": {
+      "state": {
+        "head": "故事地图",
+        "sub": "人物、关系与进度一眼看清 · 点节点看摘要，双击开档案",
+        "mapExists": true,
+        "degradedExists": false,
+        "hasCanvas": true,
+        "people": "7",
+        "meta": "R5 · 7 个人物 · 3 条关系",
+        "swatches": 1,
+        "canvasW": 894
+      },
+      "consoleErrors": 0,
+      "consoleErrorSamples": [],
+      "screenshot": "i-p1-graph-with-gpu.png"
+    },
+    "withoutGpu": {
+      "state": {
+        "head": "故事地图",
+        "sub": "人物、关系与进度一眼看清 · 点节点看摘要，双击开档案",
+        "mapExists": true,
+        "degradedExists": true,
+        "hasCanvas": false,
+        "people": "7",
+        "meta": "R5 · 7 个人物 · 3 条关系",
+        "swatches": 0,
+        "canvasW": 0
+      },
+      "consoleErrors": 0,
+      "consoleErrorSamples": [],
+      "screenshot": "i-p1-graph-no-gpu.png"
+    }
+  }
+}

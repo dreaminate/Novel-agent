@@ -1,0 +1,50 @@
+{
+  "product": "macOS System Settings",
+  "surface": "设置面板 (NovelSettings)",
+  "date": "2026-09-19",
+  "increment": "I-P5b",
+  "purpose": "视觉参数参照 for bespoke CSS (handoff §1 标杆: macOS System Settings)",
+
+  "source": {
+    "primary": "macOS System Settings 是 Apple 的系统应用，闭源。参数来自 macOS Human Interface Guidelines 的公开 pane/row 规范，以及本机 macOS 26 上 System Settings 的可观察排版（公开、可合法查看，未截取其受版权保护的资产）。",
+    "note": "未复制任何资产（图标、字体、原版资源）。只取排版参数（分组、行高、列宽、分隔线位置、字号层级）。"
+  },
+
+  "visualParams": {
+    "groupedPane": {
+      "rule": "一页设置是一个圆角分组容器；行在容器内，行与行之间一条细线。不是每项一张卡片，也不是每项一块裸内容。",
+      "currentProduct": "9 个 .setting 块平铺，每块 label 在控件上方，块间用 margin + 上边框分隔",
+      "usage": "新增 .nv-setting-group 包住全部 9 行（--r-card 圆角 + --border-100 边 + --bg-000 底），行间用 .setting + .setting 的 border-top"
+    },
+    "rowLayout": {
+      "rule": "每行：标签在左、控件在右缘、说明文字在标签下方。控件与**标签那一行**对齐，不跨越说明文字。",
+      "currentProduct": "label / 控件 / note 竖直堆叠，控件在标签下方",
+      "usage": "grid-template-columns: minmax(0,1fr) auto + grid-template-areas \"label control\" \"note .\"；控件只在第一行，长说明不会把控件推到标签下面"
+    },
+    "separatorInset": {
+      "rule": "分隔线在容器内缩进，不从容器边缘顶格起止。",
+      "currentProduct": "整宽 border-top",
+      "usage": "行内 14px 左右 padding 让细线自然内缩（容器 overflow: clip 保证圆角处不溢出）"
+    },
+    "typeScale": {
+      "rule": "标签 13px 主色；说明 11–12px 次要色；控件本身保持产品既有的 12px 与 32px 高。",
+      "currentProduct": "标签 13px、说明 12px / --text-200 75%",
+      "usage": "保持标签 13px；说明 12px / --text-200 75% / line-height 1.5；控件仍用 .seg"
+    },
+    "paneDensity": {
+      "rule": "行高紧凑到一屏能看见尽量多项；说明是次要信息，不能把面板撑成一页文档。",
+      "currentProduct": "堆叠布局下一屏约 6–7 项",
+      "usage": "行 padding 11px 14px；实测一屏 9 项全部可见"
+    }
+  },
+
+  "adoption": {
+    "markup": "markup 未改：仍是 .setting > .setting-label / .seg / .setting-note。布局全部由 CSS grid 达成，所以既有 spec 与 smoke 的每一个选择器仍然有效。",
+    "rejected": "没有引入 macOS 的侧边栏二级导航（System Settings 的左侧分区列表）。产品只有 9 项、单一分组，加一层导航是增加而非减少。"
+  },
+
+  "honestAssessment": {
+    "doubleScreenshotRule": "handoff §5.3 要求双截图（当前 vs macOS 设置面板对照）。系统应用无法在沙箱 Chrome 里截图，公开截图也不构成可再分发的对照证据。本文件把参数文字化落盘，真机验证用真实 bounding box 几何（控件是否真的在标签行右侧、说明是否真的在下方）而不是只读 CSS。",
+    "geometricCheck": "probe-i-p5b-settings.mjs 逐行测量：control.x ≥ label.x + label.w、control 与 label 纵向重叠、note.y ≥ label 底边；9/9 行通过。第一版 grid-template-areas 写成 \"note control\"（控件跨两行），长说明的两行因此不合格——几何检查抓到了 CSS 断言抓不到的东西。"
+  }
+}

@@ -1,5 +1,23 @@
 # Execution checklist
 
+## Front-end Phase 2 polish — I-P5b, 2026-09-19
+
+**Work order of record:** [`frontend-polish-handoff-2026-09-19.md`](frontend-polish-handoff-2026-09-19.md) §I-P5b (settings → macOS System Settings).
+
+- [x] **One grouped pane, nine rows.** The nine settings were loose blocks with the label stacked above its
+      control — a form, not a settings pane, with no column for the eye to run down. They are one rounded
+      container now, hairline-ruled between rows, label on the leading edge and control on the trailing one,
+      the explanation under the label. Nine rows fit on one screen, up from about seven.
+- [x] **The markup did not change.** The arrangement is CSS grid (`"label control" / "note ."`), so every
+      selector the specs and the sweep reach for still resolves.
+- [x] **The geometry check earned its keep.** The first grid put the control across both rows, so a row whose
+      explanation runs three lines pushed its switch *below its own label* — invisible to a CSS-text assertion,
+      caught immediately by measuring bounding boxes. The probe now asserts, per row, that the control sits to
+      the right of its label in the same line and the note begins below it: 9/9.
+- [x] **Evidence.** `probe-i-p5b-settings.mjs` + screenshot + summary on the isolated Host, 0 console errors;
+      `macos-settings-pane-params.json` records the benchmark.
+- [ ] **Next: I-P5c** — landing to the Heptabase welcome benchmark.
+
 ## Front-end Phase 2 polish — I-P5a, 2026-09-19
 
 **Work order of record:** [`frontend-polish-handoff-2026-09-19.md`](frontend-polish-handoff-2026-09-19.md) §I-P5a (topbar → Linear).

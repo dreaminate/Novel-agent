@@ -21,15 +21,47 @@ import { useWorkbenchState, workbenchActions, type RefineMode, type WorkbenchThe
  * Only what is this sheet's own: the rows and their labels. The panel, its
  * scrim, its radius and its dismissal all come from `NovelDialog`, so this file
  * no longer states any of them a second time.
+ *
+ * The rows are macOS System Settings' grouped pane: one rounded container, one
+ * row per setting, a hairline between rows, and the control on the trailing edge
+ * with the explanation under its label. They used to stack label-above-control
+ * in eight loose blocks — that is a form, not a settings pane, and it left the
+ * eye no column to run down. The markup is unchanged; only the arrangement is.
  */
 const SETTINGS_CSS = `
-[data-novel-settings] .setting + .setting {
-  margin-top: var(--s4);
-  padding-top: var(--s4);
-  border-top: 1px solid hsl(var(--border-100));
+[data-novel-settings] .nv-setting-group {
+  border: 1px solid hsl(var(--border-100));
+  border-radius: var(--r-card);
+  background: hsl(var(--bg-000));
+  overflow: clip;
 }
-[data-novel-settings] .setting-label { font-size: var(--fs-13); margin-bottom: var(--s2); }
-[data-novel-settings] .setting-note { font-size: var(--fs-12); color: hsl(var(--text-200) / .75); margin-top: var(--s2); }
+[data-novel-settings] .setting {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  /*
+   * The control sits in the label's row, not straddling it and the note. A
+   * control that spans both rows gets centred across them, so a row with a
+   * three-line explanation pushed its switch below its own label — which is the
+   * one thing a settings row must never do.
+   */
+  grid-template-areas: "label control" "note .";
+  align-items: center;
+  column-gap: var(--s4);
+  padding: 11px 14px;
+}
+[data-novel-settings] .setting + .setting {
+  border-top: 1px solid hsl(var(--border-100) / .55);
+}
+[data-novel-settings] .setting-label { grid-area: label; font-size: var(--fs-13); color: hsl(var(--text-000)); }
+[data-novel-settings] .setting .seg { grid-area: control; }
+[data-novel-settings] .setting-note {
+  grid-area: note;
+  font-size: var(--fs-12);
+  color: hsl(var(--text-200) / .75);
+  line-height: 1.5;
+  margin-top: 3px;
+  max-width: 46ch;
+}
 `
 
 /** The theme choices, in the prototype's order. */
@@ -73,6 +105,9 @@ export function NovelSettings(): ReactNode {
       closeAttrs: { 'data-novel-settings-close': 'true' },
     },
     createElement('style', { key: 'settings-css' }, SETTINGS_CSS),
+    createElement(
+      'div',
+      { className: 'nv-setting-group', key: 'group' },
       createElement(
         'div',
         { className: 'setting' },
@@ -288,5 +323,6 @@ export function NovelSettings(): ReactNode {
           '提交时：你把这一章交出去时，AI 把设定变化整理成提案。边写边：写到一定量也顺手整理一次 —— 会更及时，也可能一次攒下好几份待你审。两种都只产出提案，随时可以换回来。',
         ),
       ),
+    ),
   )
 }

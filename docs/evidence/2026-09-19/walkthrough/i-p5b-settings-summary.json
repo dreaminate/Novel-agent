@@ -1,0 +1,200 @@
+{
+  "purpose": "I-P5b 设置面板 macOS 化真机验证",
+  "date": "2026-09-18T18:29:16.995Z",
+  "pane": {
+    "groupCount": 1,
+    "rowCount": 9,
+    "rowsInsideGroup": 9,
+    "paneRadius": "10px",
+    "paneBackground": "rgb(255, 255, 255)",
+    "rowBorders": [
+      "0px",
+      "1px",
+      "1px",
+      "1px",
+      "1px",
+      "1px",
+      "1px",
+      "1px",
+      "1px"
+    ],
+    "rows": [
+      {
+        "label": "主题",
+        "labelBox": {
+          "x": 496,
+          "y": 163,
+          "w": 272,
+          "h": 20
+        },
+        "controlBox": {
+          "x": 784,
+          "y": 159,
+          "w": 160,
+          "h": 28
+        },
+        "noteText": null,
+        "controlRightOfLabel": true,
+        "sameRow": true,
+        "noteUnderLabel": null
+      },
+      {
+        "label": "正文大小",
+        "labelBox": {
+          "x": 496,
+          "y": 214,
+          "w": 280,
+          "h": 20
+        },
+        "controlBox": {
+          "x": 792,
+          "y": 210,
+          "w": 152,
+          "h": 28
+        },
+        "noteText": "正文阅读按这个字号排版，行高保持 1.85。",
+        "controlRightOfLabel": true,
+        "sameRow": true,
+        "noteUnderLabel": true
+      },
+      {
+        "label": "阅读行宽",
+        "labelBox": {
+          "x": 496,
+          "y": 286,
+          "w": 327,
+          "h": 20
+        },
+        "controlBox": {
+          "x": 839,
+          "y": 282,
+          "w": 105,
+          "h": 28
+        },
+        "noteText": "行宽越窄，眼睛回扫越省力；40 字是原型的默认值。",
+        "controlRightOfLabel": true,
+        "sameRow": true,
+        "noteUnderLabel": true
+      },
+      {
+        "label": "段首缩进",
+        "labelBox": {
+          "x": 496,
+          "y": 358,
+          "w": 313,
+          "h": 20
+        },
+        "controlBox": {
+          "x": 825,
+          "y": 354,
+          "w": 119,
+          "h": 28
+        },
+        "noteText": "中文稿子的惯例是段首缩进两个字；顶格更像屏幕阅读。",
+        "controlRightOfLabel": true,
+        "sameRow": true,
+        "noteUnderLabel": true
+      },
+      {
+        "label": "行高",
+        "labelBox": {
+          "x": 496,
+          "y": 430,
+          "w": 315,
+          "h": 20
+        },
+        "controlBox": {
+          "x": 827,
+          "y": 426,
+          "w": 117,
+          "h": 28
+        },
+        "noteText": "行距越大，读长段越松快；1.85 是原型的默认值。",
+        "controlRightOfLabel": true,
+        "sameRow": true,
+        "noteUnderLabel": true
+      },
+      {
+        "label": "句子续写",
+        "labelBox": {
+          "x": 496,
+          "y": 502,
+          "w": 364,
+          "h": 20
+        },
+        "controlBox": {
+          "x": 876,
+          "y": 498,
+          "w": 68,
+          "h": 28
+        },
+        "noteText": "停笔一会儿，在光标处给一句灰色的续写建议；Tab 采纳，Esc 丢掉。它只是建议，不会自己写进稿子。",
+        "controlRightOfLabel": true,
+        "sameRow": true,
+        "noteUnderLabel": true
+      },
+      {
+        "label": "续写等待",
+        "labelBox": {
+          "x": 496,
+          "y": 592,
+          "w": 270,
+          "h": 20
+        },
+        "controlBox": {
+          "x": 782,
+          "y": 588,
+          "w": 162,
+          "h": 28
+        },
+        "noteText": "等得越久越不容易打扰你，但也越像在等它。",
+        "controlRightOfLabel": true,
+        "sameRow": true,
+        "noteUnderLabel": true
+      },
+      {
+        "label": "工具活动",
+        "labelBox": {
+          "x": 496,
+          "y": 664,
+          "w": 340,
+          "h": 20
+        },
+        "controlBox": {
+          "x": 852,
+          "y": 660,
+          "w": 92,
+          "h": 28
+        },
+        "noteText": "对话里除了 AI 说的话，还会写它做了什么（读了哪个文件、整理成提案）。收起后只留文字 —— 那些动作本来也不进你的稿子。",
+        "controlRightOfLabel": true,
+        "sameRow": true,
+        "noteUnderLabel": true
+      },
+      {
+        "label": "提炼时机",
+        "labelBox": {
+          "x": 496,
+          "y": 772,
+          "w": 316,
+          "h": 20
+        },
+        "controlBox": {
+          "x": 828,
+          "y": 768,
+          "w": 116,
+          "h": 28
+        },
+        "noteText": "提交时：你把这一章交出去时，AI 把设定变化整理成提案。边写边：写到一定量也顺手整理一次 —— 会更及时，也可能一次攒下好几份待你审。两种都只产出提案，随时可以换回来。",
+        "controlRightOfLabel": true,
+        "sameRow": true,
+        "noteUnderLabel": true
+      }
+    ]
+  },
+  "allRowsAreMacOsRows": true,
+  "screenshot": "i-p5b-settings-pane",
+  "closed": true,
+  "consoleErrors": 0,
+  "consoleErrorSamples": []
+}

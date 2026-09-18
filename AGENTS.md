@@ -2,6 +2,8 @@
 
 本文件适用于仓库中的所有文件。用户当轮明确指令优先；在不冲突时，本文、规格、计划与架构文档共同约束实现。
 
+通用规则参考全局 `~/.claude/CLAUDE.md` 与 `~/.codex/AGENTS.md`；本文件只写 novel-agent 特有条款，不在项目级复述通用规则。
+
 当前实施路线以 `tasks/plan-final.md` 与 `docs/plugin-design-v3.md` 为准。`tasks/plan.md`、`README.md`、`tasks/todo.md` 和 `docs/architecture.md` 中的单插件描述用于理解迁移前实现，不再限制领域插件拆分；迁移顺序与既有证据见 `tasks/history-migration-audit.md` 和 `tasks/history-migration-todo.md`。
 
 ## 每次开始工作前
@@ -19,7 +21,6 @@
 - `anywhere-labs/deepseek-harness-desktop` 社区宿主及所有引入的社区插件也是只读上游；不得在其 checkout、安装目录或用户 Profile 中开发产品代码。隔离兼容性 smoke 只能写入临时 DSH_HOME/Profile，产品适配仍只写本仓库。
 - 不修改 `graphify-out`，除非用户单独授权其再生成。
 - 不修改规格原文或 `.i18n.yaml` 清单，除非用户明确要求维护规格；发现漂移只报告。
-- 不覆盖、清理或“顺手修复”无关改动。破坏性操作、历史重写、push 和发布必须有明确授权。
 
 ## DSH 唯一内核
 
@@ -81,7 +82,6 @@
 - 不删除、跳过、弱化或改写有效测试来获得绿色结果。
 - 一个增量保持在约 1–5 个文件；更大任务先拆分。两到三个增量后执行 checkpoint。
 - 脚手架、类型、构建成功、单元测试或截图都只是中间证据，不是用户价值完成。
-- 未经授权不提交；需要提交时保持单一逻辑、可回滚且不包含他人无关改动。
 
 ## 开源复用门禁
 

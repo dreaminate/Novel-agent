@@ -446,3 +446,18 @@ unrouted request is silence rather than an error, because a message the author
 has to read mid-sentence costs more than the suggestion was worth. Nothing it
 returns can reach Canon: the editor paints it as a decoration and only the
 author's Tab turns it into draft text.
+
+## Front-end graph layout return (2026-09-19, I-P1)
+
+`graphology-layout@0.6.1` (MIT) and `graphology-layout-forceatlas2@0.10.1` (MIT)
+are declared again as production dependencies of `@novel-agent/novel-workbench`,
+restoring the force-directed story map layout the 2026-09-17 cluster-disc detour
+had removed. Neither package ships an `install` lifecycle script; their transitive
+dependencies (`pandemonium`, `mnemonist`, `obliterator`, `graphology-types`,
+`graphology-utils`) are all MIT and were already resolved in this tree before the
+detour. `circular.assign` provides the deterministic starting ring `forceAtlas2`
+needs; `forceAtlas2.assign` runs 80 iterations with `inferSettings(graph)` to
+self-tune gravity and repulsion to the cast size. The story map's client bundle
+rises to 1.68 MB (from 1.57 MB), still under the 2.4 MB guardrail. See
+[frontend-stack-2026-09-16.md](open-source-evaluations/frontend-stack-2026-09-16.md)
+§5 supplement for the decision record.

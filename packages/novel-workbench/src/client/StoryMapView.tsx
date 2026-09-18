@@ -3,39 +3,35 @@
  * graphology graph (both MIT; see docs/open-source-evaluations/frontend-stack-2026-09-16.md).
  *
  * The view owns no facts: the nodes and edges arrive already mapped from Canon by
- * the novel data face. What lives here is presentation — where the discs go
- * (story-map-layout), colour by faction, the cluster discs and their `+N`
- * folding, name search, dragging a character to a place of the author's choosing,
- * and the selection reducer that fades everything but the chosen character's
+ * the novel data face. What lives here is presentation — where the nodes go
+ * (force-directed, the way Obsidian's graph view places them), colour by faction,
+ * name search, dragging a character to a place of the author's choosing, and the
+ * selection/hover reducer that fades everything but the chosen character's
  * neighbourhood.
+ *
+ * The 2026-09-17 cluster-disc detour placed every character on a deterministic
+ * ring; it collapsed a 40-node cast into a hairball the moment the rings ran out
+ * of room. The force-directed layout (graphology-layout-forceatlas2) returns here,
+ * with circular.assign as the deterministic starting ring forceAtlas2 needs.
  *
  * Three seams are deliberate, because each one is a way to lose the author's work
  * or their bearings:
  * - **The camera is not reset by the layout.** Positions are re-applied through
  *   `setGraph`, so pinning one character does not throw away the zoom and pan the
  *   author had set up.
- * - **Discs are drawn in an SVG overlay, not in the graph.** sigma renders nodes
- *   and edges; the discs and their counts are chrome, so they follow the camera
- *   through `graphToViewport` instead of becoming fake nodes that can be clicked,
- *   dragged or label-collided with.
- * - **Nothing is folded silently.** The header says how much of the cast is off
- *   the web, and every `+N` names the cluster it belongs to.
+ * - **Pins come from the workbench store, not component state.** "This is where
+ *   it belongs" is the author's edit to the map, and it survives a reload.
+ * - **Nothing is folded silently.** Every character the map knows about is drawn;
+ *   the header says how many there are.
  */
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { UndirectedGraph } from 'graphology'
 import Sigma from 'sigma'
+import { circular } from 'graphology-layout'
+import forceAtlas2 from 'graphology-layout-forceatlas2'
 import type { NovelStoryMap } from './novel-data.js'
 import { probeWebGL } from './webgl-probe.js'
 import { useWorkbenchState, workbenchActions } from './store.js'
-import {
-  MAP_CANVAS,
-  clusterKeyOf,
-  layoutStoryMap,
-  type ClusterAxis,
-  type MapCluster,
-  type MapLayout,
-  type MapPoint,
-} from './story-map-layout.js'
 
 export interface StoryMapViewProps {
   readonly map: NovelStoryMap
@@ -53,9 +49,6 @@ const GROUP_COLORS = ['#D97757', '#7A9E7E', '#6C7BA8', '#C08A3E'] as const
 const UNAFFILIATED_COLOR = '#9A9A9A'
 const FADED = '#d5d0ca'
 const FADED_DARK = '#4a4644'
-
-/** Radius of a `+N` bubble, in screen pixels: it must stay clickable at any zoom. */
-const BUBBLE_RADIUS = 14
 
 const MAP_CSS = `
 [data-novel-story-map] {
@@ -122,26 +115,15 @@ const MAP_CSS = `
   overflow: hidden;
 }
 [data-novel-story-map] .nw-map-canvas { position: absolute; inset: 0; }
-/* The discs are chrome over the WebGL canvas: they may not swallow a drag.
+/* The overlay is chrome over the WebGL canvas: it may not swallow a drag.
    The width/height are explicit because an SVG is a replaced element, so inset:0
-   alone leaves it at its intrinsic 300x150, and every disc then lands off-screen. */
+   alone leaves it at its intrinsic 300x150, and every focus ring then lands off-screen. */
 [data-novel-story-map] .nw-map-overlay {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   pointer-events: none;
-}
-[data-novel-story-map] .nw-map-disc {
-  fill: hsl(var(--border-100) / .45);
-  stroke: hsl(var(--border-100));
-  stroke-width: 1;
-}
-[data-novel-story-map] .nw-map-disc-label {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  fill: hsl(var(--text-200) / .8);
-  text-anchor: middle;
 }
 /* The keyboard's twin of a WebGL dot. It draws nothing until it has focus, and
    it never takes a pointer event: the mouse story belongs to sigma. */
@@ -154,21 +136,6 @@ const MAP_CSS = `
 [data-novel-story-map] .nw-map-node-focus:focus {
   stroke: hsl(var(--accent-brand));
   stroke-width: 2.5;
-}
-[data-novel-story-map] .nw-map-bubble {
-  fill: hsl(var(--bg-200));
-  stroke: hsl(var(--border-200));
-  stroke-width: 1;
-  cursor: pointer;
-  pointer-events: auto;
-}
-[data-novel-story-map] .nw-map-bubble:hover { fill: hsl(var(--bg-300)); }
-[data-novel-story-map] .nw-map-bubble-text {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  fill: hsl(var(--text-100) / .85);
-  text-anchor: middle;
-  pointer-events: none;
 }
 [data-novel-story-map] .nw-map-legend {
   display: flex;
@@ -231,6 +198,12 @@ const MAP_CSS = `
 [data-novel-story-map] .nw-map-degraded-actions { display: flex; gap: 8px; }
 `
 
+/** A graph-space point the renderer places a character at. */
+interface MapPoint {
+  readonly x: number
+  readonly y: number
+}
+
 /** The story map canvas. */
 export function StoryMapView({ map, onOpenPerson, onOpenCast }: StoryMapViewProps): ReactNode {
   const workbench = useWorkbenchState()
@@ -238,8 +211,6 @@ export function StoryMapView({ map, onOpenPerson, onOpenCast }: StoryMapViewProp
   const overlay = useRef<SVGSVGElement | null>(null)
   const renderer = useRef<Sigma | null>(null)
   const syncOverlay = useRef<() => void>(() => {})
-  /** The layout the live graph was built from, so an unchanged one is not reapplied. */
-  const applied = useRef<MapLayout | null>(null)
   const [selected, setSelected] = useState<string | undefined>(undefined)
   /**
    * The node the pointer is hovering over, if any. Obsidian's graph view
@@ -248,8 +219,6 @@ export function StoryMapView({ map, onOpenPerson, onOpenCast }: StoryMapViewProp
    */
   const [hovered, setHovered] = useState<string | undefined>(undefined)
   const [search, setSearch] = useState('')
-  const [axis, setAxis] = useState<ClusterAxis>('faction')
-  const [expanded, setExpanded] = useState<ReadonlySet<string>>(() => new Set<string>())
   /**
    * Pins come from the workbench store now, so they survive a reload: "this is
    * where it belongs" is the author's edit to the map, not a transient view
@@ -264,51 +233,60 @@ export function StoryMapView({ map, onOpenPerson, onOpenCast }: StoryMapViewProp
   const paintable = useMemo(() => probeWebGL(), [attempt])
   const colours = useMemo(() => groupColours(map), [map])
   const labels = useMemo(() => new Map(map.nodes.map(node => [node.id, node.label])), [map])
-  const layout = useMemo(
-    () => layoutStoryMap({ map, axis, expanded, pins }),
-    [map, axis, expanded, pins],
-  )
+
+  /**
+   * The force-directed layout: circular.assign gives every node a deterministic
+   * starting position (forceAtlas2 needs numerical x/y to begin), then forceAtlas2
+   * runs N iterations of repulsion, attraction and gravity. Pins the author set
+   * override the computed position, so "this is where it belongs" holds.
+   *
+   * The layout is a pure function of the map and the pins — it does not touch
+   * WebGL — so it can be memoised and tested without a renderer.
+   */
+  const positions = useMemo<ReadonlyMap<string, MapPoint>>(() => {
+    const graph = new UndirectedGraph()
+    for (const node of map.nodes) {
+      graph.addNode(node.id, { x: 0, y: 0, label: node.label, size: nodeRadius(node.debts) })
+    }
+    for (const edge of map.edges) {
+      if (!graph.hasNode(edge.source) || !graph.hasNode(edge.target)) continue
+      if (graph.hasEdge(edge.source, edge.target)) continue
+      graph.addEdge(edge.source, edge.target, { weight: 1 + Math.min(edge.turns, 4) })
+    }
+    // A deterministic starting ring: forceAtlas2 only refines positions, so
+    // without this every node starts at (0,0) and the first iteration collapses
+    // them onto a point.
+    circular.assign(graph, { scale: 100 })
+    forceAtlas2.assign(graph, {
+      settings: forceAtlas2.inferSettings(graph),
+      iterations: 80,
+    })
+    const result = new Map<string, MapPoint>()
+    for (const node of map.nodes) {
+      const attrs = graph.getNodeAttributes(node.id)
+      const pinned = pins.get(node.id)
+      result.set(node.id, pinned ?? { x: attrs.x, y: attrs.y })
+    }
+    return result
+  }, [map, pins])
+
   // The sigma lifecycle must not depend on the layout — rebuilding the renderer
   // would throw away the camera — so it reads the newest one through a ref.
-  const latest = useRef(layout)
-  latest.current = layout
+  const latest = useRef(positions)
+  latest.current = positions
 
-  const chooseAxis = useCallback((next: ClusterAxis): void => {
-    setAxis(current => {
-      // Cluster names belong to one axis: keeping them across a switch would
-      // expand a cluster that is no longer there, or one that now means
-      // something else entirely.
-      if (current !== next) setExpanded(new Set<string>())
-      return next
-    })
-  }, [])
-
-  // Discs, their `+N`, and the cast's accessible twin: built once per layout,
-  // then kept on the camera.
+  // The accessible twin of the cast: one focusable element per drawn character,
+  // sitting exactly where it is on screen. Built once per layout, then kept on
+  // the camera.
   useEffect(() => {
     const svg = overlay.current
     if (svg === null) return
     svg.replaceChildren()
-    const parts = layout.clusters.map(cluster => drawCluster(
-      svg,
-      cluster,
-      id => labels.get(id) ?? id,
-      () => { setExpanded(current => new Set(current).add(cluster.id)) },
-    ))
-    // sigma draws the cast on WebGL, where nothing is focusable and a screen
-    // reader sees nothing at all. These are the same characters as real elements
-    // in the overlay, sitting exactly where they are on screen — so the map can
-    // be walked from the keyboard and read out loud. A character folded behind a
-    // `+N` is not drawn and so is not offered; search is how the author reaches
-    // one (and it opens the cluster that hid them).
     const seats: DrawnCharacter[] = []
-    for (const cluster of layout.clusters) {
-      for (const id of cluster.drawn) {
-        const node = map.nodes.find(entry => entry.id === id)
-        const at = layout.positions.get(id)
-        if (node === undefined || at === undefined) continue
-        seats.push(drawCharacter(svg, node, at, () => { setSelected(id) }, () => { onOpenPerson?.(id) }))
-      }
+    for (const node of map.nodes) {
+      const at = positions.get(node.id)
+      if (at === undefined) continue
+      seats.push(drawCharacter(svg, node, at, () => { setSelected(node.id) }, () => { onOpenPerson?.(node.id) }))
     }
     let roving = 0
     const setRoving = (next: number): void => {
@@ -348,22 +326,6 @@ export function StoryMapView({ map, onOpenPerson, onOpenCast }: StoryMapViewProp
       const instance = renderer.current
       if (instance === null) return
       const ratio = instance.getGraphToViewportRatio()
-      for (const part of parts) {
-        const centre = instance.graphToViewport({ x: part.cluster.cx, y: part.cluster.cy })
-        const radius = part.cluster.r * ratio
-        part.disc.setAttribute('cx', String(centre.x))
-        part.disc.setAttribute('cy', String(centre.y))
-        part.disc.setAttribute('r', String(radius))
-        part.label.setAttribute('x', String(centre.x))
-        part.label.setAttribute('y', String(centre.y - radius - 8))
-        if (part.bubble !== undefined) {
-          const at = instance.graphToViewport(part.bubble.at)
-          part.bubble.circle.setAttribute('cx', String(at.x))
-          part.bubble.circle.setAttribute('cy', String(at.y))
-          part.bubble.text.setAttribute('x', String(at.x))
-          part.bubble.text.setAttribute('y', String(at.y + 4))
-        }
-      }
       for (const seat of seats) {
         const at = instance.graphToViewport(seat.at)
         seat.circle.setAttribute('cx', String(at.x))
@@ -375,7 +337,7 @@ export function StoryMapView({ map, onOpenPerson, onOpenCast }: StoryMapViewProp
     return () => {
       svg.removeEventListener('keydown', onKeyDown)
     }
-  }, [layout, labels, map, onOpenPerson])
+  }, [positions, labels, map, onOpenPerson])
 
   useEffect(() => {
     const element = host.current
@@ -404,7 +366,6 @@ export function StoryMapView({ map, onOpenPerson, onOpenCast }: StoryMapViewProp
     instance.on('leaveNode', () => { setHovered(undefined) })
     instance.on('afterRender', () => { syncOverlay.current() })
     renderer.current = instance
-    applied.current = latest.current
     syncOverlay.current()
     return () => {
       renderer.current = null
@@ -412,15 +373,14 @@ export function StoryMapView({ map, onOpenPerson, onOpenCast }: StoryMapViewProp
     }
   }, [map, colours, onOpenPerson, paintable])
 
-  // Re-lay the graph without recreating the renderer, so pinning or expanding
-  // one cluster leaves the author's zoom and pan where they were.
+  // Re-lay the graph without recreating the renderer, so pinning one character
+  // leaves the author's zoom and pan where they were.
   useEffect(() => {
     const instance = renderer.current
-    if (instance === null || applied.current === layout) return
-    applied.current = layout
-    instance.setGraph(buildGraph(map, layout, colours))
+    if (instance === null) return
+    instance.setGraph(buildGraph(map, positions, colours))
     syncOverlay.current()
-  }, [layout, map, colours])
+  }, [positions, map, colours])
 
   // Search is focus, not filtering: the match becomes the selection, which is the
   // same fade-and-card path a click uses.
@@ -431,14 +391,7 @@ export function StoryMapView({ map, onOpenPerson, onOpenCast }: StoryMapViewProp
     }
     const first = matches(map, search)[0]
     setSelected(first?.id)
-    // A folded character is off the graph, so focusing one has to open the
-    // cluster that hid them before the author can see who they searched for.
-    if (first === undefined || !layout.hidden.includes(first.id)) return
-    const key = clusterKeyOf(first, axis)
-    // Same set when the key is already open: a fresh one would re-render for
-    // nothing, and this effect keys off the layout it would change.
-    setExpanded(current => current.has(key) ? current : new Set(current).add(key))
-  }, [search, map, axis, layout])
+  }, [search, map])
 
   useEffect(() => {
     const instance = renderer.current
@@ -470,22 +423,18 @@ export function StoryMapView({ map, onOpenPerson, onOpenCast }: StoryMapViewProp
   }, [hovered, selected, map])
 
   const chosen = map.nodes.find(node => node.id === selected)
-  const folded = layout.hidden.length
   const hits = search.trim() === '' ? [] : matches(map, search)
 
   return (
     <div
       data-novel-story-map=""
       data-novel-story-map-people={map.nodes.length}
-      data-novel-story-map-clusters={layout.clusters.length}
-      data-novel-story-map-folded={folded}
     >
       <style>{MAP_CSS}</style>
       <header className="nw-map-header">
         <h2 className="nw-map-title">故事地图</h2>
         <span className="nw-map-meta">
           {`R${String(map.revision)} · ${String(map.nodes.length)} 个人物 · ${String(map.edges.length)} 条关系`}
-          {folded > 0 ? ` · 折叠 ${String(folded)} 位` : ''}
         </span>
       </header>
       {map.nodes.length === 0
@@ -532,31 +481,13 @@ export function StoryMapView({ map, onOpenPerson, onOpenCast }: StoryMapViewProp
                     <span className="nw-map-meta">{`${String(hits.length)} 处匹配`}</span>
                   )}
                 </div>
-                <div className="seg" role="group" aria-label="分簇方式" data-novel-story-map-axis={axis}>
-                  <button
-                    type="button"
-                    data-novel-story-map-axis-option="faction"
-                    aria-pressed={axis === 'faction'}
-                    onClick={() => { chooseAxis('faction') }}
-                  >
-                    按势力分簇
-                  </button>
-                  <button
-                    type="button"
-                    data-novel-story-map-axis-option="place"
-                    aria-pressed={axis === 'place'}
-                    onClick={() => { chooseAxis('place') }}
-                  >
-                    按地点分布
-                  </button>
-                </div>
                 {pins.size > 0 && (
-                <button
-                  type="button"
-                  className="nw-map-unpin"
-                  data-novel-story-map-unpin=""
-                  onClick={() => { workbenchActions.clearMapPins() }}
-                >
+                  <button
+                    type="button"
+                    className="nw-map-unpin"
+                    data-novel-story-map-unpin=""
+                    onClick={() => { workbenchActions.clearMapPins() }}
+                  >
                     {`解除全部钉位（${String(pins.size)}）`}
                   </button>
                 )}
@@ -598,86 +529,6 @@ export function StoryMapView({ map, onOpenPerson, onOpenCast }: StoryMapViewProp
           )}
     </div>
   )
-}
-
-interface DrawnCluster {
-  readonly cluster: MapCluster
-  readonly disc: SVGCircleElement
-  readonly label: SVGTextElement
-  readonly bubble: {
-    readonly at: MapPoint
-    readonly circle: SVGCircleElement
-    readonly text: SVGTextElement
-  } | undefined
-}
-
-/**
- * One disc, its label and its `+N`, created imperatively because they have to be
- * rewritten from the camera on every frame — React would re-render the tree
- * sixty times a second to do the same thing.
- */
-function drawCluster(
-  svg: SVGSVGElement,
-  cluster: MapCluster,
-  labelOf: (id: string) => string,
-  onExpand: () => void,
-): DrawnCluster {
-  const group = document.createElementNS(SVG_NS, 'g')
-  group.setAttribute('data-novel-story-map-cluster', cluster.id)
-  if (cluster.bubble !== undefined) {
-    group.setAttribute('data-novel-story-map-bubble', cluster.id)
-  }
-  const disc = document.createElementNS(SVG_NS, 'circle')
-  disc.setAttribute('class', 'nw-map-disc')
-  disc.setAttribute('aria-hidden', 'true')
-  group.append(disc)
-  const label = document.createElementNS(SVG_NS, 'text')
-  label.setAttribute('class', 'nw-map-disc-label')
-  label.setAttribute('aria-hidden', 'true')
-  label.textContent = cluster.label
-  group.append(label)
-  if (cluster.bubble === undefined) {
-    svg.append(group)
-    return { cluster, disc, label, bubble: undefined }
-  }
-  // A count alone leaves the author guessing who is missing, so the bubble says
-  // who it is holding — the same thing the prototype's chip did with its title.
-  const hidden = cluster.bubble.ids.map(labelOf).join('、')
-  const bubble = document.createElementNS(SVG_NS, 'circle')
-  bubble.setAttribute('class', 'nw-map-bubble')
-  bubble.setAttribute('r', String(BUBBLE_RADIUS))
-  bubble.setAttribute('role', 'button')
-  bubble.setAttribute('aria-label', `${cluster.label}：还有 ${String(cluster.bubble.n)} 位未展开（${hidden}）`)
-  bubble.append(document.createElementNS(SVG_NS, 'title'))
-  bubble.querySelector('title')!.textContent = hidden
-  bubble.addEventListener('click', onExpand)
-  group.append(bubble)
-  const text = document.createElementNS(SVG_NS, 'text')
-  text.setAttribute('class', 'nw-map-bubble-text')
-  text.textContent = `+${String(cluster.bubble.n)}`
-  group.append(text)
-  svg.append(group)
-  return { cluster, disc, label, bubble: { at: { x: cluster.bubble.x, y: cluster.bubble.y }, circle: bubble, text } }
-}
-
-const SVG_NS = 'http://www.w3.org/2000/svg'
-
-/**
- * How far outside the drawn dot the focus ring sits, in screen pixels.
- */
-const FOCUS_RING_GAP = 5
-
-/**
- * A drawn character's dot radius in graph units, sized by its open debts.
- *
- * The degree scales the radius so a character who carries the web reads larger
- * than a leaf: Obsidian's graph view does the same, and the cluster-disc
- * detour's cap (13px for a degree-3 node against 7px for a leaf) left the
- * headline of the cast barely twice the footnote. The multiplier is chosen so
- * a degree-3 centre is at least twice a degree-0 leaf.
- */
-function nodeRadius(debts: number): number {
-  return 5 + Math.min(debts, 3) * 3
 }
 
 interface DrawnCharacter {
@@ -723,21 +574,23 @@ function matches(map: NovelStoryMap, query: string): NovelStoryMap['nodes'] {
 
 function buildGraph(
   map: NovelStoryMap,
-  layout: MapLayout,
+  positions: ReadonlyMap<string, MapPoint>,
   colours: ReadonlyMap<string, string>,
 ): UndirectedGraph {
   const graph = new UndirectedGraph({ multi: false })
-  // sigma fits the nodes it is handed, and a disc is wider than the members it
-  // holds, so the two framing anchors sit on the layout's own content box. They
-  // carry no label (a label would enter the label grid and hide a real one) and
-  // no size, so they draw nothing and cannot be hit, clicked or dragged.
-  const bounds = layout.bounds ?? { minX: 0, minY: 0, maxX: MAP_CANVAS.w, maxY: MAP_CANVAS.h }
-  graph.addNode(EXTENT_ANCHORS[0], { x: bounds.minX, y: bounds.minY, size: 0, color: 'transparent' })
-  graph.addNode(EXTENT_ANCHORS[1], { x: bounds.maxX, y: bounds.maxY, size: 0, color: 'transparent' })
-  const hidden = new Set(layout.hidden)
+  // Two framing anchors on the layout's content box, so sigma frames the whole
+  // cast rather than a tight fit that would cut labels off. They carry no label
+  // and no size, so they draw nothing and cannot be hit, clicked or dragged.
+  const xs = [...positions.values()].map(p => p.x)
+  const ys = [...positions.values()].map(p => p.y)
+  const minX = xs.length > 0 ? Math.min(...xs) : 0
+  const maxX = xs.length > 0 ? Math.max(...xs) : 100
+  const minY = ys.length > 0 ? Math.min(...ys) : 0
+  const maxY = ys.length > 0 ? Math.max(...ys) : 100
+  graph.addNode(EXTENT_ANCHORS[0], { x: minX, y: minY, size: 0, color: 'transparent' })
+  graph.addNode(EXTENT_ANCHORS[1], { x: maxX, y: maxY, size: 0, color: 'transparent' })
   for (const node of map.nodes) {
-    if (hidden.has(node.id)) continue
-    const at = layout.positions.get(node.id) ?? { x: 0, y: 0 }
+    const at = positions.get(node.id) ?? { x: 0, y: 0 }
     graph.addNode(node.id, {
       x: at.x,
       y: at.y,
@@ -757,7 +610,25 @@ function buildGraph(
 /** Reserved graph ids of the two framing anchors; Canon ids never look like this. */
 const EXTENT_ANCHORS = ['__nw-extent-0', '__nw-extent-1'] as const
 
+/** How far outside the drawn dot the focus ring sits, in screen pixels. */
+const FOCUS_RING_GAP = 5
+
+const SVG_NS = 'http://www.w3.org/2000/svg'
+
 const UNAFFILIATED = '无势力'
+
+/**
+ * A drawn character's dot radius in graph units, sized by its open debts.
+ *
+ * The degree scales the radius so a character who carries the web reads larger
+ * than a leaf: Obsidian's graph view does the same, and the cluster-disc
+ * detour's cap (13px for a degree-3 node against 7px for a leaf) left the
+ * headline of the cast barely twice the footnote. The multiplier is chosen so
+ * a degree-3 centre is at least twice a degree-0 leaf.
+ */
+function nodeRadius(debts: number): number {
+  return 5 + Math.min(debts, 3) * 3
+}
 
 /**
  * Stable group → colour assignment: the palette order follows the sorted group

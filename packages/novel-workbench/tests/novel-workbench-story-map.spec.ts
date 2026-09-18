@@ -256,30 +256,9 @@ describe('novel-mode story map', () => {
     expect(sigmaMock.instances).toHaveLength(1)
     expect(drawnCast(sigmaMock.instances[0])).toBe(2)
     expect(sigmaMock.instances[0]?.graph.size).toBe(1)
-    // sigma fits the nodes it is handed, and a disc is wider than the members it
-    // holds: the graph has to span the layout's own content box, or the rim is
-    // cut off and the map rescales for reasons the author cannot see.
-    const { layoutStoryMap } = await import('../src/client/story-map-layout.js')
-    const bounds = layoutStoryMap({
-      map: await loadStoryMap('ws-mist'),
-      axis: 'faction',
-      expanded: new Set<string>(),
-      pins: new Map<string, { x: number; y: number }>(),
-    }).bounds
-    const xs = sigmaMock.instances[0]?.graph.nodes()
-      .map(id => sigmaMock.instances[0]!.graph.getNodeAttributes(id).x) ?? []
-    const ys = sigmaMock.instances[0]?.graph.nodes()
-      .map(id => sigmaMock.instances[0]!.graph.getNodeAttributes(id).y) ?? []
-    expect(Math.min(...xs)).toBe(bounds?.minX)
-    expect(Math.max(...xs)).toBe(bounds?.maxX)
-    expect(Math.min(...ys)).toBe(bounds?.minY)
-    expect(Math.max(...ys)).toBe(bounds?.maxY)
+    // The force-directed layout places every character the map knows about;
+    // the cluster-disc detour's folding is gone, so the whole cast is drawn.
     expect(container.querySelectorAll('.nw-map-swatch')).toHaveLength(2)
-    // One disc per faction, named on the disc itself rather than by colour alone.
-    expect(container.querySelectorAll('[data-novel-story-map-cluster]')).toHaveLength(2)
-    expect(container.querySelectorAll('.nw-map-disc')).toHaveLength(2)
-    expect(container.querySelector('[data-novel-story-map-cluster="港务局"] .nw-map-disc-label')?.textContent)
-      .toBe('港务局')
 
     // The prototype opens 人物档案 by double-clicking a node; the view hands that
     // node to the frame store, which is what the drawer seat reads.
@@ -296,87 +275,10 @@ describe('novel-mode story map', () => {
     expect(sigmaMock.instances[0]?.killed).toBe(true)
   })
 
-  it('folds each cluster own unconnected cast behind its own +N', async () => {
-    const loadStoryMap = vi.fn(async () => ({
-      revision: 5,
-      nodes: [
-        { id: 'chen-mo', label: '陈默', group: '港务局', place: '港务局大楼', debts: 1 },
-        { id: 'chen-an', label: '陈安', group: '港务局', place: '港务局大楼', debts: 0 },
-        { id: 'zhou-yan', label: '周砚', group: '雾灯帮', place: '雾灯码头', debts: 0 },
-        { id: 'solo', label: '码头看门人', group: undefined, place: undefined, debts: 0 },
-      ],
-      edges: [{ id: 'line-1', source: 'chen-mo', target: 'zhou-yan', label: '旧同僚', turns: 1 }],
-    }))
-
-    const { container, root } = await mountMap(loadStoryMap)
-
-    const before = sigmaMock.instances.length
-    // The accepted totals stay in the header; the graph draws the story web, and
-    // only a cluster that has a web to speak of folds its loose ends.
-    expect(container.querySelector('.nw-map-meta')?.textContent).toContain('4 个人物')
-    expect(container.querySelector('.nw-map-meta')?.textContent).toContain('折叠 1 位')
-    expect(drawnCast(sigmaMock.instances[before - 1])).toBe(3)
-    const bubble = container.querySelector('[data-novel-story-map-bubble="港务局"]')
-    expect(bubble?.querySelector('.nw-map-bubble-text')?.textContent).toBe('+1')
-    expect(bubble?.querySelector('.nw-map-bubble')?.getAttribute('aria-label')).toContain('陈安')
-    // The cluster with nothing on the web keeps its characters drawn.
-    expect(container.querySelector('[data-novel-story-map-bubble="无势力"]')).toBeNull()
-
-    await act(async () => {
-      bubble?.querySelector<SVGCircleElement>('.nw-map-bubble')?.dispatchEvent(new Event('click'))
-    })
-    await act(async () => {})
-    expect(drawnCast(sigmaMock.instances[sigmaMock.instances.length - 1])).toBe(4)
-    expect(container.querySelector('[data-novel-story-map-bubble="港务局"]')).toBeNull()
-    // Opening a cluster re-lays the same renderer, so the camera survives it.
-    expect(sigmaMock.instances).toHaveLength(before)
-
-    await act(async () => { root.unmount() })
-  })
-
-  it('regroups the cast when the author switches the clustering axis', async () => {
-    // The two axes name the same clusters here, so a fold left open across the
-    // switch would be visible rather than masked by a renamed disc.
-    const loadStoryMap = vi.fn(async () => ({
-      revision: 5,
-      nodes: [
-        { id: 'chen-mo', label: '陈默', group: '港务局', place: '港务局', debts: 0 },
-        { id: 'chen-an', label: '陈安', group: '港务局', place: '港务局', debts: 0 },
-        { id: 'zhou-yan', label: '周砚', group: '雾灯帮', place: '雾灯帮', debts: 0 },
-      ],
-      edges: [{ id: 'line-1', source: 'chen-mo', target: 'zhou-yan', label: '旧同僚', turns: 1 }],
-    }))
-
-    const { container, root } = await mountMap(loadStoryMap)
-
-    const axis = container.querySelector('[data-novel-story-map-axis]')
-    expect(axis?.getAttribute('data-novel-story-map-axis')).toBe('faction')
-    expect(container.querySelector('[data-novel-story-map-axis-option="faction"]')?.getAttribute('aria-pressed'))
-      .toBe('true')
-
-    // Open 港务局, then look at the same cast by place.
-    await act(async () => {
-      container.querySelector<SVGCircleElement>('[data-novel-story-map-bubble="港务局"] .nw-map-bubble')
-        ?.dispatchEvent(new Event('click'))
-    })
-    await act(async () => {})
-    expect(container.querySelector('[data-novel-story-map-bubble="港务局"]')).toBeNull()
-
-    await act(async () => {
-      container.querySelector<HTMLButtonElement>('[data-novel-story-map-axis-option="place"]')?.click()
-    })
-    await act(async () => {})
-    expect(container.querySelector('[data-novel-story-map-axis]')?.getAttribute('data-novel-story-map-axis'))
-      .toBe('place')
-    expect(container.querySelector('[data-novel-story-map-axis-option="place"]')?.getAttribute('aria-pressed'))
-      .toBe('true')
-    expect(container.querySelector('[data-novel-story-map-cluster="港务局大楼"]')).toBeNull()
-    expect(container.querySelector('[data-novel-story-map-cluster="港务局"]')).not.toBeNull()
-    // A fold belongs to the grouping that produced it: the new axis starts closed.
-    expect(container.querySelector('[data-novel-story-map-bubble="港务局"]')).not.toBeNull()
-
-    await act(async () => { root.unmount() })
-  })
+  // The cluster-folding and axis-switching tests lived here before I-P1 returned
+  // the map to force-directed layout. The detour's discs, +N bubbles and
+  // faction/place axis toggle are gone — forceAtlas2 places every character the
+  // map knows about — so the behaviours those tests held no longer exist.
 
   it('keeps a character the author dropped, and lets them release every pin', async () => {
     const loadStoryMap = vi.fn(async () => ({
@@ -438,12 +340,9 @@ describe('novel-mode story map', () => {
     await type('周砚')
     expect(container.querySelector('[data-novel-story-map-selection]')?.getAttribute('data-novel-story-map-selection')).toBe('zhou-yan')
 
-    // 陈安 is folded; focusing them has to open their cluster before the author
-    // can see who they searched for.
-    expect(container.querySelector('[data-novel-story-map-bubble="港务局"]')).not.toBeNull()
+    // The force-directed layout draws every character, so focusing 陈安 is
+    // focusing them — no cluster to open first.
     await type('陈安')
-    expect(container.querySelector('[data-novel-story-map-bubble="港务局"]')).toBeNull()
-    expect(drawnCast(sigmaMock.instances[sigmaMock.instances.length - 1])).toBe(3)
     expect(container.querySelector('[data-novel-story-map-selection]')?.getAttribute('data-novel-story-map-selection')).toBe('chen-an')
 
     await type('没有这个人')
@@ -540,18 +439,16 @@ describe('novel-mode story map keyboard', () => {
     const { container, root } = await mountMap(vi.fn(async () => cast))
     const drawn = stops(container)
 
-    // 陈安 is folded: the map does not draw them, so the map does not offer them.
-    expect(drawn.map(node => node.getAttribute('data-novel-story-map-node'))).toEqual(['chen-mo', 'zhou-yan'])
-    expect(drawn.map(node => node.getAttribute('aria-label'))).toEqual(['陈默', '周砚'])
+    // The force-directed layout draws every character, so every character is
+    // offered as a focusable stop.
+    expect(drawn.map(node => node.getAttribute('data-novel-story-map-node'))).toEqual(['chen-mo', 'chen-an', 'zhou-yan'])
+    expect(drawn.map(node => node.getAttribute('aria-label'))).toEqual(['陈默', '陈安', '周砚'])
     // Roving tabindex: a long cast must not become fifty Tab presses.
-    expect(drawn.map(node => node.getAttribute('tabindex'))).toEqual(['0', '-1'])
-    // The group is in the accessibility tree, and so is its `+N`; the disc and
-    // its label are decoration and stay out of it.
+    expect(drawn.map(node => node.getAttribute('tabindex'))).toEqual(['0', '-1', '-1'])
+    // The overlay is the cast's accessible twin.
     const overlay = container.querySelector('[data-novel-story-map-overlay]')
     expect(overlay?.getAttribute('aria-hidden')).toBeNull()
     expect(overlay?.getAttribute('aria-label')).toBe('故事地图上的人物')
-    expect(container.querySelector('.nw-map-disc')?.getAttribute('aria-hidden')).toBe('true')
-    expect(container.querySelector('.nw-map-disc-label')?.getAttribute('aria-hidden')).toBe('true')
 
     await act(async () => { root.unmount() })
   })
@@ -560,7 +457,7 @@ describe('novel-mode story map keyboard', () => {
     const { container, root } = await mountMap(vi.fn(async () => cast))
     const drawn = stops(container)
     const overlay = container.querySelector('[data-novel-story-map-overlay]')!
-    const [first, second] = drawn as [Element, Element]
+    const [first, second, third] = drawn as [Element, Element, Element]
 
     expect(first.getAttribute('tabindex')).toBe('0')
     await act(async () => {
@@ -572,10 +469,12 @@ describe('novel-mode story map keyboard', () => {
     expect(first.getAttribute('tabindex')).toBe('-1')
 
     await act(async () => { key(second, 'ArrowRight') })
+    expect(document.activeElement).toBe(third)
+    await act(async () => { key(third, 'ArrowRight') })
     expect(document.activeElement).toBe(first)
     await act(async () => { key(first, 'ArrowLeft') })
-    expect(document.activeElement).toBe(second)
-    expect(overlay.querySelectorAll('[data-novel-story-map-node]').length).toBe(2)
+    expect(document.activeElement).toBe(third)
+    expect(overlay.querySelectorAll('[data-novel-story-map-node]').length).toBe(3)
 
     await act(async () => { root.unmount() })
   })
@@ -596,7 +495,9 @@ describe('novel-mode story map keyboard', () => {
       second.focus()
       key(second, 'd')
     })
-    expect(store.getWorkbenchState().personFileId).toBe('zhou-yan')
+    // The force-directed layout draws every character, so the second stop is
+    // 陈安 now — the cluster-disc detour used to fold them away.
+    expect(store.getWorkbenchState().personFileId).toBe('chen-an')
     store.workbenchActions.closePersonFile()
 
     await act(async () => { root.unmount() })

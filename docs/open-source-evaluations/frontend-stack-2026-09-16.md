@@ -104,3 +104,16 @@ sigma 只负责渲染、缩放、平移与拖拽。
   `obliterator` 随之离开）。上表第 62 行的 165.8 kB 对照值**不再代表当前依赖组合**，保留为选型当时的口径。
 - **仍未完成**：按卷/弧过滤（`I6.1b`）—— 查实这份 Canon 里 story-event 的 `manuscriptOrder` 全是 `null`，
   而作品只有一卷，所以这个筛选今天按定义改不了任何东西，做成控件就是「按了没反应」。
+
+### 补充（2026-09-19，I-P1）
+
+**力导向回归：撤销 2026-09-17 的簇盘几何偏离，`graphology-layout@0.6.1` 与 `graphology-layout-forceatlas2@0.10.1` 加回依赖与 bundle。**
+
+- 偏离的根因是「40 人变毛球」，但毛球的成因是力导向参数未调好，不是力导向本身。Obsidian graph view（标杆）是力导向的，I-P1 的目标是回归力导向 + 对标 Obsidian。
+- 布局改回 `circular.assign`（确定性起始环）→ `forceAtlas2.assign`（力导向迭代 80 次，settings 用 `inferSettings(graph)` 自适应）→ 钉位覆盖。`story-map-layout.ts` 退役删除。
+- 分簇折叠（disc + `+N` 气泡）与轴切换（faction/place seg 控制）随布局回归移除——forceatlas2 不分簇，所有人物都画。对应 2 个 spec test 删除，`novel-workbench-story-map-layout.spec.ts`（10 tests）随 `story-map-layout.ts` 退役删除。
+- 节点 size 改 `5 + min(debts,3)*3`（degree 3 = 14px ≥ 2× degree 0 = 5px），对标 Obsidian「web 中心读大于叶子」。
+- mapPins 从组件 state 移入 workbench prefs（hydrate/dehydrate + setMapPin/clearMapPins），钉位跨 reload 保持。
+- hover 高亮连通子图（enterNode/leaveNode + nodeReducer/edgeReducer，focus = hovered ?? selected），对标 Obsidian hover 手势。
+- 按卷/弧过滤仍 blocked（`manuscriptOrder` 全 null，同 I6.1b 结论）。
+- bundle 体积待测（加回 forceatlas2 后）；2026-09-17 移除时 `lib/client.js` 从 1,611,088 B 降到 1,568,475 B（-42 kB），加回预计回升约 +42 kB，仍在 2,400,000 B 护栏内。

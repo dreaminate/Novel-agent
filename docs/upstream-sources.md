@@ -965,3 +965,16 @@ recovery, production and user acceptance remain unverified.
 No installer is redistributed by this repository. If a later novel-agent
 distribution bundles any part of the host, add the full resolved notice payload
 and exact distribution evidence before doing so.
+
+**Front-end graph layout return (2026-09-19, I-P1):** `graphology-layout@0.6.1`
+and `graphology-layout-forceatlas2@0.10.1` re-enter `@novel-agent/novel-workbench`'s
+production dependencies, restoring the force-directed story map. The 2026-09-17
+cluster-disc detour had removed both packages and replaced them with a hand-written
+pure-function layout (`story-map-layout.ts`); I-P1 deletes that file and points
+`StoryMapView` back at `circular.assign` + `forceAtlas2.assign`. The client bundle
+moves from 1.57 MB to 1.68 MB, still inside the 2.4 MB guardrail. No install
+lifecycle script, no new transitive package (the earlier removal left the
+transitive deps resolved for other consumers). The decision record and the
+behavioural specs that hold the return are in
+[frontend-stack-2026-09-16.md](open-source-evaluations/frontend-stack-2026-09-16.md)
+§5 supplement and `novel-workbench-story-map-force.spec.ts`.

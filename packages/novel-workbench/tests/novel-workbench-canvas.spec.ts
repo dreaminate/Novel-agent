@@ -156,6 +156,6 @@ describe('novel-mode writing canvas', () => {
 
     expect(container.querySelector('[data-novel-editor-outline-error]')).toBeNull()
     expect(container.querySelector('[data-novel-editor]')).not.toBeNull()
-    expect(container.querySelector('.novel-editor-bar')?.textContent).toContain('第1章《开篇章》')
+    expect(container.querySelector('.novel-editor-meta')?.textContent).toContain('第1章《开篇章》')
   })
 })

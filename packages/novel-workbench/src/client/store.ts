@@ -218,7 +218,7 @@ const DEFAULT_STATE: WorkbenchState = {
     readingSize: 17,
     readingMeasure: 40,
     readingIndent: 2,
-    readingLeading: 1.85,
+    readingLeading: 1.75,
     // On, but not eager: a 900ms pause is the author stopping to think, which is
     // the moment a continuation is welcome and the moment it is least in the way.
     completionEnabled: true,
@@ -261,7 +261,7 @@ const REFINE_MODES: readonly RefineMode[] = ['on-submit', 'while-writing']
 const READING_SIZES = [16, 17, 18] as const
 const READING_MEASURES = [34, 40] as const
 const READING_INDENTS = [0, 2] as const
-const READING_LEADINGS = [1.6, 1.85, 2.1] as const
+const READING_LEADINGS = [1.6, 1.75, 2.1] as const
 const COMPLETION_DELAYS = { min: 300, max: 2000 } as const
 
 /**

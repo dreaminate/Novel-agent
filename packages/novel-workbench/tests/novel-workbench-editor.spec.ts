@@ -48,7 +48,7 @@ function mount(options: { text?: string, state?: 'loaded' | 'missing', onSubmit?
       readingSize: 18,
       readingMeasure: 34,
       readingIndent: 2,
-      readingLeading: 1.85,
+      readingLeading: 1.75,
       sessionId: 'session-1',
       revision: 7,
       submitChapterProposal: options.onSubmit ?? (async () => {}),
@@ -88,7 +88,7 @@ describe('novel-mode writing surface', () => {
     expect(article).not.toBeNull()
     expect(article?.style.fontSize).toBe('18px')
     expect(article?.style.maxWidth).toBe('34em')
-    expect(article?.style.lineHeight).toBe('1.85')
+    expect(article?.style.lineHeight).toBe('1.75')
     expect(article?.style.textIndent).toBe('2em')
     expect(article?.querySelectorAll('p')).toHaveLength(2)
     expect(article?.textContent).toContain('第二段。')
@@ -278,7 +278,7 @@ describe('novel-mode autosave keeps the work', () => {
         saves.push({ chapter: target as SaveCall['chapter'], text, version })
         return { state: 'saved', version: `saved-${String((target as { number: number }).number)}` }
       },
-      readingSize: 18, readingMeasure: 34, readingIndent: 2, readingLeading: 1.85,
+      readingSize: 18, readingMeasure: 34, readingIndent: 2, readingLeading: 1.75,
       sessionId: 'session-1', revision: 7,
       submitChapterProposal: async () => {},
       requestContinuation: async () => ({ state: 'ok', text: continuation }),
@@ -363,7 +363,7 @@ describe('novel-mode autosave keeps the work', () => {
         }
         return { state: 'saved', version: `saved-${String((target as { number: number }).number)}` }
       },
-      readingSize: 18, readingMeasure: 34, readingIndent: 2, readingLeading: 1.85,
+      readingSize: 18, readingMeasure: 34, readingIndent: 2, readingLeading: 1.75,
       sessionId: 'session-1', revision: 7,
       submitChapterProposal: async () => {},
       requestContinuation: async () => ({ state: 'ok', text: '第一段。' }),
@@ -495,7 +495,7 @@ describe('novel-mode submit chain', () => {
         saves.push({ chapter: target as never, text, version })
         return { state: 'saved', version: 'v2' }
       },
-      readingSize: 18, readingMeasure: 34, readingIndent: 2, readingLeading: 1.85,
+      readingSize: 18, readingMeasure: 34, readingIndent: 2, readingLeading: 1.75,
       sessionId: 'sessionId' in options ? options.sessionId : 'session-1',
       revision: 7,
       submitChapterProposal: options.submit ?? (async () => {}),
@@ -666,7 +666,7 @@ describe('novel-mode accepted prose', () => {
           saves.push({ text, version })
           return { state: 'saved', version: 'v2' }
         },
-        readingSize: 18, readingMeasure: 34, readingIndent: 2, readingLeading: 1.85,
+        readingSize: 18, readingMeasure: 34, readingIndent: 2, readingLeading: 1.75,
         sessionId: 'session-1', revision: 7,
         submitChapterProposal: async () => {},
         requestContinuation: async () => ({ state: 'ok', text: '' }),
@@ -709,7 +709,7 @@ describe('novel-mode accepted prose', () => {
         chapter: FIRST,
         loadChapterDraft: async () => ({ state: 'loaded', text: '一样的话。', version: 'v1' }),
         saveChapterDraft: async () => ({ state: 'saved', version: 'v2' }),
-        readingSize: 18, readingMeasure: 34, readingIndent: 2, readingLeading: 1.85,
+        readingSize: 18, readingMeasure: 34, readingIndent: 2, readingLeading: 1.75,
         sessionId: 'session-1', revision: 7,
         submitChapterProposal: async () => {},
         requestContinuation: async () => ({ state: 'ok', text: '' }),

@@ -94,7 +94,7 @@ describe('the editor offers, accepts and drops', () => {
         chapter,
         loadChapterDraft: async () => ({ state: 'loaded', text: '风起于青萍之末', version: 'v1' }),
         saveChapterDraft: async () => ({ state: 'saved', version: 'v2' }),
-        readingSize: 17, readingMeasure: 40, readingIndent: 2, readingLeading: 1.85,
+        readingSize: 17, readingMeasure: 40, readingIndent: 2, readingLeading: 1.75,
         sessionId: 'session-1', revision: 5,
         submitChapterProposal: async () => {},
         completionEnabled: true,

@@ -32,12 +32,56 @@ const AUTOSAVE_MS = 700
 
 const EDITOR_CSS = `
 .novel-editor { display: flex; flex-direction: column; gap: 10px; height: 100%; min-height: 0; }
-.novel-editor-bar {
-  display: flex; align-items: center; gap: 12px;
-  font-family: var(--font-ui); font-size: 12px; color: hsl(var(--text-200));
+/*
+ * iA Writer's surface is almost no chrome: the page is the text. The bar that
+ * used to carry nine elements splits in two — a faint metadata row (chapter
+ * name, status, count) and a one-element toolbar (the mode toggle). Actions
+ * move into an overflow menu, so the writing surface reads as a surface.
+ */
+.novel-editor-meta {
+  display: flex; align-items: baseline; gap: 10px;
+  font-family: var(--font-mono); font-size: 11px;
+  color: hsl(var(--text-200) / .7);
+  padding: 0 2px;
 }
+.novel-editor-meta .novel-editor-chapter { color: hsl(var(--text-200)); }
 .novel-editor-count { margin-left: auto; font-variant-numeric: tabular-nums; }
-.novel-editor-state { color: hsl(var(--warn)); }
+.novel-editor-state { color: hsl(var(--warn) / .85); }
+.novel-editor-toolbar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 2px;
+}
+.novel-editor-toolbar .novel-editor-toggle { display: flex; gap: 4px; }
+.novel-editor-toolbar .novel-editor-toggle .btn.on { border-color: hsl(var(--accent-brand)); color: hsl(var(--accent-text)); }
+/*
+ * The overflow menu: a <details> the author opens to reach submit, continue
+ * and refine. It is not part of the toolbar (the toolbar is one control), so
+ * it does not compete with the text while the author is writing.
+ */
+.novel-editor-overflow { position: relative; margin-left: auto; }
+.novel-editor-overflow > summary {
+  list-style: none; cursor: pointer;
+  padding: 4px 10px; border: 1px solid hsl(var(--border-100)); border-radius: var(--r-key);
+  background: hsl(var(--bg-000)); color: hsl(var(--text-200));
+  font-family: var(--font-ui); font-size: 12px;
+}
+.novel-editor-overflow > summary::-webkit-details-marker { display: none; }
+.novel-editor-overflow[open] > summary { border-color: hsl(var(--border-200)); }
+.novel-editor-overflow-menu {
+  position: absolute; right: 0; top: calc(100% + 4px);
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 8px;
+  min-width: 160px;
+  border: 1px solid hsl(var(--border-100)); border-radius: var(--r-card);
+  background: hsl(var(--bg-000));
+  box-shadow: var(--sh-2);
+  z-index: 10;
+}
+.novel-editor-overflow-menu .btn { width: 100%; text-align: left; }
+.novel-editor-overflow-menu .novel-editor-overflow-state {
+  font-family: var(--font-mono); font-size: 11px; color: hsl(var(--text-200));
+  padding: 2px 6px;
+}
 .novel-editor-surface {
   flex: 1 1 auto; min-height: 0; overflow: auto;
   padding: 8px 2px 40px;
@@ -50,20 +94,19 @@ const EDITOR_CSS = `
   color: hsl(var(--text-000));
   min-height: 40vh;
 }
-.novel-editor-surface .ProseMirror p { margin: 0 0 .86em; }
+/* A paragraph break reads as a break at >= 1em; iA Writer's paragraphs breathe. */
+.novel-editor-surface .ProseMirror p { margin: 0 0 1em; }
 .novel-editor-surface .ProseMirror p:empty::after { content: '​'; }
 .novel-editor-reading {
   font-family: var(--font-serif);
   color: hsl(var(--text-000));
 }
-.novel-editor-reading p { margin: 0 0 .86em; }
+.novel-editor-reading p { margin: 0 0 1em; }
 /*
  * The ghost text. It is a decoration, not the author's text: grey, marked
  * aria-hidden, and gone the instant it is refused.
  */
 .novel-ghost { color: hsl(var(--text-200) / .65); pointer-events: none; }
-.novel-editor-toggle { display: flex; gap: 6px; }
-.novel-editor-toggle .btn.on { border-color: hsl(var(--accent-brand)); color: hsl(var(--accent-text)); }
 .novel-editor-confirm {
   display: flex; flex-direction: column; gap: 8px;
   padding: 12px 14px;
@@ -334,7 +377,23 @@ export function NovelEditor(props: NovelEditorProps): ReactNode {
   }
 
   const extensions = useMemo(
-    () => [StarterKit, NovelCompletion.configure({ suggestion: () => suggestionRef.current })],
+    () => [
+      // iA Writer's surface is prose, not a rich text editor: the kit keeps
+      // only the blocks a novel manuscript uses — paragraphs, headings,
+      // emphasis, strong, blockquote and hard break. Lists, code blocks,
+      // strikethrough and horizontal rules are chrome a writer does not reach
+      // for, and leaving them in lets a stray shortcut turn prose into a list.
+      StarterKit.configure({
+        strike: false,
+        code: false,
+        codeBlock: false,
+        bulletList: false,
+        orderedList: false,
+        listItem: false,
+        horizontalRule: false,
+      }),
+      NovelCompletion.configure({ suggestion: () => suggestionRef.current }),
+    ],
     [],
   )
   const editor = useEditor({
@@ -726,8 +785,26 @@ export function NovelEditor(props: NovelEditorProps): ReactNode {
   return (
     <div className="novel-editor" data-novel-editor="true">
       <style>{EDITOR_CSS}</style>
-      <div className="novel-editor-bar">
-        <span>{`第${String(chapter.number)}章《${chapter.title}》`}</span>
+      {/*
+        iA Writer's surface is almost no chrome. The bar splits in two: a faint
+        metadata row (chapter name, status, count) that does not compete with
+        the text, and a one-element toolbar (the mode toggle). Actions move into
+        an overflow menu, so the writing surface reads as a surface.
+      */}
+      <div className="novel-editor-meta">
+        <span className="novel-editor-chapter">{`第${String(chapter.number)}章《${chapter.title}》`}</span>
+        <span className="novel-editor-state" data-novel-editor-status={status}>
+          {status === 'loading' ? '正在读取草稿…'
+            : status === 'saving' ? '正在保存…'
+              : status === 'dirty' ? '未保存'
+                : conflict !== undefined ? ''
+                  : problem !== undefined ? problem
+                    : '已保存到稿子文件'}
+        </span>
+        {conflict !== undefined && <span className="novel-editor-state" role="alert">{conflict}</span>}
+        <span className="novel-editor-count" data-novel-editor-count={chars}>{`${String(chars)} 字`}</span>
+      </div>
+      <div className="novel-editor-toolbar" data-novel-editor-toolbar="true">
         <span className="novel-editor-toggle">
           <button
             type="button"
@@ -746,90 +823,90 @@ export function NovelEditor(props: NovelEditorProps): ReactNode {
             阅读
           </button>
         </span>
-        <span className="novel-editor-state" data-novel-editor-status={status}>
-          {status === 'loading' ? '正在读取草稿…'
-            : status === 'saving' ? '正在保存…'
-              : status === 'dirty' ? '未保存'
-                : conflict !== undefined ? ''
-                  : problem !== undefined ? problem
-                    : '已保存到稿子文件'}
-        </span>
-        {conflict !== undefined && <span className="novel-editor-state" role="alert">{conflict}</span>}
-        <span className="novel-editor-count" data-novel-editor-count={chars}>{`${String(chars)} 字`}</span>
-        {props.requestContinuation !== undefined && mode === 'write' && (
-          <button
-            type="button"
-            className={continuing ? 'btn sm on' : 'btn sm'}
-            data-novel-editor-continue="true"
-            onClick={() => {
-              // Only one of the two panels is open at a time: they answer
-              // different questions and would otherwise stack on one bar.
-              setConfirming(false)
-              setContinuing(open => !open)
-            }}
-          >
-            续写
-          </button>
-        )}
-        {chars > 0 && submitState !== 'sent' && (
-          <button
-            type="button"
-            className="btn sm"
-            data-novel-editor-submit="true"
-            onClick={() => {
-              setContinuing(false) // the one-panel rule, stated at the other toggle
-              setConfirming(true)
-              setSubmitState('idle')
-              setSubmitProblem(undefined)
-            }}
-          >
-            提交本章
-          </button>
-        )}
-        {submitState === 'sent' && (
-          <>
-            <span className="novel-editor-state" data-novel-editor-submitted="true">
-              已交给 AI 起草提案
-            </span>
-            {props.onOpenInbox !== undefined && (
+        {/*
+          The overflow menu: submit, continue, refine and the thread actions
+          live here. The toolbar stays one control; the actions are one click
+          deeper, the way iA Writer keeps its export and share off the page.
+        */}
+        <details className="novel-editor-overflow" data-novel-editor-overflow="true">
+          <summary>···</summary>
+          <div className="novel-editor-overflow-menu">
+            {props.requestContinuation !== undefined && mode === 'write' && (
+              <button
+                type="button"
+                className={continuing ? 'btn sm on' : 'btn sm'}
+                data-novel-editor-continue="true"
+                onClick={() => {
+                  // Only one of the two panels is open at a time: they answer
+                  // different questions and would otherwise stack on one bar.
+                  setConfirming(false)
+                  setContinuing(open => !open)
+                }}
+              >
+                续写
+              </button>
+            )}
+            {chars > 0 && submitState !== 'sent' && (
+              <button
+                type="button"
+                className="btn sm primary"
+                data-novel-editor-submit="true"
+                onClick={() => {
+                  setContinuing(false) // the one-panel rule, stated at the other toggle
+                  setConfirming(true)
+                  setSubmitState('idle')
+                  setSubmitProblem(undefined)
+                }}
+              >
+                提交本章
+              </button>
+            )}
+            {submitState === 'sent' && (
+              <>
+                <span className="novel-editor-overflow-state" data-novel-editor-submitted="true">
+                  已交给 AI 起草提案
+                </span>
+                {props.onOpenInbox !== undefined && (
+                  <button
+                    type="button"
+                    className="btn sm"
+                    data-novel-editor-inbox="true"
+                    onClick={() => { props.onOpenInbox?.() }}
+                  >
+                    去收件箱
+                  </button>
+                )}
+              </>
+            )}
+            {props.requestRefine !== undefined && (
               <button
                 type="button"
                 className="btn sm"
-                data-novel-editor-inbox="true"
-                onClick={() => { props.onOpenInbox?.() }}
+                data-novel-editor-refine="true"
+                disabled={refineState === 'asking'}
+                onClick={() => { void refine() }}
               >
-                去收件箱
+                {refineState === 'asking' ? '正在提炼…' : '重新提炼'}
               </button>
             )}
-          </>
-        )}
-        {props.requestRefine !== undefined && (
-          <button
-            type="button"
-            className="btn sm"
-            data-novel-editor-refine="true"
-            disabled={refineState === 'asking'}
-            onClick={() => { void refine() }}
-          >
-            {refineState === 'asking' ? '正在提炼…' : '重新提炼'}
-          </button>
-        )}
-        {refineState === 'asked' && (
-          <span className="novel-editor-state" data-novel-editor-refined="true">已请 AI 提炼这一章</span>
-        )}
-        {refineProblem !== undefined && (
-          <span className="novel-editor-state" role="alert">{refineProblem}</span>
-        )}
-        {needsThread && props.onOpenThread !== undefined && (
-          <button
-            type="button"
-            className="btn sm"
-            data-novel-editor-open-thread="true"
-            onClick={props.onOpenThread}
-          >
-            开一条线程
-          </button>
-        )}
+            {refineState === 'asked' && (
+              <span className="novel-editor-overflow-state" data-novel-editor-refined="true">已请 AI 提炼这一章</span>
+            )}
+            {refineProblem !== undefined && (
+              <span className="novel-editor-overflow-state" role="alert">{refineProblem}</span>
+            )}
+            {needsThread && props.onOpenThread !== undefined && (
+              <button
+                type="button"
+                className="btn sm"
+                data-novel-editor-open-thread="true"
+                onClick={props.onOpenThread}
+              >
+                开一条线程
+              </button>
+            )}
+          </div>
+        </details>
       </div>
       {diverged && (
         // The draft and the story have parted ways. Saying so is the whole point:

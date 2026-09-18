@@ -1,0 +1,27 @@
+{
+  "purpose": "I-P2 编辑器 iA Writer 化真机验证",
+  "date": "2026-09-18T17:21:23.744Z",
+  "findings": {
+    "state": {
+      "editorExists": true,
+      "metaExists": true,
+      "metaText": "第1章《开篇章》已保存到稿子文件18 字",
+      "toolbarExists": true,
+      "toggleButtonCount": 2,
+      "overflowExists": true,
+      "surfaceExists": true,
+      "fontFamily": "\"Source Han Serif SC\", \"Noto Serif SC\", \"Songti SC\", SimSun, serif",
+      "lineHeight": "29.75px",
+      "editorStyle": "\n.novel-editor { display: flex; flex-direction: column; gap: 10px; height: 100%; min-height: 0; }\n/*\n * iA Writer's surface is almost no chrome: the page is the text. The bar that\n * used to carry nine elements splits in two — a faint metadata row (chapter\n * name, status, count) and a one-element toolbar (the mode toggle). Actions\n * move into an overflow menu, so the writing surface reads as a surface.\n */\n.novel-editor-meta {\n  display: flex; align-items: baseline; gap: 10px;\n  font-family: var(--font-mono); font-size: 11px;\n  color: hsl(var(--text-200) / .7);\n  padding: 0 2px;\n}\n.novel-editor-meta .novel-editor-chapter { color: hsl(var(--text-200)); }\n.novel-editor-count { margin-left: auto; font-variant-numeric: tabular-nums; }\n.novel-editor-state { color: hsl(var(--warn) / .85); }\n.novel-editor-toolbar {\n  display: flex; align-items: center; gap: 8px;\n  padding: 0 2px;\n}\n.novel-editor-toolbar .novel-editor-toggle { display: flex; gap: 4px; }\n.novel-editor-toolbar .novel-editor-toggle .btn.on { border-color: hsl(var(--accent-brand)); color: hsl(var(--accent-text)); }\n/*\n * The overflow menu: a <details> the author opens to reach submit, continue\n * and refine. It is not part of the toolbar (the toolbar is one control), so\n * it does not compete with the text while the author is writing.\n */\n.novel-editor-overflow { position: relative; margin-left: auto; }\n.novel-editor-overflow > summary {\n  list-style: none; cursor: pointer;\n  padding: 4px 10px; border: 1px solid hsl(var(--border-100)); border-radius: var(--r-key);\n  background: hsl(var(--bg-000)); color: hsl(var(--text-200));\n  font-family: var(--font-ui); font-size: 12px;\n}\n.novel-editor-overflow > summary::-webkit-details-marker { display: none; }\n.novel-editor-overflow[open] > summary { border-color: hsl(var(--border-200)); }\n.novel-editor-overflow-menu {\n  position: absolute; right: 0; top: calc(100% + 4px);\n  display: flex; flex-direction: column; gap: 4px;\n  padding: 8px;\n  min-width: 160px;\n  border: 1px solid hsl(var(--border-100)); border-radius: var(--r-card);\n  background: hsl(var(--bg-000));\n  box-shadow: var(--sh-2);\n  z-index: 10;\n}\n.novel-editor-overflow-menu .btn { width: 100%; text-align: left; }\n.novel-editor-overflow-menu .novel-editor-overflow-state {\n  font-family: var(--font-mono); font-size: 11px; color: hsl(var(--text-200));\n  padding: 2px 6px;\n}\n.novel-editor-surface {\n  flex: 1 1 auto; min-height: 0; overflow: auto;\n  padding: 8px 2px 40px;\n}\n.novel-editor-surface .ProseMirror {\n  outline: none;\n  font-family: var(--font-serif);\n  font-size: var(--read-size);\n  line-height: var(--read-lh);\n  color: hsl(var(--text-000));\n  min-height: 40vh;\n}\n/* A paragraph break reads as a break at >= 1em; iA Writer's paragraphs breathe. */\n.novel-editor-surface .ProseMirror p { margin: 0 0 1em; }\n.novel-editor-surface .ProseMirror p:empty::after { content: '​'; }\n.novel-editor-reading {\n  font-family: var(--font-serif);\n  color: hsl(var(--text-000));\n}\n.novel-editor-reading p { margin: 0 0 1em; }\n/*\n * The ghost text. It is a decoration, not the author's text: grey, marked\n * aria-hidden, and gone the instant it is refused.\n */\n.novel-ghost { color: hsl(var(--text-200) / .65); pointer-events: none; }\n.novel-editor-confirm {\n  display: flex; flex-direction: column; gap: 8px;\n  padding: 12px 14px;\n  border: 1px solid hsl(var(--accent-brand) / .5);\n  border-radius: 10px;\n  background: hsl(var(--accent-brand) / .08);\n  font-family: var(--font-ui); font-size: 13px; line-height: 1.7;\n  color: hsl(var(--text-100));\n}\n.novel-editor-confirm p { margin: 0; }\n.novel-editor-confirm-note { color: hsl(var(--text-200)); font-size: 12px; }\n/* The draft and the accepted chapter are two documents now. This is a statement,\n   not an alarm: nothing is wrong, there are just two things and one screen. */\n.novel-editor-diverged {\n  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;\n  padding: 8px 14px;\n  border: 1px solid hsl(var(--border-100));\n  border-radius: 10px;\n  background: hsl(var(--bg-100));\n  font-family: var(--font-ui); font-size: 12px;\n  color: hsl(var(--text-200));\n}\n"
+    },
+    "paragraphMarginEm": "1",
+    "consoleErrors": 0,
+    "screenshot": "i-p2-editor-bar.png",
+    "overflow": {
+      "open": true,
+      "menuExists": true,
+      "submitExists": true,
+      "refineExists": true
+    }
+  }
+}

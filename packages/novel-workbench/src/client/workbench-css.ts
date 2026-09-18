@@ -35,14 +35,14 @@ export const WORKBENCH_CSS = `/* ═══ tokens · 日间 / 夜间 ═══ *
   --f-bureau: 32 42% 45%;
   --font-ui: "PingFang SC", "Microsoft YaHei", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-serif: "Source Han Serif SC", "Noto Serif SC", "Songti SC", "SimSun", serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --fs-12: 12px;
   --fs-13: 13px;
   --fs-14: 14px;
   --fs-16: 16px;
   --fs-20: 20px;
   --read-size: 17px;
-  --read-lh: 1.85;
+  --read-lh: 1.75;
   --read-measure: 40em;
   --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 20px; --s6: 24px; --s7: 32px;
   --r-card: 10px; --r-ctl: 6px; --r-key: 4px;

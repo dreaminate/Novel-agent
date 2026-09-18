@@ -285,13 +285,10 @@ async function main() {
   }
   const story = report.screens.find(screen => screen.view === 'map')
   if (story?.map !== undefined && story.map !== null) {
-    const clusters = `[${story.map.labels.join(' / ')}]`
-    const tail = `· ${String(story.map.people)} 人物 · 折叠 ${String(story.map.folded)}`
-    const axis = `· 轴 ${String(story.map.axis)} · canvas ${String(story.map.canvases)}`
-    console.log(`story map: ${String(story.map.clusters)} 簇 ${clusters} ${tail} ${axis}`)
-    if (Array.isArray(story.map.bubbles) && story.map.bubbles.length > 0) {
-      console.log(`story map folded clusters: ${story.map.bubbles.join(' / ')}`)
-    }
+    // What a force layout has to report about itself: how many characters, how
+    // many canvases, and how much of the stage the cast spans.
+    console.log(`story map: ${String(story.map.people)} 人物 · canvas ${String(story.map.canvases)}`
+      + ` · spread ${String(story.map.spread)}`)
     if (story.mapNodes !== undefined) {
       console.log(`story map keyboard: ${String(story.mapNodes.count)} stops`
         + ` (${String(story.mapNodes.inTabOrder)} in the tab order, ${String(story.mapNodes.named)} named)`)
@@ -388,11 +385,17 @@ async function sweepCast(session, screen) {
 }
 
 /**
- * How the map scales the accepted cast: one disc per cluster, and any cluster
- * whose loose ends are folded behind a `+N`. Read from the attributes the view
- * publishes rather than by parsing its text — the header re-renders on its own
- * schedule, and a count read out of prose has already produced one false
- * "nothing happened" in this project.
+ * The story map as it is drawn now (I-P1): one node per accepted character,
+ * laid out by forceatlas2, with the keyboard's copy of the cast in the SVG
+ * overlay above the canvas.
+ *
+ * The map used to scale the cast into cluster discs, folding the loose ends of
+ * each behind a `+N`, with an axis to regroup them. That view is gone, and this
+ * check kept reading its attributes — `data-novel-story-map-clusters` and
+ * `-axis` stopped being published, so every sweep reported "the ring layout
+ * never ran" for a map that had replaced the ring layout deliberately. What is
+ * worth asserting about a force layout is that it ran: the nodes are spread,
+ * not stacked, and they stay inside the overlay they are drawn on.
  */
 async function sweepMap(session, screen) {
   const read = async () => await session.evaluate(`(() => {
@@ -400,27 +403,38 @@ async function sweepMap(session, screen) {
     if (root === null) return null
     const stage = document.querySelector('[data-novel-story-map-canvas]')
     const overlay = document.querySelector('[data-novel-story-map-overlay]')
-    const disc = document.querySelector('.nw-map-disc')
     const box = stage === null ? null : stage.getBoundingClientRect()
     const paint = overlay === null ? null : overlay.getBoundingClientRect()
+    // The overlay's focus stops are the only per-character geometry published,
+    // and they are positioned on the nodes the layout placed. Their *centres*
+    // are the node positions; the bounding box also carries the node's radius,
+    // which would read a node sitting near an edge as off the stage.
+    const stops = Array.from(document.querySelectorAll('[data-novel-story-map-node]'))
+      .map(node => {
+        const r = node.getBoundingClientRect()
+        return { x: r.left + r.width / 2, y: r.top + r.height / 2 }
+      })
     return {
       people: Number(root.getAttribute('data-novel-story-map-people') ?? '0'),
-      clusters: Number(root.getAttribute('data-novel-story-map-clusters') ?? '0'),
-      folded: Number(root.getAttribute('data-novel-story-map-folded') ?? '0'),
-      labels: Array.from(document.querySelectorAll('[data-novel-story-map-cluster]'))
-        .map(node => node.getAttribute('data-novel-story-map-cluster')),
-      bubbles: Array.from(document.querySelectorAll('[data-novel-story-map-bubble]'))
-        .map(node => node.getAttribute('data-novel-story-map-bubble')),
-      axis: (document.querySelector('[data-novel-story-map-axis]') ?? { getAttribute: () => null })
-        .getAttribute('data-novel-story-map-axis'),
       canvases: document.querySelectorAll('[data-novel-story-map-canvas] canvas').length,
       degraded: document.querySelector('[data-novel-story-map-degraded]') !== null,
       canvasHost: stage !== null,
       overlayCoversStage: box !== null && paint !== null
         && Math.abs(paint.width - box.width) < 2 && Math.abs(paint.height - box.height) < 2,
-      discInsideOverlay: disc === null || paint === null ? null
-        : Number(disc.getAttribute('cx')) >= 0 && Number(disc.getAttribute('cx')) <= paint.width
-          && Number(disc.getAttribute('cy')) >= 0 && Number(disc.getAttribute('cy')) <= paint.height,
+      stops,
+      stopsInsideOverlay: paint === null || stops.length === 0 ? null
+        : stops.every(stop => stop.x >= paint.left - 1 && stop.x <= paint.right + 1
+          && stop.y >= paint.top - 1 && stop.y <= paint.bottom + 1),
+      // How much of the stage the cast actually spans, as a fraction of its
+      // longest side. A simulation that ran spreads it; one that fell over
+      // stacks every node on a single point.
+      spread: paint === null || stops.length < 2 ? null
+        : (() => {
+            const xs = stops.map(stop => stop.x)
+            const ys = stops.map(stop => stop.y)
+            const span = Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys))
+            return Math.round(span / Math.max(1, Math.max(paint.width, paint.height)) * 100) / 100
+          })(),
     } })()`)
   const before = await read()
   if (before === null) {
@@ -436,42 +450,29 @@ async function sweepMap(session, screen) {
     return { count: nodes.length,
       inTabOrder: nodes.filter(node => node.getAttribute('tabindex') === '0').length,
       named: nodes.filter(node => (node.getAttribute('aria-label') ?? '') !== '').length } })()`)
-  if (before.axis === null) screen.state = 'map-missing-axis'
-  // A cast with no disc means the ring layout never ran, whatever the canvas painted.
-  if (before.people > 0 && before.clusters === 0) screen.state = 'map-no-clusters'
-  // Everyone drawn has to be reachable, and everyone folded has to not be here.
-  if (screen.mapNodes.count !== before.people - before.folded) screen.state = 'map-keyboard-cast-mismatch'
+  // Everyone drawn has to be reachable, and exactly one of them may sit in the
+  // tab order, or a long cast becomes a tab marathon.
+  if (screen.mapNodes.count !== before.people) screen.state = 'map-keyboard-cast-mismatch'
   else if (screen.mapNodes.inTabOrder > 1) screen.state = 'map-keyboard-tab-marathon'
   else if (screen.mapNodes.named !== screen.mapNodes.count) screen.state = 'map-keyboard-unnamed'
-  // The discs are positioned in the overlay's own pixel space, so an overlay that
-  // does not cover the stage puts every one of them somewhere the author cannot see.
+  // The stops are positioned in the overlay's own pixel space, so an overlay
+  // that does not cover the stage puts every one of them out of sight.
   if (!before.overlayCoversStage) screen.state = 'map-overlay-misplaced'
-  if (before.discInsideOverlay === false) screen.state = 'map-disc-off-overlay'
+  if (before.stopsInsideOverlay === false) screen.state = 'map-stops-off-overlay'
+  // The layout ran if the cast is spread across the stage; a collapsed
+  // simulation stacks every node on one point.
+  if (before.people > 1 && before.spread !== null && before.spread < 0.15) {
+    screen.state = 'map-layout-degenerate'
+  }
   // A1: this sweep runs on a GPU, so the map is expected to paint. A degraded card
   // here means the probe said "no" to a machine that can — a regression, not the
   // feature. The card is the right answer only under the walkthrough's --disable-gpu.
   if (before.degraded) screen.state = 'map-degraded-on-good-gpu'
   else if (before.people > 0 && !before.canvasHost) screen.state = 'map-no-canvas-host'
-  const first = before.bubbles[0]
-  if (first === undefined) return
-  // Opening a `+N` has to bring its cast back, in the real browser, not just in
-  // the unit test: the bubble is chrome drawn in the overlay, so this is the only
-  // place its click lands. SVG elements have no `click()`, hence the event.
-  await session.evaluate(
-    `document.querySelector('[data-novel-story-map-bubble=${JSON.stringify(first)}] .nw-map-bubble')
-      .dispatchEvent(new MouseEvent('click', { bubbles: true }))`)
-  await sleep(250)
-  const after = await read()
-  screen.mapOpened = after
-  if (after !== null && after.bubbles.includes(first)) screen.state = 'map-bubble-ignored'
-  if (after !== null && after.folded >= before.folded) screen.state = 'map-bubble-ignored'
-  // Put the fold back so the rest of the sweep — and the screenshot — shows the
-  // map as an author first meets it. Switching the axis away and back is the
-  // view's own way of closing what was opened, and it exercises that too.
-  await session.evaluate(
-    `document.querySelector('[data-novel-story-map-axis-option="place"]')?.click()`)
-  await session.evaluate(
-    `document.querySelector('[data-novel-story-map-axis-option="faction"]')?.click()`)
+  // The fold-and-axis interaction this sweep used to drive is gone with the
+  // discs it belonged to. Pinning and hovering are exercised by the map's own
+  // spec and by the I-P1 probe, which can reach the pointer; the sweep's job
+  // here is the coarse one — the map renders, spread, with a reachable cast.
   await sleep(200)
   await session.send('Page.captureScreenshot', { format: 'png' }).then(shot => {
     writeFileSync(screen.screenshot, Buffer.from(shot.data, 'base64'))

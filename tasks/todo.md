@@ -1,5 +1,256 @@
 # Execution checklist
 
+## Front-end refactor handoff — A6, 2026-09-18
+
+**Status:** the two copy defects we owned are fixed and measured; S2 turned out not to be a defect at
+all, and the thing that *was* wrong was the probe.
+
+**Work order of record:** [`frontend-refactor-handoff-2026-09-18.md`](frontend-refactor-handoff-2026-09-18.md)
+(A6 section).
+
+- [x] **The submission card speaks the author's language.** It used to say 「…作为一份提案提交，和已接受版本
+  R5 对齐。…Canon 不会因为这一步改变 —— 只有你在审阅里逐条接受，它才动」: five words from the plumbing on
+  the one card that asks for consent. It now says what the chapter is, what AI will do with it, and where
+  the result goes — and that the story does not move until the author accepts, one by one.
+- [x] **The subtitle under 写作 lost `workdir` and `Canon`.** Two names from the machine room, on the line
+  the author reads every session.
+- [x] **S2 is not a defect — verified, not assumed.** The composer's placeholder is a locale key with a
+  complete zh dictionary beside the en one, and the shipped runtime falls back to English **only** for a
+  browser that asks for no registered language. Measured both ways on this machine (its languages are
+  `zh-CN,zh` either way): Chinese. And the whole `docs/evidence/` tree contains
+  「Describe what you want to build」 **only in the files this increment just wrote** — the premise does not
+  reproduce from any earlier record. The English on that row is the model's own name (provider data); the
+  effort label beside it is localised. So: no locale injection, and stop condition #1 does not apply.
+- [x] **What was wrong is the browser the probes used.** Headless Chrome carries no `Accept-Language`, so
+  the walkthrough measured a browser no author has. Both the walkthrough probe and the smoke now ask for
+  `zh-CN`, and the smoke gained an author-copy leak check over the canvas titles, the lines under them and
+  the composer placeholder — deliberately not the bodies, where the author's and the model's own words live.
+- [x] **Evidence** `docs/evidence/2026-09-18/composer-locale/` (findings + a re-runnable probe) and the
+  re-run walkthrough: its step-6 card now reads in the author's words, with zero console errors. The
+  walkthrough types into the draft, so the draft was restored to its recorded sha256.
+- [x] **Deviation worth noting:** the order's subtitle wording ("选一章开始写…") describes the *no chapter*
+  screen, which A5 moved to `NovelLanding`; the editor's subtitle only appears with a chapter open, so it
+  says 「这一章的稿子」.
+- [ ] **Phase A is done** (A1–A6). **B1 next** — filter the runtime-context injection out of the transcript.
+
+## Front-end refactor handoff — A5, 2026-09-18
+
+**Status:** `verified` for the screen an author lands on; the planning path is unit-covered only, and
+the work order's own check for it needs a state this machine cannot be put into.
+
+**Work order of record:** [`frontend-refactor-handoff-2026-09-18.md`](frontend-refactor-handoff-2026-09-18.md)
+(A5 section).
+
+- [x] **写作 is a way in, not a sentence telling the author to go elsewhere.** With no chapter open it
+  offers the first three chapters to open, named the way the rail names them. The old copy ("先在左栏选一
+  章") is gone, and with it the engineering nouns that were on that screen.
+- [x] **A work with nothing in it can get its first chapter.** 「让 AI 规划第一章」 asks the architect for
+  one chapter — not a book — behind the same consent card the other Canon-reaching actions use, and says
+  planning only produces a proposal. The offer appears only when the author has nothing to write, which is
+  the state it is for.
+- [x] **The two dead-end hints now carry their own way out.** Where the editor said a thread was missing it
+  now offers 「开一条线程」, and the topbar's 对话 opens a thread when there is none instead of toggling a
+  column that cannot render without one.
+- [x] **`sendToThread` is the same transport, not a second one.** The plan request is queued into the
+  thread through the same `beginSubmission` path the submit and refine requests use; the boundary is
+  unchanged — the architect proposes, the author accepts.
+- [x] **Evidence** `docs/evidence/2026-09-18/A5/`: `a5-summary.json` verdict **pass** — the landing card
+  with its chapter, no `Canon` / `workdir` / `R5` / `expectedRevision` anywhere on it, and the chapter
+  opening when clicked. Nothing was submitted, no Canon moved, no draft file written.
+- [ ] **Not verified, and worth saying plainly:** the planning request end-to-end. This machine has one
+  work, whose chapter is 待审, so the product *correctly* withholds 「规划下一章」 — the probe asserts that
+  absence. Exercising the planning card needs an empty work, which means creating a second work (registry
+  plus a new Canon) — a heavier fixture than the one just reverted. The request text and the card are
+  unit-covered.
+- [ ] **Also unit-only:** the no-session review banner and the editor's 「开一条线程」 button — same reason as
+  A4: this profile always has a session and no UI unselects a chapter.
+- [ ] **A6 next** — the copy pass: the submit confirmation card's five engineering nouns, the editor
+  subtitle, and the composer locale check (which is the order's first stop condition).
+
+## Front-end refactor handoff — A4, 2026-09-18
+
+**Status:** `verified`, and the headline defect was only actually fixed on the second attempt — which the
+machine is what caught.
+
+**Work order of record:** [`frontend-refactor-handoff-2026-09-18.md`](frontend-refactor-handoff-2026-09-18.md)
+(A4 section).
+
+- [x] **The waiting badge follows the agent.** A proposal filed by the agent is invisible from the client —
+  the packet goes to the host — except for the tool call that filed it, which is in the same log the
+  transcript is reduced from. A new call id there now triggers a re-read, and the thread header is keyed on
+  the store's revision, so the badge moves without a single poll. Measured: **6 → 7 in 39 seconds**, with
+  the author doing nothing.
+- [x] **…and the first attempt at it did not work.** The seen-call set and its "already primed" flag were
+  built inside `followTurnFailure`, which is re-entered on every session-list change — and an agent filing
+  a proposal is exactly such a change. Each re-entry rebuilt the set and swallowed the call it had just
+  missed. Both now live in the plugin's own scope. This is the case for running the machine before
+  believing a fix.
+- [x] **Accepting without a thread is no longer silent.** The review canvas says a thread has to carry the
+  decision, offers 「开一条线程」, and the one deciding button explains itself instead of returning.
+- [x] **The draft and the accepted chapter are two documents, and now the editor says so.** A divergence
+  bar offers 「读已接受正文」 (Canon's text, read in the reading state) and 「写回稿子」 (writes it into the
+  draft file under the version that file already has, so the conflict guard still applies). `loadManuscriptText`
+  — dead code until now — is what supplies the accepted text.
+- [x] **Evidence** `docs/evidence/2026-09-18/A4/`: `a4-summary.json` verdict **pass**, with the divergence
+  bar, the read-back, the file check behind 写回稿子, and the badge measurement. The probe restores the
+  draft it writes; the proposals its submissions produced have been removed, so the inbox is back to its
+  six pre-existing entries and Canon is still at revision 5.
+- [ ] **Unit-only:** the no-session review banner. This profile always has a session selected and CDP cannot
+  take one away, so that state is unreachable on this machine.
+- [ ] **A5 next** — the writing entry points: guidance when no chapter is picked, 「让 AI 规划第一章」 when a
+  work has none, and 「开线程」 buttons where the editor currently only says a thread is missing.
+
+## Front-end refactor handoff — second audit of A2/A3, 2026-09-18
+
+**Status:** the first "done" for A2 and A3 was overstated. Four real defects came out of re-reading
+the diff and re-running on the machine with a second chapter; all four are fixed and re-verified.
+
+- [x] **An agent proposal could rename the author's chapter and move their draft file.** The outline
+  built `titles` from accepted manuscripts, then let a *pending* proposal overwrite it — and the title
+  is what names the draft file (`第N章《title》.草稿.md`). So one proposal from the agent renamed the
+  chapter the author was writing, and the editor then opened a different, empty file. The workspace had
+  the two files to prove it, one of them created by this increment's own A3 probe. Titles now come from
+  accepted manuscripts only; a pending proposal marks the chapter 待审 and no more.
+- [x] **A remembered chapter that no longer exists was an endless wait.** `chapterId` now survives a
+  reload, and nothing cleared it when the author moved to another work — so the canvas sat on
+  「正在读取这一章…」 for ever, where the old code at least offered 「先在左栏选一章」. The stale pick is
+  now dropped when the outline does not contain it.
+- [x] **A save for the chapter just left could install its version token on the next one.** The leaving
+  flush and the next chapter's read are two requests in flight at once; answering in the wrong order
+  made the next write carry a token belonging to another chapter — F2b's own CAS rejection by another
+  road. `writeDraft` now checks the save still belongs to the chapter on screen before it touches the
+  token, the status line or the errors.
+- [x] **The smoke's review check had never worked.** `sweepProposal` looked for
+  `[data-novel-proposal]`, which the product has never rendered — so it reported "nothing pending" on
+  every run, including the runs where something was. It now reads the badge the author reads
+  (`data-novel-thread-pending`) and opens the review canvas the way the author opens it. That also
+  retired a claim of mine: the inbox held **8** pending proposals, not none.
+- [x] **Chapter switching is now verified on the machine, not just in a unit test.** This workspace had
+  one chapter, so that path was unreachable. With the author's agreement a second chapter was added to
+  the workspace as an explicitly-labelled fixture (Canon revision 6; the pre-change storage is backed
+  up beside the evidence). A2 now measures the real switch — 251ms, prose in the old chapter's file and
+  not in the new one's — and A3 measures the state that must not follow the author across it.
+- [x] **My own specs were leaking between cases.** They mounted React roots and never unmounted them,
+  while the workbench store is module state — so a canvas from one case was still writing during the
+  next. Three specs now tear down per case.
+- [ ] **Open question for the author:** the fixture added a second chapter to the workspace's Canon, and
+  the inbox now holds 8 pending proposals (at least 2 from this increment's probes). Say the word and
+  they come out.
+
+## Front-end refactor handoff — A3, 2026-09-18
+
+**Status:** `verified`, including a real submission into the thread — the one acceptance step that
+cannot be checked without spending a turn.
+
+**Work order of record:** [`frontend-refactor-handoff-2026-09-18.md`](frontend-refactor-handoff-2026-09-18.md)
+(A3 section). Runs in the **main checkout** with absolute paths.
+
+- [x] **Submitting is repeatable.** `submitState` goes back to `idle` on the next keystroke, so
+  「提交本章」 returns and the 「已交给 AI 起草提案」 badge drops. Before this, one submission took the
+  action away for the rest of the chapter. The submitted state now offers 「去收件箱」, so the author has
+  somewhere to go instead of a dead end.
+- [x] **One panel at a time.** The confirm card and the continue panel both opened, and stacked, on one
+  896px row. Opening either closes the other.
+- [x] **A chapter switch resets the chapter's own state.** `load()` clears confirming, continuing,
+  submit, refine and both problems before the draft is read, so nothing the last chapter said describes
+  this one.
+- [x] **A failed outline read says so.** The canvas keeps its own `editorProblem`, and the editor branch
+  distinguishes "could not read the chapter" (error card + 重试) from "no chapter picked" (guidance) and
+  "still reading" — the middle case used to be reported as the author's omission.
+- [x] **A jsdom gap found on the way, fixed in the test shim rather than the product.** ProseMirror
+  measures the caret with `getClientRects`/`getBoundingClientRect` when a transaction moves the selection;
+  jsdom implements neither on `Element` or `Range`, so the call threw out of band and failed the whole run
+  even with 475 tests green. `tests/webgl-env.ts` now answers both.
+- [x] **Evidence** `docs/evidence/2026-09-18/A3/`: `a3-summary.json` verdict **pass** — mutual exclusion
+  measured, 「去收件箱」 155ms after confirming, 「提交本章」 back after writing again, version history still
+  **R5**, console uncaught errors 0. The probe replaces the draft content before submitting, so the
+  proposal request carries its own sentence rather than the test residue in the file, and it restores the
+  draft afterwards: **sha256 before == after** (`c2d819ea…`). It left **no proposal** in the inbox.
+- [x] **Correction, after the first pass was challenged.** The first version of the leaving flush still
+  had a real bug: the flush and the next chapter's read are two requests in flight at once, and the save
+  for the chapter just left could answer *after* the read and install **its** version token as the guard
+  for the chapter now on screen — the next write into it would then be refused as a conflict the author
+  never caused. Same failure F2b named, reached by another road. `writeDraft` now asks `stillOnScreen`
+  before it touches the token, the status line or the errors. Two other things in the first report were
+  wrong or overstated: the "13ms" was the click's round-trip and not the gap since the keystroke (the
+  probe measures it properly now — 265ms), and **chapter switching was never verified on the real
+  machine at all**: this workspace has one chapter, so that path is unit-only.
+- [x] **The three probes were merged.** Each of A1/A2/A3 had grown its own ~200-line CDP script with the
+  same session class and launch flags copied three times. They now share
+  `docs/evidence/2026-09-18/probe-harness.mjs` and keep only their scenario — and all three were re-run so
+  the evidence matches the code that is checked in.
+- [ ] **A3 correction, same audit.** A3's own claim survives re-reading: mutual exclusion, the inbox
+  affordance and the repeatable submit are all measured on the real machine, and the outline error card is
+  unit-only (host RPCs cannot be stubbed over CDP). A chapter switch's state reset is unit-only for the
+  same one-chapter reason as A2.
+- [ ] **A4 next** — the collaboration loop: the pending-proposal badge never updates, "无 session 审阅"
+  is a silent dead end, and accepted prose has nowhere to be read.
+
+## Front-end refactor handoff — A2, 2026-09-18
+
+**Status:** `verified`. The three ways typing got lost are closed, and the browser proves it: prose typed
+13ms before leaving the editor is in the draft file, and a reload comes back to the chapter, not to "pick a
+chapter".
+
+**Work order of record:** [`frontend-refactor-handoff-2026-09-18.md`](frontend-refactor-handoff-2026-09-18.md)
+(A2 section). Runs in the **main checkout** with absolute paths — the session is pinned to a worktree.
+
+- [x] **One write path, and the identity is pinned where the work is done.** `scheduleSave` became
+  `writeDraft` (version guard, status line and failure handling in one place) plus a scheduler that pins
+  `{chapter, version, text}` into `pendingRef` when the keystroke happens. The timer used to read all three
+  at *fire* time, which is how the last paragraph of one chapter was written into the next one's file.
+  Leaving — unmount, chapter switch, `pagehide` — goes through `flushPending()`, which writes the pinned
+  text rather than reading a document that has already moved on.
+- [x] **The browser is asked before it discards.** `beforeunload` calls `preventDefault` only while prose
+  exists that the file lacks. That is answered by an `editCount`/`editsOnFile` pair rather than the status
+  line, because a save landing while newer keystrokes are queued must not report the chapter clean.
+- [x] **`chapterId` persists** (`store.ts` dehydrate/hydrate/`prefsChanged`, validated by a new `textOr`), so
+  a reload reopens the chapter instead of the rail.
+- [x] **Evidence** `docs/evidence/2026-09-18/A2/`: `a2-summary.json` verdict **pass** — switched away
+  13ms after the insert, marker present in the draft file, readable again on return, and after reload
+  `view=editor` / `chapter=vol01-ch0001` / no "先在左栏选一章" / console uncaught errors 0. The probe
+  typed into the author's draft, so it backs the file up first and restores it: **sha256 before == after**
+  (`c2d819ea…`).
+- [x] **A deviation worth keeping in view.** The order said to pin only `{chapter, version}` and re-serialize
+  in the timer; the text is pinned too, because at unmount Tiptap may already be destroyed and after a
+  chapter switch the document already holds the *other* chapter's prose. It also said `vi.useFakeTimers`
+  throughout; only `setTimeout`/`clearTimeout` are faked, since faking more stops the editor mounting at all.
+- [ ] **A3 next** — the submit chain: the button disappears after one submit, the confirm card and the
+  continue panel can be open at once, and a failed outline read claims "you picked no chapter".
+
+## Front-end refactor handoff — Phase 0 + A1, 2026-09-18
+
+**Status:** Phase 0 `verified` (10 read-only steps, two deviations recorded); A1 `verified` on the running
+host under `--disable-gpu` — which *is* A1's acceptance environment — with the degraded card, the surviving
+canvases and a zero-error console all measured, not inferred.
+
+**Work order of record:** [`frontend-refactor-handoff-2026-09-18.md`](frontend-refactor-handoff-2026-09-18.md)
+(supersedes `frontend-rewrite-handoff-2026-09-18.md`). Ran in the **main checkout** — the session is pinned to
+worktree `.claude/worktrees/review-project-status-7c2dca` and `change_directory` was refused, so commands ran
+with absolute paths, as on 2026-09-17. The worktree was not touched.
+
+- [x] **Phase 0 baseline.** HEAD `33879fb`; `corepack pnpm test` **456 passed / 32 files**; typecheck 0;
+  `git diff --check` 0; host `401`; `dev-host.sh rebuild` + `smoke-workbench.mjs` exit 0;
+  `port-prototype-css --check` pass; `lib/client.js` 1,599,048 B. Two deviations from the order's
+  expectations, both recorded at the top of the work order: **lint was red** (exit 1, one unused `dirname`
+  import in the untracked walkthrough probe — removed, now 0), and **client.js is 336 B larger than the
+  order states** (1,599,048 vs 1,598,712; `lib/` is gitignored, so the order's number was a stale build).
+- [x] **A1: a crashing canvas no longer takes the workbench with it.** New `canvas-boundary.tsx` (class
+  component, retry remounts the subtree under a fresh key, zero new dependencies) and `webgl-probe.ts`;
+  `StoryMapView` asks the machine for WebGL before building sigma and draws a card when the answer is no;
+  `index.tsx` wraps the canvas seat in the boundary, keyed by the view so switching canvas heals itself.
+  Evidence `docs/evidence/2026-09-18/A1/` — `a1-summary.json` verdict **pass**: card `role=alert` with
+  「去人物与关系」/「重试」 and `webglCanvases 0`; one click reaches a live cast canvas (6 people / 3
+  relations / 4 factions); after 重试 the rail's 10 view entries and the frame are still there, no boundary
+  card appeared, and **console uncaught errors were 0**. Gate: 461/461 (456 + 5 new), typecheck/lint/diff 0,
+  rebuild + smoke exit 0, `client.js` 1,606,425 B.
+- [x] **A probe defect found while re-running the walkthrough (not a product defect).** Step 8 reads the
+  prototype's old class names (`.char-card`, `.rel-line`), so its `cardCount: 0` says nothing about whether
+  the cast canvas is alive; screenshot `08-cast.png` shows it fully drawn. Same family as E7 — B4 fixes it.
+- [ ] **A2 next** — the three ways typing gets lost (unmount cancels the pending save; the save timer reads
+  the *new* chapter's identity; nothing flushes on `pagehide`/`beforeunload` and `chapterId` is not
+  persisted). Serial after A1 per §5 is not required (A1 ∥ A2), but A2 → A3 is.
+
 ## Editor-first front-end rework — plan of record, 2026-09-17
 
 **Status:** `not-started` as an implementation; the decisions are settled and the increment queue is written.
@@ -22,6 +273,39 @@
   must respect, the prototype/CSS regeneration rule, and the stop conditions that require a human.
 - [ ] Execute it. Phase 0 first (baseline + the editor stack's bundle-cost selection record), then Phase 1
   (the approval surface) ahead of everything visible.
+
+## The empty thread stops being a dead column, 2026-09-18
+
+**Status:** `verified` in the browser against the rebuilt profile, with the pixels and the focus measured.
+
+- [x] **The complaint was two symptoms of one defect.** "对话栏鼠标不能交互" and "提示比例很难看" are both
+  the empty thread: with no lines, the shipped conversation surface renders its *welcome page* — brand
+  headline, workspace row, 312px hero composer — and that page claims 648px of the column. The frame's own
+  empty state was left an 80px strip above 390px of scroll body, and measured, the column's centre and lower
+  third both left focus on `body`. A thread *with* lines was already correct (674px, all ours).
+- [x] **The existing hide rule could never have worked.** `[data-slot="conversation.session"] { display: none }`
+  targeted a node the framework fills with an **inline** `display: contents` — inline beats any stylesheet —
+  and which is an empty shell anyway (`childCount 0`). It was written for the transcript region; an empty
+  thread draws a welcome page, which no region rule reaches.
+- [x] **Named, not sniffed.** The frame already holds the transcript, so it publishes
+  `data-novel-thread-state="empty"` on the column — the same way it publishes `data-narrow` — and the
+  stylesheet answers that. Two rules: the composer stack keeps only its composer bar, and the shipped root
+  stops claiming the column.
+- [x] **Measured before and after, on the running host** (`docs/evidence/interaction-2026-09-18/`):
+  transcript kept 80px → **539px**; shipped root 648 → **188**; empty state 17px serif at 31.45px leading,
+  flush to the edge → **13px UI face, 22.1px leading, centred, 20px gutter**. A thread with lines is
+  **unchanged** (674 / 53, no attribute). The composer still focuses and takes text on the empty thread —
+  checked, because the fix edits the shipped surface's own flex.
+- [x] **Ruled out, with evidence, not by eye:** all seven topbar controls, the settings sheet (night resolves
+  `rgb(48, 48, 46)` — an earlier "white sheet at night" reading was a misread screenshot, corrected by
+  sampling pixels), the advanced panel, theme switching, all ten rail views, the editor (focus + typing), and
+  every clickable control's hit test.
+- [ ] **Found and left alone:** below 1184px the solver closes the conversation column outright, so the 对话
+  button is dead there. That closing is asserted as intended (`closes the conversation column rather than
+  letting it squeeze the manuscript`), and the float path the frame's own comment describes *is* reachable
+  between 1184 and `NARROW_AT` 1280. Whether the author should keep a way back below 1184 is a product call.
+- [ ] Gates: **456/456** tests (3 added), `typecheck`, `lint`, `git diff --check`, `dev-host.sh rebuild` +
+  sweep `exit 0`; `lib/client.js` 1,598,712 B against the 2.4 MB ceiling.
 
 ## The conversation chrome wears this product's colours, 2026-09-18
 

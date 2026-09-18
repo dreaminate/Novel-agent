@@ -29,10 +29,30 @@ const THEME_LABELS: readonly { readonly id: WorkbenchTheme; readonly label: stri
   { id: 'night', label: '夜间' },
 ]
 
+/**
+ * Where the theme control is and what pressing it does.
+ *
+ * The three states are a cycle, so the bar can offer them as one button rather
+ * than three: the author reads the mode it is in off the button, and the next
+ * press moves one step around. An unknown theme falls back to the first state
+ * rather than leaving the button blank.
+ */
+function themeStep(current: WorkbenchTheme): {
+  readonly label: string
+  readonly next: WorkbenchTheme
+  readonly nextLabel: string
+} {
+  const at = Math.max(0, THEME_LABELS.findIndex(entry => entry.id === current))
+  const now = THEME_LABELS[at] ?? THEME_LABELS[0]
+  const next = THEME_LABELS[(at + 1) % THEME_LABELS.length] ?? THEME_LABELS[0]
+  return { label: now?.label ?? '跟随系统', next: next?.id ?? 'auto', nextLabel: next?.label ?? '跟随系统' }
+}
+
 /** The topbar strip. */
 export function NovelTopbar(props: NovelTopbarProps): ReactNode {
   const { actions } = props
   const state = useWorkbenchState()
+  const theme = themeStep(state.theme)
   const works = props.useWorkspaces(snapshot => snapshot.items)
   const current = props.useSessions(snapshot => snapshot.current)
   const work = resolveCurrentWork(works, current)
@@ -89,18 +109,19 @@ export function NovelTopbar(props: NovelTopbarProps): ReactNode {
         '进阶',
       ),
       createElement(
-        'div',
-        { className: 'seg', role: 'group', 'aria-label': '主题' },
-        THEME_LABELS.map(entry => createElement(
-          'button',
-          {
-            key: entry.id,
-            type: 'button',
-            'aria-pressed': state.theme === entry.id ? 'true' : 'false',
-            onClick: () => { actions.setTheme(entry.id) },
-          },
-          entry.label,
-        )),
+        'button',
+        {
+          type: 'button',
+          className: 'btn sm theme-btn',
+          key: 'theme',
+          'data-novel-topbar-theme': state.theme,
+          title: `主题：${theme.label} · 点一下切到${theme.nextLabel}`,
+          // The button says the mode it is in, so the state is readable without
+          // opening anything; the label adds what a press would do.
+          'aria-label': `主题：${theme.label}，点击切换到${theme.nextLabel}`,
+          onClick: () => { actions.setTheme(theme.next) },
+        },
+        theme.label,
       ),
       createElement(
         'button',

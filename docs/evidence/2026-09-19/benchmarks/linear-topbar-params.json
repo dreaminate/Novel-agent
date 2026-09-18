@@ -1,0 +1,52 @@
+{
+  "product": "Linear",
+  "surface": "顶栏 (NovelTopbar)",
+  "date": "2026-09-19",
+  "increment": "I-P5a",
+  "purpose": "视觉参数参照 for bespoke CSS (handoff §1 标杆: Linear topbar)",
+
+  "source": {
+    "primary": "Linear 的应用（linear.app 登录后）是闭源商业产品，无公开可交互 demo。参数来自 Linear 公开站点与公开产品截图中该设计语言的一致性描述，以及其公开的设计说明。",
+    "note": "未复制任何受版权保护的资产（图标 SVG、字体文件、原版设计资源）。仅取视觉参数（密度、层级、颜色用法），不取资产。"
+  },
+
+  "visualParams": {
+    "oneLoudElement": {
+      "rule": "一个 header 里只有一件东西可以响。Linear 的 header 用单一强调色，其余全是次要色；同时出现两个强调元素会互相削弱。",
+      "currentProduct": ".vbadge 使用 --accent-brand/--accent-text（与顶栏主操作的橙色相同），因此条形图上同时有两处强调",
+      "usage": "版本徽标降为中性 chip（--bg-300 底 + --text-200 文字 + --border-100 边）"
+    },
+    "singleRow": {
+      "rule": "单行，不换行；换行会把画布往下推。",
+      "currentProduct": "已是单行 flex（无 flex-wrap）",
+      "usage": "保持；作为回归断言写进 spec"
+    },
+    "secondaryStatusText": {
+      "rule": "状态与元数据用次要色、小字号；标题用主色。",
+      "currentProduct": ".topbar .ctx 13px / --text-200 75%",
+      "usage": ".topbar .ctx 降到 12px / --text-200 70%，与 Linear 的 12px 元数据行一致"
+    },
+    "noSegmentedGroups": {
+      "rule": "header 里不放假分段控件；状态用单个控件表达，点一下走到下一个状态。",
+      "currentProduct": "主题是三个常驻按钮（跟随系统 / 日间 / 夜间），占掉顶栏最宽的一段",
+      "usage": "改为一个循环按钮，按钮文字就是当前模式，title/aria-label 说明下一按会切到哪里"
+    },
+    "density": {
+      "rule": "控件高 32px、圆角 6px、间距 8px —— 与产品既有 .btn / --r-ctl / --s2 一致，不另立一套。",
+      "currentProduct": "已一致",
+      "usage": "保持"
+    }
+  },
+
+  "adoption": {
+    "vbadge": "原型 .vbadge 由 accent 底/字/边改为 --bg-300 / --text-200 / --border-100；版本号本身仍是等宽字体与 12px。",
+    "ctx": "原型 .topbar .ctx 由 13px / 75% 改为 12px / 70%。",
+    "themeControl": "原型新增 .topbar .theme-btn（min-width 72px + 次要色）；NovelTopbar 用 themeStep() 计算当前模式与下一模式。",
+    "kept": "进阶 保留在顶栏。rail 底部也有同一个开关（smoke 驱动的是 rail 那个），但窄窗 ≤1280 时 .rail-foot .lbl 被隐藏，顶栏这份是唯一仍可读的标签。"
+  },
+
+  "honestAssessment": {
+    "doubleScreenshotRule": "handoff §5.3 要求双截图（当前 vs Linear 顶栏对照）。Linear 应用需登录、无公开 demo，无法合法获取同规模对照截图。本文件用其公开设计语言的可验证描述作为参数来源，真机验证截当前实现的亮色 + 夜间两张；不构成双截图对照。",
+    "mitigation": "与 I-P1（Obsidian）、I-P3（Things 3）同样的处理：参数文字化并落盘，实现截图留档，偏差如实写在 honestAssessment 里。"
+  }
+}

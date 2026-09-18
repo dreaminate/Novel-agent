@@ -1,5 +1,27 @@
 # Execution checklist
 
+## Front-end Phase 2 polish — I-P5a, 2026-09-19
+
+**Work order of record:** [`frontend-polish-handoff-2026-09-19.md`](frontend-polish-handoff-2026-09-19.md) §I-P5a (topbar → Linear).
+
+- [x] **One theme control, not three.** The bar spent its widest slot on a three-button theme segment.
+      It is one button now whose own text is the mode it is in, cycling 跟随系统 → 日间 → 夜间 → 跟随系统;
+      `title`/`aria-label` say what the next press does. Measured on a real Host: the cycle repaints the
+      frame at every step (`auto` → `day` → `night` → `auto`).
+- [x] **One loud thing.** The revision badge wore the accent — the same orange as the bar's primary action —
+      so two elements competed for one glance. It is a neutral chip now (`--bg-300` / `--text-200` /
+      `--border-100`). The status line dropped 13px → 12px to read as metadata.
+- [x] **进阶 kept, deliberately.** The rail foot has the same switch and the sweep drives that one, but
+      `.rail-foot .lbl` is hidden at ≤1280, so the bar's copy is the only labelled one in a narrow window.
+      Five controls, no segmented group.
+- [x] **Changed through the prototype**, as the design-source rule requires: the topbar rules were edited in
+      `novel-mode-workbench.html` and `port-prototype-css.mjs` regenerated `workbench-css.ts` (`--check` passes).
+- [x] **Evidence.** `probe-i-p5a-topbar.mjs` + day/night screenshots + summary on the isolated Host, 0 console
+      errors; `linear-topbar-params.json` records the benchmark (Linear's app needs a login and has no public
+      demo, so the params are its documented design language — the same honest deviation I-P1 and I-P3 took).
+- [ ] **Next: I-P5b** — settings to the macOS System Settings benchmark.
+- [ ] **Parity matrix**: the Phase 2 rows are being updated in one pass at I-P6 rather than seven times.
+
 ## Front-end Phase 2 polish — I-P4, 2026-09-19
 
 **Work order of record:** [`frontend-polish-handoff-2026-09-19.md`](frontend-polish-handoff-2026-09-19.md) §I-P4 (A10).

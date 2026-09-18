@@ -1,0 +1,62 @@
+{
+  "purpose": "I-P5a topbar Linear 化真机验证",
+  "date": "2026-09-18T18:26:45.455Z",
+  "bar": {
+    "controls": [
+      "进阶",
+      "跟随系统",
+      "设置",
+      "左栏",
+      "对话"
+    ],
+    "segmentedGroups": 0,
+    "badges": 1,
+    "badgeStyle": {
+      "color": "rgba(20, 20, 19, 0.85)",
+      "background": "rgb(240, 238, 230)",
+      "border": "rgb(222, 220, 209)"
+    },
+    "rowStyle": {
+      "display": "flex",
+      "wrap": "nowrap",
+      "height": "44px"
+    },
+    "ctxStyle": {
+      "fontSize": "12px",
+      "color": "rgba(20, 20, 19, 0.7)"
+    },
+    "settingsEmphasis": {
+      "color": "rgba(20, 20, 19, 0.92)",
+      "background": "rgb(255, 255, 255)"
+    }
+  },
+  "cycle": [
+    {
+      "label": "跟随系统",
+      "frame": "auto"
+    },
+    {
+      "label": "日间",
+      "frame": "day"
+    },
+    {
+      "label": "夜间",
+      "frame": "night"
+    },
+    {
+      "label": "跟随系统",
+      "frame": "auto"
+    }
+  ],
+  "cycleReturnsToStart": true,
+  "day": {
+    "theme": "auto",
+    "screenshot": "i-p5a-topbar-day"
+  },
+  "night": {
+    "theme": "night",
+    "screenshot": "i-p5a-topbar-night"
+  },
+  "consoleErrors": 0,
+  "consoleErrorSamples": []
+}

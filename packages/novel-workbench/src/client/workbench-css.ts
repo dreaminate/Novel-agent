@@ -123,6 +123,12 @@ svg { display: block; }
 }
 
 /* 顶栏 */
+/*
+ * The bar's one rule, taken from Linear: exactly one thing in a header may be
+ * loud. The revision badge used to wear the accent — the same orange as the
+ * bar's primary action — so two elements competed for the same glance. Which
+ * revision the work stands at is a fact about the work, not a call to action.
+ */
 .topbar {
   grid-area: top;
   display: flex; align-items: center; gap: var(--s3);
@@ -132,14 +138,20 @@ svg { display: block; }
 }
 .topbar .brand { font-family: var(--font-serif); font-size: var(--fs-14); font-weight: 600; color: hsl(var(--text-000)); }
 .topbar .sep { width: 1px; height: 18px; background: hsl(var(--border-100)); }
-.topbar .ctx { font-size: var(--fs-13); color: hsl(var(--text-200) / .75); }
+.topbar .ctx { font-size: var(--fs-12); color: hsl(var(--text-200) / .7); }
 .topbar .right { margin-left: auto; display: flex; align-items: center; gap: var(--s2); }
 .vbadge {
   font-family: var(--font-mono); font-size: var(--fs-12); font-weight: 600;
   padding: 2px 7px; border-radius: var(--r-key);
-  background: hsl(var(--accent-brand) / .14); color: hsl(var(--accent-text));
-  border: 1px solid hsl(var(--accent-brand) / .35);
+  background: hsl(var(--bg-300)); color: hsl(var(--text-200) / .85);
+  border: 1px solid hsl(var(--border-100));
 }
+/*
+ * One theme control, not three. Three always-visible buttons spent the bar's
+ * widest slot on a setting the author changes twice a day; the button now names
+ * the mode it is in and moves to the next one when pressed.
+ */
+.topbar .theme-btn { min-width: 72px; color: hsl(var(--text-200) / .85); }
 
 /* 左栏 */
 .rail {

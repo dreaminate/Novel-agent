@@ -686,14 +686,23 @@ async function sweepThread(session) {
   return screen
 }
 
-/** Pick one button of the topbar's theme group by its visible label. */
+/**
+ * Put the topbar's theme control on `label`.
+ *
+ * I-P5a replaced the three-button theme group with one cycling control, so the
+ * mode is reached by pressing it until it reads the one asked for. Each press
+ * needs its own frame: React batches the state update, so clicking three times
+ * in one tick would read the starting label three times.
+ */
 async function pressTheme(session, label) {
-  return await session.evaluate(
-    `(() => { const group = document.querySelector('[aria-label="主题"]')
-      if (group === null) return 'no-group'
-      const button = Array.from(group.querySelectorAll('button')).find(node => node.innerText.trim() === ${JSON.stringify(label)})
-      if (button === undefined) return 'no-button'
-      button.click(); return 'ok' })()`)
+  const read = `(() => document.querySelector('[data-novel-topbar-theme]')?.innerText.trim() ?? '')()`
+  if (await session.evaluate(`document.querySelector('[data-novel-topbar-theme]') === null`)) return 'no-button'
+  for (let press = 0; press < 4; press += 1) {
+    if (await session.evaluate(read) === label) return 'ok'
+    await session.evaluate(`(() => document.querySelector('[data-novel-topbar-theme]')?.click())()`)
+    await sleep(150)
+  }
+  return await session.evaluate(read) === label ? 'ok' : 'no-button'
 }
 
 /**

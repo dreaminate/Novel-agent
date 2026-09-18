@@ -1,0 +1,32 @@
+{
+ "at": "2026-09-18T04:16:14.429Z",
+ "degraded": {
+  "cardPresent": true,
+  "cardRole": "alert",
+  "cardText": "这台机器没能给出可以画图的 WebGL 环境，所以 7 个人物的关系图画不出来。人物与关系本身没有问题——换「人物与关系」用列表看同一批人，或者换一个浏览器再试。 去人物与关系 重试",
+  "toCastButton": "去人物与关系",
+  "retryButton": "重试",
+  "shellHead": "故事地图",
+  "people": "7",
+  "webglCanvases": 0
+ },
+ "afterDegraded": {
+  "view": "cast",
+  "shellHead": "人物与关系",
+  "boardPresent": true,
+  "people": 6,
+  "rels": 3,
+  "factions": 4
+ },
+ "afterRetry": {
+  "cardStillThere": true,
+  "webglCanvases": 0,
+  "railAlive": true,
+  "railItems": 10,
+  "boundaryCard": false,
+  "frameAlive": true
+ },
+ "consoleErrorCount": 0,
+ "consoleErrors": [],
+ "verdict": "pass"
+}

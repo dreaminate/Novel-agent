@@ -1,0 +1,95 @@
+{
+  "populated": {
+    "threadState": null,
+    "transcriptSeat": {
+      "h": 674,
+      "top": 86,
+      "w": 295,
+      "left": 1145
+    },
+    "shippedRoot": {
+      "h": 53,
+      "top": 760,
+      "w": 295,
+      "left": 1145
+    },
+    "lines": 6,
+    "emptyState": null,
+    "strip": [
+      {
+        "f": 0.15,
+        "tag": "p",
+        "cls": "novel-transcript-text"
+      },
+      {
+        "f": 0.3,
+        "tag": "div",
+        "cls": "novel-transcript"
+      },
+      {
+        "f": 0.5,
+        "tag": "p",
+        "cls": "novel-transcript-text"
+      },
+      {
+        "f": 0.8,
+        "tag": "p",
+        "cls": "novel-transcript-text"
+      }
+    ]
+  },
+  "empty": {
+    "threadState": "empty",
+    "transcriptSeat": {
+      "h": 539,
+      "top": 86,
+      "w": 295,
+      "left": 1145
+    },
+    "shippedRoot": {
+      "h": 188,
+      "top": 625,
+      "w": 295,
+      "left": 1145
+    },
+    "lines": 0,
+    "emptyState": {
+      "h": 44,
+      "top": 333,
+      "w": 255,
+      "left": 1165,
+      "size": "13px",
+      "lh": "22.1px",
+      "align": "center",
+      "font": "\"PingFang SC\", \"Mi"
+    },
+    "strip": [
+      {
+        "f": 0.15,
+        "tag": "div",
+        "cls": "seat"
+      },
+      {
+        "f": 0.3,
+        "tag": "div",
+        "cls": "seat"
+      },
+      {
+        "f": 0.5,
+        "tag": "div",
+        "cls": "seat"
+      },
+      {
+        "f": 0.8,
+        "tag": "div",
+        "cls": "uV2eYG_input"
+      }
+    ]
+  },
+  "clickMiddle": "body.",
+  "clickComposer": {
+    "tag": "div",
+    "cls": "uV2eYG_input",
+    "editable": "true"
+  }
+}

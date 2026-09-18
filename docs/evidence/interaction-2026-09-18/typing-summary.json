@@ -1,0 +1,22 @@
+{
+  "composerBox": {
+    "x": 1293,
+    "y": 489,
+    "w": 295,
+    "h": 648
+  },
+  "afterComposerClick": "div.uV2eYG_input ce=true 251x52@467",
+  "composerText": "探索未至之境预览版天机阁主标准模式xx工作区内修改DeepSeek-V4-Fla",
+  "editorBox": {
+    "sel": "uV2eYG_input",
+    "x": 1287,
+    "y": 507,
+    "w": 251,
+    "h": 52
+  },
+  "afterEditorClick": "div.uV2eYG_input ce=true 251x52@467",
+  "editorLength": {
+    "before": null,
+    "after": null
+  }
+}

@@ -1,0 +1,241 @@
+
+ RUN  v4.1.8 /Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent
+
+ ❯ packages/novel-workbench/tests/novel-workbench-transcript.spec.ts (15 tests | 3 failed) 26ms
+     × names the calls that filed a proposal, and nothing else 1ms
+     × names every filing, in the order they happened 0ms
+     × says nothing when the thread has filed nothing 0ms
+stderr | packages/novel-workbench/tests/novel-workbench-review.spec.ts > novel-mode proposal review > says which thread is missing, and offers to open one, instead of a dead 接受本章
+Warning: `ReactDOMTestUtils.act` is deprecated in favor of `React.act`. Import `act` from `react` instead of `react-dom/test-utils`. See https://react.dev/warnings/react-dom-test-utils for more info.
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-review.spec.ts > novel-mode proposal review > says which thread is missing, and offers to open one, instead of a dead 接受本章
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-review.spec.ts > novel-mode proposal review > refuses to accept without a thread, and says what is missing instead of doing nothing
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-review.spec.ts > novel-mode proposal review > refuses to accept without a thread, and says what is missing instead of doing nothing
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-review.spec.ts > novel-mode proposal review > refuses to accept without a thread, and says what is missing instead of doing nothing
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-review.spec.ts > novel-mode proposal review > refuses to accept without a thread, and says what is missing instead of doing nothing
+Warning: The current testing environment is not configured to support act(...)
+
+ ❯ packages/novel-workbench/tests/novel-workbench-review.spec.ts (6 tests | 2 failed) 169ms
+     × says which thread is missing, and offers to open one, instead of a dead 接受本章 46ms
+     × refuses to accept without a thread, and says what is missing instead of doing nothing 100ms
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode accepted prose > says the draft and the accepted chapter have parted ways, and offers both ways across
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode accepted prose > says the draft and the accepted chapter have parted ways, and offers both ways across
+Warning: The current testing environment is not configured to support act(...)
+    at PureEditorContent (file:///Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/node_modules/.pnpm/@tiptap+react@3.31.3_@floating-ui+dom@1.8.0_@tiptap+core@3.31.3_@tiptap+pm@3.31.3__@tip_3f7997d730e64301e0d94ab970df1ddd/node_modules/@tiptap/react/dist/index.js:77:3)
+    at file:///Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/node_modules/.pnpm/@tiptap+react@3.31.3_@floating-ui+dom@1.8.0_@tiptap+core@3.31.3_@tiptap+pm@3.31.3__@tip_3f7997d730e64301e0d94ab970df1ddd/node_modules/@tiptap/react/dist/index.js:125:12
+    at div
+    at div
+    at NovelEditor (/Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/packages/novel-workbench/src/client/NovelEditor.tsx:61:11)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode accepted prose > says the draft and the accepted chapter have parted ways, and offers both ways across
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode accepted prose > says the draft and the accepted chapter have parted ways, and offers both ways across
+Warning: The current testing environment is not configured to support act(...)
+
+ ❯ packages/novel-workbench/tests/novel-workbench-editor.spec.ts (18 tests | 1 failed) 1081ms
+     × says the draft and the accepted chapter have parted ways, and offers both ways across 5ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode accepted prose > says the draft and the accepted chapter have parted ways, and offers both ways across
+AssertionError: expected null not to be null
+ ❯ packages/novel-workbench/tests/novel-workbench-editor.spec.ts:636:21
+    634|
+    635|     const bar = container.querySelector('[data-novel-editor-diverged]')
+    636|     expect(bar).not.toBeNull()
+       |                     ^
+    637|
+    638|     // 读已接受正文 shows what Canon actually holds…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  packages/novel-workbench/tests/novel-workbench-review.spec.ts > novel-mode proposal review > says which thread is missing, and offers to open one, instead of a dead 接受本章
+AssertionError: expected null not to be null
+ ❯ packages/novel-workbench/tests/novel-workbench-review.spec.ts:108:24
+    106|
+    107|     const banner = container.querySelector('[data-novel-review-session…
+    108|     expect(banner).not.toBeNull()
+       |                        ^
+    109|     expect(banner?.textContent).toContain('开一条线程')
+    110|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  packages/novel-workbench/tests/novel-workbench-review.spec.ts > novel-mode proposal review > refuses to accept without a thread, and says what is missing instead of doing nothing
+AssertionError: expected '提案审阅作者是决策者，AI 是稿手：逐条决定，再写入故事事实\n[data…' to contain '要先开一条线程'
+
+- Expected
++ Received
+
+- 要先开一条线程
++ 提案审阅作者是决策者，AI 是稿手：逐条决定，再写入故事事实
++ [data-novel-canvas] .nw-note {
++   padding: 12px 16px;
++   border: 1px solid hsl(var(--border-100));
++   border-radius: 10px;
++   background: hsl(var(--bg-000));
++   font-size: 13px;
++   color: hsl(var(--text-200));
++ }
++ [data-novel-canvas] .nw-canvas-error {
++   padding: 12px 16px;
++   border: 1px solid hsl(var(--border-100));
++   border-radius: 10px;
++   background: hsl(var(--bg-000));
++   font-size: 13px;
++   color: hsl(var(--text-100));
++ }
++ [data-novel-canvas] .reading {
++   max-width: var(--read-measure);
++   margin: 0 auto;
++   font-family: var(--font-serif);
++   font-size: var(--read-size);
++   line-height: var(--read-lh);
++   color: hsl(var(--text-000));
++ }
++ [data-novel-canvas] .reading h2 {
++   margin: 0 0 var(--s5);
++   font-size: var(--fs-20);
++   font-weight: 600;
++ }
++ [data-novel-canvas] .reading p { margin: 0 0 .86em; }
++
++ [data-novel-review] { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; gap: 14px; }
++ [data-novel-review] .nw-review-head { display: flex; flex-direction: column; gap: 4px; }
++ [data-novel-review] .nw-review-route { display: flex; align-items: baseline; gap: 8px; font-size: 13px; color: hsl(var(--text-200)); font-variant-numeric: tabular-nums; }
++ [data-novel-review] h2 { margin: 0; font-size: 18px; }
++ [data-novel-review] .nw-review-body { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 18px; flex: 1 1 auto; min-height: 0; }
++ [data-novel-review] .nw-review-column { display: flex; flex-direction: column; gap: 12px; min-height: 0; overflow: auto; padding-right: 4px; }
++ [data-novel-review] .nw-card { border: 1px solid hsl(var(--border-100)); border-radius: 10px; background: hsl(var(--bg-000)); padding: 14px 16px; }
++ [data-novel-review] .nw-card h3 { margin: 0 0 8px; font-size: 13px; color: hsl(var(--text-200)); font-weight: 600; }
++ [data-novel-review] .nw-manuscript {
++   font-family: "Songti SC", "Source Han Serif SC", Georgia, serif;
++   font-size: 16px;
++   line-height: 1.9;
++   white-space: pre-wrap;
++   max-height: 46vh;
++   overflow: auto;
++   color: hsl(var(--text-000));
++ }
++ [data-novel-review] .nw-item { display: flex; gap: 10px; padding: 8px 0; border-top: 1px solid hsl(var(--border-100)); }
++ [data-novel-review] .nw-item:first-of-type { border-top: none; }
++ [data-novel-review] .nw-item-text { flex: 1 1 auto; min-width: 0; }
++ [data-novel-review] .nw-item-actions { display: flex; gap: 6px; flex: 0 0 auto; }
++ [data-novel-review] button {
++   padding: 4px 10px;
++   border: 1px solid hsl(var(--border-100));
++   border-radius: 6px;
++   background: hsl(var(--bg-000));
++   color: hsl(var(--text-100));
++   font: inherit;
++   cursor: pointer;
++ }
++ [data-novel-review] button:hover:not(:disabled) { background: hsl(var(--bg-200)); }
++ [data-novel-review] button:disabled { opacity: .5; cursor: default; }
++ [data-novel-review] button[aria-pressed="true"] {
++   border-color: hsl(var(--accent-brand));
++   color: hsl(var(--accent-text));
++   background: hsl(var(--accent-brand) / .10);
++ }
++ [data-novel-review] .nw-primary { border-color: hsl(var(--accent-brand)); background: hsl(var(--accent-brand)); color: #fff; }
++ [data-novel-review] .nw-primary:hover:not(:disabled) { filter: brightness(.95); }
++ [data-novel-review] .nw-issue { display: flex; flex-direction: column; gap: 4px; padding: 8px 0; border-top: 1px solid hsl(var(--border-100)); }
++ [data-novel-review] .nw-issue:first-of-type { border-top: none; }
++ [data-novel-review] .nw-issue-head { display: flex; align-items: baseline; gap: 8px; }
++ [data-novel-review] .nw-severity { padding: 1px 6px; border-radius: 999px; font-size: 11px; background: hsl(var(--bg-300)); color: hsl(var(--text-200)); }
++ [data-novel-review] .nw-severity[data-severity="critical"] { background: hsl(var(--accent-brand) / .18); color: hsl(var(--accent-text)); }
++ [data-novel-review] .nw-anchor { font-size: 12px; color: hsl(var(--text-200)); }
++ [data-novel-review] .nw-footer { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; border-top: 1px solid hsl(var(--border-100)); padding-top: 12px; }
++ [data-novel-review] .nw-impact { font-size: 13px; color: hsl(var(--text-200)); }
++ [data-novel-review] .nw-notice { font-size: 13px; color: hsl(var(--accent-text)); }
++ [data-novel-review] .nw-empty { margin: 0; color: hsl(var(--text-200)); }
++ [data-novel-review] .nw-stale { color: hsl(var(--accent-text)); font-weight: 600; }
++ [data-novel-review] .nw-confirm {
++   position: absolute;
++   inset: 0;
++   z-index: 30;
++   display: flex;
++   align-items: center;
++   justify-content: center;
++   background: hsl(var(--text-000) / .18);
++ }
++ [data-novel-review] .nw-confirm-sheet {
++   width: min(520px, calc(100% - 48px));
++   background: hsl(var(--bg-000));
++   border: 1px solid hsl(var(--border-100));
++   border-radius: var(--r-card);
++   box-shadow: var(--sh-3);
++   padding: var(--s5);
++ }
++ [data-novel-review] .nw-confirm-sheet h3 { margin: 0 0 var(--s3); font-size: var(--fs-16); }
++ [data-novel-review] .nw-confirm-foot { display: flex; gap: var(--s2); justify-content: flex-end; margin-top: var(--s4); }
++ R5 → R6 · 冷库之下的通道 · 约 6 字冷库之下的通道正文预览陈默推开门。设定变更 1 条更新人物状态：3 号冷库地下通道接受拒绝审阅问题 1 个重要连续性采纳建议第 4 章说陈默受伤，这里却翻墙。建议：改成他扶墙走。出处 1 处影响预览正在计算影响…接受本章暂不处理丢弃提案确认接受本章？R5 → R6：正文 1 篇 · 设定变更 1 条 · 未采纳建议 0 条接受之后仍然可以回滚到上一版：回滚会停用这次写入的全部变更，历史里仍然查得到。返回调整确认接受 R6
+
+ ❯ packages/novel-workbench/tests/novel-workbench-review.spec.ts:184:35
+    182|
+    183|     expect(submitReview).not.toHaveBeenCalled()
+    184|     expect(container.textContent).toContain('要先开一条线程')
+       |                                   ^
+    185|   })
+    186|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  packages/novel-workbench/tests/novel-workbench-transcript.spec.ts > proposalCallIds > names the calls that filed a proposal, and nothing else
+TypeError: proposalCallIds is not a function
+ ❯ packages/novel-workbench/tests/novel-workbench-transcript.spec.ts:143:12
+    141|     ])
+    142|
+    143|     expect(proposalCallIds(lines)).toEqual(['call-propose'])
+       |            ^
+    144|   })
+    145|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  packages/novel-workbench/tests/novel-workbench-transcript.spec.ts > proposalCallIds > names every filing, in the order they happened
+TypeError: proposalCallIds is not a function
+ ❯ packages/novel-workbench/tests/novel-workbench-transcript.spec.ts:152:12
+    150|     ])
+    151|
+    152|     expect(proposalCallIds(lines)).toEqual(['call-a', 'call-b'])
+       |            ^
+    153|   })
+    154|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ FAIL  packages/novel-workbench/tests/novel-workbench-transcript.spec.ts > proposalCallIds > says nothing when the thread has filed nothing
+TypeError: proposalCallIds is not a function
+ ❯ packages/novel-workbench/tests/novel-workbench-transcript.spec.ts:161:12
+    159|     ])
+    160|
+    161|     expect(proposalCallIds(lines)).toEqual([])
+       |            ^
+    162|   })
+    163| })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+
+
+ Test Files  3 failed (3)
+      Tests  6 failed | 33 passed (39)
+   Start at  13:18:14
+   Duration  1.73s (transform 230ms, setup 0ms, import 290ms, tests 1.28s, environment 1.26s)
+

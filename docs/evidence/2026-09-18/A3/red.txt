@@ -1,0 +1,325 @@
+
+ RUN  v4.1.8 /Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent
+
+stderr | packages/novel-workbench/tests/novel-workbench-canvas.spec.ts > novel-mode writing canvas > says the outline could not be read, instead of blaming the author for not picking a chapter
+Warning: `ReactDOMTestUtils.act` is deprecated in favor of `React.act`. Import `act` from `react` instead of `react-dom/test-utils`. See https://react.dev/warnings/react-dom-test-utils for more info.
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-canvas.spec.ts > novel-mode writing canvas > reads the outline again when the author retries
+Warning: The current testing environment is not configured to support act(...)
+
+ ❯ packages/novel-workbench/tests/novel-workbench-canvas.spec.ts (3 tests | 2 failed) 222ms
+     × says the outline could not be read, instead of blaming the author for not picking a chapter 206ms
+     × reads the outline again when the author retries 5ms
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode submit chain > puts 「提交本章」 back as soon as the author writes again
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode submit chain > puts 「提交本章」 back as soon as the author writes again
+Warning: The current testing environment is not configured to support act(...)
+    at PureEditorContent (file:///Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/node_modules/.pnpm/@tiptap+react@3.31.3_@floating-ui+dom@1.8.0_@tiptap+core@3.31.3_@tiptap+pm@3.31.3__@tip_3f7997d730e64301e0d94ab970df1ddd/node_modules/@tiptap/react/dist/index.js:77:3)
+    at file:///Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/node_modules/.pnpm/@tiptap+react@3.31.3_@floating-ui+dom@1.8.0_@tiptap+core@3.31.3_@tiptap+pm@3.31.3__@tip_3f7997d730e64301e0d94ab970df1ddd/node_modules/@tiptap/react/dist/index.js:125:12
+    at div
+    at div
+    at NovelEditor (/Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/packages/novel-workbench/src/client/NovelEditor.tsx:61:11)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode submit chain > puts 「提交本章」 back as soon as the author writes again
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode submit chain > puts 「提交本章」 back as soon as the author writes again
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode submit chain > puts 「提交本章」 back as soon as the author writes again
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode submit chain > puts 「提交本章」 back as soon as the author writes again
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode submit chain > puts 「提交本章」 back as soon as the author writes again
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode submit chain > puts 「提交本章」 back as soon as the author writes again
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode submit chain > starts the next chapter with a clean slate, not the last chapter`s leftovers
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode submit chain > starts the next chapter with a clean slate, not the last chapter`s leftovers
+Warning: The current testing environment is not configured to support act(...)
+    at PureEditorContent (file:///Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/node_modules/.pnpm/@tiptap+react@3.31.3_@floating-ui+dom@1.8.0_@tiptap+core@3.31.3_@tiptap+pm@3.31.3__@tip_3f7997d730e64301e0d94ab970df1ddd/node_modules/@tiptap/react/dist/index.js:77:3)
+    at file:///Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/node_modules/.pnpm/@tiptap+react@3.31.3_@floating-ui+dom@1.8.0_@tiptap+core@3.31.3_@tiptap+pm@3.31.3__@tip_3f7997d730e64301e0d94ab970df1ddd/node_modules/@tiptap/react/dist/index.js:125:12
+    at div
+    at div
+    at NovelEditor (/Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/packages/novel-workbench/src/client/NovelEditor.tsx:61:11)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode submit chain > starts the next chapter with a clean slate, not the last chapter`s leftovers
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode submit chain > starts the next chapter with a clean slate, not the last chapter`s leftovers
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode submit chain > starts the next chapter with a clean slate, not the last chapter`s leftovers
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode submit chain > starts the next chapter with a clean slate, not the last chapter`s leftovers
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode submit chain > starts the next chapter with a clean slate, not the last chapter`s leftovers
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode submit chain > starts the next chapter with a clean slate, not the last chapter`s leftovers
+Warning: The current testing environment is not configured to support act(...)
+    at NovelEditor (/Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/packages/novel-workbench/src/client/NovelEditor.tsx:61:11)
+Warning: The current testing environment is not configured to support act(...)
+    at NovelEditor (/Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/packages/novel-workbench/src/client/NovelEditor.tsx:61:11)
+Warning: The current testing environment is not configured to support act(...)
+    at NovelEditor (/Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/packages/novel-workbench/src/client/NovelEditor.tsx:61:11)
+Warning: The current testing environment is not configured to support act(...)
+    at NovelEditor (/Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/packages/novel-workbench/src/client/NovelEditor.tsx:61:11)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode submit chain > never shows the confirm card and the continue panel at the same time
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode submit chain > never shows the confirm card and the continue panel at the same time
+Warning: The current testing environment is not configured to support act(...)
+    at PureEditorContent (file:///Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/node_modules/.pnpm/@tiptap+react@3.31.3_@floating-ui+dom@1.8.0_@tiptap+core@3.31.3_@tiptap+pm@3.31.3__@tip_3f7997d730e64301e0d94ab970df1ddd/node_modules/@tiptap/react/dist/index.js:77:3)
+    at file:///Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/node_modules/.pnpm/@tiptap+react@3.31.3_@floating-ui+dom@1.8.0_@tiptap+core@3.31.3_@tiptap+pm@3.31.3__@tip_3f7997d730e64301e0d94ab970df1ddd/node_modules/@tiptap/react/dist/index.js:125:12
+    at div
+    at div
+    at NovelEditor (/Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/packages/novel-workbench/src/client/NovelEditor.tsx:61:11)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode submit chain > never shows the confirm card and the continue panel at the same time
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode submit chain > never shows the confirm card and the continue panel at the same time
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode submit chain > never shows the confirm card and the continue panel at the same time
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode submit chain > offers a way to the inbox it just filled
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode submit chain > offers a way to the inbox it just filled
+Warning: The current testing environment is not configured to support act(...)
+    at PureEditorContent (file:///Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/node_modules/.pnpm/@tiptap+react@3.31.3_@floating-ui+dom@1.8.0_@tiptap+core@3.31.3_@tiptap+pm@3.31.3__@tip_3f7997d730e64301e0d94ab970df1ddd/node_modules/@tiptap/react/dist/index.js:77:3)
+    at file:///Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/node_modules/.pnpm/@tiptap+react@3.31.3_@floating-ui+dom@1.8.0_@tiptap+core@3.31.3_@tiptap+pm@3.31.3__@tip_3f7997d730e64301e0d94ab970df1ddd/node_modules/@tiptap/react/dist/index.js:125:12
+    at div
+    at div
+    at NovelEditor (/Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/packages/novel-workbench/src/client/NovelEditor.tsx:61:11)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode submit chain > offers a way to the inbox it just filled
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode submit chain > offers a way to the inbox it just filled
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode submit chain > offers a way to the inbox it just filled
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode submit chain > offers a way to the inbox it just filled
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode submit chain > offers a way to the inbox it just filled
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode submit chain > offers a way to the inbox it just filled
+Warning: The current testing environment is not configured to support act(...)
+
+ ❯ packages/novel-workbench/tests/novel-workbench-editor.spec.ts (15 tests | 4 failed) 1061ms
+     × puts 「提交本章」 back as soon as the author writes again 7ms
+     × starts the next chapter with a clean slate, not the last chapter`s leftovers 6ms
+     × never shows the confirm card and the continue panel at the same time 4ms
+     × offers a way to the inbox it just filled 7ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  packages/novel-workbench/tests/novel-workbench-canvas.spec.ts > novel-mode writing canvas > says the outline could not be read, instead of blaming the author for not picking a chapter
+AssertionError: expected null not to be null
+ ❯ packages/novel-workbench/tests/novel-workbench-canvas.spec.ts:66:22
+     64|
+     65|     const card = container.querySelector('[data-novel-editor-outline-e…
+     66|     expect(card).not.toBeNull()
+       |                      ^
+     67|     // The real reason, not a sentence about something the author did …
+     68|     expect(card?.textContent).toContain('这一章的大纲没有读出来')
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  packages/novel-workbench/tests/novel-workbench-canvas.spec.ts > novel-mode writing canvas > reads the outline again when the author retries
+AssertionError: expected 1 to be greater than 1
+ ❯ packages/novel-workbench/tests/novel-workbench-canvas.spec.ts:83:43
+     81|     await act(async () => {})
+     82|
+     83|     expect(loadOutline.mock.calls.length).toBeGreaterThan(before)
+       |                                           ^
+     84|   })
+     85|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode submit chain > puts 「提交本章」 back as soon as the author writes again
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ packages/novel-workbench/tests/novel-workbench-editor.spec.ts:431:62
+    429|     await ui.click('[data-novel-editor-confirm-submit]')
+    430|
+    431|     expect(shown(ui.container, '[data-novel-editor-inbox]')).toBe(true)
+       |                                                              ^
+    432|     expect(shown(ui.container, '[data-novel-editor-submit]')).toBe(fal…
+    433|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode submit chain > starts the next chapter with a clean slate, not the last chapter`s leftovers
+AssertionError: expected '\n.novel-editor { display: flex; flex…' not to contain '还没有选定线程'
+
+- Expected
++ Received
+
+- 还没有选定线程
++
++ .novel-editor { display: flex; flex-direction: column; gap: 10px; height: 100%; min-height: 0; }
++ .novel-editor-bar {
++   display: flex; align-items: center; gap: 12px;
++   font-family: var(--font-ui); font-size: 12px; color: hsl(var(--text-200));
++ }
++ .novel-editor-count { margin-left: auto; font-variant-numeric: tabular-nums; }
++ .novel-editor-state { color: hsl(var(--warn)); }
++ .novel-editor-surface {
++   flex: 1 1 auto; min-height: 0; overflow: auto;
++   padding: 8px 2px 40px;
++ }
++ .novel-editor-surface .ProseMirror {
++   outline: none;
++   font-family: var(--font-serif);
++   font-size: var(--read-size);
++   line-height: var(--read-lh);
++   color: hsl(var(--text-000));
++   min-height: 40vh;
++ }
++ .novel-editor-surface .ProseMirror p { margin: 0 0 .86em; }
++ .novel-editor-surface .ProseMirror p:empty::after { content: '​'; }
++ .novel-editor-reading {
++   font-family: var(--font-serif);
++   color: hsl(var(--text-000));
++ }
++ .novel-editor-reading p { margin: 0 0 .86em; }
++ /*
++  * The ghost text. It is a decoration, not the author's text: grey, marked
++  * aria-hidden, and gone the instant it is refused.
++  */
++ .novel-ghost { color: hsl(var(--text-200) / .65); pointer-events: none; }
++ .novel-editor-toggle { display: flex; gap: 6px; }
++ .novel-editor-toggle .btn.on { border-color: hsl(var(--accent-brand)); color: hsl(var(--accent-text)); }
++ .novel-editor-confirm {
++   display: flex; flex-direction: column; gap: 8px;
++   padding: 12px 14px;
++   border: 1px solid hsl(var(--accent-brand) / .5);
++   border-radius: 10px;
++   background: hsl(var(--accent-brand) / .08);
++   font-family: var(--font-ui); font-size: 13px; line-height: 1.7;
++   color: hsl(var(--text-100));
++ }
++ .novel-editor-confirm p { margin: 0; }
++ .novel-editor-confirm-note { color: hsl(var(--text-200)); font-size: 12px; }
++ 第2章《夜航》写作阅读已保存到稿子文件4 字续写提交本章重新提炼还没有选定线程，先在左栏开一条线再提炼。把第2章《夜航》的草稿（4 字）作为一份提案提交，和已接受版本 R7 对齐。草稿先存盘，再由 AI 读它、产出提案放进提案收件箱。 Canon 不会因为这一步改变 —— 只有你在审阅里逐条接受，它才动。还没有选定线程，先在左栏开一条线再提交。先不提交提交成提案第一段。
+
+ ❯ packages/novel-workbench/tests/novel-workbench-editor.spec.ts:461:42
+    459|     // Nothing said about the last chapter may describe this one: not …
+    460|     // inbox state, not its problems, not a confirm card left open.
+    461|     expect(ui.container.textContent).not.toContain('还没有选定线程')
+       |                                          ^
+    462|     expect(shown(ui.container, '[data-novel-editor-inbox]')).toBe(fals…
+    463|     expect(shown(ui.container, '[data-novel-editor-refined]')).toBe(fa…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode submit chain > never shows the confirm card and the continue panel at the same time
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ packages/novel-workbench/tests/novel-workbench-editor.spec.ts:479:58
+    477|     await ui.click('[data-novel-editor-submit]')
+    478|     expect(shown(ui.container, '[data-novel-editor-confirm]')).toBe(tr…
+    479|     expect(shown(ui.container, '[data-novel-continue]')).toBe(false)
+       |                                                          ^
+    480|
+    481|     // …and the other way round.
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ FAIL  packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode submit chain > offers a way to the inbox it just filled
+AssertionError: expected +0 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ packages/novel-workbench/tests/novel-workbench-editor.spec.ts:497:20
+    495|     await ui.click('[data-novel-editor-inbox]')
+    496|
+    497|     expect(opened).toBe(1)
+       |                    ^
+    498|   })
+    499| })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  6 failed | 12 passed (18)
+   Start at  10:06:27
+   Duration  1.75s (transform 186ms, setup 0ms, import 195ms, tests 1.28s, environment 896ms)
+

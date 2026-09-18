@@ -1,0 +1,82 @@
+{
+  "populatedBeforeRule": {
+    "transcriptSeat": {
+      "h": 674,
+      "top": 86,
+      "w": 295
+    },
+    "shippedRoot": {
+      "h": 53,
+      "top": 760,
+      "w": 295
+    },
+    "hero": null,
+    "lines": 6,
+    "emptyState": null
+  },
+  "populatedWithRule": {
+    "transcriptSeat": {
+      "h": 674,
+      "top": 86,
+      "w": 295
+    },
+    "shippedRoot": {
+      "h": 53,
+      "top": 760,
+      "w": 295
+    },
+    "hero": null,
+    "lines": 6,
+    "emptyState": null
+  },
+  "emptyWithoutAttribute": {
+    "transcriptSeat": {
+      "h": 80,
+      "top": 86,
+      "w": 295
+    },
+    "shippedRoot": {
+      "h": 648,
+      "top": 165,
+      "w": 295
+    },
+    "hero": {
+      "h": 312,
+      "top": 333,
+      "w": 287
+    },
+    "lines": 0,
+    "emptyState": {
+      "w": 295,
+      "left": 1145,
+      "size": "17px",
+      "align": "start",
+      "lh": "31.45px"
+    }
+  },
+  "emptyWithAttribute": {
+    "transcriptSeat": {
+      "h": 539,
+      "top": 86,
+      "w": 295
+    },
+    "shippedRoot": {
+      "h": 188,
+      "top": 625,
+      "w": 295
+    },
+    "hero": {
+      "h": 188,
+      "top": 625,
+      "w": 287
+    },
+    "lines": 0,
+    "emptyState": {
+      "w": 295,
+      "left": 1145,
+      "size": "17px",
+      "align": "start",
+      "lh": "31.45px"
+    }
+  }
+}

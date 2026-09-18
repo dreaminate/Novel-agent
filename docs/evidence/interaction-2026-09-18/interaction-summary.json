@@ -1,0 +1,535 @@
+{
+  "opened": true,
+  "landmarks": {
+    "column": {
+      "left": 1144,
+      "top": 44,
+      "width": 296,
+      "height": 769
+    },
+    "transcriptSeat": {
+      "x": 1145,
+      "y": 85.59375,
+      "width": 295,
+      "height": 79.890625,
+      "top": 85.59375,
+      "right": 1440,
+      "bottom": 165.484375,
+      "left": 1145
+    },
+    "emptyText": {
+      "text": "这个线程还没有对话。写下第一句，或者从右栏挑一条待审提案。",
+      "rect": {
+        "x": 1145,
+        "y": 109.59375,
+        "width": 295,
+        "height": 62.875,
+        "top": 109.59375,
+        "right": 1440,
+        "bottom": 172.46875,
+        "left": 1145
+      },
+      "font": "\"Source Han Serif SC\", \"Noto Serif SC\", \"Songti SC\", SimSun, serif",
+      "size": "17px",
+      "lineHeight": "31.45px",
+      "color": "rgb(20, 20, 19)"
+    },
+    "bottomMost": [
+      {
+        "cls": "uV2eYG_row",
+        "tag": "div",
+        "top": 531,
+        "height": 82,
+        "width": 255
+      },
+      {
+        "cls": "uV2eYG_placeholder",
+        "tag": "div",
+        "top": 471,
+        "height": 48,
+        "width": 227
+      },
+      {
+        "cls": "uV2eYG_scroll",
+        "tag": "div",
+        "top": 467,
+        "height": 52,
+        "width": 251
+      },
+      {
+        "cls": "uV2eYG_grow",
+        "tag": "div",
+        "top": 467,
+        "height": 52,
+        "width": 251
+      },
+      {
+        "cls": "uV2eYG_input",
+        "tag": "div",
+        "top": 467,
+        "height": 52,
+        "width": 251
+      },
+      {
+        "cls": "uV2eYG_root uV2eYG_hero",
+        "tag": "div",
+        "top": 457,
+        "height": 156,
+        "width": 287
+      }
+    ]
+  },
+  "grid": [
+    {
+      "i": 0,
+      "j": 0,
+      "x": 1174,
+      "y": 87,
+      "tag": "div",
+      "cls": "novel-transcript",
+      "inside": true,
+      "pe": "auto"
+    },
+    {
+      "i": 0,
+      "j": 1,
+      "x": 1174,
+      "y": 172,
+      "tag": "div",
+      "cls": "wSkVaW_scrollBody",
+      "inside": true,
+      "pe": "auto"
+    },
+    {
+      "i": 0,
+      "j": 2,
+      "x": 1174,
+      "y": 258,
+      "tag": "div",
+      "cls": "wSkVaW_scrollBody",
+      "inside": true,
+      "pe": "auto"
+    },
+    {
+      "i": 0,
+      "j": 3,
+      "x": 1174,
+      "y": 343,
+      "tag": "div",
+      "cls": "pXSMma_headline",
+      "inside": true,
+      "pe": "auto"
+    },
+    {
+      "i": 0,
+      "j": 4,
+      "x": 1174,
+      "y": 429,
+      "tag": "svg",
+      "cls": "[object SVGAnimatedString]",
+      "inside": true,
+      "pe": "auto"
+    },
+    {
+      "i": 0,
+      "j": 5,
+      "x": 1174,
+      "y": 514,
+      "tag": "div",
+      "cls": "uV2eYG_input",
+      "inside": true,
+      "pe": "auto"
+    },
+    {
+      "i": 0,
+      "j": 6,
+      "x": 1174,
+      "y": 599,
+      "tag": "div",
+      "cls": "uV2eYG_row",
+      "inside": true,
+      "pe": "auto"
+    },
+    {
+      "i": 0,
+      "j": 7,
+      "x": 1174,
+      "y": 685,
+      "tag": "div",
+      "cls": "wSkVaW_scrollBody",
+      "inside": true,
+      "pe": "auto"
+    },
+    {
+      "i": 0,
+      "j": 8,
+      "x": 1174,
+      "y": 770,
+      "tag": "div",
+      "cls": "wSkVaW_scrollBody",
+      "inside": true,
+      "pe": "auto"
+    },
+    {
+      "i": 1,
+      "j": 0,
+      "x": 1233,
+      "y": 87,
+      "tag": "div",
+      "cls": "novel-transcript",
+      "inside": true,
+      "pe": "auto"
+    },
+    {
+      "i": 1,
+      "j": 1,
+      "x": 1233,
+      "y": 172,
+      "tag": "div",
+      "cls": "wSkVaW_scrollBody",
+      "inside": true,
+      "pe": "auto"
+    },
+    {
+      "i": 1,
+      "j": 2,
+      "x": 1233,
+      "y": 258,
+      "tag": "div",
+      "cls": "wSkVaW_scrollBody",
+      "inside": true,
+      "pe": "auto"
+    },
+    {
+      "i": 1,
+      "j": 3,
+      "x": 1233,
+      "y": 343,
+      "tag": "span",
+      "cls": "pXSMma_headlineText",
+      "inside": true,
+      "pe": "auto"
+    },
+    {
+      "i": 1,
+      "j": 4,
+      "x": 1233,
+      "y": 429,
+      "tag": "span",
+      "cls": "pXSMma_workspaceLabel",
+      "inside": true,
+      "pe": "auto"
+    },
+    {
+      "i": 1,
+      "j": 5,
+      "x": 1233,
+      "y": 514,
+      "tag": "div",
+      "cls": "uV2eYG_input",
+      "inside": true,
+      "pe": "auto"
+    },
+    {
+      "i": 1,
+      "j": 6,
+      "x": 1233,
+      "y": 599,
+      "tag": "div",
+      "cls": "uV2eYG_row",
+      "inside": true,
+      "pe": "auto"
+    },
+    {
+      "i": 1,
+      "j": 7,
+      "x": 1233,
+      "y": 685,
+      "tag": "div",
+      "cls": "wSkVaW_scrollBody",
+      "inside": true,
+      "pe": "auto"
+    },
+    {
+      "i": 1,
+      "j": 8,
+      "x": 1233,
+      "y": 770,
+      "tag": "div",
+      "cls": "wSkVaW_scrollBody",
+      "inside": true,
+      "pe": "auto"
+    },
+    {
+      "i": 2,
+      "j": 0,
+      "x": 1292,
+      "y": 87,
+      "tag": "div",
+      "cls": "novel-transcript",
+      "inside": true,
+      "pe": "auto"
+    },
+    {
+      "i": 2,
+      "j": 1,
+      "x": 1292,
+      "y": 172,
+      "tag": "div",
+      "cls": "wSkVaW_scrollBody",
+      "inside": true,
+      "pe": "auto"
+    },
+    {
+      "i": 2,
+      "j": 2,
+      "x": 1292,
+      "y": 258,
+      "tag": "div",
+      "cls": "wSkVaW_scrollBody",
+      "inside": true,
+      "pe": "auto"
+    },
+    {
+      "i": 2,
+      "j": 3,
+      "x": 1292,
+      "y": 343,
+      "tag": "span",
+      "cls": "pXSMma_headlineText",
+      "inside": true,
+      "pe": "auto"
+    },
+    {
+      "i": 2,
+      "j": 4,
+      "x": 1292,
+      "y": 429,
+      "tag": "svg",
+      "cls": "[object SVGAnimatedString]",
+      "inside": true,
+      "pe": "auto"
+    },
+    {
+      "i": 2,
+      "j": 5,
+      "x": 1292,
+      "y": 514,
+      "tag": "div",
+      "cls": "uV2eYG_input",
+      "inside": true,
+      "pe": "auto"
+    },
+    {
+      "i": 2,
+      "j": 6,
+      "x": 1292,
+      "y": 599,
+      "tag": "span",
+      "cls": "_7KE1Ra_triggerLabel",
+      "inside": true,
+      "pe": "auto"
+    },
+    {
+      "i": 2,
+      "j": 7,
+      "x": 1292,
+      "y": 685,
+      "tag": "div",
+      "cls": "wSkVaW_scrollBody",
+      "inside": true,
+      "pe": "auto"
+    },
+    {
+      "i": 2,
+      "j": 8,
+      "x": 1292,
+      "y": 770,
+      "tag": "div",
+      "cls": "wSkVaW_scrollBody",
+      "inside": true,
+      "pe": "auto"
+    },
+    {
+      "i": 3,
+      "j": 0,
+      "x": 1351,
+      "y": 87,
+      "tag": "div",
+      "cls": "novel-transcript",
+      "inside": true,
+      "pe": "auto"
+    },
+    {
+      "i": 3,
+      "j": 1,
+      "x": 1351,
+      "y": 172,
+      "tag": "div",
+      "cls": "wSkVaW_scrollBody",
+      "inside": true,
+      "pe": "auto"
+    },
+    {
+      "i": 3,
+      "j": 2,
+      "x": 1351,
+      "y": 258,
+      "tag": "div",
+      "cls": "wSkVaW_scrollBody",
+      "inside": true,
+      "pe": "auto"
+    },
+    {
+      "i": 3,
+      "j": 3,
+      "x": 1351,
+      "y": 343,
+      "tag": "div",
+      "cls": "pXSMma_headline",
+      "inside": true,
+      "pe": "auto"
+    },
+    {
+      "i": 3,
+      "j": 4,
+      "x": 1351,
+      "y": 429,
+      "tag": "button",
+      "cls": "cubgiG_seat",
+      "inside": true,
+      "pe": "auto"
+    },
+    {
+      "i": 3,
+      "j": 5,
+      "x": 1351,
+      "y": 514,
+      "tag": "div",
+      "cls": "uV2eYG_input",
+      "inside": true,
+      "pe": "auto"
+    },
+    {
+      "i": 3,
+      "j": 6,
+      "x": 1351,
+      "y": 599,
+      "tag": "button",
+      "cls": "_7KE1Ra_trigger",
+      "inside": true,
+      "pe": "auto"
+    },
+    {
+      "i": 3,
+      "j": 7,
+      "x": 1351,
+      "y": 685,
+      "tag": "div",
+      "cls": "wSkVaW_scrollBody",
+      "inside": true,
+      "pe": "auto"
+    },
+    {
+      "i": 3,
+      "j": 8,
+      "x": 1351,
+      "y": 770,
+      "tag": "div",
+      "cls": "wSkVaW_scrollBody",
+      "inside": true,
+      "pe": "auto"
+    },
+    {
+      "i": 4,
+      "j": 0,
+      "x": 1410,
+      "y": 87,
+      "tag": "div",
+      "cls": "novel-transcript",
+      "inside": true,
+      "pe": "auto"
+    },
+    {
+      "i": 4,
+      "j": 1,
+      "x": 1410,
+      "y": 172,
+      "tag": "div",
+      "cls": "wSkVaW_scrollBody",
+      "inside": true,
+      "pe": "auto"
+    },
+    {
+      "i": 4,
+      "j": 2,
+      "x": 1410,
+      "y": 258,
+      "tag": "div",
+      "cls": "wSkVaW_scrollBody",
+      "inside": true,
+      "pe": "auto"
+    },
+    {
+      "i": 4,
+      "j": 3,
+      "x": 1410,
+      "y": 343,
+      "tag": "div",
+      "cls": "pXSMma_root",
+      "inside": true,
+      "pe": "auto"
+    },
+    {
+      "i": 4,
+      "j": 4,
+      "x": 1410,
+      "y": 429,
+      "tag": "div",
+      "cls": "wSkVaW_heroWorkspaceRow",
+      "inside": true,
+      "pe": "auto"
+    },
+    {
+      "i": 4,
+      "j": 5,
+      "x": 1410,
+      "y": 514,
+      "tag": "div",
+      "cls": "uV2eYG_input",
+      "inside": true,
+      "pe": "auto"
+    },
+    {
+      "i": 4,
+      "j": 6,
+      "x": 1410,
+      "y": 599,
+      "tag": "div",
+      "cls": "uV2eYG_row",
+      "inside": true,
+      "pe": "auto"
+    },
+    {
+      "i": 4,
+      "j": 7,
+      "x": 1410,
+      "y": 685,
+      "tag": "div",
+      "cls": "wSkVaW_scrollBody",
+      "inside": true,
+      "pe": "auto"
+    },
+    {
+      "i": 4,
+      "j": 8,
+      "x": 1410,
+      "y": 770,
+      "tag": "div",
+      "cls": "wSkVaW_scrollBody",
+      "inside": true,
+      "pe": "auto"
+    }
+  ],
+  "consoleErrors": []
+}

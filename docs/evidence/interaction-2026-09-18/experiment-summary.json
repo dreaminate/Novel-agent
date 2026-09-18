@@ -1,0 +1,229 @@
+{
+  "results": {
+    "none": {
+      "emptyState": {
+        "w": 295,
+        "h": 63,
+        "left": 1145,
+        "right": 1440,
+        "overflow": false,
+        "size": "17px",
+        "lh": "31.45px",
+        "align": "start"
+      },
+      "sideFlex": {
+        "disp": "flex",
+        "dir": "column",
+        "h": 769
+      },
+      "root": {
+        "h": 648,
+        "top": 165,
+        "flex": "0 1 auto",
+        "cls": "wSkVaW_root",
+        "disp": "flex"
+      },
+      "body": {
+        "h": 648,
+        "top": 165,
+        "flex": "1 1 0%",
+        "cls": "wSkVaW_body",
+        "disp": "flex"
+      },
+      "scroll": {
+        "h": 648,
+        "top": 165,
+        "flex": "1 1 0%",
+        "cls": "wSkVaW_scrollBody",
+        "disp": "flex"
+      },
+      "composerSeat": {
+        "h": 312,
+        "top": 333,
+        "flex": "0 0 auto",
+        "cls": "wSkVaW_composerSeat",
+        "disp": "flex"
+      },
+      "stack": {
+        "h": 312,
+        "top": 333,
+        "flex": "0 1 auto",
+        "cls": "wSkVaW_composerStack wSkVaW_composerHero",
+        "disp": "flex"
+      },
+      "transcriptSeat": {
+        "h": 80,
+        "top": 86,
+        "flex": "1 1 auto",
+        "cls": "seat",
+        "disp": "block"
+      },
+      "sideChildren": [
+        {
+          "h": 0,
+          "top": 0,
+          "flex": "0 1 auto",
+          "cls": "seat",
+          "disp": "contents"
+        },
+        {
+          "h": 769,
+          "top": 44,
+          "flex": "0 1 auto",
+          "cls": "nw-column-handle",
+          "disp": "block"
+        }
+      ]
+    },
+    "heroGone": {
+      "emptyState": {
+        "w": 295,
+        "h": 63,
+        "left": 1145,
+        "right": 1440,
+        "overflow": false,
+        "size": "17px",
+        "lh": "31.45px",
+        "align": "start"
+      },
+      "sideFlex": {
+        "disp": "flex",
+        "dir": "column",
+        "h": 769
+      },
+      "root": {
+        "h": 188,
+        "top": 625,
+        "flex": "0 0 auto",
+        "cls": "wSkVaW_root",
+        "disp": "flex"
+      },
+      "body": {
+        "h": 188,
+        "top": 625,
+        "flex": "1 1 0%",
+        "cls": "wSkVaW_body",
+        "disp": "flex"
+      },
+      "scroll": {
+        "h": 188,
+        "top": 625,
+        "flex": "1 1 0%",
+        "cls": "wSkVaW_scrollBody",
+        "disp": "flex"
+      },
+      "composerSeat": {
+        "h": 188,
+        "top": 625,
+        "flex": "0 0 auto",
+        "cls": "wSkVaW_composerSeat",
+        "disp": "flex"
+      },
+      "stack": {
+        "h": 188,
+        "top": 625,
+        "flex": "0 1 auto",
+        "cls": "wSkVaW_composerStack wSkVaW_composerHero",
+        "disp": "flex"
+      },
+      "transcriptSeat": {
+        "h": 539,
+        "top": 86,
+        "flex": "1 1 auto",
+        "cls": "seat",
+        "disp": "block"
+      },
+      "sideChildren": [
+        {
+          "h": 0,
+          "top": 0,
+          "flex": "0 1 auto",
+          "cls": "seat",
+          "disp": "contents"
+        },
+        {
+          "h": 769,
+          "top": 44,
+          "flex": "0 1 auto",
+          "cls": "nw-column-handle",
+          "disp": "block"
+        }
+      ]
+    },
+    "heroGoneAndEmpty": {
+      "emptyState": {
+        "w": 255,
+        "h": 44,
+        "left": 1165,
+        "right": 1420,
+        "overflow": false,
+        "size": "13px",
+        "lh": "22.1px",
+        "align": "center"
+      },
+      "sideFlex": {
+        "disp": "flex",
+        "dir": "column",
+        "h": 769
+      },
+      "root": {
+        "h": 188,
+        "top": 625,
+        "flex": "0 0 auto",
+        "cls": "wSkVaW_root",
+        "disp": "flex"
+      },
+      "body": {
+        "h": 188,
+        "top": 625,
+        "flex": "1 1 0%",
+        "cls": "wSkVaW_body",
+        "disp": "flex"
+      },
+      "scroll": {
+        "h": 188,
+        "top": 625,
+        "flex": "1 1 0%",
+        "cls": "wSkVaW_scrollBody",
+        "disp": "flex"
+      },
+      "composerSeat": {
+        "h": 188,
+        "top": 625,
+        "flex": "0 0 auto",
+        "cls": "wSkVaW_composerSeat",
+        "disp": "flex"
+      },
+      "stack": {
+        "h": 188,
+        "top": 625,
+        "flex": "0 1 auto",
+        "cls": "wSkVaW_composerStack wSkVaW_composerHero",
+        "disp": "flex"
+      },
+      "transcriptSeat": {
+        "h": 539,
+        "top": 86,
+        "flex": "1 1 auto",
+        "cls": "seat",
+        "disp": "flex"
+      },
+      "sideChildren": [
+        {
+          "h": 0,
+          "top": 0,
+          "flex": "0 1 auto",
+          "cls": "seat",
+          "disp": "contents"
+        },
+        {
+          "h": 769,
+          "top": 44,
+          "flex": "0 1 auto",
+          "cls": "nw-column-handle",
+          "disp": "block"
+        }
+      ]
+    }
+  }
+}

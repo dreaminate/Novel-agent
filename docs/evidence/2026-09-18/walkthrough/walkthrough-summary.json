@@ -1,0 +1,199 @@
+{
+  "findings": [
+    {
+      "step": "1-landing",
+      "view": "editor",
+      "canvas": "editor",
+      "editorExists": false,
+      "editorEmptyText": null,
+      "welcomeExists": false,
+      "chapterSelected": false,
+      "mainHead": "写作",
+      "mainSub": "这一章的稿子 · 自动保存在你自己的文件夹里"
+    },
+    {
+      "step": "2-select-chapter",
+      "firstChapter": {
+        "id": "vol01-ch0001",
+        "title": "第 1 章 · 开篇章",
+        "viewBefore": "editor"
+      },
+      "afterChapter": {
+        "view": "editor",
+        "barChildrenCount": 7,
+        "barChildren": [
+          "第1章《开篇章》",
+          "写作阅读",
+          "已保存到稿子文件",
+          "18 字",
+          "续写",
+          "提交本章",
+          "重新提炼"
+        ],
+        "status": "clean",
+        "count": "18"
+      }
+    },
+    {
+      "step": "3-editor-bar-density",
+      "itemCount": 9,
+      "items": [
+        {
+          "tag": "span",
+          "text": "第1章《开篇章》",
+          "cls": "",
+          "dataAttrs": ""
+        },
+        {
+          "tag": "span",
+          "text": "写作阅读",
+          "cls": "novel-editor-toggle",
+          "dataAttrs": ""
+        },
+        {
+          "tag": "button",
+          "text": "写作",
+          "cls": "btn sm on",
+          "dataAttrs": "data-novel-editor-mode=write"
+        },
+        {
+          "tag": "button",
+          "text": "阅读",
+          "cls": "btn sm",
+          "dataAttrs": "data-novel-editor-mode=read"
+        },
+        {
+          "tag": "span",
+          "text": "已保存到稿子文件",
+          "cls": "novel-editor-state",
+          "dataAttrs": "data-novel-editor-status=clean"
+        },
+        {
+          "tag": "span",
+          "text": "18 字",
+          "cls": "novel-editor-count",
+          "dataAttrs": "data-novel-editor-count=18"
+        },
+        {
+          "tag": "button",
+          "text": "续写",
+          "cls": "btn sm",
+          "dataAttrs": "data-novel-editor-continue=true"
+        },
+        {
+          "tag": "button",
+          "text": "提交本章",
+          "cls": "btn sm",
+          "dataAttrs": "data-novel-editor-submit=true"
+        },
+        {
+          "tag": "button",
+          "text": "重新提炼",
+          "cls": "btn sm",
+          "dataAttrs": "data-novel-editor-refine=true"
+        }
+      ],
+      "barWidth": 896,
+      "overflow": false
+    },
+    {
+      "step": "4-typing",
+      "status": "clean",
+      "count": "32",
+      "textLen": 58,
+      "textSample": "测测试试夜里风大，吹得窗纸哗哗作响。他蜷在薄被里，听着那声音一阵紧似一阵，迟迟没"
+    },
+    {
+      "step": "5-continue-panel",
+      "continueBtn": {
+        "exists": true,
+        "label": "续写",
+        "position": {
+          "x": 934,
+          "y": 127
+        }
+      },
+      "continuePanel": {
+        "exists": true,
+        "head": "接着往下写一行一件事，按你写的顺序推进",
+        "placeholder": "接下来发生什么？一行一件事。\n例如：\n先写风声\n再写脚步声",
+        "actions": [
+          "生成"
+        ]
+      }
+    },
+    {
+      "step": "6-submit-confirm",
+      "submitBtn": "提交本章",
+      "confirmCard": {
+        "text": "把第1章《开篇章》的草稿（32 字）交给 AI 整理成一份提案。草稿先存盘。AI 会把这一章的设定变化整理成一条条建议，放进提案收件箱。在你逐条接受之前，故事内容不会有任何变化。先不提交提交成提案"
+      }
+    },
+    {
+      "step": "7-story-map",
+      "head": "故事地图",
+      "sub": "人物、关系与进度一眼看清 · 点节点看摘要，双击开档案",
+      "nodeLabels": [],
+      "nodeLabelCount": 0,
+      "foldedChip": null
+    },
+    {
+      "step": "8-cast",
+      "cardCount": 0,
+      "cards": [],
+      "relCount": 0,
+      "rels": [],
+      "zeroChips": []
+    },
+    {
+      "step": "9-transcript-noise",
+      "lineCount": 0,
+      "lines": [],
+      "noiseCount": 0,
+      "noiseSample": []
+    },
+    {
+      "step": "10-settings",
+      "exists": true,
+      "settingLabels": [
+        "主题",
+        "正文大小",
+        "阅读行宽",
+        "段首缩进",
+        "行高",
+        "句子续写",
+        "续写等待",
+        "工具活动",
+        "提炼时机"
+      ],
+      "settingNotes": [
+        "正文阅读按这个字号排版，行高保持 1.85。",
+        "行宽越窄，眼睛回扫越省力；40 字是原型的默认值。",
+        "中文稿子的惯例是段首缩进两个字；顶格更像屏幕阅读。",
+        "行距越大，读长段越松快；1.85 是原型的默认值。",
+        "停笔一会儿，在光标处给一句灰色的续写建议；Tab 采纳，Esc 丢掉。它只是建议，不会自己写进稿子。",
+        "等得越久越不容易打扰你，但也越像在等它。",
+        "对话里除了 AI 说的话，还会写它做了什么（读了哪个文件、整理成提案）。收起后只留文字 —— 那些动作本来也不进你的稿子",
+        "提交时：你把这一章交出去时，AI 把设定变化整理成提案。边写边：写到一定量也顺手整理一次 —— 会更及时，也可能一次攒下"
+      ]
+    },
+    {
+      "step": "11-night",
+      "bg": "rgb(48, 48, 46)",
+      "theme": "night"
+    },
+    {
+      "step": "12-narrow-1280",
+      "dataNarrow": "1",
+      "railWidth": 58,
+      "itemCount": 19,
+      "noLabelCount": 0
+    },
+    {
+      "step": "13-console",
+      "errorCount": 0,
+      "errors": []
+    }
+  ],
+  "generatedAt": "2026-09-18T16:05:48.345Z"
+}

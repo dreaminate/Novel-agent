@@ -1,0 +1,92 @@
+{
+  "day": {
+    "frameTheme": "auto",
+    "frameBg000": "0 0% 100%",
+    "frameBg100": "48 33.3% 97.1%",
+    "layerParentIsFrame": true,
+    "layerBg": "rgba(20, 20, 19, 0.18)",
+    "sheetBg": "rgb(255, 255, 255)",
+    "sheetColor": "rgb(20, 20, 19)",
+    "sheetTokenBg000": "0 0% 100%",
+    "sheetCentre": {
+      "x": 720,
+      "y": 124,
+      "top": [
+        "div.sheet-head=rgba(0, 0, 0, 0)",
+        "div.sheet=rgb(255, 255, 255)",
+        "div.=rgba(20, 20, 19, 0.18)",
+        "div.=rgba(0, 0, 0, 0)",
+        "div.app=rgb(255, 255, 255)",
+        "div.=rgba(0, 0, 0, 0)"
+      ]
+    },
+    "sheetRect": {
+      "w": 520,
+      "h": 1140,
+      "left": 460,
+      "top": 84
+    },
+    "bodyBg000": "0 0% 100%",
+    "workbenchStyleSheets": 82
+  },
+  "nightWhileOpen": {
+    "frameTheme": "night",
+    "frameBg000": "60 2.1% 18.4%",
+    "frameBg100": "60 2.7% 14.5%",
+    "layerParentIsFrame": true,
+    "layerBg": "rgba(250, 249, 245, 0.18)",
+    "sheetBg": "rgb(48, 48, 46)",
+    "sheetColor": "rgb(250, 249, 245)",
+    "sheetTokenBg000": "60 2.1% 18.4%",
+    "sheetCentre": {
+      "x": 720,
+      "y": 124,
+      "top": [
+        "div.sheet-head=rgba(0, 0, 0, 0)",
+        "div.sheet=rgb(48, 48, 46)",
+        "div.=rgba(250, 249, 245, 0.18)",
+        "div.=rgba(0, 0, 0, 0)",
+        "div.app=rgb(48, 48, 46)",
+        "div.=rgba(0, 0, 0, 0)"
+      ]
+    },
+    "sheetRect": {
+      "w": 520,
+      "h": 1140,
+      "left": 460,
+      "top": 84
+    },
+    "bodyBg000": "0 0% 100%",
+    "workbenchStyleSheets": 82
+  },
+  "nightReopened": {
+    "frameTheme": "night",
+    "frameBg000": "60 2.1% 18.4%",
+    "frameBg100": "60 2.7% 14.5%",
+    "layerParentIsFrame": true,
+    "layerBg": "rgba(250, 249, 245, 0.18)",
+    "sheetBg": "rgb(48, 48, 46)",
+    "sheetColor": "rgb(250, 249, 245)",
+    "sheetTokenBg000": "60 2.1% 18.4%",
+    "sheetCentre": {
+      "x": 720,
+      "y": 124,
+      "top": [
+        "div.sheet-head=rgba(0, 0, 0, 0)",
+        "div.sheet=rgb(48, 48, 46)",
+        "div.=rgba(250, 249, 245, 0.18)",
+        "div.=rgba(0, 0, 0, 0)",
+        "div.app=rgb(48, 48, 46)",
+        "div.=rgba(0, 0, 0, 0)"
+      ]
+    },
+    "sheetRect": {
+      "w": 520,
+      "h": 1140,
+      "left": 460,
+      "top": 84
+    },
+    "bodyBg000": "0 0% 100%",
+    "workbenchStyleSheets": 82
+  }
+}

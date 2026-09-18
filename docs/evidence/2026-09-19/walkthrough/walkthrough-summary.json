@@ -1,0 +1,53 @@
+{
+  "findings": [
+    {
+      "step": "1-landing-a3",
+      "view": "editor",
+      "canvas": "editor",
+      "landingCardExists": true,
+      "landingChapters": [
+        {
+          "id": "vol01-ch0001",
+          "text": "第1章开篇章待审"
+        }
+      ],
+      "landingPlan": null,
+      "mainHead": "写作",
+      "mainSub": "这一章的稿子 · 自动保存在你自己的文件夹里",
+      "subHasWorkdir": false,
+      "subHasCanon": false
+    },
+    {
+      "step": "2-story-map-a1",
+      "head": "故事地图",
+      "sub": "人物、关系与进度一眼看清 · 点节点看摘要，双击开档案",
+      "degradedCardExists": true,
+      "degradedText": "这台机器没能给出可以画图的 WebGL 环境，所以 7 个人物的关系图画不出来。人物与关系本身没有问题——换「人物与关系」用列表看同一批人，或者换一个浏览器再试。去人物与关系重试",
+      "degradedCastBtn": "去人物与关系",
+      "degradedRetryBtn": "重试",
+      "crashedCardExists": false,
+      "crashedText": null
+    },
+    {
+      "step": "3-cast-a1",
+      "head": "人物与关系",
+      "canvasView": "cast",
+      "crashedCardExists": false,
+      "castCanvasExists": true,
+      "charCardCount": 0
+    },
+    {
+      "step": "4-map-again",
+      "canvasView": "map",
+      "degradedCardExists": true,
+      "crashedCardExists": false
+    },
+    {
+      "step": "5-console",
+      "errorCount": 0,
+      "errors": []
+    }
+  ],
+  "generatedAt": "2026-09-18T16:29:36.984Z",
+  "purpose": "A1+A3 复跑验证 (Phase 2 开工闸门 §3.3 第 3 条)"
+}

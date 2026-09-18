@@ -1,0 +1,500 @@
+{
+  "slots": [
+    {
+      "slot": "root",
+      "tag": "div",
+      "cls": "",
+      "display": "contents",
+      "vis": "visible",
+      "w": 0,
+      "h": 0,
+      "top": 0
+    },
+    {
+      "slot": "novel.topbar",
+      "tag": "div",
+      "cls": "",
+      "display": "contents",
+      "vis": "visible",
+      "w": 0,
+      "h": 0,
+      "top": 0
+    },
+    {
+      "slot": "sidebar",
+      "tag": "div",
+      "cls": "",
+      "display": "contents",
+      "vis": "visible",
+      "w": 0,
+      "h": 0,
+      "top": 0
+    },
+    {
+      "slot": "novel.canvas",
+      "tag": "div",
+      "cls": "",
+      "display": "contents",
+      "vis": "visible",
+      "w": 0,
+      "h": 0,
+      "top": 0
+    },
+    {
+      "slot": "novel.thread.header",
+      "tag": "div",
+      "cls": "",
+      "display": "contents",
+      "vis": "visible",
+      "w": 0,
+      "h": 0,
+      "top": 0
+    },
+    {
+      "slot": "novel.thread.notice",
+      "tag": "div",
+      "cls": "",
+      "display": "contents",
+      "vis": "visible",
+      "w": 0,
+      "h": 0,
+      "top": 0
+    },
+    {
+      "slot": "conversation",
+      "tag": "div",
+      "cls": "",
+      "display": "contents",
+      "vis": "visible",
+      "w": 0,
+      "h": 0,
+      "top": 0
+    },
+    {
+      "slot": "conversation.session.header",
+      "tag": "div",
+      "cls": "",
+      "display": "contents",
+      "vis": "visible",
+      "w": 0,
+      "h": 0,
+      "top": 0
+    },
+    {
+      "slot": "conversation.session",
+      "tag": "div",
+      "cls": "",
+      "display": "contents",
+      "vis": "visible",
+      "w": 0,
+      "h": 0,
+      "top": 0
+    },
+    {
+      "slot": "conversation.composer",
+      "tag": "div",
+      "cls": "",
+      "display": "contents",
+      "vis": "visible",
+      "w": 0,
+      "h": 0,
+      "top": 0
+    },
+    {
+      "slot": "conversation.hero.brand.mark",
+      "tag": "div",
+      "cls": "",
+      "display": "contents",
+      "vis": "visible",
+      "w": 0,
+      "h": 0,
+      "top": 0
+    },
+    {
+      "slot": "conversation.hero.workspace",
+      "tag": "div",
+      "cls": "",
+      "display": "contents",
+      "vis": "visible",
+      "w": 0,
+      "h": 0,
+      "top": 0
+    },
+    {
+      "slot": "conversation.hero.workspace.directoryFlow",
+      "tag": "div",
+      "cls": "",
+      "display": "contents",
+      "vis": "visible",
+      "w": 0,
+      "h": 0,
+      "top": 0
+    },
+    {
+      "slot": "conversation.hero.agentPreset",
+      "tag": "div",
+      "cls": "",
+      "display": "contents",
+      "vis": "visible",
+      "w": 0,
+      "h": 0,
+      "top": 0
+    },
+    {
+      "slot": "conversation.input.dock",
+      "tag": "div",
+      "cls": "",
+      "display": "contents",
+      "vis": "visible",
+      "w": 0,
+      "h": 0,
+      "top": 0
+    },
+    {
+      "slot": "conversation.composer.bar",
+      "tag": "div",
+      "cls": "",
+      "display": "contents",
+      "vis": "visible",
+      "w": 0,
+      "h": 0,
+      "top": 0
+    },
+    {
+      "slot": "conversation.input.overlay",
+      "tag": "div",
+      "cls": "",
+      "display": "contents",
+      "vis": "visible",
+      "w": 0,
+      "h": 0,
+      "top": 0
+    },
+    {
+      "slot": "conversation.input.attachments",
+      "tag": "div",
+      "cls": "",
+      "display": "contents",
+      "vis": "visible",
+      "w": 0,
+      "h": 0,
+      "top": 0
+    },
+    {
+      "slot": "conversation.input.plan",
+      "tag": "div",
+      "cls": "",
+      "display": "contents",
+      "vis": "visible",
+      "w": 0,
+      "h": 0,
+      "top": 0
+    },
+    {
+      "slot": "conversation.input.left",
+      "tag": "div",
+      "cls": "",
+      "display": "contents",
+      "vis": "visible",
+      "w": 0,
+      "h": 0,
+      "top": 0
+    },
+    {
+      "slot": "conversation.input.right",
+      "tag": "div",
+      "cls": "",
+      "display": "contents",
+      "vis": "visible",
+      "w": 0,
+      "h": 0,
+      "top": 0
+    },
+    {
+      "slot": "conversation.input.model",
+      "tag": "div",
+      "cls": "",
+      "display": "contents",
+      "vis": "visible",
+      "w": 0,
+      "h": 0,
+      "top": 0
+    },
+    {
+      "slot": "shell.overlay",
+      "tag": "div",
+      "cls": "",
+      "display": "contents",
+      "vis": "visible",
+      "w": 0,
+      "h": 0,
+      "top": 0
+    }
+  ],
+  "columnPath": [
+    {
+      "depth": 0,
+      "tag": "aside",
+      "cls": "side",
+      "slot": null,
+      "display": "flex",
+      "w": 296,
+      "h": 769,
+      "top": 44,
+      "left": 1144
+    },
+    {
+      "depth": 1,
+      "tag": "div",
+      "cls": "seat",
+      "slot": null,
+      "display": "contents",
+      "w": 0,
+      "h": 0,
+      "top": 0,
+      "left": 0
+    },
+    {
+      "depth": 2,
+      "tag": "div",
+      "cls": "",
+      "slot": "novel.thread.header",
+      "display": "contents",
+      "w": 0,
+      "h": 0,
+      "top": 0,
+      "left": 0
+    },
+    {
+      "depth": 3,
+      "tag": "div",
+      "cls": "",
+      "slot": null,
+      "display": "flex",
+      "w": 295,
+      "h": 42,
+      "top": 44,
+      "left": 1145
+    },
+    {
+      "depth": 4,
+      "tag": "style",
+      "cls": "",
+      "slot": null,
+      "display": "none",
+      "w": 0,
+      "h": 0,
+      "top": 0,
+      "left": 0
+    },
+    {
+      "depth": 4,
+      "tag": "span",
+      "cls": "nw-thread-work",
+      "slot": null,
+      "display": "block",
+      "w": 48,
+      "h": 19,
+      "top": 55,
+      "left": 1161
+    },
+    {
+      "depth": 4,
+      "tag": "span",
+      "cls": "nw-thread-version",
+      "slot": null,
+      "display": "block",
+      "w": 15,
+      "h": 19,
+      "top": 55,
+      "left": 1219
+    },
+    {
+      "depth": 4,
+      "tag": "button",
+      "cls": "nw-thread-pending",
+      "slot": null,
+      "display": "block",
+      "w": 77,
+      "h": 25,
+      "top": 52,
+      "left": 1347
+    },
+    {
+      "depth": 2,
+      "tag": "div",
+      "cls": "seat",
+      "slot": null,
+      "display": "block",
+      "w": 295,
+      "h": 80,
+      "top": 86,
+      "left": 1145
+    },
+    {
+      "depth": 3,
+      "tag": "div",
+      "cls": "novel-transcript",
+      "slot": null,
+      "display": "flex",
+      "w": 295,
+      "h": 95,
+      "top": 86,
+      "left": 1145
+    },
+    {
+      "depth": 4,
+      "tag": "style",
+      "cls": "",
+      "slot": null,
+      "display": "none",
+      "w": 0,
+      "h": 0,
+      "top": 0,
+      "left": 0
+    },
+    {
+      "depth": 4,
+      "tag": "p",
+      "cls": "novel-transcript-empty",
+      "slot": null,
+      "display": "block",
+      "w": 295,
+      "h": 63,
+      "top": 110,
+      "left": 1145
+    },
+    {
+      "depth": 3,
+      "tag": "div",
+      "cls": "",
+      "slot": "novel.thread.notice",
+      "display": "contents",
+      "w": 0,
+      "h": 0,
+      "top": 0,
+      "left": 0
+    },
+    {
+      "depth": 2,
+      "tag": "div",
+      "cls": "",
+      "slot": "conversation",
+      "display": "contents",
+      "w": 0,
+      "h": 0,
+      "top": 0,
+      "left": 0
+    },
+    {
+      "depth": 3,
+      "tag": "div",
+      "cls": "wSkVaW_root",
+      "slot": null,
+      "display": "flex",
+      "w": 295,
+      "h": 648,
+      "top": 165,
+      "left": 1145
+    },
+    {
+      "depth": 4,
+      "tag": "div",
+      "cls": "",
+      "slot": "conversation.session.header",
+      "display": "contents",
+      "w": 0,
+      "h": 0,
+      "top": 0,
+      "left": 0
+    },
+    {
+      "depth": 5,
+      "tag": "header",
+      "cls": "wSkVaW_header wSkVaW_headerHidden",
+      "slot": null,
+      "display": "none",
+      "w": 0,
+      "h": 0,
+      "top": 0,
+      "left": 0
+    },
+    {
+      "depth": 4,
+      "tag": "div",
+      "cls": "wSkVaW_body",
+      "slot": null,
+      "display": "flex",
+      "w": 295,
+      "h": 648,
+      "top": 165,
+      "left": 1145
+    },
+    {
+      "depth": 5,
+      "tag": "div",
+      "cls": "wSkVaW_scrollBody",
+      "slot": null,
+      "display": "flex",
+      "w": 295,
+      "h": 648,
+      "top": 165,
+      "left": 1145
+    },
+    {
+      "depth": 6,
+      "tag": "div",
+      "cls": "",
+      "slot": "conversation.session",
+      "display": "contents",
+      "w": 0,
+      "h": 0,
+      "top": 0,
+      "left": 0
+    },
+    {
+      "depth": 6,
+      "tag": "div",
+      "cls": "wSkVaW_composerSeat",
+      "slot": null,
+      "display": "flex",
+      "w": 287,
+      "h": 312,
+      "top": 333,
+      "left": 1145
+    },
+    {
+      "depth": 7,
+      "tag": "div",
+      "cls": "",
+      "slot": "conversation.composer",
+      "display": "contents",
+      "w": 0,
+      "h": 0,
+      "top": 0,
+      "left": 0
+    },
+    {
+      "depth": 8,
+      "tag": "div",
+      "cls": "",
+      "slot": null,
+      "display": "contents",
+      "w": 0,
+      "h": 0,
+      "top": 0,
+      "left": 0
+    },
+    {
+      "depth": 1,
+      "tag": "div",
+      "cls": "nw-column-handle",
+      "slot": null,
+      "display": "block",
+      "w": 9,
+      "h": 769,
+      "top": 44,
+      "left": 1141
+    }
+  ]
+}

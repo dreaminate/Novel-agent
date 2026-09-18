@@ -1,0 +1,52 @@
+{
+ "at": "2026-09-18T05:04:06.782Z",
+ "marker": "提交探针写下的这一句。",
+ "draftShaBefore": "c2d819ea19922c09e177037777c8af465fb8b3013aa3725970e991ad988dd2f9",
+ "secondDraftExistedBefore": false,
+ "submittedText": "提交探针写下的这一句。",
+ "continueOpen": {
+  "submit": true,
+  "inbox": false,
+  "submitted": false,
+  "confirm": false,
+  "continuePanel": true
+ },
+ "confirmOpen": {
+  "submit": true,
+  "inbox": false,
+  "submitted": false,
+  "confirm": true,
+  "continuePanel": false
+ },
+ "sentAfterMs": 158,
+ "sent": {
+  "submit": false,
+  "inbox": true,
+  "submitted": true,
+  "confirm": false,
+  "continuePanel": false
+ },
+ "sentLabel": "已交给 AI 起草提案",
+ "inboxLabel": "去收件箱",
+ "wroteAgain": {
+  "submit": true,
+  "inbox": false,
+  "submitted": false,
+  "confirm": false,
+  "continuePanel": false
+ },
+ "afterChapterSwitch": {
+  "submit": false,
+  "inbox": false,
+  "submitted": false,
+  "confirm": false,
+  "continuePanel": false,
+  "bar": "第2章《测试夹具第二章》写作阅读已保存到"
+ },
+ "nextChapterCanSubmit": true,
+ "historyHead": "版本历史 · 每个已接受版本一句人话摘要 · 回滚会停用其后的变更 · 版本历史 · R6",
+ "consoleErrorCount": 0,
+ "verdict": "pass",
+ "draftShaAfter": "c2d819ea19922c09e177037777c8af465fb8b3013aa3725970e991ad988dd2f9",
+ "draftRestored": true
+}

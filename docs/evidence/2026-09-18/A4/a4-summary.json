@@ -1,0 +1,36 @@
+{
+ "at": "2026-09-18T05:33:06.113Z",
+ "draftShaBefore": "c2d819ea19922c09e177037777c8af465fb8b3013aa3725970e991ad988dd2f9",
+ "pendingBefore": [
+  "tiangege-ch0001-draft-2026-09-17",
+  "tiangege-ch0001-draft-r5-2026-09-17-b",
+  "wmo-ch0001-post-check-r5-2026-09-17",
+  "wmo-ch0001-knowledge-r5-2026-09-17",
+  "wmo-ch0001-knowledge-set-r5-2026-09-17",
+  "wmo-vol01-ch0001-postcheck-r5"
+ ],
+ "diverged": {
+  "barPresent": true,
+  "text": "这一章已经接受过一版，稿子和它不一样了。 读已接受正文 写回稿子",
+  "readAccepted": true,
+  "writeBack": true,
+  "draftSample": "测测试试夜里风大，吹得窗纸哗哗作响。"
+ },
+ "acceptedText": "顾辰在漏雨的屋檐下睁眼，喉咙里还堵着猝死前那口气。四合院不知荒了多少年，石阶缝里长满枯草，只有正屋地板上一圈微光在缓慢呼吸——天机系统就在那里等他。「宿主苏醒。天机点：零。」一个懒洋洋的童声在他识海里翻了个身，「先说好，白手起家也是起家。」他推开门，山风灌满袖口。远处青岚城的轮廓浮在雾上，像一张还没落笔的纸。顾辰笑了一下：命是白捡的，生意就从这座山开始。他不知道，今日山下正有一纸休书落款；也不知道，这一笔，落的是别人的命。",
+ "readingAccepted": "顾辰在漏雨的屋檐下睁眼，喉咙里还堵着猝死前那口气。四合院不知荒了多少年，石阶缝里长满枯草，只有正屋地板上一圈微光在缓慢呼",
+ "writeBack": {
+  "fileSample": "顾辰在漏雨的屋檐下睁眼，喉咙里还堵着猝死前那口气。四合院不知荒了多少年，石阶缝里长满枯草，只有正屋地板上一圈微光在缓慢呼",
+  "fileSha": "dabd429bf5fe2512dac417847b15840136dbc170eb4c4088ab30caff233fd6f9",
+  "carriesAcceptedText": true
+ },
+ "badgeBefore": 6,
+ "badgeAfter": 7,
+ "badgeDelayMs": 39044,
+ "consoleErrorCount": 0,
+ "pendingAdded": [
+  "tiangege-ch1-draft-r5-2026-09-18-v2"
+ ],
+ "draftShaAfter": "c2d819ea19922c09e177037777c8af465fb8b3013aa3725970e991ad988dd2f9",
+ "draftRestored": true,
+ "verdict": "pass"
+}

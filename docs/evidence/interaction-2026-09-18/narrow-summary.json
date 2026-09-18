@@ -1,0 +1,30 @@
+{
+  "1024x760": {
+    "narrow": "1",
+    "innerW": 1024,
+    "innerH": 760,
+    "column": null,
+    "transcriptSeat": null
+  },
+  "1024x760-afterDetails": {
+    "narrow": "1",
+    "innerW": 1024,
+    "innerH": 760,
+    "column": null,
+    "transcriptSeat": null
+  },
+  "900x700": {
+    "narrow": "1",
+    "innerW": 900,
+    "innerH": 700,
+    "column": null,
+    "transcriptSeat": null
+  },
+  "900x700-afterDetails": {
+    "narrow": "1",
+    "innerW": 900,
+    "innerH": 700,
+    "column": null,
+    "transcriptSeat": null
+  }
+}

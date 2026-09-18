@@ -1,0 +1,115 @@
+{
+  "topbar": [
+    {
+      "label": "进阶",
+      "w": 46,
+      "h": 26,
+      "x": 1071,
+      "y": 22,
+      "pressed": "false",
+      "dis": false,
+      "vis": true
+    },
+    {
+      "label": "跟随系统",
+      "w": 68,
+      "h": 24,
+      "x": 1138,
+      "y": 22,
+      "pressed": "true",
+      "dis": false,
+      "vis": true
+    },
+    {
+      "label": "日间",
+      "w": 44,
+      "h": 24,
+      "x": 1194,
+      "y": 22,
+      "pressed": "false",
+      "dis": false,
+      "vis": true
+    },
+    {
+      "label": "夜间",
+      "w": 44,
+      "h": 24,
+      "x": 1238,
+      "y": 22,
+      "pressed": "false",
+      "dis": false,
+      "vis": true
+    },
+    {
+      "label": "设置",
+      "w": 46,
+      "h": 26,
+      "x": 1293,
+      "y": 22,
+      "pressed": "false",
+      "dis": false,
+      "vis": true
+    },
+    {
+      "label": "左栏",
+      "w": 46,
+      "h": 26,
+      "x": 1347,
+      "y": 22,
+      "pressed": "false",
+      "dis": false,
+      "vis": true
+    },
+    {
+      "label": "对话",
+      "w": 46,
+      "h": 26,
+      "x": 1401,
+      "y": 22,
+      "pressed": "false",
+      "dis": false,
+      "vis": true
+    }
+  ],
+  "settings": {
+    "nodesBefore": 241,
+    "nodesAfter": 304,
+    "state": {
+      "panels": [
+        "left:flex",
+        "main:flex",
+        "right:flex",
+        "true"
+      ],
+      "theme": "auto"
+    }
+  },
+  "night": {
+    "nodesBefore": 304,
+    "nodesAfter": 304,
+    "state": {
+      "panels": [
+        "left:flex",
+        "main:flex",
+        "right:flex",
+        "true"
+      ],
+      "theme": "night"
+    }
+  },
+  "advanced": {
+    "nodesBefore": 304,
+    "nodesAfter": 1021,
+    "state": {
+      "panels": [
+        "left:flex",
+        "main:flex",
+        "",
+        "right:flex",
+        "true"
+      ],
+      "theme": "auto"
+    }
+  },
+  "consoleErrors": []
+}

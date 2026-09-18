@@ -1,0 +1,120 @@
+{
+  "clicks": [
+    {
+      "key": "empty",
+      "sel": ".novel-transcript-empty",
+      "x": 1293,
+      "y": 141,
+      "active": "body. [-] 1440x813@0",
+      "hit": "p.novel-transcript-empty"
+    },
+    {
+      "key": "header",
+      "sel": "[data-novel-thread-header]",
+      "x": 1293,
+      "y": 65,
+      "active": "body. [-] 1440x813@0",
+      "hit": "div."
+    },
+    {
+      "key": "columnCentre",
+      "sel": "column-centre",
+      "x": 1292,
+      "y": 275,
+      "active": "body. [-] 1440x813@0",
+      "hit": "div.wSkVaW_scrollBody"
+    },
+    {
+      "key": "columnLower",
+      "sel": "column-lower-blank",
+      "x": 1292,
+      "y": 698,
+      "active": "body. [-] 1440x813@0",
+      "hit": "div.wSkVaW_scrollBody"
+    }
+  ],
+  "landmarks": {
+    "empty": {
+      "sel": ".novel-transcript-empty",
+      "x": 1293,
+      "y": 141
+    },
+    "header": {
+      "sel": "[data-novel-thread-header]",
+      "x": 1293,
+      "y": 65
+    },
+    "columnCentre": {
+      "sel": "column-centre",
+      "x": 1292,
+      "y": 275
+    },
+    "columnLower": {
+      "sel": "column-lower-blank",
+      "x": 1292,
+      "y": 698
+    }
+  },
+  "overlays": [
+    {
+      "tag": "header",
+      "cls": "topbar",
+      "z": "auto",
+      "pos": "static",
+      "w": 1440,
+      "h": 44,
+      "left": 0,
+      "top": 0
+    },
+    {
+      "tag": "main",
+      "cls": "main",
+      "z": "auto",
+      "pos": "static",
+      "w": 896,
+      "h": 769,
+      "left": 248,
+      "top": 44
+    },
+    {
+      "tag": "div",
+      "cls": "main-head",
+      "z": "auto",
+      "pos": "static",
+      "w": 896,
+      "h": 83,
+      "left": 248,
+      "top": 44
+    },
+    {
+      "tag": "div",
+      "cls": "main-body flush",
+      "z": "auto",
+      "pos": "static",
+      "w": 896,
+      "h": 686,
+      "left": 248,
+      "top": 127
+    },
+    {
+      "tag": "div",
+      "cls": "novel-editor",
+      "z": "auto",
+      "pos": "static",
+      "w": 896,
+      "h": 686,
+      "left": 248,
+      "top": 127
+    },
+    {
+      "tag": "p",
+      "cls": "nw-note",
+      "z": "auto",
+      "pos": "static",
+      "w": 896,
+      "h": 46,
+      "left": 248,
+      "top": 127
+    }
+  ]
+}

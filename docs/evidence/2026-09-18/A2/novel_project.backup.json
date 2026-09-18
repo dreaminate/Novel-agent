@@ -1,0 +1,2330 @@
+{
+  "unit": {
+    "name": "novel_project",
+    "version": 1
+  },
+  "global": null,
+  "tables": {
+    "projects": {
+      "b7cc9537-2480-4f02-9d3d-6729f2efe980": {
+        "id": "9dd94176-ed3e-4630-a374-72258673546f",
+        "workspaceId": "b7cc9537-2480-4f02-9d3d-6729f2efe980",
+        "cwd": "/private/tmp/nw-workspace/天机阁主",
+        "acceptedRevision": 5,
+        "canonLocks": [],
+        "revisions": [
+          {
+            "revision": 1,
+            "parentRevision": 0,
+            "packetId": "tiangege-structure-r0b-2026-09-16",
+            "deltas": [
+              {
+                "id": "nu-01",
+                "targetId": "tiangege-series",
+                "sourceAnchorIds": [],
+                "kind": "narrative-unit",
+                "operation": "set",
+                "field": "unit",
+                "value": {
+                  "level": "series",
+                  "parentId": null,
+                  "order": 1,
+                  "objective": "承载整部作品的总命题、主角成长上限与终局方向，作为唯一无父级的叙事根。",
+                  "entryState": "无叙事结构：项目刚刚开局，尚未确立任何叙事层级。",
+                  "exitState": "已确立 series 根节点，向下逐级展开 book → volume → arc → chapter。",
+                  "status": "planned"
+                }
+              },
+              {
+                "id": "nu-02",
+                "targetId": "tiangege-book-01",
+                "sourceAnchorIds": [],
+                "kind": "narrative-unit",
+                "operation": "set",
+                "field": "unit",
+                "value": {
+                  "level": "book",
+                  "parentId": "tiangege-series",
+                  "order": 1,
+                  "objective": "第一部：完成主角从被动卷入到主动入局的身份确立，并落实第一轮实质代价。",
+                  "entryState": "系列层级已确立，第一部尚未展开。",
+                  "exitState": "主角从被动卷入到主动入局，身份确立并付出第一轮实质代价。",
+                  "status": "planned"
+                }
+              },
+              {
+                "id": "nu-03",
+                "targetId": "tiangege-vol-01",
+                "sourceAnchorIds": [],
+                "kind": "narrative-unit",
+                "operation": "set",
+                "field": "unit",
+                "value": {
+                  "level": "volume",
+                  "parentId": "tiangege-book-01",
+                  "order": 1,
+                  "objective": "第一卷：把主角拖进天机阁所在的博弈场，在认识规则、对手与自身代价的过程中取得第一次立足。",
+                  "entryState": "第一部尚未开卷，主角与天机阁无直接牵连。",
+                  "exitState": "主角在博弈场取得第一次立足，并承担由此产生的长期代价。",
+                  "status": "planned"
+                }
+              },
+              {
+                "id": "nu-04",
+                "targetId": "tiangege-arc-01",
+                "sourceAnchorIds": [],
+                "kind": "narrative-unit",
+                "operation": "set",
+                "field": "unit",
+                "value": {
+                  "level": "arc",
+                  "parentId": "tiangege-vol-01",
+                  "order": 1,
+                  "objective": "第一弧：交付开篇钩子与主角处境，建立第一组核心张力、信息差与读者承诺的兑现方向。",
+                  "entryState": "主角处于既有常态处境，尚未被真实规则作用。",
+                  "exitState": "主角已被推进不可逆路径，第一组核心张力与信息差被立稳。",
+                  "status": "planned"
+                }
+              },
+              {
+                "id": "nu-05",
+                "targetId": "vol01-ch0001",
+                "sourceAnchorIds": [],
+                "kind": "narrative-unit",
+                "operation": "set",
+                "field": "unit",
+                "value": {
+                  "level": "chapter",
+                  "parentId": "tiangege-arc-01",
+                  "order": 1,
+                  "objective": "开篇章：在具体场景压力下迫使主角做出第一个不可逆选择，并立稳全书核心张力与代价规则。",
+                  "entryState": "主角尚在常态处境，未与天机阁发生不可逆牵连。",
+                  "exitState": "主角已接受筹码并完成第一次越界，退路消失且代价被记录。",
+                  "status": "planned",
+                  "chapterContract": {
+                    "viewpoint": "限制性第三人称过去时，视角人物为已接受 Canon 的主角；叙述距离贴近其感官与内心。",
+                    "storyTime": "第一卷第一弧开篇，紧接主角现有常态处境的同一段连续时间。",
+                    "sceneFunctions": [
+                      "常态场景：用可观察细节立起主角的处境、资源上限与一个具体缺陷。",
+                      "触发场景：外部事件把主角的目标与博弈场规则顶到一起。",
+                      "升级场景：第一次常规尝试失败，且失败原因指向规则本身。",
+                      "抉择场景：在时间与资源压力下接受带条件的筹码，完成不可逆的第一次越界。"
+                    ],
+                    "activePlotLineIds": [],
+                    "activeRelationshipLineIds": [],
+                    "promisesTouched": [],
+                    "informationPolicy": {
+                      "readerMayKnow": [
+                        "博弈场存在一套可被利用但不可违背的规则。",
+                        "主角的资源上限与一个具体缺陷。",
+                        "主角当前存在误判这一事实（不揭示误判内容）。"
+                      ],
+                      "characterMayKnow": []
+                    },
+                    "progressionSetups": [],
+                    "progressionPayoffs": [],
+                    "emotionalMovement": "从惯性自信与侥幸，到被规则当面碾压的失衡，再到主动接下代价的冷静决断。",
+                    "endingPull": "章末落在主角已完成的选择及其直接后果上：问题被暂时压下，但下一章必须处理的新代价已经生效。",
+                    "prohibitedContradictions": [
+                      "不得出现主角以未定义的新能力或新设定解决冲突。",
+                      "不得提前揭示被信息政策排除的真相信息。",
+                      "不得让主角依靠巧合或对手无动机失误脱身。",
+                      "不得出现与已接受 Canon 事实冲突的人物动机或关系。"
+                    ],
+                    "styleConstraints": [
+                      "采用限制性第三人称过去时，贴紧主角感官与内心但不预支后续真相。",
+                      "以动作与可观察细节推进，不使用旁白式世界观说明。",
+                      "对话承担信息差与代价的交涉功能，不使用解释性长台词。",
+                      "段落节奏以场景进出状态变化为准，不为单章堆叠多线。"
+                    ],
+                    "lengthRange": {
+                      "min": 2800,
+                      "max": 3600
+                    },
+                    "acceptanceGates": [
+                      "开篇三页内出现具体压力动作，且不先交代世界观设定。",
+                      "主角在本章内至少一次常规尝试失败，失败原因指向规则而非运气。",
+                      "章末主角已完成一个不可逆选择，且该选择的代价可被读者指着句子复述。",
+                      "章内新引入的地点、物件与关系均为后续章节必然复用的最小集。"
+                    ]
+                  }
+                }
+              }
+            ],
+            "issues": [],
+            "decisions": [
+              {
+                "itemType": "delta",
+                "itemId": "nu-01",
+                "outcome": "accept"
+              },
+              {
+                "itemType": "delta",
+                "itemId": "nu-02",
+                "outcome": "accept"
+              },
+              {
+                "itemType": "delta",
+                "itemId": "nu-03",
+                "outcome": "accept"
+              },
+              {
+                "itemType": "delta",
+                "itemId": "nu-04",
+                "outcome": "accept"
+              },
+              {
+                "itemType": "delta",
+                "itemId": "nu-05",
+                "outcome": "accept"
+              }
+            ],
+            "sourceAnchors": [],
+            "provenance": {
+              "taskId": "tiangege-structure-r0b-2026-09-16",
+              "sessionId": "session-c1020fe4-fe91-4750-8fd1-5f97b4095d98",
+              "producer": "novel-architect"
+            },
+            "authorization": {
+              "kind": "author",
+              "actorId": "session-c1020fe4-fe91-4750-8fd1-5f97b4095d98",
+              "decisionId": "db13931b-ffa8-4d9f-854b-c5f13d46a3cd"
+            }
+          },
+          {
+            "revision": 2,
+            "parentRevision": 1,
+            "packetId": "tiangege-facts-r1-2026-09-16",
+            "deltas": [
+              {
+                "id": "cs-linxuan-constitution",
+                "targetId": "linxuan",
+                "sourceAnchorIds": [
+                  "a-lore-linxuan-row",
+                  "a-lore-body-ranking"
+                ],
+                "kind": "character-state",
+                "operation": "set",
+                "field": "constitution",
+                "value": "身怀至尊骨（万古神体榜第五），生来压同龄人一头，成年前不显；至尊骨初醒后走肉身无敌路线。"
+              },
+              {
+                "id": "cs-linxuan-realm",
+                "targetId": "linxuan",
+                "sourceAnchorIds": [
+                  "a-lore-linxuan-row"
+                ],
+                "kind": "character-state",
+                "operation": "set",
+                "field": "realm",
+                "value": "出场时尚未正式踏入凡尘境（第一重）；至尊骨初醒后直达凡尘境圆满。"
+              },
+              {
+                "id": "cs-xiaoyuan-persona",
+                "targetId": "xiaoyuan",
+                "sourceAnchorIds": [
+                  "a-lore-xiaoyuan-row"
+                ],
+                "kind": "character-state",
+                "operation": "set",
+                "field": "persona",
+                "value": "毒舌、傲娇、护主：全书笑点担当，也是顾辰孤独时唯一的「同类」，因为两者都懂系统的秘密。"
+              },
+              {
+                "id": "cs-xiaoyuan-mechanism",
+                "targetId": "xiaoyuan",
+                "sourceAnchorIds": [
+                  "a-factions-weapon-table",
+                  "a-lore-weapons-list",
+                  "a-lore-xiaoyuan-row"
+                ],
+                "kind": "character-state",
+                "operation": "set",
+                "field": "mechanism",
+                "value": "器灵职能为发布榜单与结算天机点；自身无境界、无武器，法宝即系统本体；另有天机罗盘与万物母气鼎（帝兵）归于顾辰本尊，发布榜单与结算天机点皆由它执行。"
+              },
+              {
+                "id": "cs-sumubai-artifact",
+                "targetId": "sumubai",
+                "sourceAnchorIds": [
+                  "a-factions-weapon-table",
+                  "a-lore-sumubai-block",
+                  "a-lore-sumubai-row"
+                ],
+                "kind": "character-state",
+                "operation": "set",
+                "field": "artifact",
+                "value": "武器为折扇「算天扇」；无招牌神通，以情报推演与经营情报网为长；身世为落魄散修，被顾辰救下后死心塌地追随。"
+              },
+              {
+                "id": "cs-qingshuying-artifact",
+                "targetId": "qingshuying",
+                "sourceAnchorIds": [
+                  "a-factions-weapon-table",
+                  "a-factions-yaochi-qingshuying"
+                ],
+                "kind": "character-state",
+                "operation": "set",
+                "field": "artifact",
+                "value": "武器为太初剑——女帝命格的剑，从不离身；法宝/本命印记为前世留下的泪痣。"
+              },
+              {
+                "id": "cs-qingshuying-signature",
+                "targetId": "qingshuying",
+                "sourceAnchorIds": [
+                  "a-factions-weapon-table",
+                  "a-factions-yaochi-nine-row",
+                  "a-lore-daos-manifest"
+                ],
+                "kind": "character-state",
+                "operation": "set",
+                "field": "signature",
+                "value": "招牌神通为前字秘（完整传承，瑶池镇阁）、太初神体异象「太初之光」，以及前世女帝的吞天魔功与不灭天功。"
+              },
+              {
+                "id": "cs-junlinyuan-thread",
+                "targetId": "junlinyuan",
+                "sourceAnchorIds": [
+                  "a-lore-junlinyuan-row",
+                  "a-lore-junlinyuan-blurb"
+                ],
+                "kind": "character-state",
+                "operation": "set",
+                "field": "thread",
+                "value": "君家天骄兼为顾辰七徒弟，天帝转世重修并隐藏转世经历，通晓万古秘辛，修轮回之道，是君家下任家主候选。"
+              },
+              {
+                "id": "fs-dange-leadership",
+                "targetId": "dange-pavilion",
+                "sourceAnchorIds": [
+                  "a-factions-dange-block",
+                  "a-lore-factions-list"
+                ],
+                "kind": "faction-state",
+                "operation": "set",
+                "field": "leadership",
+                "value": "阁主为「药帝」——九品炼药师（准帝级），痴迷丹道、超然、惜才，修造化之道；下设数位八品炼药师长老与各地炼药天才弟子。"
+              },
+              {
+                "id": "fs-dange-assets",
+                "targetId": "dange-pavilion",
+                "sourceAnchorIds": [
+                  "a-factions-dange-block",
+                  "a-lore-dange-row",
+                  "a-lore-faction-ancestor-rule"
+                ],
+                "kind": "faction-state",
+                "operation": "set",
+                "field": "assets",
+                "value": "镇阁之宝为破帝丹丹方（炼出破帝丹才能晋级帝品）；无帝兵、无大帝祖上，祖上例外只因出过炼制「破帝丹」的炼药师。"
+              },
+              {
+                "id": "fs-taiyi-leadership",
+                "targetId": "taiyi-holyland",
+                "sourceAnchorIds": [
+                  "a-factions-taiyi-lord",
+                  "a-factions-taiyi-block",
+                  "a-factions-all-dao-ranks"
+                ],
+                "kind": "faction-state",
+                "operation": "set",
+                "field": "leadership",
+                "value": "圣主为太一圣主（归道·归一境大成，四圣地中修为最高）——正道魁首，威严、老谋深算；下设归一境长老与太一圣子、圣女。"
+              },
+              {
+                "id": "fs-zhuxian-leadership",
+                "targetId": "zhuxian-holyland",
+                "sourceAnchorIds": [
+                  "a-factions-zhuxian-block",
+                  "a-factions-all-dao-ranks"
+                ],
+                "kind": "faction-state",
+                "operation": "set",
+                "field": "leadership",
+                "value": "圣主为诛仙圣主（归真）——剑痴、冷冽、好战；祖上大帝为通天剑帝（剑道之祖，创诛仙剑阵），下有归一境剑修长老与剑修天骄。"
+              },
+              {
+                "id": "fs-zhuxian-assets",
+                "targetId": "zhuxian-holyland",
+                "sourceAnchorIds": [
+                  "a-factions-zhuxian-array",
+                  "a-factions-zhuxian-block",
+                  "a-lore-nine-secrets-line"
+                ],
+                "kind": "faction-state",
+                "operation": "set",
+                "field": "assets",
+                "value": "帝兵为诛仙四剑与诛仙阵图，号称天道第一杀阵、非四圣不可破；传承帝经为《戮仙剑诀》（仙陨/仙灭/戮仙三式），另由顾辰后期搜集兵字秘、斗字秘等九秘补足杀伐底牌。"
+              },
+              {
+                "id": "fs-kunlun-assets",
+                "targetId": "kunlun-palace",
+                "sourceAnchorIds": [
+                  "a-factions-kunlun-jade",
+                  "a-factions-kunlun-block"
+                ],
+                "kind": "faction-state",
+                "operation": "set",
+                "field": "assets",
+                "value": "帝兵为昆仑镜（映照诸天、窥探因果）；传承帝经为《昆仑玉虚诀》，祖上大帝昆仑大帝（玉虚之道），宫主昆仑宫主（归真）仙风道骨、清高淡泊。"
+              },
+              {
+                "id": "promise-scope-wider-world",
+                "targetId": "promise-scope-wider-world",
+                "sourceAnchorIds": [
+                  "a-lore-factions-list",
+                  "a-factions-five-clans-note",
+                  "a-factions-monster-power"
+                ],
+                "kind": "promise",
+                "operation": "set",
+                "field": "state",
+                "value": {
+                  "version": 1,
+                  "promise": "格局承诺：圣地之间、荒古世家、东荒妖族与大夏皇朝各成体系，读者会看到圣地帝兵全盛与世家帝兵年久弱一筹的势力差，以及妖族与人族「时战时和」的东荒线。",
+                  "type": "progression",
+                  "weight": "major",
+                  "horizon": {
+                    "openedUnitId": "tiangege-book-01",
+                    "expectedPayoffStartUnitId": "tiangege-book-01",
+                    "expectedPayoffEndUnitId": "tiangege-book-01"
+                  },
+                  "setup": {
+                    "beatId": "vol01-ch0001-setup",
+                    "unitId": "vol01-ch0001",
+                    "sourceRevision": 1,
+                    "sourceAnchorIds": [
+                      "a-lore-factions-list",
+                      "a-factions-five-clans-note",
+                      "a-factions-monster-power"
+                    ],
+                    "description": "已经接受的结构只有天机阁、太清天与瑶池三处，四圣地、五世家与东荒妖族尚未建立可写事实。"
+                  },
+                  "reminders": [],
+                  "complications": [],
+                  "resolution": {
+                    "status": "open",
+                    "payoffType": null,
+                    "beat": null,
+                    "retirementRationale": null
+                  },
+                  "aftermath": null,
+                  "revisionRationale": null
+                }
+              },
+              {
+                "id": "promise-lord-weapons-win",
+                "targetId": "promise-lord-weapons-win",
+                "sourceAnchorIds": [
+                  "a-factions-weapon-table",
+                  "a-factions-taiching-weapon"
+                ],
+                "kind": "promise",
+                "operation": "set",
+                "field": "state",
+                "value": {
+                  "version": 1,
+                  "promise": "器物承诺：每一位势力掌权者与徒弟都有专属武器与招牌神通，凡出场必然亮明，不临时取名、不跑偏。",
+                  "type": "progression",
+                  "weight": "major",
+                  "horizon": {
+                    "openedUnitId": "tiangege-book-01",
+                    "expectedPayoffStartUnitId": "tiangege-book-01",
+                    "expectedPayoffEndUnitId": "tiangege-book-01"
+                  },
+                  "setup": {
+                    "beatId": "vol01-ch0001-setup",
+                    "unitId": "vol01-ch0001",
+                    "sourceRevision": 1,
+                    "sourceAnchorIds": [
+                      "a-factions-weapon-table",
+                      "a-factions-taiching-weapon"
+                    ],
+                    "description": "已接受的器物事实只有顾辰本尊、清疏影、苏沐白与小源四行，八徒弟与其余掌权者的武器尚未进入 Canon。"
+                  },
+                  "reminders": [],
+                  "complications": [],
+                  "resolution": {
+                    "status": "open",
+                    "payoffType": null,
+                    "beat": null,
+                    "retirementRationale": null
+                  },
+                  "aftermath": null,
+                  "revisionRationale": null
+                }
+              },
+              {
+                "id": "promise-forbidden-zone-to-taiqing",
+                "targetId": "promise-forbidden-zone-to-taiqing",
+                "sourceAnchorIds": [
+                  "a-lore-forbidden-zone-detail",
+                  "a-lore-taiching-daozun-row",
+                  "a-lore-forbidden-zone-row"
+                ],
+                "kind": "promise",
+                "operation": "set",
+                "field": "state",
+                "value": {
+                  "version": 1,
+                  "promise": "隐患承诺：生命禁区与太清天同源，禁区中「自斩一刀」的大帝会在后期把台前势力推到正面，并掀开不详真相。",
+                  "type": "mystery",
+                  "weight": "major",
+                  "horizon": {
+                    "openedUnitId": "tiangege-book-01",
+                    "expectedPayoffStartUnitId": "tiangege-book-01",
+                    "expectedPayoffEndUnitId": "tiangege-book-01"
+                  },
+                  "setup": {
+                    "beatId": "vol01-ch0001-setup",
+                    "unitId": "vol01-ch0001",
+                    "sourceRevision": 1,
+                    "sourceAnchorIds": [
+                      "a-lore-forbidden-zone-detail",
+                      "a-lore-taiching-daozun-row",
+                      "a-lore-forbidden-zone-row"
+                    ],
+                    "description": "已接受事实只到「太清天背景就是生命禁区、禁区之主为自斩一刀的大帝」，台前与幕后如何合流仍未成事实。"
+                  },
+                  "reminders": [],
+                  "complications": [],
+                  "resolution": {
+                    "status": "open",
+                    "payoffType": null,
+                    "beat": null,
+                    "retirementRationale": null
+                  },
+                  "aftermath": null,
+                  "revisionRationale": null
+                }
+              },
+              {
+                "id": "clue-qingdi-lotus-vessel",
+                "targetId": "clue-qingdi-lotus-vessel",
+                "sourceAnchorIds": [
+                  "a-lore-qingdi-lotus",
+                  "a-lore-datai-sources",
+                  "a-lore-weapons-list"
+                ],
+                "kind": "clue",
+                "operation": "set",
+                "field": "state",
+                "value": {
+                  "version": 1,
+                  "role": "foreshadowing",
+                  "statement": "混沌青莲是八万年前青帝死后所化，可修出「混沌体」；它既是帝品天材地宝，也是顾辰黑分身得以成立的源头，青帝因此成为全书最大的伏笔人物之一。",
+                  "linkedMysteryIds": [
+                    "mystery-forbidden-zone-longevity"
+                  ],
+                  "status": "proposed",
+                  "readerVisibility": "available",
+                  "intendedFunction": "把「黑分身混沌体」与八万年前的大帝之死绑成同一件可追溯的实物，使混沌体不是凭空兑换，而是有来源、有前主的既成事实。",
+                  "expectedPayoffWindow": "卷一埋线；卷6 帝路争锋（远古战场得混沌青莲、修出混沌体）至青帝遗迹线",
+                  "payoff": null,
+                  "abandonmentReason": null,
+                  "revisionRationale": null
+                }
+              },
+              {
+                "id": "clue-qingshuying-mother",
+                "targetId": "clue-qingshuying-mother",
+                "sourceAnchorIds": [
+                  "a-lore-datai-sources",
+                  "a-lore-qingshuying-row"
+                ],
+                "kind": "clue",
+                "operation": "set",
+                "field": "state",
+                "value": {
+                  "version": 1,
+                  "role": "foreshadowing",
+                  "statement": "女主母亲是上一代瑶池圣女，已陨落；她因触碰「不详」的秘密被灭口，此事与顾辰无关，而是清疏影身世与感情线的核心线索。",
+                  "linkedMysteryIds": [
+                    "mystery-forbidden-zone-longevity"
+                  ],
+                  "status": "proposed",
+                  "readerVisibility": "available",
+                  "intendedFunction": "用一条与主角无关的旧案把女主的私人动机与不详主线接在一起，使圣女的「算天机」底牌有情感层面的理由。",
+                  "expectedPayoffWindow": "清疏影正式相遇之后至不详真相线（生命禁区与太清天合流）",
+                  "payoff": null,
+                  "abandonmentReason": null,
+                  "revisionRationale": null
+                }
+              },
+              {
+                "id": "mystery-forbidden-zone-longevity",
+                "targetId": "mystery-forbidden-zone-longevity",
+                "sourceAnchorIds": [
+                  "a-lore-forbidden-zone-detail",
+                  "a-lore-forbidden-zone-row",
+                  "a-lore-taiching-daozun-row",
+                  "a-factions-taiching-block"
+                ],
+                "kind": "mystery",
+                "operation": "set",
+                "field": "state",
+                "value": {
+                  "version": 1,
+                  "question": "生命禁区为什么存在：巅峰大帝为何自斩一刀跌落到准帝与大帝之间，禁区之主所求的长生究竟拿什么来换，而这与太清天又是什么关系？",
+                  "truth": {
+                    "status": "unknown-to-author",
+                    "answer": null
+                  },
+                  "hypotheses": [
+                    "自斩一刀是以境界换寿元：从大帝跌落、不再受天心印记压制，因而能活着跨越十万年的大帝寿命极限。",
+                    "长生的代价被转嫁给不详：禁区维持自身存在的方式，正在持续制造本书的邪祟与污浊源头。",
+                    "太清天并不独立，它是生命禁区推到台前的门面，台前势力与幕后禁区共担同一条长生交易。"
+                  ],
+                  "knowers": [],
+                  "readerVisibility": "hidden",
+                  "concealmentRule": "只允许以禁区宝物、自斩传说、寿元异常这类可观察现象出现；任何角色都不得直接解释禁区长生的机制与代价。",
+                  "revealConditions": [
+                    "故事推进到生命禁区成为主要地图，并把禁区之主自斩一刀、太清天背景与不详真相三条证据并列验证"
+                  ],
+                  "earliestFairResolutionUnitId": null,
+                  "desiredRevealWindow": null,
+                  "actualReveal": null,
+                  "aftermath": null,
+                  "revisionRationale": "依 04 势力清单与大帝寿命条目、04 人物清单禁区之主条目，以及 08 太清天背景条目设立谜题容器，用于挂载两条线索。"
+                }
+              },
+              {
+                "id": "se-qingdi-fall-lotus",
+                "targetId": "event-qingdi-fall-lotus",
+                "sourceAnchorIds": [
+                  "a-lore-qingdi-lotus",
+                  "a-lore-datai-sources",
+                  "a-lore-weapons-list"
+                ],
+                "kind": "story-event",
+                "operation": "set",
+                "field": "event",
+                "value": {
+                  "storyTime": {
+                    "startOrder": -80000,
+                    "endOrder": -79999,
+                    "label": "远古：八万年前（顾辰穿越前约八万年）·远古战场一带"
+                  },
+                  "manuscriptOrder": null,
+                  "participants": [
+                    "qingdi"
+                  ],
+                  "location": "location-ancient-battlefield",
+                  "effects": [
+                    "八万年前的大帝青帝陨落，其身后所化之物成为帝品至宝「混沌青莲」。",
+                    "混沌青莲成为修出「混沌体」的唯一途径，顾辰黑分身的第一因由因此可回溯到八万年前的旧事。",
+                    "青帝被登记为伏笔人物：上古遗迹、青帝遗迹与帝兵埋藏线都以他的陨落为起点，为后期夺宝与传承线提供来源。"
+                  ]
+                }
+              },
+              {
+                "id": "se-forbidden-zone-self-cut",
+                "targetId": "event-forbidden-zone-self-cut",
+                "sourceAnchorIds": [
+                  "a-lore-forbidden-zone-row",
+                  "a-lore-forbidden-zone-detail",
+                  "a-factions-taiching-block"
+                ],
+                "kind": "story-event",
+                "operation": "set",
+                "field": "event",
+                "value": {
+                  "storyTime": {
+                    "startOrder": -20000,
+                    "endOrder": -19999,
+                    "label": "远古：数万年前，远早于八万年前青帝陨落·生命禁区"
+                  },
+                  "manuscriptOrder": null,
+                  "participants": [
+                    "forbidden-zone-master"
+                  ],
+                  "location": "location-forbidden-zone",
+                  "effects": [
+                    "巅峰大帝为求长生自斩一刀，从大帝跌落，实力降到准帝与大帝之间，换取寿元大增。",
+                    "自斩一刀者成为禁区之主，是本书的幕后黑手，并把太清天推到台前充当旧秩序顶点。",
+                    "大帝寿命被登记为极限十万年，禁区修行因此可以跨越大帝寿命上限，与后文「极尽升华」线呼应。"
+                  ]
+                }
+              }
+            ],
+            "issues": [],
+            "decisions": [
+              {
+                "itemType": "delta",
+                "itemId": "cs-linxuan-constitution",
+                "outcome": "accept"
+              },
+              {
+                "itemType": "delta",
+                "itemId": "cs-linxuan-realm",
+                "outcome": "accept"
+              },
+              {
+                "itemType": "delta",
+                "itemId": "cs-xiaoyuan-persona",
+                "outcome": "accept"
+              },
+              {
+                "itemType": "delta",
+                "itemId": "cs-xiaoyuan-mechanism",
+                "outcome": "accept"
+              },
+              {
+                "itemType": "delta",
+                "itemId": "cs-sumubai-artifact",
+                "outcome": "accept"
+              },
+              {
+                "itemType": "delta",
+                "itemId": "cs-qingshuying-artifact",
+                "outcome": "accept"
+              },
+              {
+                "itemType": "delta",
+                "itemId": "cs-qingshuying-signature",
+                "outcome": "accept"
+              },
+              {
+                "itemType": "delta",
+                "itemId": "cs-junlinyuan-thread",
+                "outcome": "accept"
+              },
+              {
+                "itemType": "delta",
+                "itemId": "fs-dange-leadership",
+                "outcome": "accept"
+              },
+              {
+                "itemType": "delta",
+                "itemId": "fs-dange-assets",
+                "outcome": "accept"
+              },
+              {
+                "itemType": "delta",
+                "itemId": "fs-taiyi-leadership",
+                "outcome": "accept"
+              },
+              {
+                "itemType": "delta",
+                "itemId": "fs-zhuxian-leadership",
+                "outcome": "accept"
+              },
+              {
+                "itemType": "delta",
+                "itemId": "fs-zhuxian-assets",
+                "outcome": "accept"
+              },
+              {
+                "itemType": "delta",
+                "itemId": "fs-kunlun-assets",
+                "outcome": "accept"
+              },
+              {
+                "itemType": "delta",
+                "itemId": "promise-scope-wider-world",
+                "outcome": "accept"
+              },
+              {
+                "itemType": "delta",
+                "itemId": "promise-lord-weapons-win",
+                "outcome": "accept"
+              },
+              {
+                "itemType": "delta",
+                "itemId": "promise-forbidden-zone-to-taiqing",
+                "outcome": "accept"
+              },
+              {
+                "itemType": "delta",
+                "itemId": "clue-qingdi-lotus-vessel",
+                "outcome": "accept"
+              },
+              {
+                "itemType": "delta",
+                "itemId": "clue-qingshuying-mother",
+                "outcome": "accept"
+              },
+              {
+                "itemType": "delta",
+                "itemId": "mystery-forbidden-zone-longevity",
+                "outcome": "accept"
+              },
+              {
+                "itemType": "delta",
+                "itemId": "se-qingdi-fall-lotus",
+                "outcome": "accept"
+              },
+              {
+                "itemType": "delta",
+                "itemId": "se-forbidden-zone-self-cut",
+                "outcome": "accept"
+              }
+            ],
+            "sourceAnchors": [
+              {
+                "id": "a-lore-body-ranking",
+                "sourceId": "04-设定大全.md",
+                "start": 116,
+                "end": 1213,
+                "contentHash": "4d925c6affb0f248dea87dac409c222c348618bf265cda6768ba7c089a6638d1"
+              },
+              {
+                "id": "a-lore-void-body-row",
+                "sourceId": "04-设定大全.md",
+                "start": 350,
+                "end": 421,
+                "contentHash": "345b4e8eae7a81d957744243180f7f15cd7d4b263b22b51ea0442a065954090d"
+              },
+              {
+                "id": "a-lore-taichu-body-row",
+                "sourceId": "04-设定大全.md",
+                "start": 422,
+                "end": 493,
+                "contentHash": "432602459380e6f8f05e40c5f4c4a9fc7552fe9ee151bc02499159100e772e08"
+              },
+              {
+                "id": "a-lore-daos-manifest",
+                "sourceId": "04-设定大全.md",
+                "start": 1785,
+                "end": 2510,
+                "contentHash": "323b4604bb39b065344976c503d6e7a6e6cb0d8d7bff9456ed72c1a1c06e9983"
+              },
+              {
+                "id": "a-lore-guchen-row",
+                "sourceId": "04-设定大全.md",
+                "start": 11680,
+                "end": 11855,
+                "contentHash": "0e49525a26b29a8d2fca22af88aa8e6e6d7b41e0a172e4348edab5ab7a0b9762"
+              },
+              {
+                "id": "a-lore-sumubai-row",
+                "sourceId": "04-设定大全.md",
+                "start": 11856,
+                "end": 12032,
+                "contentHash": "0162d0bb65d4fd5c7788bbc49881d3871a52f564bbecb8b0baa8d6f934a08a41"
+              },
+              {
+                "id": "a-lore-sumubai-block",
+                "sourceId": "04-设定大全.md",
+                "start": 13484,
+                "end": 13623,
+                "contentHash": "761d17a9659edb12154c8ecb593907c744f0e7a9fc2c983100f7eaceb2f6db7d"
+              },
+              {
+                "id": "a-lore-qingshuying-row",
+                "sourceId": "04-设定大全.md",
+                "start": 12033,
+                "end": 12222,
+                "contentHash": "f4bbb94ec424598730e1e600f08edb151a36cf85f3432b61f609f5093b2be0f5"
+              },
+              {
+                "id": "a-lore-xiaoyuan-row",
+                "sourceId": "04-设定大全.md",
+                "start": 12223,
+                "end": 12399,
+                "contentHash": "9f111eb86cc6d497a7e219c0e1cf3d11f5933e62ff7279b6680484734cfd8a90"
+              },
+              {
+                "id": "a-lore-linxuan-row",
+                "sourceId": "04-设定大全.md",
+                "start": 12596,
+                "end": 12773,
+                "contentHash": "5b02fd2688f3647f1101adf20254f5eeb956de72062279838ec56c5e12b9609d"
+              },
+              {
+                "id": "a-lore-yejinghong-row",
+                "sourceId": "04-设定大全.md",
+                "start": 12774,
+                "end": 12831,
+                "contentHash": "86983acf2c5aa5bdb22fa1387f1d1eb34daadd8b84d9f94b2ec4ff75ffd935ba"
+              },
+              {
+                "id": "a-lore-yejinghong-blurb",
+                "sourceId": "04-设定大全.md",
+                "start": 13292,
+                "end": 13334,
+                "contentHash": "a0e27948d76c0cc7bd8bddf657f1a4b14f9ebbb8a9ccc68ba91695bb932224ae"
+              },
+              {
+                "id": "a-lore-junlinyuan-row",
+                "sourceId": "04-设定大全.md",
+                "start": 12890,
+                "end": 12947,
+                "contentHash": "562d07c703cd6bbbfe34583665fea68ae7b7a73fe0f57b2678a2894d0952cd7e"
+              },
+              {
+                "id": "a-lore-junlinyuan-blurb",
+                "sourceId": "04-设定大全.md",
+                "start": 13383,
+                "end": 13427,
+                "contentHash": "545f1832aac244b83d8447c80c10406d8d229a321538c0354d5e7625a33469c5"
+              },
+              {
+                "id": "a-lore-taiching-daozun-row",
+                "sourceId": "04-设定大全.md",
+                "start": 13914,
+                "end": 14234,
+                "contentHash": "c70dae577b1a84ab3b23d10d4a39b413f04b8d9db5509570c4c4d22689e7986a"
+              },
+              {
+                "id": "a-lore-lord-weapons",
+                "sourceId": "04-设定大全.md",
+                "start": 13914,
+                "end": 15091,
+                "contentHash": "e8568a0e082cc36f8e16763a295eaa351594a76ccff059b611b2de4891eaaa5e"
+              },
+              {
+                "id": "a-lore-factions-list",
+                "sourceId": "04-设定大全.md",
+                "start": 8721,
+                "end": 9582,
+                "contentHash": "4a3c2d65b23cb533568d73cce56ac33deb1bdcd6897dcd7da0de6f5927030b68"
+              },
+              {
+                "id": "a-lore-dange-row",
+                "sourceId": "04-设定大全.md",
+                "start": 8942,
+                "end": 9007,
+                "contentHash": "d4456c2c8ab7c9648596a6b4c0f5ff625e2fffbaaa28c5cbec29314ba772e6b0"
+              },
+              {
+                "id": "a-lore-faction-ancestor-rule",
+                "sourceId": "04-设定大全.md",
+                "start": 9454,
+                "end": 9583,
+                "contentHash": "bb9d0180fd733bc922a226b9df384e16f6ce0e5c5d3724dfd3b73840b0606a80"
+              },
+              {
+                "id": "a-lore-tianji-exception",
+                "sourceId": "04-设定大全.md",
+                "start": 9454,
+                "end": 9676,
+                "contentHash": "6b8387c83b967d772b90e17ae147981ce24ffc8a06589291d6c467c952e38df0"
+              },
+              {
+                "id": "a-lore-forbidden-zone-row",
+                "sourceId": "04-设定大全.md",
+                "start": 9321,
+                "end": 9386,
+                "contentHash": "d833437d57b5f09f9602056035a9462b340ae7b885b6f3438c3e036ad7f4c831"
+              },
+              {
+                "id": "a-lore-forbidden-zone-detail",
+                "sourceId": "04-设定大全.md",
+                "start": 9584,
+                "end": 9677,
+                "contentHash": "bc93c918269cf68fa39c7914e9e3a0c5687cdc288b2bff816f73f852b59f0c1c"
+              },
+              {
+                "id": "a-lore-qingdi-lotus",
+                "sourceId": "04-设定大全.md",
+                "start": 6156,
+                "end": 6218,
+                "contentHash": "7efadc712028bf0873ab3615b53d6f9f7f365f6206d74d4276072a958bc2f4d5"
+              },
+              {
+                "id": "a-lore-nine-secrets-line",
+                "sourceId": "04-设定大全.md",
+                "start": 19518,
+                "end": 19757,
+                "contentHash": "7796196fe41b5d4422501d0eed9e9a861ec535bd8ad409d1a759f13584ff8a85"
+              },
+              {
+                "id": "a-lore-datai-sources",
+                "sourceId": "04-设定大全.md",
+                "start": 16417,
+                "end": 16528,
+                "contentHash": "b3b24562c0ffe1eddd971811c89cb3635b9a7305d353c1438e81f8a07f56c671"
+              },
+              {
+                "id": "a-lore-weapons-list",
+                "sourceId": "04-设定大全.md",
+                "start": 5090,
+                "end": 5907,
+                "contentHash": "64280db3137f2d2f6b48980c66e001343a5a7bff9a5c0da84148f4a1af3b7328"
+              },
+              {
+                "id": "a-factions-taiching-block",
+                "sourceId": "08-势力人物大全.md",
+                "start": 162,
+                "end": 459,
+                "contentHash": "4e531e0e0e97d08f470597672a8ac6e0206757d6650a0870dde452d977001402"
+              },
+              {
+                "id": "a-factions-taiching-head",
+                "sourceId": "08-势力人物大全.md",
+                "start": 235,
+                "end": 279,
+                "contentHash": "93e7bd34186c9e6cf3f72a6f324dbb8e719c031146b6cb1999cbddfa67b7de70"
+              },
+              {
+                "id": "a-factions-taiching-secrets",
+                "sourceId": "08-势力人物大全.md",
+                "start": 363,
+                "end": 396,
+                "contentHash": "e7a1c7c7924718acb436864047c62d7b03958981e514a584856ba69b63995ee9"
+              },
+              {
+                "id": "a-factions-taiching-gongfa",
+                "sourceId": "08-势力人物大全.md",
+                "start": 397,
+                "end": 431,
+                "contentHash": "16d9a44475a36a48341d7d7f5d7c93e7946ec78048adc1b4d6c98029d6e190d7"
+              },
+              {
+                "id": "a-factions-dange-block",
+                "sourceId": "08-势力人物大全.md",
+                "start": 746,
+                "end": 884,
+                "contentHash": "2b0d5b05f58a14ec4648c044e22ddd0490658555937685b6c56cc37f2c1eec22"
+              },
+              {
+                "id": "a-factions-taiyi-block",
+                "sourceId": "08-势力人物大全.md",
+                "start": 913,
+                "end": 1137,
+                "contentHash": "cfbd7adf84494ae4aef7c04a95aa10c6e5dfb2b265df2e06666ab7ffb9affc38"
+              },
+              {
+                "id": "a-factions-taiyi-lord",
+                "sourceId": "08-势力人物大全.md",
+                "start": 981,
+                "end": 1030,
+                "contentHash": "d96b3546f07ab5bae9780a7b8b0dd243e4070b6cc67be660e7477ceb9cc65724"
+              },
+              {
+                "id": "a-factions-taiyi-sword",
+                "sourceId": "08-势力人物大全.md",
+                "start": 1031,
+                "end": 1057,
+                "contentHash": "84420a5771d2431db434ee6e07ab5402160404a69f4698b5d4ff78258f28d549"
+              },
+              {
+                "id": "a-factions-kunlun-block",
+                "sourceId": "08-势力人物大全.md",
+                "start": 1139,
+                "end": 1333,
+                "contentHash": "8bc59443651b6aca2a037948121bfac4de0ab206c2615ba88ad75aa2bae9a9c5"
+              },
+              {
+                "id": "a-factions-kunlun-jade",
+                "sourceId": "08-势力人物大全.md",
+                "start": 1241,
+                "end": 1271,
+                "contentHash": "c16a9898e603f4692e05b80104ce9f271f6160cb6dc993e76ad03ac49d7e2094"
+              },
+              {
+                "id": "a-factions-zhuxian-block",
+                "sourceId": "08-势力人物大全.md",
+                "start": 1335,
+                "end": 1552,
+                "contentHash": "534591e425073a3a9bd2d235c283c74d4328c9c3f3a3c2cd26fc60722d63df23"
+              },
+              {
+                "id": "a-factions-zhuxian-array",
+                "sourceId": "08-势力人物大全.md",
+                "start": 1436,
+                "end": 1475,
+                "contentHash": "e34d9ecab0ddab23b4c7aa0b0c609854dd28384b1594f964662e178319cfe844"
+              },
+              {
+                "id": "a-factions-yaochi-block",
+                "sourceId": "08-势力人物大全.md",
+                "start": 1554,
+                "end": 1811,
+                "contentHash": "c4b3f5de0a93fef45217d5435974074a952f8a983d87bf550bcc35bdefa45912"
+              },
+              {
+                "id": "a-factions-yaochi-lady",
+                "sourceId": "08-势力人物大全.md",
+                "start": 1633,
+                "end": 1677,
+                "contentHash": "bb487704ffeb67b2de535adf73ef765de64a32fbad80172c13f1d28a8f2af2d4"
+              },
+              {
+                "id": "a-factions-yaochi-true-sutra",
+                "sourceId": "08-势力人物大全.md",
+                "start": 1678,
+                "end": 1727,
+                "contentHash": "d04886b5b96407b49f80609e85912cf28670302d3a810947362707426abb5309"
+              },
+              {
+                "id": "a-factions-yaochi-qingshuying",
+                "sourceId": "08-势力人物大全.md",
+                "start": 1728,
+                "end": 1775,
+                "contentHash": "ccc102686a9f472de38226a576412e6e6839f8f083d61708bb71d7ded60ab558"
+              },
+              {
+                "id": "a-factions-yaochi-nine-row",
+                "sourceId": "08-势力人物大全.md",
+                "start": 1776,
+                "end": 1810,
+                "contentHash": "6d4a87376397d431da127f64547513198cff5af386468f6cad6f9e0d36a46208"
+              },
+              {
+                "id": "a-factions-five-clans-note",
+                "sourceId": "08-势力人物大全.md",
+                "start": 2340,
+                "end": 2423,
+                "contentHash": "fe5a18aec202568d4198282ee7c5c8c2a5b04f73399e106a88dcc3ee70b2bef2"
+              },
+              {
+                "id": "a-factions-five-clans-table",
+                "sourceId": "08-势力人物大全.md",
+                "start": 1894,
+                "end": 2338,
+                "contentHash": "d7b78f788c760b72bc4e8c54b12ebc62c71646ab7443d51e23c636a0c9f5b8e9"
+              },
+              {
+                "id": "a-factions-secret-owners",
+                "sourceId": "08-势力人物大全.md",
+                "start": 363,
+                "end": 431,
+                "contentHash": "71e55bde111cfb202f14c6572cb0a643dd8ce1d52902807470d10f2713e6acd2"
+              },
+              {
+                "id": "a-factions-power-table",
+                "sourceId": "08-势力人物大全.md",
+                "start": 3267,
+                "end": 3570,
+                "contentHash": "b1218bacc8076dd131bb1aafd44faa479f1dadf96a86d9ca94f2e8d033ac3520"
+              },
+              {
+                "id": "a-factions-weapon-table",
+                "sourceId": "08-势力人物大全.md",
+                "start": 4419,
+                "end": 4770,
+                "contentHash": "7c14290fcc40f91b5680620a07e6b446913eb5042cf116ee4b07b571a3de0e09"
+              },
+              {
+                "id": "a-factions-all-dao-ranks",
+                "sourceId": "08-势力人物大全.md",
+                "start": 3408,
+                "end": 3451,
+                "contentHash": "4eff944b9322afce9ffa072ea0beac6bcf2025fec1f7bde2c9a6de7ab61c5233"
+              },
+              {
+                "id": "a-factions-taiching-weapon",
+                "sourceId": "08-势力人物大全.md",
+                "start": 4404,
+                "end": 4499,
+                "contentHash": "b9726151140749682d8eca36268da4b08ce522e67a3eac36d7132730b984aa5b"
+              },
+              {
+                "id": "a-factions-monster-power",
+                "sourceId": "08-势力人物大全.md",
+                "start": 3132,
+                "end": 3239,
+                "contentHash": "548303eaf5e3899eb663117abcbdcb3242a8dfc6f20ac0bbb718c7c975ec0d41"
+              }
+            ],
+            "provenance": {
+              "taskId": "tiangege-facts-r1-2026-09-16",
+              "sessionId": "session-463c44fd-2d69-4f0f-aed2-28ae616d208e",
+              "producer": "novel-world-character-setting"
+            },
+            "authorization": {
+              "kind": "author",
+              "actorId": "session-463c44fd-2d69-4f0f-aed2-28ae616d208e",
+              "decisionId": "aa204aa4-bb37-43b1-ad08-b99acf298f65"
+            }
+          },
+          {
+            "revision": 3,
+            "parentRevision": 2,
+            "packetId": "tiangege-status-r2-2026-09-16",
+            "deltas": [
+              {
+                "id": "cs-linxuan-status",
+                "targetId": "linxuan",
+                "sourceAnchorIds": [],
+                "kind": "character-state",
+                "operation": "set",
+                "field": "status",
+                "value": "已入天机阁"
+              },
+              {
+                "id": "cs-guchen-status",
+                "targetId": "guchen",
+                "sourceAnchorIds": [],
+                "kind": "character-state",
+                "operation": "set",
+                "field": "status",
+                "value": "阁主初立"
+              }
+            ],
+            "issues": [],
+            "decisions": [
+              {
+                "itemType": "delta",
+                "itemId": "cs-linxuan-status",
+                "outcome": "accept"
+              },
+              {
+                "itemType": "delta",
+                "itemId": "cs-guchen-status",
+                "outcome": "accept"
+              }
+            ],
+            "sourceAnchors": [],
+            "provenance": {
+              "taskId": "tiangege-status",
+              "sessionId": "session-7f4027dd-404f-4b02-a339-2aabf56b3cd5",
+              "producer": "novel-architect"
+            },
+            "authorization": {
+              "kind": "author",
+              "actorId": "session-7f4027dd-404f-4b02-a339-2aabf56b3cd5",
+              "decisionId": "c26282ad-fefa-402f-b6ff-00b20dd1ce8b"
+            }
+          },
+          {
+            "revision": 4,
+            "parentRevision": 3,
+            "packetId": "tiangege-relations-chapter1-r3-2026-09-16",
+            "manuscript": {
+              "unitId": "vol01-ch0001",
+              "title": "开篇章",
+              "text": "顾辰在漏雨的屋檐下睁眼，喉咙里还堵着猝死前那口气。四合院不知荒了多少年，石阶缝里长满枯草，只有正屋地板上一圈微光在缓慢呼吸——天机系统就在那里等他。\n「宿主苏醒。天机点：零。」一个懒洋洋的童声在他识海里翻了个身，「先说好，白手起家也是起家。」\n他推开门，山风灌满袖口。远处青岚城的轮廓浮在雾上，像一张还没落笔的纸。顾辰笑了一下：命是白捡的，生意就从这座山开始。\n他不知道，今日山下正有一纸休书落款；也不知道，这一笔，落的是别人的命。"
+            },
+            "deltas": [
+              {
+                "id": "rel-guchen-linxuan",
+                "targetId": "guchen->linxuan",
+                "sourceAnchorIds": [],
+                "kind": "relationship",
+                "operation": "set",
+                "field": "line-state",
+                "value": {
+                  "agencyEvidence": [],
+                  "boundaries": [],
+                  "currentCommitment": "顾辰承诺提供至尊骨初醒所需的资源与遮掩；林玄承诺觉醒前不外泄天机阁的存在。",
+                  "currentConflict": "顾辰要的是可控成长节奏，林玄的天赋决定了他天然不接受被安排",
+                  "currentTrust": "低：顾辰认可林玄的天赋与骄傲是同一件东西，只肯给资源换配合，不给名分换忠心",
+                  "desiredEndingState": null,
+                  "form": "师徒（阁主→二徒弟），前期更接近投资人对标的",
+                  "independentGoal": "顾辰要让林玄的觉醒节奏完全落在天机阁的资源口径里，用他验证第二条收徒产品线。",
+                  "mainPlotConsequences": [],
+                  "obstacles": [],
+                  "premise": "顾辰以天机阁主身份把林玄（逆天体质流·至尊骨）列入第二批重点培养的主角模板，这次他不只想收割，还想看看能不能养出一个真正听话的样本。",
+                  "revisionRationale": null,
+                  "sharedHistory": [],
+                  "stage": "初见立契：顾辰已推演到至尊骨的成色，林玄尚未正式拜师",
+                  "turns": [],
+                  "unresolvedDebts": [],
+                  "version": 1
+                }
+              },
+              {
+                "id": "rel-linxuan-guchen",
+                "targetId": "linxuan->guchen",
+                "sourceAnchorIds": [],
+                "kind": "relationship",
+                "operation": "set",
+                "field": "line-state",
+                "value": {
+                  "agencyEvidence": [],
+                  "boundaries": [],
+                  "currentCommitment": "默认在顾辰给出至尊骨线索前不另投他人门下。",
+                  "currentConflict": "骄傲与报恩心互相拉扯——拜师等于承认自己需要人扶",
+                  "currentTrust": "偏低的有限信任：信他的情报，不信他的动机",
+                  "desiredEndingState": null,
+                  "form": "弟子→潜在师父（未正式拜师）",
+                  "independentGoal": "先看清顾辰到底图什么，再决定要不要交出师承名分。",
+                  "mainPlotConsequences": [],
+                  "obstacles": [],
+                  "premise": "林玄视角：一个来历成谜、张口就报出他至尊骨底细的陌生人，主动提出收他为徒。",
+                  "revisionRationale": null,
+                  "sharedHistory": [],
+                  "stage": "戒备观望：承认对方有本事，但拒绝先行低头",
+                  "turns": [],
+                  "unresolvedDebts": [],
+                  "version": 1
+                }
+              },
+              {
+                "id": "rel-guchen-hanpotian",
+                "targetId": "guchen->han-potian",
+                "sourceAnchorIds": [],
+                "kind": "relationship",
+                "operation": "set",
+                "field": "line-state",
+                "value": {
+                  "agencyEvidence": [],
+                  "boundaries": [],
+                  "currentCommitment": "顾辰承诺点破韩破天被退婚的困局并给出逆袭路径；韩破天尚不知这笔交易的对价。",
+                  "currentConflict": "顾辰要的是可控样本，韩破天要的是复仇与尊严，两条节奏随时会撞车",
+                  "currentTrust": "低：只信推演结果，不信活人；对韩破天始终保持观察距离",
+                  "desiredEndingState": null,
+                  "form": "师徒（阁主→大徒弟），前期更接近试探、利用与投资",
+                  "independentGoal": "顾辰要让韩破天以天机阁的节奏完成废柴逆袭，用他跑通推演、收徒、返还与抽成的核心循环。",
+                  "mainPlotConsequences": [],
+                  "obstacles": [],
+                  "premise": "顾辰首次推演命格即锁定废柴退婚流主角模板韩破天，把他当作天机阁第一个可收割也最可能脱轨的样本。",
+                  "revisionRationale": null,
+                  "sharedHistory": [],
+                  "stage": "试探与利用：韩破天尚未正式拜师，顾辰正在验证自己的师父资格",
+                  "turns": [],
+                  "unresolvedDebts": [],
+                  "version": 1
+                }
+              },
+              {
+                "id": "rel-hanpotian-guchen",
+                "targetId": "han-potian->guchen",
+                "sourceAnchorIds": [],
+                "kind": "relationship",
+                "operation": "set",
+                "field": "line-state",
+                "value": {
+                  "agencyEvidence": [],
+                  "boundaries": [],
+                  "currentCommitment": "默认接受顾辰指的路，但保留随时翻脸的余地。",
+                  "currentConflict": "恩情要求他听命，骄傲要求他先弄明白顾辰到底要什么",
+                  "currentTrust": "有限信任：信事不信人，感激底下压着对这号人物的本能警惕",
+                  "desiredEndingState": null,
+                  "form": "感恩者→恩人，尚未进入师徒名分",
+                  "independentGoal": "拿回被退婚夺走的尊严，并查清自己跌落成废柴的根源。",
+                  "mainPlotConsequences": [],
+                  "obstacles": [],
+                  "premise": "韩破天在被当众退婚的绝境里，遇到一个开口就说中他全部处境的陌生人。",
+                  "revisionRationale": null,
+                  "sharedHistory": [],
+                  "stage": "感恩起步、怀疑潜伏：先信他的判断，再问他为什么帮自己",
+                  "turns": [],
+                  "unresolvedDebts": [],
+                  "version": 1
+                }
+              },
+              {
+                "id": "rel-linxuan-sumubai",
+                "targetId": "linxuan->sumubai",
+                "sourceAnchorIds": [],
+                "kind": "relationship",
+                "operation": "set",
+                "field": "line-state",
+                "value": {
+                  "agencyEvidence": [],
+                  "boundaries": [],
+                  "currentCommitment": "林玄承诺不越级打探阁内情报；苏沐白承诺按顾辰的批示配给资源。",
+                  "currentConflict": "林玄要直来直去，苏沐白只给结论不给过程",
+                  "currentTrust": "中等偏低的职业信任：办事可靠，但直觉告诉他那副对外温润的面孔只是工具",
+                  "desiredEndingState": null,
+                  "form": "弟子→大管家（事务与资源对接）",
+                  "independentGoal": "从苏沐白手里拿到至尊骨觉醒所需的资源与遮掩，而不是被当成需要看管的小孩。",
+                  "mainPlotConsequences": [],
+                  "obstacles": [],
+                  "premise": "林玄作为待入门弟子实际接触到的第一个天机阁实权人物，是负责兜底与情报的大管家苏沐白。",
+                  "revisionRationale": null,
+                  "sharedHistory": [],
+                  "stage": "初次共事：流程被安排得密不透风，林玄还在摸苏沐白的底线",
+                  "turns": [],
+                  "unresolvedDebts": [],
+                  "version": 1
+                }
+              },
+              {
+                "id": "rel-sumubai-linxuan",
+                "targetId": "sumubai->linxuan",
+                "sourceAnchorIds": [],
+                "kind": "relationship",
+                "operation": "set",
+                "field": "line-state",
+                "value": {
+                  "agencyEvidence": [],
+                  "boundaries": [],
+                  "currentCommitment": "苏沐白承诺不向林玄隐瞒会影响他觉醒的硬条件；林玄尚不知自己被列在观察名单上。",
+                  "currentConflict": "林玄要自主权，苏沐白只肯给受控的自主权",
+                  "currentTrust": "低度信任：能力认可，服从性存疑",
+                  "desiredEndingState": null,
+                  "form": "大管家→待入门弟子（对内冷面严谨、惜字如金）",
+                  "independentGoal": "在顾辰收手之前把这个不稳定的二徒弟压进规矩里，别让他的骄傲变成天机阁的窟窿。",
+                  "mainPlotConsequences": [],
+                  "obstacles": [],
+                  "premise": "苏沐白奉命为至尊骨体质的新弟子铺路，同时替顾辰盯住这个明显不好管的人。",
+                  "revisionRationale": null,
+                  "sharedHistory": [],
+                  "stage": "观察与警惕：先评估风险，再谈投入",
+                  "turns": [],
+                  "unresolvedDebts": [],
+                  "version": 1
+                }
+              }
+            ],
+            "issues": [],
+            "decisions": [
+              {
+                "itemType": "manuscript",
+                "itemId": "vol01-ch0001",
+                "outcome": "accept"
+              },
+              {
+                "itemType": "delta",
+                "itemId": "rel-guchen-linxuan",
+                "outcome": "accept"
+              },
+              {
+                "itemType": "delta",
+                "itemId": "rel-linxuan-guchen",
+                "outcome": "accept"
+              },
+              {
+                "itemType": "delta",
+                "itemId": "rel-guchen-hanpotian",
+                "outcome": "accept"
+              },
+              {
+                "itemType": "delta",
+                "itemId": "rel-hanpotian-guchen",
+                "outcome": "accept"
+              },
+              {
+                "itemType": "delta",
+                "itemId": "rel-linxuan-sumubai",
+                "outcome": "accept"
+              },
+              {
+                "itemType": "delta",
+                "itemId": "rel-sumubai-linxuan",
+                "outcome": "accept"
+              }
+            ],
+            "sourceAnchors": [],
+            "provenance": {
+              "taskId": "tiangege-relations-chapter1-r3-2026-09-16",
+              "sessionId": "session-c369891e-522f-4eea-898b-57fe33c33098",
+              "producer": "novel-world-character-setting"
+            },
+            "authorization": {
+              "kind": "author",
+              "actorId": "session-c369891e-522f-4eea-898b-57fe33c33098",
+              "decisionId": "0e4abc67-9dc6-4c0e-9605-cb2b5b410674"
+            }
+          },
+          {
+            "revision": 5,
+            "parentRevision": 4,
+            "packetId": "tiangege-debts-r4-2026-09-16",
+            "deltas": [
+              {
+                "id": "debt-vol01-ch0001-mystery-guchen-origin",
+                "targetId": "debt-guchen-origin-untold",
+                "sourceAnchorIds": [],
+                "kind": "narrative-debt",
+                "operation": "set",
+                "unitId": "vol01-ch0001",
+                "field": "mystery",
+                "value": {
+                  "summary": "顾辰穿越来历与天机系统／小源的真正来源仍未揭底：读者只看到他绑定系统，不知道他为何会被选中。",
+                  "status": "open",
+                  "horizon": "第 9–11 章"
+                }
+              },
+              {
+                "id": "debt-vol01-ch0001-world-tianji-rules",
+                "targetId": "debt-tianji-pavilion-trade-rules",
+                "sourceAnchorIds": [],
+                "kind": "narrative-debt",
+                "operation": "set",
+                "unitId": "vol01-ch0001",
+                "field": "world",
+                "value": {
+                  "summary": "天机阁推演、收徒返还与抽成的交易规则尚未讲透：代价口径与不可违背的边界只露了一角。",
+                  "status": "open",
+                  "horizon": "第 9–11 章"
+                }
+              },
+              {
+                "id": "debt-vol01-ch0001-relationship-hanpotian-pact",
+                "targetId": "debt-guchen-hanpotian-pact",
+                "sourceAnchorIds": [],
+                "kind": "narrative-debt",
+                "operation": "set",
+                "unitId": "vol01-ch0001",
+                "field": "relationship",
+                "value": {
+                  "summary": "顾辰与韩破天的约定尚未履行到底：逆袭路径已给出，对价未挑明，师徒名分与信任都还没真正建立。",
+                  "status": "open",
+                  "horizon": "第 9–11 章"
+                }
+              }
+            ],
+            "issues": [],
+            "decisions": [
+              {
+                "itemType": "delta",
+                "itemId": "debt-vol01-ch0001-mystery-guchen-origin",
+                "outcome": "accept"
+              },
+              {
+                "itemType": "delta",
+                "itemId": "debt-vol01-ch0001-world-tianji-rules",
+                "outcome": "accept"
+              },
+              {
+                "itemType": "delta",
+                "itemId": "debt-vol01-ch0001-relationship-hanpotian-pact",
+                "outcome": "accept"
+              }
+            ],
+            "sourceAnchors": [],
+            "provenance": {
+              "taskId": "tiangege-debts-r4-2026-09-16",
+              "sessionId": "session-7e532900-e5d9-45e4-9634-242b94abfc41",
+              "producer": "novel-writing-memory-organizer"
+            },
+            "authorization": {
+              "kind": "author",
+              "actorId": "session-7e532900-e5d9-45e4-9634-242b94abfc41",
+              "decisionId": "9e4f8935-d17e-43c6-8214-8fa7ad8eac1a"
+            }
+          }
+        ],
+        "pendingProposals": [
+          {
+            "packetId": "tiangege-ch0001-draft-2026-09-17",
+            "receivedAt": 1789583787982,
+            "producer": "novel-prose-writer",
+            "packet": {
+              "packetId": "tiangege-ch0001-draft-2026-09-17",
+              "expectedRevision": 5,
+              "manuscript": {
+                "unitId": "vol01-ch0001",
+                "title": "开篇章",
+                "text": "风起于青萍之末。他合上门，把袖中的信压得更深。"
+              },
+              "manuscriptDiff": {
+                "format": "unified",
+                "text": "--- vol01-ch0001@r5\n+++ vol01-ch0001@proposal\n@@ -1,4 +1,1 @@\n-顾辰在漏雨的屋檐下睁眼，喉咙里还堵着猝死前那口气。四合院不知荒了多少年，石阶缝里长满枯草，只有正屋地板上一圈微光在缓慢呼吸——天机系统就在那里等他。\n-「宿主苏醒。天机点：零。」一个懒洋洋的童声在他识海里翻了个身，「先说好，白手起家也是起家。」\n-他推开门，山风灌满袖口。远处青岚城的轮廓浮在雾上，像一张还没落笔的纸。顾辰笑了一下：命是白捡的，生意就从这座山开始。\n-他不知道，今日山下正有一纸休书落款；也不知道，这一笔，落的是别人的命。\n+风起于青萍之末。他合上门，把袖中的信压得更深。"
+              },
+              "deltas": [],
+              "issues": [],
+              "sourceAnchors": [
+                {
+                  "id": "anchor-draft-ch0001",
+                  "sourceId": "第1章《开篇章》.草稿.md",
+                  "start": 0,
+                  "end": 69,
+                  "contentHash": "357078e23a5b8ccb5ad987baf233b589baf4fb5fac1ac574f652f2b5b39f7c00"
+                },
+                {
+                  "id": "anchor-prose-ch0001-r4",
+                  "sourceId": "vol01-ch0001",
+                  "start": 0,
+                  "end": 216,
+                  "contentHash": "dabd429bf5fe2512dac417847b15840136dbc170eb4c4088ab30caff233fd6f9"
+                }
+              ],
+              "provenance": {
+                "taskId": "tiangege-ch0001-draft-proposal-2026-09-17",
+                "sessionId": "session-3b13f527-0b48-42fe-a18d-10cbc2a84daf",
+                "producer": "novel-prose-writer"
+              }
+            }
+          },
+          {
+            "packetId": "tiangege-ch0001-draft-r5-2026-09-17-b",
+            "receivedAt": 1789616113275,
+            "producer": "novel-prose-writer",
+            "packet": {
+              "packetId": "tiangege-ch0001-draft-r5-2026-09-17-b",
+              "expectedRevision": 5,
+              "manuscript": {
+                "unitId": "vol01-ch0001",
+                "title": "开篇章",
+                "text": "夜里风大，吹得窗纸哗哗作响。他站在门口，没有推门。"
+              },
+              "manuscriptDiff": {
+                "format": "unified",
+                "text": "--- vol01-ch0001@r5\n+++ vol01-ch0001@proposal\n@@ -1,4 +1,1 @@\n-顾辰在漏雨的屋檐下睁眼，喉咙里还堵着猝死前那口气。四合院不知荒了多少年，石阶缝里长满枯草，只有正屋地板上一圈微光在缓慢呼吸——天机系统就在那里等他。\n-「宿主苏醒。天机点：零。」一个懒洋洋的童声在他识海里翻了个身，「先说好，白手起家也是起家。」\n-他推开门，山风灌满袖口。远处青岚城的轮廓浮在雾上，像一张还没落笔的纸。顾辰笑了一下：命是白捡的，生意就从这座山开始。\n-他不知道，今日山下正有一纸休书落款；也不知道，这一笔，落的是别人的命。\n+夜里风大，吹得窗纸哗哗作响。他站在门口，没有推门。"
+              },
+              "deltas": [],
+              "issues": [],
+              "sourceAnchors": [
+                {
+                  "id": "anchor-draft-ch0001-25zi",
+                  "sourceId": "第1章《开篇章》.草稿.md",
+                  "start": 0,
+                  "end": 75,
+                  "contentHash": "7b592b514af3dd386dae9cb21be030e126093440fc5d63b8db3a6801b8412b9f"
+                },
+                {
+                  "id": "anchor-prose-ch0001-r4",
+                  "sourceId": "vol01-ch0001",
+                  "start": 0,
+                  "end": 216,
+                  "contentHash": "dabd429bf5fe2512dac417847b15840136dbc170eb4c4088ab30caff233fd6f9"
+                }
+              ],
+              "provenance": {
+                "taskId": "tiangege-ch0001-draft-proposal-2026-09-17-b",
+                "sessionId": "session-3b13f527-0b48-42fe-a18d-10cbc2a84daf",
+                "producer": "novel-prose-writer"
+              }
+            }
+          },
+          {
+            "packetId": "wmo-ch0001-post-check-r5-2026-09-17",
+            "receivedAt": 1789616211343,
+            "producer": "novel-writing-memory-organizer",
+            "packet": {
+              "packetId": "wmo-ch0001-post-check-r5-2026-09-17",
+              "expectedRevision": 5,
+              "deltas": [
+                {
+                  "id": "wmo-vol01-ch0001-post-check-r5",
+                  "targetId": "vol01-ch0001",
+                  "sourceAnchorIds": [
+                    "anchor-prose-ch0001-r5"
+                  ],
+                  "kind": "chapter-state",
+                  "operation": "set",
+                  "field": "post-check",
+                  "value": {
+                    "contractAssessment": {
+                      "contractRevision": 1,
+                      "contractSourceDeltaId": "nu-05",
+                      "outcome": "missed",
+                      "deviations": [
+                        "lengthRange 要求 2800–3600 字，本章已接受正文实际为 216 字。",
+                        "sceneFunctions 只交付了常态场景（处境、起点、资源）；触发场景、升级场景与抉择场景均未在正文中出现，本章在主角走下山之前就结束了。",
+                        "emotionalMovement 未走完：正文只到了「惯性自信」，没有「被规则当面碾压的失衡」，也没有「主动接下代价的冷静决断」。",
+                        "endingPull 落实为叙述提前告知的两件事（休书落款与「落的是别人的命」），而非「主角已完成的选择及其直接后果」；章末尚无生效的新代价。",
+                        "acceptanceGates 第 2、3 条无法成立于正文：既无一次常规尝试失败，也无章末的不可逆选择及可被指句复述的代价；第 1 条在 216 字的篇幅下无法按「开篇三页」评判。"
+                      ]
+                    },
+                    "manuscriptSourceRevision": 5,
+                    "changes": [
+                      "主角作为主体进入世界：开篇即写他在漏雨的屋檐下「睁眼」，并带着猝死前的体感，穿越/重生的既成事实被直接确立。",
+                      "天机系统已在正屋地板上等待并被绑定：此刻天机点为零，这是他全部可用资源的初始口径。",
+                      "器灵小源的首次登场与口气被立起：懒洋洋的童声、开口先接受「白手起家」的前提。",
+                      "主角的起点场所被固定为一座荒废四合院（山中山、近青岚城），这是他此后一切经营的物理原点。",
+                      "他自认把系统绑定读成「命是白捡的」，并当场定下向山下拓张的经营意向——从一个被抛弃的院子向外做生意的方向已被他自己选定。",
+                      "叙事在末尾落下两条本人尚不知情的线：今日山下有一纸休书落款，且这一笔将决定别人的命。"
+                    ],
+                    "costs": [
+                      "本章正文中未发生任何实质损失、消耗或代价交换：主角未付出资源、未支付对价、未做出不可逆选择，也未因此失去任何退路。",
+                      "唯一近似成本的是时间与信息：他对自己的处境、系统来历与山下事态全部无知，这份无知本身就是他下一章要面对的代价。",
+                      "他放弃了确定性：在完全未验证规则的情况下，已把「从这里起家」当成既定方向，这笔尚未定价的账在白手起家的口径下迟早要结。"
+                    ],
+                    "newlyPossible": [
+                      "下一章可以让他首次离山（向青岚城方向）或首次尝试动用天机点，两条路都已被正文铺好。",
+                      "下一章可以接上山下那纸休书的落款人，并把它的后果推到主角眼前，而主角仍不知道叙事已提前告知读者什么。",
+                      "下一章可以让小源第一次给出规则、代价口径或一次结算，而无需重新铺垫它的存在与口气。",
+                      "下一章可以利用「与世隔绝的荒院 + 近在雾中的青岚城」这一空间反差，做他的第一次对外接触。"
+                    ],
+                    "newlyImpossible": [
+                      "不能把主角写成已经知道山下发生了什么：他对休书与另一人的命运均不知情。",
+                      "不能让他此刻调用任何未定义的能力、法宝或人脉解决困难：他的全部资源仍是天机点零，且他是独自一人。",
+                      "不能让天机系统或小源在此阶段交代规则、代价口径或选召理由——正文尚未给过任何一条。",
+                      "不能默认本章已经发生了一次常规尝试失败或一次不可逆选择；正文中两者都不存在。"
+                    ],
+                    "readerNowKnows": [
+                      "天机系统已经与主角绑定，且当前天机点为零。",
+                      "器灵小源是一个懒洋洋、开口先谈白手起家的童声角色。",
+                      "主角眼下独自落在一座荒废多年、近青岚城的四合院里。",
+                      "主角已经决定从这里起家、向外做生意。"
+                    ],
+                    "readerNowSuspects": [
+                      "章末的预先告知把「山下的一纸休书」与「另一人的命」硬性绑在一起，读者可合理预期这笔落款将在下一章与主角的目标交会。",
+                      "小源回答得太轻巧、太不提条件，读者可怀疑白手起家的前提底下有一笔尚未明说的代价。",
+                      "主角的自信建立在「命是白捡的」之上，读者可合理预感这份惯性自信会被规则亲手打破。"
+                    ],
+                    "characterCarryForward": [
+                      {
+                        "characterId": "guchen",
+                        "carries": [
+                          "他已经是天机系统的主人，这是下一章不可撤销的前提",
+                          "他的账面资源仍为天机点零，无任何人脉、产业与情报",
+                          "他已经把「从这座山开始做生意」当作自己的既定方向，但尚未做出任何不可逆的实际投入",
+                          "他不知道自己捡回的这条命已经与山下正在发生的事连上因果",
+                          "他的信心来自「命是白捡的」这种惯性自信，而不是对规则的验证"
+                        ]
+                      },
+                      {
+                        "characterId": "xiaoyuan",
+                        "carries": [
+                          "它必须在下一章继续作为系统交互的唯一接口发话，口气仍为懒散、不客气、先讲前提",
+                          "天机点是它结算与发布榜单的口径，下一章开始时仍为零",
+                          "它尚未任何代价、规则或不可违背的边界说明——它对这个主人的选召理由也仍是空白"
+                        ]
+                      }
+                    ],
+                    "debtTransitions": [
+                      {
+                        "clock": "world",
+                        "debtId": "debt-tianji-pavilion-trade-rules",
+                        "transition": "created",
+                        "sourceDeltaId": "debt-vol01-ch0001-world-tianji-rules"
+                      },
+                      {
+                        "clock": "mystery",
+                        "debtId": "debt-guchen-origin-untold",
+                        "transition": "created",
+                        "sourceDeltaId": "debt-vol01-ch0001-mystery-guchen-origin"
+                      },
+                      {
+                        "clock": "relationship",
+                        "debtId": "debt-guchen-hanpotian-pact",
+                        "transition": "created",
+                        "sourceDeltaId": "debt-vol01-ch0001-relationship-hanpotian-pact"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "issues": [],
+              "sourceAnchors": [
+                {
+                  "id": "anchor-prose-ch0001-r5",
+                  "sourceId": "vol01-ch0001",
+                  "start": 0,
+                  "end": 216,
+                  "contentHash": "dabd429bf5fe2512dac417847b15840136dbc170eb4c4088ab30caff233fd6f9"
+                }
+              ],
+              "provenance": {
+                "taskId": "tiangege-wmo-ch0001-post-check-2026-09-17",
+                "sessionId": "session-3b13f527-0b48-42fe-a18d-10cbc2a84daf",
+                "producer": "novel-writing-memory-organizer"
+              }
+            }
+          },
+          {
+            "packetId": "wmo-ch0001-knowledge-r5-2026-09-17",
+            "receivedAt": 1789616234652,
+            "producer": "novel-writing-memory-organizer",
+            "packet": {
+              "packetId": "wmo-ch0001-knowledge-r5-2026-09-17",
+              "expectedRevision": 5,
+              "deltas": [
+                {
+                  "id": "wmo-knowledge-reader-ch0001-r5",
+                  "targetId": "reader->fact-ch0001-tianji-system-bound",
+                  "sourceAnchorIds": [
+                    "anchor-prose-ch0001-r5"
+                  ],
+                  "kind": "knowledge",
+                  "operation": "set",
+                  "field": "state",
+                  "value": {
+                    "access": {
+                      "mode": "observed",
+                      "unitId": "vol01-ch0001",
+                      "viewpointAccess": "direct",
+                      "viewpointId": "reader"
+                    },
+                    "belief": "主角已在漏雨的屋檐下睁眼、天机系统就在正屋地板上等他，且当前天机点为零。",
+                    "beliefStatus": "known",
+                    "memoryStatus": "retained",
+                    "revisionRationale": "后写回需把 R5 正文已直接呈现给读者的最小已知事实固定下来，作为下一章不得重播的下限。",
+                    "subjectKind": "reader",
+                    "truthAlignment": "accurate",
+                    "version": 1
+                  }
+                }
+              ],
+              "issues": [],
+              "sourceAnchors": [
+                {
+                  "id": "anchor-prose-ch0001-r5",
+                  "sourceId": "vol01-ch0001",
+                  "start": 0,
+                  "end": 216,
+                  "contentHash": "dabd429bf5fe2512dac417847b15840136dbc170eb4c4088ab30caff233fd6f9"
+                }
+              ],
+              "provenance": {
+                "taskId": "tiangege-wmo-ch0001-knowledge-2026-09-17",
+                "sessionId": "session-3b13f527-0b48-42fe-a18d-10cbc2a84daf",
+                "producer": "novel-writing-memory-organizer"
+              }
+            }
+          },
+          {
+            "packetId": "wmo-ch0001-knowledge-set-r5-2026-09-17",
+            "receivedAt": 1789616260673,
+            "producer": "novel-writing-memory-organizer",
+            "packet": {
+              "packetId": "wmo-ch0001-knowledge-set-r5-2026-09-17",
+              "expectedRevision": 5,
+              "deltas": [
+                {
+                  "id": "wmo-knowledge-reader-ch0001-suspect-r5",
+                  "targetId": "reader->fact-ch0001-xieshu-intersect",
+                  "sourceAnchorIds": [
+                    "anchor-prose-ch0001-r5"
+                  ],
+                  "kind": "knowledge",
+                  "operation": "set",
+                  "field": "state",
+                  "value": {
+                    "access": {
+                      "mode": "inferred",
+                      "unitId": "vol01-ch0001",
+                      "viewpointAccess": "limited",
+                      "viewpointId": "reader"
+                    },
+                    "belief": "山下那一纸休书与「落的是别人的命」将与主角的目标在下游交会，而主角此刻对此一无所知。",
+                    "beliefStatus": "suspected",
+                    "memoryStatus": "retained",
+                    "revisionRationale": "章末的预告式叙述把两条线硬拴在一起，但正文并未给出机制或人物，只能作为可疑而非已知入账。",
+                    "subjectKind": "reader",
+                    "truthAlignment": "unverified",
+                    "version": 1
+                  }
+                },
+                {
+                  "id": "wmo-knowledge-guchen-ch0001-confidence-r5",
+                  "targetId": "guchen->fact-ch0001-self-confidence-source",
+                  "sourceAnchorIds": [
+                    "anchor-prose-ch0001-r5"
+                  ],
+                  "kind": "knowledge",
+                  "operation": "set",
+                  "field": "state",
+                  "value": {
+                    "access": {
+                      "mode": "inferred",
+                      "unitId": "vol01-ch0001",
+                      "viewpointAccess": "direct",
+                      "viewpointId": "guchen"
+                    },
+                    "belief": "天机点为零、无资源无人脉都不构成障碍，因为命是白捡的，生意可以从这座山白手做起。",
+                    "beliefStatus": "known",
+                    "memoryStatus": "retained",
+                    "revisionRationale": "约束下一章不得把主角写成已经知道代价口径或已自认误判，他当前真心认为这笔账是划算的。",
+                    "subjectKind": "character",
+                    "truthAlignment": "partial",
+                    "version": 1
+                  }
+                }
+              ],
+              "issues": [],
+              "sourceAnchors": [
+                {
+                  "id": "anchor-prose-ch0001-r5",
+                  "sourceId": "vol01-ch0001",
+                  "start": 0,
+                  "end": 216,
+                  "contentHash": "dabd429bf5fe2512dac417847b15840136dbc170eb4c4088ab30caff233fd6f9"
+                }
+              ],
+              "provenance": {
+                "taskId": "tiangege-wmo-ch0001-knowledge-set-2026-09-17",
+                "sessionId": "session-3b13f527-0b48-42fe-a18d-10cbc2a84daf",
+                "producer": "novel-writing-memory-organizer"
+              }
+            }
+          },
+          {
+            "packetId": "wmo-vol01-ch0001-postcheck-r5",
+            "receivedAt": 1789618684022,
+            "producer": "novel-writing-memory-organizer",
+            "packet": {
+              "packetId": "wmo-vol01-ch0001-postcheck-r5",
+              "expectedRevision": 5,
+              "deltas": [
+                {
+                  "id": "wmo-vol01-ch0001-post-check",
+                  "targetId": "vol01-ch0001",
+                  "sourceAnchorIds": [],
+                  "kind": "chapter-state",
+                  "operation": "set",
+                  "field": "post-check",
+                  "value": {
+                    "contractAssessment": {
+                      "contractRevision": 1,
+                      "contractSourceDeltaId": "nu-05",
+                      "outcome": "changed",
+                      "deviations": [
+                        "R5 中不存在 vol01-ch0001 的已接受正文单元（recentManuscripts 与 recentPostChapterChecks 均为空），本次评估依据的是 R4 已接受正文片段（unitId vol01-ch0001，标题「开篇章」，sourceRevision 4），不是全章完整正文。",
+                        "该已接受片段只覆盖开篇常态场景与章末一句预叙，无法在正文层面验证 chapterContract 的升级场景（第一次常规尝试失败）与抉择场景（接受带条件筹码、完成不可逆越界）是否已按合同交付，因此 outcome 记为 changed 而非 met；acceptanceGates 的逐条达成情况标注为未验证。",
+                        "changes 中「林玄已入天机阁」「顾辰阁主初立」「顾辰与韩破天约定」等条目，来自本 lineage 已接受的 character-state 与 relationship Delta（R3／R4），并非本次从正文逐句提取；正文片段只能佐证开篇场景与章末休书一句。"
+                      ]
+                    },
+                    "manuscriptSourceRevision": 4,
+                    "changes": [
+                      "顾辰在漏雨的荒废四合院中苏醒，天机系统已在正屋等待，器灵小源以童声报到；天机点初始为零，开局没有任何可兑换的资源。",
+                      "顾辰确认自己身处青岚城附近的山中，把「命是白捡的，生意就从这座山开始」定为入局姿态，全书经营线由此起笔。",
+                      "章末预叙点出「今日山下正有一纸休书落款」，把开篇场景与韩破天的当众退婚困局接上，暗示「这一笔落的是别人的命」。",
+                      "已接受关系事实登记：顾辰已点破韩破天被退婚的困局并给出逆袭路径，韩破天尚不知这笔交易的对价（guchen->han-potian，delta rel-guchen-hanpotian，R4）。",
+                      "已接受人物状态登记：顾辰为阁主初立（delta cs-guchen-status，R3），林玄已入天机阁（delta cs-linxuan-status，R3）。",
+                      "已接受人物关系登记：顾辰已推演到林玄至尊骨的成色并承诺提供初醒所需资源与遮掩，林玄承诺觉醒前不外泄天机阁的存在（delta rel-guchen-linxuan，R4）。",
+                      "本 R5 未记录本弧的 plot 时钟债务与 ending 时钟条目；本项不代填，留待作者决定是否补登记。"
+                    ],
+                    "costs": [
+                      "天机点为零：顾辰没有可依赖的既有资本，任何一步都要靠推演与谈判换取，起步成本只能自己先付。",
+                      "一纸休书已经落款：韩破天被退婚的既成事实无法撤回，顾辰能改变的只是之后的对价与方向，不能改变已发生的损失。",
+                      "林玄已入天机阁：林玄脱离了原本身份路径，把自己的觉醒前景部分押在顾辰的批条上，退路同步收窄。",
+                      "顾辰以「阁主初立」的架子开局，手上却无人无资源：他必须先撑住一个能推演却暂无战力的师父形象，信息优势一旦被质疑就会立刻兑现成风险。"
+                    ],
+                    "newlyPossible": [
+                      "顾辰可以正式把韩破天的退婚绝境当作天机阁的第一笔生意来经营，并据此开始结算天机点与积累返还。",
+                      "顾辰可以按已接受关系事实向林玄兑付至尊骨初醒所需的资源与遮掩，把林玄的觉醒正式排进日程。",
+                      "林玄可以在天机阁内部依照顾辰的批条获取修炼资源，并与大管家苏沐白就资源配给直接对接。",
+                      "韩破天可以在「必输」的处境上拿到一条可执行的逆袭路径，并据此选择是否对外公开自己已另投他处。"
+                    ],
+                    "newlyImpossible": [
+                      "阻断或挽回那纸休书已经不可能：退婚在第一章之前或同一时间已成事实，故事只能向前处理其后果。",
+                      "顾辰已不可能靠本世界的既有资产、师门或家世起步：天机点为零这一初始条件把路径锁死在推演与经营上。",
+                      "韩破天与林玄的师承名分已不可能回到「互不相识的陌生人」状态：双方的第一次接触已被登记为既定历史。"
+                    ],
+                    "readerNowKnows": [
+                      "主角顾辰是一名穿越者，醒来即已绑定天机系统，识海中存在器灵小源。",
+                      "系统给出的初始状态是天机点为零，主角必须白手起家。",
+                      "主角开局落点在青岚城一带的山中荒废四合院。",
+                      "已接受正文明确预叙：这一天下山有一纸休书落款，且这一笔「落的是别人的命」，读者由此先于主角知道山下正在发生一桩决定他人命运的退婚。",
+                      "林玄已入天机阁、顾辰为阁主初立，且顾辰已掌握林玄至尊骨的成色（已接受 Canon 登记事实）。"
+                    ],
+                    "readerNowSuspects": [
+                      "读者可合理怀疑那纸休书正是韩破天的退婚，主角的第一笔生意会以某个陌生人的绝境为代价。",
+                      "读者可怀疑天机系统为何选中顾辰，以及小源所知的系统来源是什么。",
+                      "读者可怀疑顾辰「师父」身份的成色：他已推演出他人底细，却尚未展示与之匹配的实力。",
+                      "读者可怀疑顾辰帮助韩破天背后有未挑明的对价或利用意图（对价在已接受 Canon 中被明确登记为尚未告知当事人）。"
+                    ],
+                    "characterCarryForward": [
+                      {
+                        "characterId": "guchen",
+                        "carries": [
+                          "阁主初立、天机点为零：顾辰继续以经营姿态推进，任何行动建立在推演与信息差之上，没有战力兜底。",
+                          "他必须先让韩破天与林玄认可自己的师父资格，才有资源结算与返还可言。",
+                          "他掌握林玄至尊骨成色与韩破天退婚困局这两项信息优势，但优势尚未转化为可压场的实力。"
+                        ]
+                      },
+                      {
+                        "characterId": "han-potian",
+                        "carries": [
+                          "已被当众退婚并跌落成废柴，处于绝境；他默认接受顾辰指的路，同时保留随时翻脸的余地。",
+                          "他的独立目标是拿回被退婚夺走的尊严并查清自己跌落的根源，与顾辰「可控样本」的需求随时可能撞车。",
+                          "他尚不知这笔交易的对价，感恩底下压着对顾辰的本能警惕。"
+                        ]
+                      },
+                      {
+                        "characterId": "linxuan",
+                        "carries": [
+                          "身怀至尊骨且尚未正式踏入凡尘境；已入天机阁，处于戒备观望状态，承认顾辰有本事但拒绝先行低头。",
+                          "他已获得顾辰关于至尊骨初醒资源与遮掩的承诺，同时承诺觉醒前不外泄天机阁的存在。",
+                          "他尚不知自己被苏沐白列在观察名单上；拜师等于承认自己需要人扶，骄傲与报恩心仍在互相拉扯。"
+                        ]
+                      },
+                      {
+                        "characterId": "sumubai",
+                        "carries": [
+                          "以大管家的身份按顾辰的批示为林玄配给资源，只给结论不给过程。",
+                          "他奉命同时替顾辰看住这个不好管的二徒弟，在「受控的自主权」与林玄的骄傲之间找平衡。"
+                        ]
+                      }
+                    ],
+                    "debtTransitions": [
+                      {
+                        "clock": "world",
+                        "debtId": "debt-tianji-pavilion-trade-rules",
+                        "transition": "created",
+                        "sourceDeltaId": "debt-vol01-ch0001-world-tianji-rules"
+                      },
+                      {
+                        "clock": "relationship",
+                        "debtId": "debt-guchen-hanpotian-pact",
+                        "transition": "created",
+                        "sourceDeltaId": "debt-vol01-ch0001-relationship-hanpotian-pact"
+                      },
+                      {
+                        "clock": "mystery",
+                        "debtId": "debt-guchen-origin-untold",
+                        "transition": "created",
+                        "sourceDeltaId": "debt-vol01-ch0001-mystery-guchen-origin"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "issues": [
+                {
+                  "id": "wmo-issue-arc-cannot-be-mapped",
+                  "dimension": "character-arc",
+                  "severity": "major",
+                  "problem": "用户要求的 character-state/arc-hypothesis 无法在本提案里合法提交：该 strict contract 要求 `scopeUnitId`、`version`、`startingBelief`、`targetTransformation`、`transformationDimensions`（只能取 belief／strategy／identity／relationship／responsibility）、`pressures`、`decisionChain`、`currentStage`、`unresolvedQuestion`、`changeRationale`，而 `decisionChain` 每一项必须携带非空的 `storyEventId`（已探针验证：空串会被拒绝为 too_small）。R5 的 story-event 家族只有 event-forbidden-zone-self-cut（participants: forbidden-zone-master）与 event-qingdi-fall-lotus（participants: qingdi）两条远古事件，均与本章人物无关；vol01-ch0001 在本 lineage 里没有任何已接受的 story-event 记录，因此没有任何值可以如实填入 `storyEventId`。",
+                  "suggestion": "已完成的弧假设正文供作者审阅，待补 story-event 记录后可原样提交。顾辰：起点信念「命是白捡的，生意可以从这座山开始白手做起来，只要推演还在，就能把别人的困局变成自己的筹码」；目标转变「从靠信息差白手开局，转为靠可验证的对价与结算体系立住天机阁」；转变维度 strategy／identity／responsibility；当前阶段「开局立信，尚无人真正为他的判断付账」；未解问题「他能不能在不暴露无战力的前提下，把推演能力持续兑换成别人愿意信的名分与资源」。韩破天：起点信念「谁给我一条能翻回去的路我就先走，但谁也别想让我交出最后一分傲气」；目标转变「从用恩情换路径的受助者，转为明算账的合作方或入室弟子」；维度 relationship／identity／belief；当前阶段「感恩起步、怀疑潜伏」；未解问题「先当恩人用到底，还是先弄清对价再决定是否拜师」。林玄：起点信念「我的天赋自己就足够把我送到该到的高度，别人能给我的是资源和遮掩，不是师承与指挥权」；目标转变「从只要资源不谈名分的戒备者，转为在明确条件与尊重前提下承认师承的入室弟子」；维度 belief／relationship／strategy；当前阶段「戒备观望」；未解问题「在接受资源而不交出师承名分的状态下，他的骄傲能撑多久」。",
+                  "sourceAnchorIds": [
+                    "a-wmo-draft-head"
+                  ]
+                },
+                {
+                  "id": "wmo-issue-knowledge-no-baseline",
+                  "dimension": "knowledge-boundary",
+                  "severity": "minor",
+                  "problem": "未提交 knowledge/state（<subject>-><fact>）Delta：R5 的 knowledge 家族为空（reader 知识边界 entries 为空、character 知识边界未登记），不存在可引用的已接受 baseline，凭正文推测填写会凭空造出一个矛盾事实。",
+                  "suggestion": "待确认清单：请作者指定要登记的知情边界及其 subject 与 fact 标识，例如「顾辰已知韩破天被退婚但未告知对价」「读者已知休书与韩破天的关联」「林玄不知自己被列在观察名单上」，确认后再以 knowledge/state 单独提交。",
+                  "sourceAnchorIds": [
+                    "a-wmo-draft-head"
+                  ]
+                },
+                {
+                  "id": "wmo-issue-relationship-no-turn",
+                  "dimension": "relationship-state",
+                  "severity": "minor",
+                  "problem": "未提交 relationship/line-state（<from>-><to>）Delta：全部六条关系线（guchen->han-potian、guchen->linxuan、han-potian->guchen、linxuan->guchen、linxuan->sumubai、sumubai->linxuan）已在 R4 处于 version 1，且 turns 全为空，从 R5 视角看没有可核验的转向或双向状态变化，重写只会覆盖既有 accepted 值。",
+                  "suggestion": "待确认清单：如作者认为第一章正文确实造成了某条关系线的一次转向（例如韩破天从「绝境受助」到「默认接受路径」），请指名该线与转向内容，再以 relationship/line-state 单独提交。",
+                  "sourceAnchorIds": [
+                    "a-wmo-draft-head"
+                  ]
+                },
+                {
+                  "id": "wmo-issue-debt-already-open",
+                  "dimension": "narrative-debt",
+                  "severity": "minor",
+                  "problem": "未提交新的 narrative-debt/set Delta：三条债务（debt-tianji-pavilion-trade-rules、debt-guchen-hanpotian-pact、debt-guchen-origin-untold）均已在 R5 以 status open、horizon 第 9–11 章 登记；R5 没有可由已接受正文证明的债务推进或清偿，重新 set 会覆盖既有值。",
+                  "suggestion": "post-check 的 debtTransitions 已精确引用这三条已接受 Delta 的 id 与 clock（transition 记为 created，表示本章为三者的创建点）。如作者认为应改记为其他 transition，请指名债务与目标状态。",
+                  "sourceAnchorIds": [
+                    "a-wmo-lore-sources"
+                  ]
+                },
+                {
+                  "id": "wmo-issue-changes-mixed-provenance",
+                  "dimension": "evidence-strength",
+                  "severity": "minor",
+                  "problem": "post-check 的 changes 存在证据强度差异：开篇场景与章末休书预叙来自 R4 已接受正文片段（unitId vol01-ch0001，sourceRevision 4）；而「林玄已入天机阁」「阁主初立」「顾辰与韩破天的约定」来自 R3／R4 已接受 character-state 与 relationship Delta 所登记的章节后状态，并非本次逐句提取自正文。",
+                  "suggestion": "作者如认为第二类不应计入本章 changes，可逐条驳回这些条目，保留纯正文可证的部分。",
+                  "sourceAnchorIds": [
+                    "a-wmo-draft-head"
+                  ]
+                },
+                {
+                  "id": "wmo-issue-no-exact-anchor",
+                  "dimension": "evidence-anchor",
+                  "severity": "minor",
+                  "problem": "post-check Delta 给出空 sourceAnchorIds：已接受正文可定位到 vol01-ch0001 的字节区间 0–25，但该区间可查到的 contentHash 是所在分片的哈希，不是该精确字节范围的 SHA-256，无法在不猜测的前提下给出，故按约定不硬算、不附锚点。",
+                  "suggestion": "本提案 issue 的证据锚点改用可精确计算的来源：工作区章节文件首行字节 0–4800，以及已接受 Canon 所引用的 04-设定大全.md 字节 16417–16528。若作者要用已接受正文的精确锚点，请提供该字节范围的准确 SHA-256 后重新提交。",
+                  "sourceAnchorIds": [
+                    "a-wmo-draft-head"
+                  ]
+                },
+                {
+                  "id": "wmo-issue-review-only",
+                  "dimension": "review-only",
+                  "severity": "minor",
+                  "problem": "本次仅提交提案，未改动 Canon、未添加任何 author authorization、未 Apply 或 Publish；预期版本固定为 R5。",
+                  "suggestion": "请作者逐条决定每个 Delta 与 issue，确认后由现有 Novel Project Apply 事务推进下一 revision。",
+                  "sourceAnchorIds": [
+                    "a-wmo-lore-sources"
+                  ]
+                }
+              ],
+              "sourceAnchors": [
+                {
+                  "id": "a-wmo-draft-head",
+                  "sourceId": "第1章《开篇章》.草稿.md",
+                  "start": 0,
+                  "end": 4800,
+                  "contentHash": "7968ac5341289dfb20e55289e8227fd1991b3e4875c22298c94d355af04ddc77"
+                },
+                {
+                  "id": "a-wmo-lore-sources",
+                  "sourceId": "04-设定大全.md",
+                  "start": 16417,
+                  "end": 16528,
+                  "contentHash": "0e247894848a47806957b8ed866872e5326091ba8cf970e07f21452b9012e670"
+                }
+              ],
+              "provenance": {
+                "taskId": "wmo-chapter1-postcheck-r5",
+                "sessionId": "session-65f247e8-828e-4fb4-a13a-778afb43309f",
+                "producer": "novel-writing-memory-organizer"
+              }
+            }
+          },
+          {
+            "packetId": "tiangege-ch1-draft-r5-2026-09-18",
+            "receivedAt": 1789705047654,
+            "producer": "novel-prose-writer",
+            "packet": {
+              "packetId": "tiangege-ch1-draft-r5-2026-09-18",
+              "expectedRevision": 5,
+              "manuscript": {
+                "unitId": "vol01-ch0001",
+                "title": "第1章《开篇章》",
+                "text": "测测试试夜里风大，吹得窗纸哗哗作响。"
+              },
+              "manuscriptDiff": {
+                "format": "unified",
+                "text": "--- accepted/vol01-ch0001\n+++ draft/vol01-ch0001\n@@ -0,0 +1 @@\n+测测试试夜里风大，吹得窗纸哗哗作响。"
+              },
+              "deltas": [],
+              "issues": [],
+              "sourceAnchors": [
+                {
+                  "id": "anchor-ch1-draft-file-r5",
+                  "sourceId": "第1章《开篇章》.草稿.md",
+                  "start": 0,
+                  "end": 54,
+                  "contentHash": "c2d819ea19922c09e177037777c8af465fb8b3013aa3725970e991ad988dd2f9",
+                  "sourceEncoding": "utf-8",
+                  "sourceBom": false,
+                  "sourceByteLength": 54,
+                  "sourcePath": "第1章《开篇章》.草稿.md"
+                }
+              ],
+              "provenance": {
+                "taskId": "tiangege-ch1-draft-submit-r5-2026-09-18",
+                "sessionId": "session-802c6caf-7415-45e3-9c3b-038bba748483",
+                "producer": "novel-prose-writer"
+              }
+            }
+          },
+          {
+            "packetId": "wmo-ch0001-post-check-r5-2026-09-18",
+            "receivedAt": 1789705186366,
+            "producer": "novel-writing-memory-organizer",
+            "packet": {
+              "packetId": "wmo-ch0001-post-check-r5-2026-09-18",
+              "expectedRevision": 5,
+              "deltas": [
+                {
+                  "id": "wmo-post-check-vol01-ch0001-r5",
+                  "targetId": "vol01-ch0001",
+                  "sourceAnchorIds": [
+                    "anchor-prose-ch0001-r5"
+                  ],
+                  "kind": "chapter-state",
+                  "operation": "set",
+                  "field": "post-check",
+                  "value": {
+                    "contractAssessment": {
+                      "contractRevision": 1,
+                      "contractSourceDeltaId": "nu-05",
+                      "outcome": "changed",
+                      "deviations": [
+                        "本章在 accepted lineage 里的正文单元（unitId vol01-ch0001，title 开篇章，sourceRevision 4，642 字节 / 216 字 / 4 段，SHA-256 dabd429bf5fe2512dac417847b15840136dbc170eb4c4088ab30caff233fd6f9）只覆盖开篇常态场景与章末一句预叙，无法在正文层面验证 sceneFunctions 的升级场景（第一次常规尝试失败，且失败原因指向规则）与抉择场景（接受带条件筹码、完成不可逆越界）是否已交付，故 outcome 记 changed 而非 met，未按 met 计。",
+                        "lengthRange 要求 2800–3600 字，本章已接受正文为 216 字，低于下限；但该 216 字是否即全章仍待作者确认（无 Chapter 级全文可比对）。",
+                        "acceptanceGates 第 2 条（一次常规尝试失败）与第 3 条（章末不可逆选择及其可被指句复述的代价）在已接受正文中找不到对应句子，记为未验证，不等同于判定为违反。",
+                        "本次评估依据 manuscriptSourceRevision 4 的已接受正文，不是本 revision（5）新接受的正文；revision 5 未改动任何正文与 Canon 事实，只新增三条 open 债务。"
+                      ]
+                    },
+                    "manuscriptSourceRevision": 4,
+                    "changes": [
+                      "主角顾辰以「睁眼」进入世界，带着猝死前的体感在漏雨的荒废四合院醒来，穿越/重生这一既成事实被直接确立。",
+                      "天机系统已在正屋地板上等待并被绑定，初始天机点为零，这是他当前全部可用资源的唯一口径。",
+                      "器灵小源首次登场并发话：懒洋洋的童声、开口先接受「白手起家」的前提。",
+                      "起点场所被固定为一座荒废多年、地处山中并近青岚城的四合院，成为此后一切经营的物理原点。",
+                      "顾辰把「命是白捡的」读成自己的既得优势，并当场定下「生意就从这座山开始」的经营方向。",
+                      "章末以预叙落下两条本人尚不知情的线：今日山下正有一纸休书落款，且这一笔落的是别人的命。"
+                    ],
+                    "costs": [
+                      "本章正文中没有发生任何实质损失、资源消耗或对价交换：主角未付出资源、未支付代价、未做出不可逆选择，也未因此失去任何退路。",
+                      "唯一已支付的代价是信息与验证：他对自己的处境、系统来历与山下事态全部无知，这份无知是下一章起要背的成本。",
+                      "他放弃了确定性：在完全未验证规则的情况下已把「从这里起家」当作既定方向，这笔尚未定价的账要在白手起家的口径下自己结清。"
+                    ],
+                    "newlyPossible": [
+                      "他可以首次离山（向青岚城方向）或首次尝试动用天机点，两条路都已被正文铺好。",
+                      "小源可以第一次给出规则、代价口径或一次结算，无需重新铺垫它的存在与口气。",
+                      "下一章可以接上山下那纸休书的落款人，把后果推到主角眼前，而主角仍不知道叙事已提前告知读者什么。",
+                      "「与世隔绝的荒院 + 近在雾中的青岚城」这一空间反差可以直接用于他的第一次对外接触。"
+                    ],
+                    "newlyImpossible": [
+                      "不能把主角写成已经知道山下发生了什么：休书与另一人的命运他都还不知情。",
+                      "不能让他调用任何未定义的能力、法宝或人脉解决困难：全部资源仍是天机点零，且他独自一人。",
+                      "不能让天机系统或小源在此阶段交代规则、代价口径或选召理由——本章正文未给出任何一条。",
+                      "不能默认本章已经发生一次常规尝试失败或一次不可逆选择；本章正文中两者都不存在。"
+                    ],
+                    "readerNowKnows": [
+                      "主角已与天机系统绑定，且当前天机点为零。",
+                      "器灵小源是一个懒洋洋、开口先谈白手起家的童声角色。",
+                      "主角独自落在一座荒废多年、近青岚城的四合院里。",
+                      "主角已决定从这里起家、向外做生意。"
+                    ],
+                    "readerNowSuspects": [
+                      "章末预叙把「山下的一纸休书」与「落的是别人的命」硬栓在一起，读者可合理预期这笔落款将在下一章与主角的目标交会。",
+                      "小源答得太轻巧、没提任何条件，读者可怀疑白手起家的前提底下有一笔尚未明说的代价。",
+                      "主角的自信建立在「命是白捡的」之上，读者可合理预感这份惯性自信会被规则亲手打破。"
+                    ],
+                    "characterCarryForward": [
+                      {
+                        "characterId": "guchen",
+                        "carries": [
+                          "他已经是天机系统的主人，这是下一章不可撤销的前提。",
+                          "账面资源仍为天机点零，无任何人脉、产业与情报。",
+                          "他已把「从这座山开始做生意」当作既定方向，但尚未做出任何不可逆的实际投入。",
+                          "他不知道自己捡回的这条命已与山下正在发生的事连上因果。",
+                          "他的信心来自「命是白捡的」这种惯性自信，而不是对规则的验证。"
+                        ]
+                      },
+                      {
+                        "characterId": "xiaoyuan",
+                        "carries": [
+                          "它必须继续作为系统交互的唯一接口发话，口气仍为懒散、不客气、先讲前提。",
+                          "天机点是它结算与发布榜单的口径，下一章开始时仍为零。",
+                          "它尚未给出任何代价、规则或不可违背的边界说明，对选召理由也仍是空白。"
+                        ]
+                      }
+                    ],
+                    "debtTransitions": [
+                      {
+                        "clock": "world",
+                        "debtId": "debt-tianji-pavilion-trade-rules",
+                        "transition": "created",
+                        "sourceDeltaId": "debt-vol01-ch0001-world-tianji-rules"
+                      },
+                      {
+                        "clock": "mystery",
+                        "debtId": "debt-guchen-origin-untold",
+                        "transition": "created",
+                        "sourceDeltaId": "debt-vol01-ch0001-mystery-guchen-origin"
+                      },
+                      {
+                        "clock": "relationship",
+                        "debtId": "debt-guchen-hanpotian-pact",
+                        "transition": "created",
+                        "sourceDeltaId": "debt-vol01-ch0001-relationship-hanpotian-pact"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "debt-vol01-ch0001-plot-first-transaction",
+                  "targetId": "debt-guchen-first-transaction-unsettled",
+                  "sourceAnchorIds": [
+                    "anchor-prose-ch0001-r5"
+                  ],
+                  "kind": "narrative-debt",
+                  "operation": "set",
+                  "unitId": "vol01-ch0001",
+                  "field": "plot",
+                  "value": {
+                    "summary": "顾辰的第一笔生意尚未开张也尚未定价：他已经把「生意就从这座山开始」定为既定方向，手上却只有天机点零，商品、客户、报价与结算方式全部空白。",
+                    "status": "open",
+                    "horizon": "第 2–3 章",
+                    "dependsOn": [
+                      {
+                        "clock": "mystery",
+                        "id": "debt-guchen-origin-untold"
+                      },
+                      {
+                        "clock": "world",
+                        "id": "debt-tianji-pavilion-trade-rules"
+                      },
+                      {
+                        "clock": "relationship",
+                        "id": "debt-guchen-hanpotian-pact"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "wmo-knowledge-reader-ch0001-xieshu-r5",
+                  "targetId": "reader->fact-ch0001-xieshu-today",
+                  "sourceAnchorIds": [
+                    "anchor-prose-ch0001-r5"
+                  ],
+                  "kind": "knowledge",
+                  "operation": "set",
+                  "field": "state",
+                  "value": {
+                    "version": 1,
+                    "subjectKind": "reader",
+                    "beliefStatus": "known",
+                    "memoryStatus": "retained",
+                    "belief": "今日山下正有一纸休书落款，且这一笔落的是别人的命；而主角对此尚不知情。",
+                    "truthAlignment": "accurate",
+                    "access": {
+                      "mode": "told",
+                      "unitId": "vol01-ch0001",
+                      "viewpointId": "reader",
+                      "viewpointAccess": "direct"
+                    },
+                    "revisionRationale": "章末预叙已把这两件事直接呈现给读者，属于已经交出去的读者已知，续写不得当作悬念重播，也不得让主角提前知道。"
+                  }
+                },
+                {
+                  "id": "wmo-knowledge-guchen-ch0001-self-confidence-r5",
+                  "targetId": "guchen->fact-ch0001-self-confidence-source",
+                  "sourceAnchorIds": [
+                    "anchor-prose-ch0001-r5"
+                  ],
+                  "kind": "knowledge",
+                  "operation": "set",
+                  "field": "state",
+                  "value": {
+                    "version": 1,
+                    "subjectKind": "character",
+                    "beliefStatus": "misread",
+                    "memoryStatus": "retained",
+                    "belief": "天机点为零、无资源无人脉都不构成障碍，因为命是白捡的，生意可以从这座山白手做起。",
+                    "truthAlignment": "unverified",
+                    "access": {
+                      "mode": "inferred",
+                      "unitId": "vol01-ch0001",
+                      "viewpointId": "guchen",
+                      "viewpointAccess": "direct"
+                    },
+                    "revisionRationale": "chapterContract 的 informationPolicy 允许读者知道「主角当前存在误判」，而章末预叙同时证明他对山下事态完全无知；此处把他的自信登记为本人确信但未经核实的判断，约束续写不得把他写成一开局就自认误判。"
+                  }
+                }
+              ],
+              "issues": [
+                {
+                  "id": "wmo-issue-volume-3500",
+                  "dimension": "scope",
+                  "severity": "major",
+                  "problem": "本次整理只能依据 accepted lineage 中实际存在的正文单元（sourceRevision 4，642 字节 / 216 字 / 4 段），其长度仅为 chapterContract.lengthRange 下限（2800 字）的约 1/13；无法在正文层面核验升级场景、抉择场景与 acceptanceGates 第 2、3 条，也无法判断这 216 字之外是否另有未入库的成稿正文。",
+                  "suggestion": "请作者确认这 216 字是否即为本章全文：若是，本合同应按未达成逐条裁定并重写本章；若否，请给出包含完整正文的 accepted revision，再据以重报 post-check。",
+                  "sourceAnchorIds": [
+                    "anchor-prose-ch0001-r5"
+                  ]
+                },
+                {
+                  "id": "wmo-issue-anchor-verified",
+                  "dimension": "evidence-anchor",
+                  "severity": "minor",
+                  "problem": "此前同类提案曾因无法给出已接受正文精确字节范围的 SHA-256 而只能提交空锚点；本次该哈希已从 accepted revision 4 的正文单元字节直接验证得到（SHA-256 与既有值逐字节一致，不得再按「猜算」处理）。",
+                  "suggestion": "本提案的 post-check 与知识项统一引用该已验证锚点；如作者认为锚点范围仍需按正文单元内部片段收窄，请给出目标片段后重报。",
+                  "sourceAnchorIds": [
+                    "anchor-prose-ch0001-r5"
+                  ]
+                },
+                {
+                  "id": "wmo-issue-review-only",
+                  "dimension": "review-only",
+                  "severity": "minor",
+                  "problem": "本次仅提交提案：未改动 Canon、未添加 author authorization、未 Apply 或 Publish，预期版本固定为 R5；本提案与既有待审提案 wmo-ch0001-post-check-r5-2026-09-17、wmo-vol01-ch0001-postcheck-r5 争用同一目标 chapter-state/vol01-ch0001/post-check。",
+                  "suggestion": "请作者对同一 post-check 目标只接受一份，并逐条决定其余 Delta 与 issue，再由现有 Novel Project Apply 事务推进下一 revision。",
+                  "sourceAnchorIds": [
+                    "anchor-prose-ch0001-r5"
+                  ]
+                },
+                {
+                  "id": "wmo-issue-pending-confirmation-list",
+                  "dimension": "pending-confirmation",
+                  "severity": "major",
+                  "problem": "以下四项按要求未能合法映射为本包的独立 strict Delta，转为待确认清单：1) character-state/arc-hypothesis：该 contract 的 decisionChain 每项必须携带非空 storyEventId，而本章 lineage 中没有任何已接受的 story-event 记录（story-event 家族仅有 event-forbidden-zone-self-cut 与 event-qingdi-fall-lotus 两条远古事件，均与本章人物无关），无法如实填写；2) relationship/line-state：六条关系线在 R4 已处于 version 1 且 turns 为空，本章正文（顾辰独处荒院）没有任何可核验的双向状态变化，重写只会覆盖既有已接受值；3) 韩破天是否在本章现身：已接受正文中没有出现他，但 R4 已把 guchen->han-potian 关系登记为「已点破退婚困局并给出逆袭路径」，正文与已接受关系事实之间存在待作者裁定的顺序问题；4) 本包新增的 plot 债务 debt-guchen-first-transaction-unsettled 未写入 post-check 的 debtTransitions——该字段按约定只能引用已接受 lineage 中已存在的债务 Delta，而这条债务与 post-check 同包待审，写入会指向尚不存在的 Delta。",
+                  "suggestion": "1) 请先为本弧补一条 story-event（例如「顾辰在山中荒院绑定天机系统并定下经营方向」）并接受，之后再按 arc-hypothesis 提交人物弧；2) 若作者认为某条关系线确实在本章发生转向，请指名该线与转向内容；3) 请裁定 R4 关系登记对应的场景是否属于本章正文范围，以便判断本章是否需要补写对应场景或把该登记移到后续章节；4) 接受本条 plot 债务后，如需把它记为本章的债务变更，请在下一次提案中按已接受 Delta 补写 debtTransitions。",
+                  "sourceAnchorIds": [
+                    "anchor-prose-ch0001-r5"
+                  ]
+                }
+              ],
+              "sourceAnchors": [
+                {
+                  "id": "anchor-prose-ch0001-r5",
+                  "sourceId": "vol01-ch0001",
+                  "start": 0,
+                  "end": 642,
+                  "contentHash": "dabd429bf5fe2512dac417847b15840136dbc170eb4c4088ab30caff233fd6f9",
+                  "sourceEncoding": "utf-8",
+                  "sourceBom": false,
+                  "sourceByteLength": 642
+                }
+              ],
+              "provenance": {
+                "taskId": "tiangege-wmo-ch0001-post-check-2026-09-18",
+                "sessionId": "session-802c6caf-7415-45e3-9c3b-038bba748483",
+                "producer": "novel-writing-memory-organizer"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

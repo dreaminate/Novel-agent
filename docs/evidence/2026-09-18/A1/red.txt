@@ -1,0 +1,75 @@
+
+ RUN  v4.1.8 /Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent
+
+ ❯ packages/novel-workbench/tests/novel-workbench-canvas-boundary.spec.ts (0 test)
+stderr | packages/novel-workbench/tests/novel-workbench-story-map.spec.ts > novel-mode story map > degrades to a card, not a blank canvas, where the machine cannot paint WebGL
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-story-map.spec.ts > novel-mode story map > degrades to a card, not a blank canvas, where the machine cannot paint WebGL
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-story-map.spec.ts > novel-mode story map > paints the map when the author retries and the machine turns out to have WebGL
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-story-map.spec.ts > novel-mode story map > paints the map when the author retries and the machine turns out to have WebGL
+Warning: The current testing environment is not configured to support act(...)
+
+ ❯ packages/novel-workbench/tests/novel-workbench-story-map.spec.ts (11 tests | 2 failed) 207ms
+     × degrades to a card, not a blank canvas, where the machine cannot paint WebGL 4ms
+     × paints the map when the author retries and the machine turns out to have WebGL 2ms
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  packages/novel-workbench/tests/novel-workbench-canvas-boundary.spec.ts [ packages/novel-workbench/tests/novel-workbench-canvas-boundary.spec.ts ]
+Error: Failed to resolve import "../src/client/canvas-boundary.js" from "packages/novel-workbench/tests/novel-workbench-canvas-boundary.spec.ts". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/packages/novel-workbench/tests/novel-workbench-canvas-boundary.spec.ts:6:31
+  3  |  import { act } from "react-dom/test-utils";
+  4  |  import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+  5  |  import { CanvasBoundary } from "../src/client/canvas-boundary.js";
+     |                                  ^
+  6  |  let mounts = 0;
+  7  |  function Bomb(props) {
+ ❯ TransformPluginContext._formatLog node_modules/.pnpm/vite@6.4.3_@types+node@22.20.0_jiti@2.7.0_terser@5.50.0_tsx@4.22.4_yaml@2.9.0/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42658:41
+ ❯ TransformPluginContext.error node_modules/.pnpm/vite@6.4.3_@types+node@22.20.0_jiti@2.7.0_terser@5.50.0_tsx@4.22.4_yaml@2.9.0/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42655:16
+ ❯ normalizeUrl node_modules/.pnpm/vite@6.4.3_@types+node@22.20.0_jiti@2.7.0_terser@5.50.0_tsx@4.22.4_yaml@2.9.0/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:40634:23
+ ❯ node_modules/.pnpm/vite@6.4.3_@types+node@22.20.0_jiti@2.7.0_terser@5.50.0_tsx@4.22.4_yaml@2.9.0/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:40753:37
+ ❯ TransformPluginContext.transform node_modules/.pnpm/vite@6.4.3_@types+node@22.20.0_jiti@2.7.0_terser@5.50.0_tsx@4.22.4_yaml@2.9.0/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:40680:7
+ ❯ EnvironmentPluginContainer.transform node_modules/.pnpm/vite@6.4.3_@types+node@22.20.0_jiti@2.7.0_terser@5.50.0_tsx@4.22.4_yaml@2.9.0/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42453:18
+ ❯ loadAndTransform node_modules/.pnpm/vite@6.4.3_@types+node@22.20.0_jiti@2.7.0_terser@5.50.0_tsx@4.22.4_yaml@2.9.0/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:35845:27
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  packages/novel-workbench/tests/novel-workbench-story-map.spec.ts > novel-mode story map > degrades to a card, not a blank canvas, where the machine cannot paint WebGL
+AssertionError: expected null not to be null
+ ❯ packages/novel-workbench/tests/novel-workbench-story-map.spec.ts:473:22
+    471|
+    472|     const card = container.querySelector('[data-novel-story-map-degrad…
+    473|     expect(card).not.toBeNull()
+       |                      ^
+    474|     // The cast is still one click away, and the author can ask the ma…
+    475|     expect(container.querySelector('[data-novel-story-map-degraded-cas…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  packages/novel-workbench/tests/novel-workbench-story-map.spec.ts > novel-mode story map > paints the map when the author retries and the machine turns out to have WebGL
+AssertionError: expected null not to be null
+ ❯ packages/novel-workbench/tests/novel-workbench-story-map.spec.ts:497:76
+    495|       edges: [],
+    496|     })))
+    497|     expect(container.querySelector('[data-novel-story-map-degraded]'))…
+       |                                                                            ^
+    498|
+    499|     probe.ok = true
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  2 failed | 9 passed (11)
+   Start at  01:42:55
+   Duration  711ms (transform 153ms, setup 0ms, import 102ms, tests 207ms, environment 639ms)
+

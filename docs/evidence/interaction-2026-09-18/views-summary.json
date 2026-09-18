@@ -1,0 +1,153 @@
+{
+  "views": [
+    {
+      "id": "editor",
+      "label": "写作",
+      "disabled": false
+    },
+    {
+      "id": "map",
+      "label": "故事地图",
+      "disabled": false
+    },
+    {
+      "id": "clues",
+      "label": "伏笔与线索",
+      "disabled": false
+    },
+    {
+      "id": "debts",
+      "label": "未收束债务",
+      "disabled": false
+    },
+    {
+      "id": "cast",
+      "label": "人物与关系",
+      "disabled": false
+    },
+    {
+      "id": "timeline",
+      "label": "时间线",
+      "disabled": false
+    },
+    {
+      "id": "memory",
+      "label": "写作记忆",
+      "disabled": false
+    },
+    {
+      "id": "contract",
+      "label": "本章合同",
+      "disabled": false
+    },
+    {
+      "id": "simulation",
+      "label": "推演",
+      "disabled": false
+    },
+    {
+      "id": "history",
+      "label": "版本历史",
+      "disabled": false
+    }
+  ],
+  "editor": {
+    "view": "editor",
+    "seatH": 0,
+    "controls": 0,
+    "unreachable": [],
+    "text": "写作这一章的草稿文件 · 自动保存到你自己的 workdir，接受后才进 Canon\n[data-novel-canva"
+  },
+  "map": {
+    "view": "map",
+    "seatH": 0,
+    "controls": 8,
+    "unreachable": [
+      {
+        "tag": "circle",
+        "cls": "[object SVGAnimatedString]",
+        "label": "guchen",
+        "box": "30x30",
+        "top": "canvas.sigma-mouse"
+      },
+      {
+        "tag": "circle",
+        "cls": "[object SVGAnimatedString]",
+        "label": "linxuan",
+        "box": "30x30",
+        "top": "canvas.sigma-mouse"
+      },
+      {
+        "tag": "circle",
+        "cls": "[object SVGAnimatedString]",
+        "label": "sumubai",
+        "box": "30x30",
+        "top": "canvas.sigma-mouse"
+      },
+      {
+        "tag": "circle",
+        "cls": "[object SVGAnimatedString]",
+        "label": "han-potian",
+        "box": "30x30",
+        "top": "canvas.sigma-mouse"
+      }
+    ],
+    "text": "故事地图人物、关系与进度一眼看清 · 点节点看摘要，双击开档案\n[data-novel-canvas] .nw-note"
+  },
+  "clues": {
+    "view": "clues",
+    "seatH": 0,
+    "controls": 10,
+    "unreachable": [],
+    "text": "伏笔与线索板未收束的伏笔 / 线索 / 谜团 · 点证据锚点回到正文\n[data-novel-canvas] .nw-n"
+  },
+  "debts": {
+    "view": "debts",
+    "seatH": 0,
+    "controls": 6,
+    "unreachable": [],
+    "text": "未收束债务按「多久没推进」排序 · 临期项加提示色\n[data-novel-canvas] .nw-note {\n  p"
+  },
+  "cast": {
+    "view": "cast",
+    "seatH": 0,
+    "controls": 12,
+    "unreachable": [],
+    "text": "人物与关系人物、势力与双向关系（每条两个方向各自独立）\n[data-novel-canvas] .nw-note {\n "
+  },
+  "timeline": {
+    "view": "timeline",
+    "seatH": 0,
+    "controls": 2,
+    "unreachable": [],
+    "text": "时间线故事内时间与章节交叉引用\n[data-novel-canvas] .nw-note {\n  padding: 12"
+  },
+  "memory": {
+    "view": "memory",
+    "seatH": 0,
+    "controls": 2,
+    "unreachable": [],
+    "text": "写作记忆AI 记得什么 · 来源与新鲜度\n[data-novel-canvas] .nw-note {\n  paddin"
+  },
+  "contract": {
+    "view": "contract",
+    "seatH": 0,
+    "controls": 2,
+    "unreachable": [],
+    "text": "本章合同这一章要写成什么样，先和 AI 对齐\n[data-novel-canvas] .nw-note {\n  padd"
+  },
+  "simulation": {
+    "view": "simulation",
+    "seatH": 0,
+    "controls": 3,
+    "unreachable": [],
+    "text": "推演读者反应与人物压力实验 · 只作创作参考\n[data-novel-canvas] .nw-note {\n  padd"
+  },
+  "history": {
+    "view": "history",
+    "seatH": 0,
+    "controls": 4,
+    "unreachable": [],
+    "text": "版本历史每个已接受版本一句人话摘要 · 回滚会停用其后的变更\n[data-novel-canvas] .nw-note "
+  }
+}

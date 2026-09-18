@@ -1,0 +1,204 @@
+{
+  "threads": [
+    "未命名线程",
+    "提炼第1章写作记忆提案",
+    "提交第一章草稿提案",
+    "把 ok 写入指定文件",
+    "将文本 ok 写入指定文件"
+  ],
+  "empty": {
+    "transcriptSeat": {
+      "h": 80,
+      "top": 86
+    },
+    "lineCount": 0,
+    "sessionSlotChildren": 0,
+    "columnBoxes": [
+      {
+        "cls": "seat",
+        "h": 0,
+        "top": 0,
+        "disp": "contents"
+      },
+      {
+        "cls": "nw-column-handle",
+        "h": 769,
+        "top": 44,
+        "disp": "block"
+      }
+    ],
+    "hero": {
+      "cls": "wSkVaW_heroWorkspaceRow",
+      "h": 28,
+      "top": 421
+    },
+    "strip": [
+      {
+        "k": 0,
+        "y": 44,
+        "tag": "div",
+        "cls": "",
+        "near": "seat"
+      },
+      {
+        "k": 1,
+        "y": 121,
+        "tag": "p",
+        "cls": "novel-transcript-empty",
+        "near": "novel-transcript-empty"
+      },
+      {
+        "k": 2,
+        "y": 198,
+        "tag": "div",
+        "cls": "wSkVaW_scrollBody",
+        "near": "wSkVaW_scrollBody"
+      },
+      {
+        "k": 3,
+        "y": 275,
+        "tag": "div",
+        "cls": "wSkVaW_scrollBody",
+        "near": "wSkVaW_scrollBody"
+      },
+      {
+        "k": 4,
+        "y": 352,
+        "tag": "span",
+        "cls": "pXSMma_headlineText",
+        "near": "pXSMma_headlineText"
+      },
+      {
+        "k": 5,
+        "y": 429,
+        "tag": "svg",
+        "cls": "[object SVGAnimatedString]",
+        "near": "[object SVGAnimatedString]"
+      },
+      {
+        "k": 6,
+        "y": 505,
+        "tag": "div",
+        "cls": "uV2eYG_input",
+        "near": "uV2eYG_input"
+      },
+      {
+        "k": 7,
+        "y": 582,
+        "tag": "span",
+        "cls": "_7KE1Ra_triggerLabel",
+        "near": "_7KE1Ra_triggerLabel"
+      },
+      {
+        "k": 8,
+        "y": 659,
+        "tag": "div",
+        "cls": "wSkVaW_scrollBody",
+        "near": "wSkVaW_scrollBody"
+      },
+      {
+        "k": 9,
+        "y": 736,
+        "tag": "div",
+        "cls": "wSkVaW_scrollBody",
+        "near": "wSkVaW_scrollBody"
+      }
+    ]
+  },
+  "pickedRow": "把 ok 写入指定文件",
+  "afterPick": {
+    "transcriptSeat": {
+      "h": 674,
+      "top": 86
+    },
+    "lineCount": 6,
+    "sessionSlotChildren": 1,
+    "columnBoxes": [
+      {
+        "cls": "seat",
+        "h": 0,
+        "top": 0,
+        "disp": "contents"
+      },
+      {
+        "cls": "nw-column-handle",
+        "h": 769,
+        "top": 44,
+        "disp": "block"
+      }
+    ],
+    "hero": null,
+    "strip": [
+      {
+        "k": 0,
+        "y": 44,
+        "tag": "div",
+        "cls": "",
+        "near": "seat"
+      },
+      {
+        "k": 1,
+        "y": 121,
+        "tag": "p",
+        "cls": "novel-transcript-text",
+        "near": "novel-transcript-text"
+      },
+      {
+        "k": 2,
+        "y": 198,
+        "tag": "p",
+        "cls": "novel-transcript-text",
+        "near": "novel-transcript-text"
+      },
+      {
+        "k": 3,
+        "y": 275,
+        "tag": "div",
+        "cls": "novel-transcript",
+        "near": "novel-transcript"
+      },
+      {
+        "k": 4,
+        "y": 352,
+        "tag": "p",
+        "cls": "novel-transcript-text",
+        "near": "novel-transcript-text"
+      },
+      {
+        "k": 5,
+        "y": 429,
+        "tag": "p",
+        "cls": "novel-transcript-text",
+        "near": "novel-transcript-text"
+      },
+      {
+        "k": 6,
+        "y": 505,
+        "tag": "p",
+        "cls": "novel-transcript-text",
+        "near": "novel-transcript-text"
+      },
+      {
+        "k": 7,
+        "y": 582,
+        "tag": "p",
+        "cls": "novel-transcript-text",
+        "near": "novel-transcript-text"
+      },
+      {
+        "k": 8,
+        "y": 659,
+        "tag": "p",
+        "cls": "novel-transcript-text",
+        "near": "novel-transcript-text"
+      },
+      {
+        "k": 9,
+        "y": 736,
+        "tag": "p",
+        "cls": "novel-transcript-text",
+        "near": "novel-transcript-text"
+      }
+    ]
+  }
+}

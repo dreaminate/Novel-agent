@@ -1,0 +1,27 @@
+{
+ "at": "2026-09-18T06:19:46.972Z",
+ "landing": {
+  "present": true,
+  "text": "选一章开始写。 第1章 开篇章 待审",
+  "chapters": [
+   "vol01-ch0001"
+  ],
+  "firstChapterLabel": "第1章 开篇章 待审",
+  "planLabel": null,
+  "leaks": [],
+  "editorOpen": false
+ },
+ "planOffer": {
+  "offered": false,
+  "chapters": [
+   "第1章 开篇章 待审"
+  ]
+ },
+ "opened": {
+  "editorOpen": true,
+  "bar": "第1章《开篇章》写作阅读已保存到稿子文件",
+  "landingGone": true
+ },
+ "consoleErrorCount": 0,
+ "verdict": "pass"
+}

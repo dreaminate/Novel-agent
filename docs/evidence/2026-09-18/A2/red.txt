@@ -1,0 +1,309 @@
+
+ RUN  v4.1.8 /Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent
+
+ ❯ packages/novel-workbench/tests/novel-workbench-prefs.spec.ts (12 tests | 3 failed) 6ms
+     × comes back to the chapter the author was writing 2ms
+     × falls back when the stored chapter is not a chapter id 0ms
+     × writes the chapter down, and keeps nothing else about the thread 1ms
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode autosave keeps the work > files the last keystrokes under the chapter they were typed in, not the next one
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode autosave keeps the work > files the last keystrokes under the chapter they were typed in, not the next one
+Warning: The current testing environment is not configured to support act(...)
+    at PureEditorContent (file:///Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/node_modules/.pnpm/@tiptap+react@3.31.3_@floating-ui+dom@1.8.0_@tiptap+core@3.31.3_@tiptap+pm@3.31.3__@tip_3f7997d730e64301e0d94ab970df1ddd/node_modules/@tiptap/react/dist/index.js:77:3)
+    at file:///Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/node_modules/.pnpm/@tiptap+react@3.31.3_@floating-ui+dom@1.8.0_@tiptap+core@3.31.3_@tiptap+pm@3.31.3__@tip_3f7997d730e64301e0d94ab970df1ddd/node_modules/@tiptap/react/dist/index.js:125:12
+    at div
+    at div
+    at NovelEditor (/Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/packages/novel-workbench/src/client/NovelEditor.tsx:61:11)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode autosave keeps the work > files the last keystrokes under the chapter they were typed in, not the next one
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode autosave keeps the work > files the last keystrokes under the chapter they were typed in, not the next one
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode autosave keeps the work > files the last keystrokes under the chapter they were typed in, not the next one
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode autosave keeps the work > files the last keystrokes under the chapter they were typed in, not the next one
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode autosave keeps the work > files the last keystrokes under the chapter they were typed in, not the next one
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode autosave keeps the work > files the last keystrokes under the chapter they were typed in, not the next one
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode autosave keeps the work > files the last keystrokes under the chapter they were typed in, not the next one
+Warning: The current testing environment is not configured to support act(...)
+    at NovelEditor (/Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/packages/novel-workbench/src/client/NovelEditor.tsx:61:11)
+Warning: The current testing environment is not configured to support act(...)
+    at NovelEditor (/Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/packages/novel-workbench/src/client/NovelEditor.tsx:61:11)
+Warning: The current testing environment is not configured to support act(...)
+    at NovelEditor (/Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/packages/novel-workbench/src/client/NovelEditor.tsx:61:11)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode autosave keeps the work > files the last keystrokes under the chapter they were typed in, not the next one
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode autosave keeps the work > files the last keystrokes under the chapter they were typed in, not the next one
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode autosave keeps the work > files the last keystrokes under the chapter they were typed in, not the next one
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode autosave keeps the work > does not cancel the pending save when the editor unmounts
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode autosave keeps the work > does not cancel the pending save when the editor unmounts
+Warning: The current testing environment is not configured to support act(...)
+    at PureEditorContent (file:///Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/node_modules/.pnpm/@tiptap+react@3.31.3_@floating-ui+dom@1.8.0_@tiptap+core@3.31.3_@tiptap+pm@3.31.3__@tip_3f7997d730e64301e0d94ab970df1ddd/node_modules/@tiptap/react/dist/index.js:77:3)
+    at file:///Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/node_modules/.pnpm/@tiptap+react@3.31.3_@floating-ui+dom@1.8.0_@tiptap+core@3.31.3_@tiptap+pm@3.31.3__@tip_3f7997d730e64301e0d94ab970df1ddd/node_modules/@tiptap/react/dist/index.js:125:12
+    at div
+    at div
+    at NovelEditor (/Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/packages/novel-workbench/src/client/NovelEditor.tsx:61:11)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode autosave keeps the work > does not cancel the pending save when the editor unmounts
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode autosave keeps the work > does not cancel the pending save when the editor unmounts
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode autosave keeps the work > does not cancel the pending save when the editor unmounts
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode autosave keeps the work > does not cancel the pending save when the editor unmounts
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode autosave keeps the work > does not cancel the pending save when the editor unmounts
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode autosave keeps the work > does not cancel the pending save when the editor unmounts
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode autosave keeps the work > writes the pending paragraph when the page is going away
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode autosave keeps the work > writes the pending paragraph when the page is going away
+Warning: The current testing environment is not configured to support act(...)
+    at PureEditorContent (file:///Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/node_modules/.pnpm/@tiptap+react@3.31.3_@floating-ui+dom@1.8.0_@tiptap+core@3.31.3_@tiptap+pm@3.31.3__@tip_3f7997d730e64301e0d94ab970df1ddd/node_modules/@tiptap/react/dist/index.js:77:3)
+    at file:///Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/node_modules/.pnpm/@tiptap+react@3.31.3_@floating-ui+dom@1.8.0_@tiptap+core@3.31.3_@tiptap+pm@3.31.3__@tip_3f7997d730e64301e0d94ab970df1ddd/node_modules/@tiptap/react/dist/index.js:125:12
+    at div
+    at div
+    at NovelEditor (/Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/packages/novel-workbench/src/client/NovelEditor.tsx:61:11)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode autosave keeps the work > writes the pending paragraph when the page is going away
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode autosave keeps the work > writes the pending paragraph when the page is going away
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode autosave keeps the work > writes the pending paragraph when the page is going away
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode autosave keeps the work > writes the pending paragraph when the page is going away
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode autosave keeps the work > writes the pending paragraph when the page is going away
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode autosave keeps the work > asks the browser to wait while there is prose the draft file does not have
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode autosave keeps the work > asks the browser to wait while there is prose the draft file does not have
+Warning: The current testing environment is not configured to support act(...)
+    at PureEditorContent (file:///Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/node_modules/.pnpm/@tiptap+react@3.31.3_@floating-ui+dom@1.8.0_@tiptap+core@3.31.3_@tiptap+pm@3.31.3__@tip_3f7997d730e64301e0d94ab970df1ddd/node_modules/@tiptap/react/dist/index.js:77:3)
+    at file:///Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/node_modules/.pnpm/@tiptap+react@3.31.3_@floating-ui+dom@1.8.0_@tiptap+core@3.31.3_@tiptap+pm@3.31.3__@tip_3f7997d730e64301e0d94ab970df1ddd/node_modules/@tiptap/react/dist/index.js:125:12
+    at div
+    at div
+    at NovelEditor (/Users/wzy/Work/01_Projects/My-Projects/Original/Novel-agent/packages/novel-workbench/src/client/NovelEditor.tsx:61:11)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode autosave keeps the work > asks the browser to wait while there is prose the draft file does not have
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode autosave keeps the work > asks the browser to wait while there is prose the draft file does not have
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode autosave keeps the work > asks the browser to wait while there is prose the draft file does not have
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode autosave keeps the work > asks the browser to wait while there is prose the draft file does not have
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode autosave keeps the work > asks the browser to wait while there is prose the draft file does not have
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+ ❯ packages/novel-workbench/tests/novel-workbench-editor.spec.ts (11 tests | 4 failed) 1048ms
+     × files the last keystrokes under the chapter they were typed in, not the next one 15ms
+     × does not cancel the pending save when the editor unmounts 7ms
+     × writes the pending paragraph when the page is going away 6ms
+     × asks the browser to wait while there is prose the draft file does not have 5ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode autosave keeps the work > files the last keystrokes under the chapter they were typed in, not the next one
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ packages/novel-workbench/tests/novel-workbench-editor.spec.ts:303:59
+    301|
+    302|     const forFirst = ui.saves.filter(call => call.chapter?.number === …
+    303|     expect(forFirst.some(call => call.text === '第一章的话。')).toBe(true)
+       |                                                           ^
+    304|     // …and must never be filed against the chapter that happens to be…
+    305|     // carrying a version token that belongs to that other chapter.
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯
+
+ FAIL  packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode autosave keeps the work > does not cancel the pending save when the editor unmounts
+AssertionError: expected 0 to be greater than 0
+ ❯ packages/novel-workbench/tests/novel-workbench-editor.spec.ts:321:29
+    319|     await ui.settle()
+    320|
+    321|     expect(ui.saves.length).toBeGreaterThan(before)
+       |                             ^
+    322|     expect(ui.saves.at(-1)?.text).toBe('风起于青萍之末。')
+    323|     expect(ui.saves.at(-1)?.chapter?.number).toBe(1)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯
+
+ FAIL  packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode autosave keeps the work > writes the pending paragraph when the page is going away
+AssertionError: expected undefined to be '风起于青萍之末。' // Object.is equality
+
+- Expected:
+"风起于青萍之末。"
+
++ Received:
+undefined
+
+ ❯ packages/novel-workbench/tests/novel-workbench-editor.spec.ts:336:35
+    334|     await ui.settle()
+    335|
+    336|     expect(ui.saves.at(-1)?.text).toBe('风起于青萍之末。')
+       |                                   ^
+    337|     expect(ui.saves.at(-1)?.chapter?.number).toBe(1)
+    338|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/7]⎯
+
+ FAIL  packages/novel-workbench/tests/novel-workbench-editor.spec.ts > novel-mode autosave keeps the work > asks the browser to wait while there is prose the draft file does not have
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ packages/novel-workbench/tests/novel-workbench-editor.spec.ts:348:83
+    346|
+    347|     // `dispatchEvent` answers false exactly when something called pre…
+    348|     expect(window.dispatchEvent(new Event('beforeunload', { cancelable…
+       |                                                                                   ^
+    349|
+    350|     // Once the debounce has landed there is nothing to lose, and hold…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/7]⎯
+
+ FAIL  packages/novel-workbench/tests/novel-workbench-prefs.spec.ts > workbench preferences across a reload > comes back to the chapter the author was writing
+AssertionError: expected undefined to be 'vol01-ch0001' // Object.is equality
+
+- Expected:
+"vol01-ch0001"
+
++ Received:
+undefined
+
+ ❯ packages/novel-workbench/tests/novel-workbench-prefs.spec.ts:183:43
+    181|
+    182|     resetWorkbench()
+    183|     expect(getWorkbenchState().chapterId).toBe('vol01-ch0001')
+       |                                           ^
+    184|   })
+    185|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/7]⎯
+
+ FAIL  packages/novel-workbench/tests/novel-workbench-prefs.spec.ts > workbench preferences across a reload > falls back when the stored chapter is not a chapter id
+AssertionError: expected undefined to be 'vol01-ch0002' // Object.is equality
+
+- Expected:
+"vol01-ch0002"
+
++ Received:
+undefined
+
+ ❯ packages/novel-workbench/tests/novel-workbench-prefs.spec.ts:192:8
+    190|     expect(hydrateWorkbench(JSON.stringify({ chapterId: '' })).chapter…
+    191|     expect(hydrateWorkbench(JSON.stringify({ chapterId: 'vol01-ch0002'…
+    192|       .toBe('vol01-ch0002')
+       |        ^
+    193|   })
+    194|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/7]⎯
+
+ FAIL  packages/novel-workbench/tests/novel-workbench-prefs.spec.ts > workbench preferences across a reload > writes the chapter down, and keeps nothing else about the thread
+AssertionError: expected null to match object { chapterId: 'vol01-ch0001' }
+
+- Expected:
+{
+  "chapterId": "vol01-ch0001",
+}
+
++ Received:
+null
+
+ ❯ packages/novel-workbench/tests/novel-workbench-prefs.spec.ts:197:22
+    195|   it('writes the chapter down, and keeps nothing else about the thread…
+    196|     workbenchActions.openChapter('vol01-ch0001')
+    197|     expect(stored()).toMatchObject({ chapterId: 'vol01-ch0001' })
+       |                      ^
+    198|     expect(localStorage.getItem(WORKBENCH_PREFS_KEY) ?? '').not.toCont…
+    199|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/7]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  7 failed | 16 passed (23)
+   Start at  01:50:35
+   Duration  1.67s (transform 86ms, setup 0ms, import 162ms, tests 1.05s, environment 825ms)
+

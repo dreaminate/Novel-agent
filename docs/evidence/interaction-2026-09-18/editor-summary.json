@@ -1,0 +1,25 @@
+{
+  "chapters": [
+    {
+      "id": "vol01-ch0001",
+      "status": "pending",
+      "label": "1开篇章待审"
+    }
+  ],
+  "editor": {
+    "proseMirror": {
+      "w": 676,
+      "h": 325,
+      "top": 171,
+      "len": 0,
+      "editable": "true"
+    },
+    "contentEditables": 1,
+    "canvasText": "写作这一章的草稿文件 · 自动保存到你自己的 workdir，接受后才进 Canon\n[data-novel-canvas] .nw-note {\n  padd"
+  },
+  "afterClick": "div.tiptap ProseMirror ProseMirror",
+  "typing": {
+    "before": 0,
+    "after": 4
+  }
+}

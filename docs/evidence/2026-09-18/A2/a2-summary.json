@@ -1,0 +1,33 @@
+{
+ "at": "2026-09-18T05:03:21.624Z",
+ "markers": [
+  "切视图之前写的这一句。",
+  "切章节之前写的这一句。"
+ ],
+ "draftShaBefore": "c2d819ea19922c09e177037777c8af465fb8b3013aa3725970e991ad988dd2f9",
+ "secondDraftExistedBefore": false,
+ "opened": "第1章《开篇章》写作阅读已保存到稿子文件",
+ "viewSwitchGapMs": 266,
+ "byView": {
+  "markerInFirstDraft": true,
+  "editorWasUnmounted": true
+ },
+ "chapterSwitchGapMs": 251,
+ "byChapter": {
+  "markerInFirstDraft": true,
+  "markerInSecondDraft": false,
+  "secondDraftExists": true,
+  "nowOn": "第2章《测试夹具第二章》写作阅读已保存到"
+ },
+ "afterReload": {
+  "view": "editor",
+  "chapter": "vol01-ch0002",
+  "askToPick": false,
+  "bar": "第2章《测试夹具第二章》写作阅读已保存到"
+ },
+ "consoleErrorCount": 0,
+ "verdict": "pass",
+ "firstDraftRestoredSha": "c2d819ea19922c09e177037777c8af465fb8b3013aa3725970e991ad988dd2f9",
+ "firstDraftRestored": true,
+ "secondDraftCleaned": true
+}

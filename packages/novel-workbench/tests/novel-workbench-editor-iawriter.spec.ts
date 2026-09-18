@@ -86,13 +86,13 @@ describe('novel-mode editor iA Writer (I-P2)', () => {
   it('keeps the submit action reachable from the overflow menu, not lost', async () => {
     const { container } = await mountEditor()
     // iA Writer hides chrome, but it does not hide the one thing the author
-    // came to do. The submit action is in the overflow menu, and opening it
-    // shows the confirm card the same way it always did.
+    // came to do. The menu is the way to it, so the way in has to be a real
+    // control: a labelled trigger, and the panel holding the action.
+    expect(container.querySelector('[data-novel-editor-overflow-trigger]')).not.toBeNull()
     const overflow = container.querySelector('[data-novel-editor-overflow]')
     expect(overflow).not.toBeNull()
     // The submit trigger is inside the overflow menu's content, not on the bar.
-    const submit = overflow?.querySelector('[data-novel-editor-submit]')
-    expect(submit).not.toBeNull()
+    expect(overflow?.querySelector('[data-novel-editor-submit]')).not.toBeNull()
   })
 
   it('sets the body font to a CJK serif, the way iA Writer sets a serif', async () => {

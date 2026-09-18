@@ -1,8 +1,12 @@
 // @vitest-environment jsdom
-// `aria-modal` is a promise the frame has to keep. A dialog that does not take
+// A dialog is a promise the frame has to keep. A dialog that does not take
 // focus, does not hold Tab inside itself and does not give focus back is one the
 // keyboard cannot use — and inside the shipped host, Tab out of our overlay does
 // not land on our own UI, it lands in whatever else is mounted behind us.
+//
+// The primitive is Radix's `Dialog` now, so these four promises are the ones it
+// has to keep through the surfaces that use it: the same behaviour, checked
+// against the component the author actually opens.
 import './webgl-env.js'
 import { createElement } from 'react'
 import { createRoot } from 'react-dom/client'
@@ -14,6 +18,16 @@ import { workbenchActions } from '../src/client/store.js'
 
 function tab(shiftKey = false): KeyboardEvent {
   return new KeyboardEvent('keydown', { key: 'Tab', shiftKey, bubbles: true, cancelable: true })
+}
+
+/**
+ * The primitive hands focus back on a zero-delay timer — it waits for the
+ * unmounting panel to leave the document before deciding where focus lands. An
+ * assertion that reads the frame immediately inspects it before the key has
+ * been given back.
+ */
+async function settle(): Promise<void> {
+  await act(async () => { await new Promise(resolve => { setTimeout(resolve, 0) }) })
 }
 
 const focusables = (root: Element): HTMLElement[] =>
@@ -44,6 +58,7 @@ describe('novel-mode modal surfaces', () => {
     expect(sheet?.contains(document.activeElement)).toBe(true)
 
     await act(async () => { root.unmount() })
+    await settle()
     expect(document.activeElement).toBe(opener)
   })
 
@@ -126,6 +141,7 @@ describe('novel-mode modal surfaces', () => {
     expect(document.activeElement).toBe(items[0])
 
     await act(async () => { root.unmount() })
+    await settle()
     expect(document.activeElement).toBe(opener)
   })
 })

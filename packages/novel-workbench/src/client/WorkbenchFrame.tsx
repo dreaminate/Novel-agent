@@ -12,6 +12,8 @@
 import { createElement, useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import type { PropsRenderSlots } from '@deepseek-ai/dsh-client-ui-slots'
 import { NovelTranscript } from './NovelTranscript.js'
+import { DIALOG_CSS } from './novel-dialog.js'
+import { POPOVER_CSS } from './novel-popover.js'
 import { RAIL_COLLAPSED, RAIL_MAX, RAIL_MIN, SIDE_MAX, SIDE_MIN, solveColumns } from './frame-columns.js'
 import { useWorkbenchState, workbenchActions } from './store.js'
 import { WorkbenchStyleSheet } from './WorkbenchStyleSheet.js'
@@ -246,6 +248,8 @@ const FRAME_CSS = `
   margin: auto;
   padding: 0;
 }
+${DIALOG_CSS}
+${POPOVER_CSS}
 `
 
 /** The novel-mode frame: topbar / rail / canvas / side / composer, all seats declared. */

@@ -1,0 +1,56 @@
+{
+  "purpose": "I-P4 对话框 primitive 真机验证",
+  "date": "2026-09-18T18:16:51.990Z",
+  "settings": {
+    "opened": true,
+    "panel": {
+      "shape": "sheet",
+      "role": "dialog",
+      "state": "open",
+      "title": "设置",
+      "className": "nv-dialog-content",
+      "radius": "10px",
+      "shadow": "set",
+      "hasClose": true,
+      "overlay": true
+    },
+    "backgroundHidden": {
+      "rail": true,
+      "canvas": true
+    },
+    "screenshot": "i-p4-settings-sheet",
+    "escapeCloses": true,
+    "backgroundRestored": true,
+    "scrimCloses": true
+  },
+  "drawer": {
+    "castUp": true,
+    "openedFile": true,
+    "panel": {
+      "shape": "drawer",
+      "role": "dialog",
+      "state": "open",
+      "title": "guchen",
+      "className": "nv-dialog-content",
+      "radius": "0px",
+      "shadow": "set",
+      "hasClose": true,
+      "overlay": true
+    },
+    "backgroundHidden": true,
+    "screenshot": "i-p4-person-drawer",
+    "escapeCloses": true
+  },
+  "menu": {
+    "editorUp": true,
+    "menuOpened": true,
+    "triggerAria": {
+      "haspopup": "dialog",
+      "expanded": "true"
+    },
+    "screenshot": "i-p4-editor-menu",
+    "outsideClickCloses": true
+  },
+  "consoleErrors": 0,
+  "consoleErrorSamples": []
+}

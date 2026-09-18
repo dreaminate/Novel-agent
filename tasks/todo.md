@@ -1,5 +1,47 @@
 # Execution checklist
 
+## Front-end Phase 2 polish — I-P4, 2026-09-19
+
+**Work order of record:** [`frontend-polish-handoff-2026-09-19.md`](frontend-polish-handoff-2026-09-19.md) §I-P4 (A10).
+
+- [x] **Gate checked before starting.** 499 tests / typecheck 0 / lint 0 / `lib/client.js` 1,685,186 B /
+      host 401 all green; I-W1 (`canvas-boundary.tsx`), I-X1 (`NovelLanding.tsx`) and R1 are in the tree.
+      I-P1 (forceatlas2 + Obsidian palette), I-P2 (iA Writer surface) and I-P3 (Things 3 rail) were already
+      implemented and their probes are in `docs/evidence/2026-09-19/walkthrough/`.
+- [x] **shadcn/ui evaluated, and not taken verbatim.** It is copy-paste Tailwind over Radix primitives, and
+      this tree has no Tailwind — the workbench draws from one ported token sheet. The behaviour it wraps is
+      the adoption: `@radix-ui/react-dialog@1.1.15` + `@radix-ui/react-popover@1.1.15` (MIT), styled here.
+      Measured cost **+213,229 B** to `lib/client.js` (1,685,186 → 1,898,415; 79 % of the 2.4 MB guardrail).
+      [Evaluation](open-source-evaluations/shadcn-ui-2026-09-19.md).
+- [x] **One primitive for every modal.** `novel-dialog.tsx` carries the settings sheet, the person drawer and
+      the accept-confirm; `novel-popover.tsx` carries the editor's `···`. `dialog-focus.ts` is deleted — the
+      hand-rolled trap set `aria-modal` and never made it true, so nothing hid the page behind it from a
+      screen reader. Radix does, and the probe measures it.
+- [x] **The surfaces keep their own hooks.** `data-novel-settings`, `data-novel-settings-close`,
+      `data-novel-person-file`, `data-novel-review-confirm*` all still resolve, so every existing spec and the
+      sweep were left to assert what they always did. Two specs changed for a real reason: the editor menu is
+      a popover now (a trigger to open, and it dismisses on an outside click), and focus returns on Radix's
+      zero-delay timer rather than synchronously.
+- [x] **A pre-existing gate defect fixed.** I-P1 replaced the map's cluster discs with forceatlas2 but left
+      `scripts/smoke-workbench.mjs` reading `data-novel-story-map-{clusters,axis,folded}` — attributes the view
+      stopped publishing. Every sweep since reported `map-no-clusters` as a failure for a map that had removed
+      clusters on purpose; the main checkout's own recorded sweep shows it. The map screen now asserts what a
+      force layout can be held to: the cast is spread (measured `spread 0.68`), the nodes sit inside the
+      overlay, and one focusable named stop per character.
+- [x] **Evidence.** `probe-i-p4-dialog.mjs` + three screenshots + summary, against an isolated Host on
+      `127.0.0.1:4781`; 504 tests, typecheck/lint/`git diff --check` clean; the probed workdir's draft files are
+      byte-identical before and after.
+- [ ] **Next: I-P5a** — topbar to the Linear benchmark.
+
+### Loose ends this increment did NOT take
+
+- **The person drawer's title is `guchen`, the entity id.** `data-novel-person-file` and its heading both show
+  the id because this work's `character-state` deltas carry no `name`. That is the A5/W8 pipeline gap, gated on
+  D6 (a Canon-semantics change), not an I-P4 defect — but the drawer makes it plainer than the map did.
+- **The draft still opens on 「测测试试夜里风大」.** The probe-typing residue in
+  `/private/tmp/nw-workspace/天机阁主/第1章《开篇章》.草稿.md` is still there. Cleaning it writes to the author's own
+  file, so it needs authorization that this increment did not have.
+
 ## Front-end refactor handoff — A6, 2026-09-18
 
 **Status:** the two copy defects we owned are fixed and measured; S2 turned out not to be a defect at

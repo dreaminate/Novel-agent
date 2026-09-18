@@ -978,3 +978,15 @@ transitive deps resolved for other consumers). The decision record and the
 behavioural specs that hold the return are in
 [frontend-stack-2026-09-16.md](open-source-evaluations/frontend-stack-2026-09-16.md)
 §5 supplement and `novel-workbench-story-map-force.spec.ts`.
+
+**Modal and popover primitives (2026-09-19, I-P4):** `@radix-ui/react-dialog@1.1.15`
+and `@radix-ui/react-popover@1.1.15` (both MIT) enter `@novel-agent/novel-workbench`'s
+production dependencies, replacing the hand-rolled focus trap in `dialog-focus.ts`
+(deleted) and the editor's `<details>` menu. shadcn/ui's own component source is
+**not** adopted: it is Tailwind classes over these same primitives, and this tree has
+no Tailwind — the look is written in the frame's token sheet instead. The client
+bundle moves from 1.69 MB to 1.90 MB (+213,229 B, 79 % of the 2.4 MB guardrail). No
+install lifecycle script; every transitive addition is MIT. Decision record:
+[shadcn-ui-2026-09-19.md](open-source-evaluations/shadcn-ui-2026-09-19.md). Behaviour
+held by `novel-workbench-dialog-primitive.spec.ts` and the real-machine
+`probe-i-p4-dialog.mjs`.

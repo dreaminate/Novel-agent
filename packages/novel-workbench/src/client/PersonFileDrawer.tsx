@@ -6,36 +6,17 @@
  * their relations stand in each direction, and where have they appeared — then
  * offers the one action that matters: keep writing from this person.
  */
-import { createElement, useEffect, useRef, type ReactNode } from 'react'
-import { useDialogFocus } from './dialog-focus.js'
+import { createElement, type ReactNode } from 'react'
+import { NovelDialog } from './novel-dialog.js'
 import { aspectLabel } from './novel-copy.js'
 import type { NovelPersonFile } from './novel-data.js'
 
-/** Drawer rules: a right-hand panel above the columns, like the prototype's sheet. */
+/**
+ * Only what is this drawer's own: the aspect grid that shows a field beside its
+ * value. The panel, its edge, its scrim and its dismissal come from
+ * `NovelDialog` with the drawer arrangement.
+ */
 const DRAWER_CSS = `
-[data-novel-person-file] {
-  position: absolute;
-  inset: 0;
-  z-index: 45;
-  display: flex;
-  justify-content: flex-end;
-  background: hsl(var(--text-000) / .16);
-}
-[data-novel-person-file] .file {
-  width: min(420px, 100%);
-  height: 100%;
-  overflow-y: auto;
-  background: hsl(var(--bg-000));
-  border-left: 1px solid hsl(var(--border-100));
-  box-shadow: var(--sh-3);
-  padding: var(--s5);
-}
-[data-novel-person-file] .file-head {
-  display: flex; align-items: center; gap: var(--s2);
-  margin-bottom: var(--s3);
-}
-[data-novel-person-file] .file-head h2 { margin: 0; font-size: var(--fs-16); }
-[data-novel-person-file] .file-head .btn { margin-left: auto; }
 [data-novel-person-file] .aspect {
   display: grid;
   grid-template-columns: 96px minmax(0, 1fr);
@@ -63,54 +44,24 @@ export interface PersonFileDrawerProps {
 /** The drawer. */
 export function PersonFileDrawer(props: PersonFileDrawerProps): ReactNode {
   const { file } = props
-  const drawer = useRef<HTMLDivElement | null>(null)
-  useDialogFocus(drawer, file !== undefined)
-
-  useEffect(() => {
-    if (file === undefined) return
-    const onKey = (event: KeyboardEvent): void => {
-      if (event.key === 'Escape') props.onClose()
-    }
-    window.addEventListener('keydown', onKey)
-    return () => { window.removeEventListener('keydown', onKey) }
-  }, [file, props])
-
   if (file === undefined) return null
 
   return createElement(
-    'div',
+    NovelDialog,
     {
-      'data-novel-person-file': file.id,
-      role: 'dialog',
-      'aria-modal': 'true',
-      'aria-label': `人物档案 ${file.name}`,
-      ref: drawer,
-      onClick: (event: { target: unknown; currentTarget: unknown }) => {
-        if (event.target === event.currentTarget) props.onClose()
-      },
+      open: true,
+      onClose: props.onClose,
+      label: `人物档案 ${file.name}`,
+      title: file.name,
+      shape: 'drawer',
+      closeLabel: '关闭',
+      badge: file.faction === undefined
+        ? createElement('span', { className: 'chip' }, '无势力')
+        : createElement('span', { className: 'chip info' }, file.faction),
+      surfaceAttrs: { 'data-novel-person-file': file.id },
+      closeAttrs: { 'data-novel-person-close': 'true' },
     },
-    createElement(
-      'div',
-      { className: 'file' },
-      createElement('style', null, DRAWER_CSS),
-      createElement(
-        'div',
-        { className: 'file-head' },
-        createElement('h2', null, file.name),
-        file.faction === undefined
-          ? createElement('span', { className: 'chip' }, '无势力')
-          : createElement('span', { className: 'chip info' }, file.faction),
-        createElement(
-          'button',
-          {
-            type: 'button',
-            className: 'btn sm',
-            'data-novel-person-close': 'true',
-            onClick: () => { props.onClose() },
-          },
-          '关闭',
-        ),
-      ),
+    createElement('style', { key: 'drawer-css' }, DRAWER_CSS),
       createElement(
         'div',
         { className: 'side-title' },
@@ -183,6 +134,5 @@ export function PersonFileDrawer(props: PersonFileDrawerProps): ReactNode {
           '让 AI 从这个人物继续写',
         ),
       ),
-    ),
   )
 }

@@ -10,6 +10,7 @@
 import { createElement, useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { NovelResultItemDecision } from '@novel-agent/novel-project/types'
 import { workbenchActions } from './store.js'
+import { NovelDialog } from './novel-dialog.js'
 import type { NovelReviewImpact, NovelReviewProposal } from './novel-data.js'
 
 export interface ProposalReviewViewProps {
@@ -98,24 +99,8 @@ const REVIEW_CSS = `
 [data-novel-review] .nw-notice { font-size: 13px; color: hsl(var(--accent-text)); }
 [data-novel-review] .nw-empty { margin: 0; color: hsl(var(--text-200)); }
 [data-novel-review] .nw-stale { color: hsl(var(--accent-text)); font-weight: 600; }
-[data-novel-review] .nw-confirm {
-  position: absolute;
-  inset: 0;
-  z-index: 30;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: hsl(var(--text-000) / .18);
-}
-[data-novel-review] .nw-confirm-sheet {
-  width: min(520px, calc(100% - 48px));
-  background: hsl(var(--bg-000));
-  border: 1px solid hsl(var(--border-100));
-  border-radius: var(--r-card);
-  box-shadow: var(--sh-3);
-  padding: var(--s5);
-}
-[data-novel-review] .nw-confirm-sheet h3 { margin: 0 0 var(--s3); font-size: var(--fs-16); }
+/* The confirmation panel, its scrim and its dismissal are the shared dialog's;
+   only the footer row of this surface's own actions is declared here. */
 [data-novel-review] .nw-confirm-foot { display: flex; gap: var(--s2); justify-content: flex-end; margin-top: var(--s4); }
 `
 
@@ -305,60 +290,49 @@ export function ProposalReviewView(props: ProposalReviewViewProps): ReactNode {
         </button>
         {props.notice !== undefined && <span className="nw-notice">{props.notice}</span>}
       </div>
-      {confirming && createElement(
-        'div',
+      {createElement(
+        NovelDialog,
         {
-          className: 'nw-confirm',
-          'data-novel-review-confirm': 'true',
-          role: 'dialog',
-          'aria-modal': 'true',
-          onClick: (event: { target: unknown; currentTarget: unknown }) => {
-            if (event.target === event.currentTarget) setConfirming(false)
-          },
+          open: confirming,
+          onClose: () => { setConfirming(false) },
+          label: '确认接受本章',
+          title: '确认接受本章？',
+          shape: 'sheet',
+          // The way out of this one is "go back and adjust", not "done" — it is
+          // the same act, and the author should read it in their own terms.
+          closeLabel: '返回调整',
+          surfaceAttrs: { 'data-novel-review-confirm': 'true' },
+          closeAttrs: { 'data-novel-review-confirm-back': 'true' },
         },
         createElement(
           'div',
-          { className: 'nw-confirm-sheet' },
-          createElement('h3', null, '确认接受本章？'),
+          { className: 'nw-impact', style: { marginTop: '8px' }, key: 'impact' },
+          `R${String(proposal.expectedRevision)} → R${String(props.acceptedRevision + 1)}：`
+          + `${decisions.some(decision => decision.itemType === 'manuscript' && decision.outcome === 'accept') ? '正文 1 篇' : '正文 0 篇'}`
+          + ` · 设定变更 ${String(decisions.filter(decision => decision.itemType === 'delta' && decision.outcome === 'accept').length)} 条`
+          + ` · 未采纳建议 ${String(decisions.filter(decision => decision.itemType === 'issue' && decision.outcome === 'reject').length)} 条`,
+        ),
+        createElement(
+          'p',
+          { className: 'note', style: { marginTop: '12px' }, key: 'note' },
+          '接受之后仍然可以回滚到上一版：回滚会停用这次写入的全部变更，历史里仍然查得到。',
+        ),
+        createElement(
+          'div',
+          { className: 'nw-confirm-foot', key: 'foot' },
           createElement(
-            'div',
-            { className: 'nw-impact', style: { marginTop: '8px' } },
-            `R${String(proposal.expectedRevision)} → R${String(props.acceptedRevision + 1)}：`
-            + `${decisions.some(decision => decision.itemType === 'manuscript' && decision.outcome === 'accept') ? '正文 1 篇' : '正文 0 篇'}`
-            + ` · 设定变更 ${String(decisions.filter(decision => decision.itemType === 'delta' && decision.outcome === 'accept').length)} 条`
-            + ` · 未采纳建议 ${String(decisions.filter(decision => decision.itemType === 'issue' && decision.outcome === 'reject').length)} 条`,
-          ),
-          createElement(
-            'p',
-            { className: 'note', style: { marginTop: '12px' } },
-            '接受之后仍然可以回滚到上一版：回滚会停用这次写入的全部变更，历史里仍然查得到。',
-          ),
-          createElement(
-            'div',
-            { className: 'nw-confirm-foot' },
-            createElement(
-              'button',
-              {
-                type: 'button',
-                'data-novel-review-confirm-back': 'true',
-                onClick: () => { setConfirming(false) },
+            'button',
+            {
+              type: 'button',
+              className: 'nw-primary',
+              'data-novel-review-confirm-yes': 'true',
+              disabled: props.busy,
+              onClick: () => {
+                setConfirming(false)
+                props.onAccept(decisions)
               },
-              '返回调整',
-            ),
-            createElement(
-              'button',
-              {
-                type: 'button',
-                className: 'nw-primary',
-                'data-novel-review-confirm-yes': 'true',
-                disabled: props.busy,
-                onClick: () => {
-                  setConfirming(false)
-                  props.onAccept(decisions)
-                },
-              },
-              `确认接受 R${String(props.acceptedRevision + 1)}`,
-            ),
+            },
+            `确认接受 R${String(props.acceptedRevision + 1)}`,
           ),
         ),
       )}

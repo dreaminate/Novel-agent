@@ -24,6 +24,7 @@ import type { NovelContinuationResult } from '@novel-agent/novel-project/types'
 import { countCharacters } from './novel-copy.js'
 import { COMPLETION_PLUGIN_KEY, NovelCompletion, completionInsertion, shouldAskForCompletion } from './novel-completion.js'
 import { ContinueWritingPanel } from './ContinueWritingPanel.js'
+import { NovelPopover } from './novel-popover.js'
 import type { ChapterDraft, ChapterDraftSave, ChapterIdentity } from './chapter-files.js'
 import { shouldRefineWhileWriting } from './chapter-files.js'
 
@@ -54,31 +55,16 @@ const EDITOR_CSS = `
 .novel-editor-toolbar .novel-editor-toggle { display: flex; gap: 4px; }
 .novel-editor-toolbar .novel-editor-toggle .btn.on { border-color: hsl(var(--accent-brand)); color: hsl(var(--accent-text)); }
 /*
- * The overflow menu: a <details> the author opens to reach submit, continue
- * and refine. It is not part of the toolbar (the toolbar is one control), so
- * it does not compete with the text while the author is writing.
+ * The overflow menu is an anchored menu (NovelPopover), not a details
+ * disclosure. The toolbar is still one control, and the menu still keeps the
+ * actions off the bar while the author writes — but a menu now dismisses on a
+ * click away or an Escape, and it closes when one of its own actions is taken
+ * instead of hanging over the panel that action just opened.
+ *
+ * Only the status line the menu shows is this surface's own.
  */
-.novel-editor-overflow { position: relative; margin-left: auto; }
-.novel-editor-overflow > summary {
-  list-style: none; cursor: pointer;
-  padding: 4px 10px; border: 1px solid hsl(var(--border-100)); border-radius: var(--r-key);
-  background: hsl(var(--bg-000)); color: hsl(var(--text-200));
-  font-family: var(--font-ui); font-size: 12px;
-}
-.novel-editor-overflow > summary::-webkit-details-marker { display: none; }
-.novel-editor-overflow[open] > summary { border-color: hsl(var(--border-200)); }
-.novel-editor-overflow-menu {
-  position: absolute; right: 0; top: calc(100% + 4px);
-  display: flex; flex-direction: column; gap: 4px;
-  padding: 8px;
-  min-width: 160px;
-  border: 1px solid hsl(var(--border-100)); border-radius: var(--r-card);
-  background: hsl(var(--bg-000));
-  box-shadow: var(--sh-2);
-  z-index: 10;
-}
-.novel-editor-overflow-menu .btn { width: 100%; text-align: left; }
-.novel-editor-overflow-menu .novel-editor-overflow-state {
+.novel-editor-overflow { margin-left: auto; }
+.novel-editor-overflow .novel-editor-overflow-state {
   font-family: var(--font-mono); font-size: 11px; color: hsl(var(--text-200));
   padding: 2px 6px;
 }
@@ -256,6 +242,12 @@ export function NovelEditor(props: NovelEditorProps): ReactNode {
    * else, and a button that opened a thread for that would be the wrong answer.
    */
   const [needsThread, setNeedsThread] = useState(false)
+  /**
+   * The `···` menu. Closing it when one of its own actions is taken is the
+   * reason it is state and not a `<details>`: submit opens a confirmation, and
+   * a menu still hanging over that confirmation is the old bug in a new place.
+   */
+  const [menuOpen, setMenuOpen] = useState(false)
 
   // Refs, not state: the debounce timer and the newest version must be readable
   // from the timer callback without re-registering it on every keystroke.
@@ -828,17 +820,29 @@ export function NovelEditor(props: NovelEditorProps): ReactNode {
           live here. The toolbar stays one control; the actions are one click
           deeper, the way iA Writer keeps its export and share off the page.
         */}
-        <details className="novel-editor-overflow" data-novel-editor-overflow="true">
-          <summary>···</summary>
-          <div className="novel-editor-overflow-menu">
-            {props.requestContinuation !== undefined && mode === 'write' && (
-              <button
+        <NovelPopover
+          open={menuOpen}
+          onOpenChange={setMenuOpen}
+          label="更多操作"
+          trigger={(
+            <button
+              type="button"
+              className="btn sm novel-editor-overflow"
+              data-novel-editor-overflow-trigger="true"
+            >
+              ···
+            </button>
+          )}
+          attrs={{ 'data-novel-editor-overflow': 'true' }}
+        >
+          {props.requestContinuation !== undefined && mode === 'write' && (              <button
                 type="button"
                 className={continuing ? 'btn sm on' : 'btn sm'}
                 data-novel-editor-continue="true"
                 onClick={() => {
                   // Only one of the two panels is open at a time: they answer
                   // different questions and would otherwise stack on one bar.
+                  setMenuOpen(false)
                   setConfirming(false)
                   setContinuing(open => !open)
                 }}
@@ -852,6 +856,7 @@ export function NovelEditor(props: NovelEditorProps): ReactNode {
                 className="btn sm primary"
                 data-novel-editor-submit="true"
                 onClick={() => {
+                  setMenuOpen(false) // the confirmation is what the author needs to see
                   setContinuing(false) // the one-panel rule, stated at the other toggle
                   setConfirming(true)
                   setSubmitState('idle')
@@ -871,7 +876,7 @@ export function NovelEditor(props: NovelEditorProps): ReactNode {
                     type="button"
                     className="btn sm"
                     data-novel-editor-inbox="true"
-                    onClick={() => { props.onOpenInbox?.() }}
+                    onClick={() => { setMenuOpen(false); props.onOpenInbox?.() }}
                   >
                     去收件箱
                   </button>
@@ -900,13 +905,12 @@ export function NovelEditor(props: NovelEditorProps): ReactNode {
                 type="button"
                 className="btn sm"
                 data-novel-editor-open-thread="true"
-                onClick={props.onOpenThread}
+                onClick={() => { setMenuOpen(false); props.onOpenThread?.() }}
               >
                 开一条线程
               </button>
             )}
-          </div>
-        </details>
+          </NovelPopover>
       </div>
       {diverged && (
         // The draft and the story have parted ways. Saying so is the whole point:

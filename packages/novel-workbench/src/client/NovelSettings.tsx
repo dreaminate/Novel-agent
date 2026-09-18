@@ -13,36 +13,16 @@
  * so the switch has somewhere to land — the rule was never against the control,
  * only against shipping one that does nothing.
  */
-import { createElement, useEffect, useRef, type ReactNode } from 'react'
-import { useDialogFocus } from './dialog-focus.js'
+import { createElement, type ReactNode } from 'react'
+import { NovelDialog } from './novel-dialog.js'
 import { useWorkbenchState, workbenchActions, type RefineMode, type WorkbenchTheme } from './store.js'
 
-/** Sheet rules: the frame's own overlay above the three columns. */
+/**
+ * Only what is this sheet's own: the rows and their labels. The panel, its
+ * scrim, its radius and its dismissal all come from `NovelDialog`, so this file
+ * no longer states any of them a second time.
+ */
 const SETTINGS_CSS = `
-[data-novel-settings] {
-  position: absolute;
-  inset: 0;
-  z-index: 40;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding-top: 84px;
-  background: hsl(var(--text-000) / .18);
-}
-[data-novel-settings] .sheet {
-  width: min(520px, calc(100% - 48px));
-  background: hsl(var(--bg-000));
-  border: 1px solid hsl(var(--border-100));
-  border-radius: var(--r-card);
-  box-shadow: var(--sh-3);
-  padding: var(--s5);
-}
-[data-novel-settings] .sheet-head {
-  display: flex; align-items: center; gap: var(--s2);
-  margin-bottom: var(--s4);
-}
-[data-novel-settings] .sheet-head h2 { margin: 0; font-size: var(--fs-16); }
-[data-novel-settings] .sheet-head .btn { margin-left: auto; }
 [data-novel-settings] .setting + .setting {
   margin-top: var(--s4);
   padding-top: var(--s4);
@@ -62,20 +42,6 @@ const THEMES: readonly { readonly id: WorkbenchTheme; readonly label: string }[]
 /** The sheet; renders nothing while it is closed. */
 export function NovelSettings(): ReactNode {
   const state = useWorkbenchState()
-  const open = state.settingsOpen
-  const sheet = useRef<HTMLDivElement | null>(null)
-  useDialogFocus(sheet, open)
-
-  useEffect(() => {
-    if (!open) return
-    const onKey = (event: KeyboardEvent): void => {
-      if (event.key === 'Escape') workbenchActions.closeSettings()
-    }
-    window.addEventListener('keydown', onKey)
-    return () => { window.removeEventListener('keydown', onKey) }
-  }, [open])
-
-  if (!open) return null
   const { settings } = state
 
   const segment = (
@@ -96,36 +62,17 @@ export function NovelSettings(): ReactNode {
   )
 
   return createElement(
-    'div',
+    NovelDialog,
     {
-      'data-novel-settings': 'true',
-      role: 'dialog',
-      'aria-modal': 'true',
-      'aria-label': '设置',
-      ref: sheet,
-      onClick: (event: { target: unknown; currentTarget: unknown }) => {
-        if (event.target === event.currentTarget) workbenchActions.closeSettings()
-      },
+      open: state.settingsOpen,
+      onClose: () => { workbenchActions.closeSettings() },
+      label: '设置',
+      title: '设置',
+      shape: 'sheet',
+      surfaceAttrs: { 'data-novel-settings': 'true' },
+      closeAttrs: { 'data-novel-settings-close': 'true' },
     },
-    createElement(
-      'div',
-      { className: 'sheet', style: { position: 'relative' } },
-      createElement('style', null, SETTINGS_CSS),
-      createElement(
-        'div',
-        { className: 'sheet-head' },
-        createElement('h2', null, '设置'),
-        createElement(
-          'button',
-          {
-            type: 'button',
-            className: 'btn sm',
-            'data-novel-settings-close': 'true',
-            onClick: () => { workbenchActions.closeSettings() },
-          },
-          '完成',
-        ),
-      ),
+    createElement('style', { key: 'settings-css' }, SETTINGS_CSS),
       createElement(
         'div',
         { className: 'setting' },
@@ -341,6 +288,5 @@ export function NovelSettings(): ReactNode {
           '提交时：你把这一章交出去时，AI 把设定变化整理成提案。边写边：写到一定量也顺手整理一次 —— 会更及时，也可能一次攒下好几份待你审。两种都只产出提案，随时可以换回来。',
         ),
       ),
-    ),
   )
 }

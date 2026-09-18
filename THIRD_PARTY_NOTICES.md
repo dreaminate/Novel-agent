@@ -461,3 +461,20 @@ self-tune gravity and repulsion to the cast size. The story map's client bundle
 rises to 1.68 MB (from 1.57 MB), still under the 2.4 MB guardrail. See
 [frontend-stack-2026-09-16.md](open-source-evaluations/frontend-stack-2026-09-16.md)
 §5 supplement for the decision record.
+
+## Modal and popover primitives (2026-09-19, I-P4)
+
+`@radix-ui/react-dialog@1.1.15` (MIT) and `@radix-ui/react-popover@1.1.15` (MIT)
+are declared as production dependencies of `@novel-agent/novel-workbench`. They
+supply the behaviour every modal and anchored menu in the frame was previously
+hand-rolling — focus scope, Escape, outside-pointer dismissal, scroll lock and the
+`aria-hidden` that puts the page behind a modal out of the accessibility tree —
+and the arrangement is drawn in this product's own token sheet, because the
+workbench has no Tailwind for shadcn/ui's component source to compile against.
+
+Their transitive additions (`@radix-ui/react-*` primitives, `react-remove-scroll`,
+`react-remove-scroll-bar`, `aria-hidden`, `get-nonce`, `@floating-ui/{core,dom,react,utils}`)
+are all MIT and ship no install lifecycle script. The client bundle rises to
+1.90 MB from 1.69 MB — **+213,229 B**, 79 % of the 2.4 MB guardrail. No shadcn/ui
+source, theme, class names or demo markup is copied. See
+[shadcn-ui-2026-09-19.md](open-source-evaluations/shadcn-ui-2026-09-19.md).

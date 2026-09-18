@@ -2,7 +2,7 @@
 
 本文件适用于仓库中的所有文件。用户当轮明确指令优先；在不冲突时，本文、规格、计划与架构文档共同约束实现。
 
-通用规则参考全局 `~/.claude/CLAUDE.md` 与 `~/.codex/AGENTS.md`；本文件只写 novel-agent 特有条款，不在项目级复述通用规则。
+通用规则参考全局 `~/.claude/CLAUDE.md` 与 `~/.codex/AGENTS.md`。
 
 当前实施路线以 `tasks/plan-final.md` 与 `docs/plugin-design-v3.md` 为准。`tasks/plan.md`、`README.md`、`tasks/todo.md` 和 `docs/architecture.md` 中的单插件描述用于理解迁移前实现，不再限制领域插件拆分；迁移顺序与既有证据见 `tasks/history-migration-audit.md` 和 `tasks/history-migration-todo.md`。
 

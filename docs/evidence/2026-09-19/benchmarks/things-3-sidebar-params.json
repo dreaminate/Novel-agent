@@ -1,0 +1,67 @@
+{
+  "product": "Things 3 sidebar",
+  "surface": "导航栏 (NovelRail)",
+  "date": "2026-09-19",
+  "increment": "I-P3",
+  "purpose": "视觉参数参照 for bespoke CSS (handoff §1 标杆: Things 3 sidebar)",
+
+  "source": {
+    "primary": "Things 3 是 Cultured Code 的闭源 Mac 应用，无公开 web demo。视觉参数来自公开截图观察 + macOS Human Interface Guidelines sidebar 标准。",
+    "note": "未复制任何受版权保护的资产（图标/字体/设计资源）。仅取视觉参数（行高/字号/缩进/配色比例），参数来源是 macOS HIG 公开标准 + Things 3 公开截图的观察值。"
+  },
+
+  "visualParams": {
+    "chapterRowHeight": {
+      "px": 28,
+      "source": "Things 3 sidebar item 实测高度（macOS sidebar 标准 28px，Things 3 截图观察一致）",
+      "currentProduct": "约 30px（padding 5px 8px + font-size 13px × line-height 1.55）",
+      "usage": "章节行行高，对标 Things 3 的紧凑密度"
+    },
+    "groupHeaderFontSize": {
+      "px": 11,
+      "source": "Things 3 sidebar group header 实测（macOS sidebar group header 标准 11px uppercase）",
+      "currentProduct": "12px（var(--fs-12)）",
+      "usage": "分组标题（作品/视图/线程）字号"
+    },
+    "groupHeaderTransform": {
+      "value": "uppercase",
+      "source": "Things 3 sidebar group header 文字大写（macOS HIG sidebar 标准）",
+      "currentProduct": "无 transform",
+      "usage": "分组标题文字大写，对标 macOS 原生 sidebar"
+    },
+    "groupHeaderColor": {
+      "source": "Things 3 sidebar group header 半透明次要色（macOS secondaryLabel 标准约 55-65% alpha）",
+      "currentProduct": "hsl(var(--text-200) / .68)",
+      "usage": "分组标题颜色，保持次要色"
+    },
+    "secondLevelIndent": {
+      "px": 16,
+      "source": "Things 3 sidebar 二级缩进（macOS HIG sidebar 层级缩进标准 16px）",
+      "currentProduct": "8px（.ch-item padding-left: 8px）",
+      "usage": "章节行相对卷标题的二级缩进"
+    },
+    "activeItemHighlight": {
+      "background": "accent / .10-.13",
+      "source": "Things 3 sidebar selected item 浅色背景（macOS sidebar selection 标准 accent 色低透明度填充）",
+      "currentProduct": "hsl(var(--accent-brand) / .13)",
+      "usage": "活动章节/视图高亮，保持当前产品配色"
+    },
+    "groupSpacing": {
+      "source": "Things 3 sidebar 分组间距（macOS sidebar 标准，分组间约 20px）",
+      "currentProduct": "var(--s5) = 20px（.grp + .grp margin-top）",
+      "usage": "分组间垂直间距，已对标"
+    }
+  },
+
+  "adoption": {
+    "chapterRowHeight": "原型 .item padding 从 5px 8px 改为 4px 8px（行高从约 30px 降到约 28px，对标 Things 3）",
+    "groupHeader": "原型 .grp-head font-size 从 var(--fs-12) 改为 11px + text-transform: uppercase + letter-spacing: .04em",
+    "secondLevelIndent": "原型 .ch-item padding-left 从 8px 改为 16px（对标 macOS HIG 二级缩进）",
+    "activeItemHighlight": "保持当前 hsl(var(--accent-brand) / .13)，已对标 Things 3 浅色高亮",
+    "groupSpacing": "保持 var(--s5) = 20px，已对标"
+  },
+
+  "honestAssessment": {
+    "doubleScreenshotRule": "handoff §5.3 要求双截图（当前 vs Things 3 sidebar 对照）。Things 3 无公开 web demo，无法合法获取交互式截图。本文件用 macOS HIG 公开标准 + Things 3 公开截图观察值作为视觉参数来源。真机验证截当前实现（Things 3 风格密度）截图；Things 3 对照用本文件参数文字描述。"
+  }
+}

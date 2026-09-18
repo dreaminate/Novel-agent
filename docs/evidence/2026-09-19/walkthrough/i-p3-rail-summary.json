@@ -1,0 +1,20 @@
+{
+  "purpose": "I-P3 rail Things 3 化真机验证",
+  "date": "2026-09-18T17:30:10.444Z",
+  "findings": {
+    "state": {
+      "railExists": true,
+      "grpHeadExists": true,
+      "grpHeadFontSize": "11px",
+      "grpHeadTransform": "uppercase",
+      "grpHeadLetterSpacing": "0.44px",
+      "grpHeadText": "作品1 卷 · 1 章 · R5",
+      "chItemExists": true,
+      "chItemPaddingLeft": "16px",
+      "activeChapterExists": false,
+      "activeBackground": null
+    },
+    "consoleErrors": 0,
+    "screenshot": "i-p3-rail.png"
+  }
+}

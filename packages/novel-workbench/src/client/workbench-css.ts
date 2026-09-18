@@ -152,10 +152,16 @@ svg { display: block; }
 .rail-scroll { flex: 1; overflow-y: auto; padding: var(--s3) var(--s2) var(--s2); }
 .rail-foot { border-top: 1px solid hsl(var(--border-100)); padding: var(--s2); }
 .grp + .grp { margin-top: var(--s5); }
+/*
+ * Things 3 sidebar: group headers are 11px, uppercase, with letter-spacing —
+ * the way macOS sidebars label their sections. The prototype shipped 12px
+ * sentence-case, which read as looser than the benchmark.
+ */
 .grp-head {
   display: flex; align-items: center; gap: 6px;
   padding: 0 6px var(--s2);
-  font-size: var(--fs-12); color: hsl(var(--text-200) / .68);
+  font-size: 11px; color: hsl(var(--text-200) / .68);
+  text-transform: uppercase; letter-spacing: .04em;
 }
 .grp-head .count { margin-left: auto; font-family: var(--font-mono); }
 .item {
@@ -177,7 +183,7 @@ svg { display: block; }
   font-size: var(--fs-12); color: hsl(var(--text-200) / .7);
 }
 .vol-head .vol-meta { margin-left: auto; font-family: var(--font-mono); }
-.ch-item { padding-left: 8px; gap: 7px; }
+.ch-item { padding-left: 16px; gap: 7px; }
 .ch-item .ord { flex: none; width: 18px; font-family: var(--font-mono); font-size: var(--fs-12); color: hsl(var(--text-200) / .7); text-align: right; }
 .ch-item .t { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .st-dot { flex: none; width: 7px; height: 7px; border-radius: 50%; }

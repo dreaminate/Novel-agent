@@ -25,6 +25,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } fro
 import { UndirectedGraph } from 'graphology'
 import Sigma from 'sigma'
 import type { NovelStoryMap } from './novel-data.js'
+import { probeWebGL } from './webgl-probe.js'
 import {
   MAP_CANVAS,
   clusterKeyOf,
@@ -39,6 +40,11 @@ export interface StoryMapViewProps {
   readonly map: NovelStoryMap
   /** Open one person's 人物档案 (the prototype's double-click on a node). */
   readonly onOpenPerson?: (id: string) => void
+  /**
+   * Where the degraded card sends an author whose machine cannot paint the map.
+   * The same cast is still readable as a list, so the card is never a dead end.
+   */
+  readonly onOpenCast?: () => void
 }
 
 /** Faction palette: four colours plus the unaffiliated grey, both schemes legible. */
@@ -199,10 +205,33 @@ const MAP_CSS = `
   border-radius: 10px;
   color: hsl(var(--text-200));
 }
+/* Where the machine cannot paint WebGL the map is not a blank stage: it says what
+   happened, offers the list view that shows the same cast, and lets the author ask
+   again (a second monitor, a restarted browser, a driver that came back). */
+[data-novel-story-map] .nw-map-degraded {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 10px;
+  flex: 1 1 auto;
+  min-height: 320px;
+  padding: 16px 18px;
+  border: 1px dashed hsl(var(--border-100));
+  border-radius: 10px;
+}
+[data-novel-story-map] .nw-map-degraded-why {
+  margin: 0;
+  max-width: 52ch;
+  font-size: 13px;
+  line-height: 1.7;
+  color: hsl(var(--text-100));
+}
+[data-novel-story-map] .nw-map-degraded-actions { display: flex; gap: 8px; }
 `
 
 /** The story map canvas. */
-export function StoryMapView({ map, onOpenPerson }: StoryMapViewProps): ReactNode {
+export function StoryMapView({ map, onOpenPerson, onOpenCast }: StoryMapViewProps): ReactNode {
   const host = useRef<HTMLDivElement | null>(null)
   const overlay = useRef<SVGSVGElement | null>(null)
   const renderer = useRef<Sigma | null>(null)
@@ -214,6 +243,11 @@ export function StoryMapView({ map, onOpenPerson }: StoryMapViewProps): ReactNod
   const [axis, setAxis] = useState<ClusterAxis>('faction')
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(() => new Set<string>())
   const [pins, setPins] = useState<ReadonlyMap<string, MapPoint>>(() => new Map<string, MapPoint>())
+  // Asking the machine is a render-time question, and 重试 is the author asking
+  // again — so the answer is memoised against an attempt counter, not cached for
+  // the life of the view.
+  const [attempt, setAttempt] = useState(0)
+  const paintable = useMemo(() => probeWebGL(), [attempt])
   const colours = useMemo(() => groupColours(map), [map])
   const labels = useMemo(() => new Map(map.nodes.map(node => [node.id, node.label])), [map])
   const layout = useMemo(
@@ -331,7 +365,9 @@ export function StoryMapView({ map, onOpenPerson }: StoryMapViewProps): ReactNod
 
   useEffect(() => {
     const element = host.current
-    if (element === null) return
+    // Nothing is built where nothing can be drawn: sigma with no WebGL context
+    // throws on its first frame, and a thrown canvas used to take the whole seat.
+    if (!paintable || element === null) return
     const instance = new Sigma(buildGraph(map, latest.current, colours), element, {
       renderEdgeLabels: true,
       labelDensity: 0.6,
@@ -357,7 +393,7 @@ export function StoryMapView({ map, onOpenPerson }: StoryMapViewProps): ReactNod
       renderer.current = null
       instance.kill()
     }
-  }, [map, colours, onOpenPerson])
+  }, [map, colours, onOpenPerson, paintable])
 
   // Re-lay the graph without recreating the renderer, so pinning or expanding
   // one cluster leaves the author's zoom and pan where they were.
@@ -432,8 +468,34 @@ export function StoryMapView({ map, onOpenPerson }: StoryMapViewProps): ReactNod
       </header>
       {map.nodes.length === 0
         ? <p className="nw-map-empty">还没有人物与关系设定</p>
-        : (
-            <>
+        : !paintable
+          ? (
+              <div className="nw-map-degraded" data-novel-story-map-degraded="" role="alert">
+                <p className="nw-map-degraded-why">
+                  {`这台机器没能给出可以画图的 WebGL 环境，所以 ${String(map.nodes.length)} 个人物的关系图画不出来。人物与关系本身没有问题——换「人物与关系」用列表看同一批人，或者换一个浏览器再试。`}
+                </p>
+                <div className="nw-map-degraded-actions">
+                  <button
+                    type="button"
+                    className="btn sm"
+                    data-novel-story-map-degraded-cast=""
+                    onClick={() => { onOpenCast?.() }}
+                  >
+                    去人物与关系
+                  </button>
+                  <button
+                    type="button"
+                    className="btn sm"
+                    data-novel-story-map-degraded-retry=""
+                    onClick={() => { setAttempt(current => current + 1) }}
+                  >
+                    重试
+                  </button>
+                </div>
+              </div>
+            )
+          : (
+              <>
               <div className="nw-map-bar">
                 <div className="nw-map-search">
                   <input

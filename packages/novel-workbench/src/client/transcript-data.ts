@@ -92,6 +92,24 @@ function toolDetail(argumentsJson: unknown): string | undefined {
   return undefined
 }
 
+/** The tool an agent files a Result Packet with. */
+const PROPOSAL_TOOL = 'propose_novel_result_packet'
+
+/**
+ * The call ids of the proposals this log has filed.
+ *
+ * An agent filing a proposal is invisible from here — the packet goes to the
+ * host, not to this bundle — except for the tool call that filed it, which is in
+ * the very log the transcript is reduced from. Noticing a new id is what lets the
+ * waiting-proposal badge update without polling: a call we have not seen means
+ * there is something new to read.
+ */
+export function proposalCallIds(lines: readonly TranscriptEntry[]): readonly string[] {
+  return lines
+    .filter(line => line.kind === 'tool' && line.text === PROPOSAL_TOOL)
+    .map(line => line.id)
+}
+
 /**
  * Reduce a session log to transcript lines.
  * @param entries - durable log entries, oldest first.

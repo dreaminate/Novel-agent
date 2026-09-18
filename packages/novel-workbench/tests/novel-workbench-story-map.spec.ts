@@ -2,9 +2,17 @@
 import { createElement } from 'react'
 import { createRoot } from 'react-dom/client'
 import { act } from 'react-dom/test-utils'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { NovelCanonProjection, NovelRelationshipProjection } from '@novel-agent/novel-project/types'
 import { buildStoryMap } from '../src/client/novel-data.js'
+
+/**
+ * The map only paints where WebGL does, and jsdom has none. Every test here is
+ * about what the map draws once it can draw, so the probe answers yes by default;
+ * the degraded path is exercised by its own test with the probe turned off.
+ */
+const probe = vi.hoisted(() => ({ ok: true }))
+vi.mock('../src/client/webgl-probe.js', () => ({ probeWebGL: () => probe.ok }))
 
 /** Renderer stand-in: sigma needs WebGL, the mapping and wiring do not. */
 const sigmaMock = vi.hoisted(() => ({
@@ -190,6 +198,10 @@ async function mountMap(loadStoryMap: ReturnType<typeof vi.fn>) {
       }),
       loadOutline: vi.fn(),
       loadStoryMap,
+      // The degraded card's way out is 人物与关系, so a test that takes it lands on
+      // the cast canvas — which reads this. It resolves to nothing here: what is
+      // under test is that the author was sent there, not what the board draws.
+      loadCast: vi.fn(async () => undefined),
       openThread: vi.fn(),
       newThread: vi.fn(),
     } as never))
@@ -439,6 +451,64 @@ describe('novel-mode story map', () => {
     expect(container.querySelector('[data-novel-story-map-selection]')).toBeNull()
 
     await act(async () => { root.unmount() })
+  })
+
+  afterEach(() => { probe.ok = true })
+
+  /**
+   * F1: with no GPU the old code built sigma anyway, `createWebGLContext` returned
+   * null, and reading `blendFunc` off it threw — the map died, and because nothing
+   * caught it, so did every canvas the author opened afterwards. The map now asks
+   * the machine first and says so in the author's words when the answer is no.
+   */
+  it('degrades to a card, not a blank canvas, where the machine cannot paint WebGL', async () => {
+    probe.ok = false
+    const before = sigmaMock.instances.length
+    const { container } = await mountMap(vi.fn(async () => ({
+      revision: 5,
+      nodes: [
+        { id: 'chen-mo', label: '陈默', group: '港务局', place: undefined, debts: 0 },
+        { id: 'zhou-yan', label: '周砚', group: '雾灯帮', place: undefined, debts: 0 },
+      ],
+      edges: [{ id: 'line-1', source: 'chen-mo', target: 'zhou-yan', label: '旧同僚', turns: 1 }],
+    })))
+
+    const card = container.querySelector('[data-novel-story-map-degraded]')
+    expect(card).not.toBeNull()
+    // The cast is still one click away, and the author can ask the machine again.
+    expect(container.querySelector('[data-novel-story-map-degraded-cast]')).not.toBeNull()
+    expect(container.querySelector('[data-novel-story-map-degraded-retry]')).not.toBeNull()
+    // The fallback is a decision made before anything was built, not a crash: the
+    // renderer is never handed a graph it cannot paint.
+    expect(sigmaMock.instances).toHaveLength(before)
+
+    const { getWorkbenchState } = await import('../src/client/store.js')
+    await act(async () => {
+      container.querySelector('[data-novel-story-map-degraded-cast]')
+        ?.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+    expect(getWorkbenchState().view).toBe('cast')
+  })
+
+  it('paints the map when the author retries and the machine turns out to have WebGL', async () => {
+    probe.ok = false
+    const before = sigmaMock.instances.length
+    const { container } = await mountMap(vi.fn(async () => ({
+      revision: 5,
+      nodes: [{ id: 'chen-mo', label: '陈默', group: '港务局', place: undefined, debts: 0 }],
+      edges: [],
+    })))
+    expect(container.querySelector('[data-novel-story-map-degraded]')).not.toBeNull()
+
+    probe.ok = true
+    await act(async () => {
+      container.querySelector('[data-novel-story-map-degraded-retry]')
+        ?.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+
+    expect(container.querySelector('[data-novel-story-map-degraded]')).toBeNull()
+    expect(container.querySelector('[data-novel-story-map]')).not.toBeNull()
+    expect(sigmaMock.instances).toHaveLength(before + 1)
   })
 })
 

@@ -22,3 +22,21 @@ globalThis.ResizeObserver ??= class ResizeObserverStub {
 // not depend on what they do.
 Element.prototype.setPointerCapture ??= function setPointerCapture(): void {}
 Element.prototype.releasePointerCapture ??= function releasePointerCapture(): void {}
+// ProseMirror measures the caret with `getClientRects` / `getBoundingClientRect`
+// whenever a transaction moves the selection and scrolls it into view. jsdom has
+// no layout and implements neither on the two targets ProseMirror probes: an
+// element, and a Range when the caret sits inside a text node. Without them the
+// call throws out of band and fails the whole run; with them ProseMirror simply
+// measures zero, which is what a real browser reports for a detached node.
+function noClientRects(): DOMRectList {
+  return [] as unknown as DOMRectList
+}
+function zeroRect(): DOMRect {
+  return {
+    x: 0, y: 0, top: 0, bottom: 0, left: 0, right: 0, width: 0, height: 0,
+    toJSON: () => ({}),
+  } as unknown as DOMRect
+}
+Element.prototype.getClientRects ??= noClientRects
+Range.prototype.getClientRects ??= noClientRects
+Range.prototype.getBoundingClientRect ??= zeroRect

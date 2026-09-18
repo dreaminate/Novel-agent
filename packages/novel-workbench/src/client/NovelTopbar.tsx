@@ -133,7 +133,17 @@ export function NovelTopbar(props: NovelTopbarProps): ReactNode {
           'data-novel-topbar-details': 'true',
           title: '收起或展开对话',
           'aria-pressed': state.panels.details === 0 ? 'true' : 'false',
-          onClick: () => { actions.toggleDetails() },
+          onClick: () => {
+            if (current === undefined) {
+              // The conversation column only mounts when there is a session, so
+              // with none this button toggled something that could never appear.
+              // "Show me the conversation" with no thread means "give me one".
+              if (workId !== undefined) props.newThread(workId)
+              workbenchActions.openDetails()
+              return
+            }
+            actions.toggleDetails()
+          },
         },
         '对话',
       ),

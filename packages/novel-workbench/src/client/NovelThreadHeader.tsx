@@ -9,7 +9,7 @@
  */
 import { useEffect, useState, type ReactNode } from 'react'
 import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
-import { workbenchActions } from './store.js'
+import { useWorkbenchState, workbenchActions } from './store.js'
 import { resolveCurrentWork, type NovelWorkFace } from './novel-data.js'
 
 /** Everything the thread header receives: the framework shares and the data face. */
@@ -49,6 +49,12 @@ export function NovelThreadHeader(props: NovelThreadHeaderProps): ReactNode {
   const { loadReviews } = props
   const [pending, setPending] = useState<number | undefined>(undefined)
   const [revision, setRevision] = useState<number | undefined>(undefined)
+  /**
+   * The workbench's own revision counter. Something that notices a new proposal
+   * (the transcript follow in `index.tsx`) bumps it, and this read is keyed on it
+   * — so the badge follows the agent without polling for anything.
+   */
+  const store = useWorkbenchState()
 
   useEffect(() => {
     if (workId === undefined) return
@@ -66,7 +72,7 @@ export function NovelThreadHeader(props: NovelThreadHeaderProps): ReactNode {
     return () => {
       live = false
     }
-  }, [workId, loadReviews])
+  }, [workId, loadReviews, store.revision])
 
   if (work === undefined) return null
   if (props.sessionId === undefined) return null

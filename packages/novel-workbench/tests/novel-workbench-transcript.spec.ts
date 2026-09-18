@@ -3,7 +3,7 @@ import { createElement } from 'react'
 import { createRoot } from 'react-dom/client'
 import { act } from 'react-dom/test-utils'
 import { describe, expect, it } from 'vitest'
-import { transcriptOf, type SessionLogEntry } from '../src/client/transcript-data.js'
+import { transcriptOf, proposalCallIds, type SessionLogEntry } from '../src/client/transcript-data.js'
 import { NovelTranscript } from '../src/client/NovelTranscript.js'
 
 /** One durable log entry wrapping one session event. */
@@ -122,6 +122,43 @@ describe('transcriptOf', () => {
 
   it('ignores log entries that carry no transcript meaning', () => {
     expect(transcriptOf([event('step/start', {}), event('request/context', {})])).toEqual([])
+  })
+})
+
+/**
+ * F3b: an agent filing a proposal is invisible from here — the packet goes to the
+ * host, not to this bundle — except for the tool call that filed it, which is in
+ * the very log the transcript is reduced from. Noticing it is what lets the
+ * waiting-proposal badge update without polling and without one ghost counter.
+ */
+describe('proposalCallIds', () => {
+  it('names the calls that filed a proposal, and nothing else', () => {
+    const lines = transcriptOf([
+      event('user/message', userMessage('u1', '把这一章提交成提案。')),
+      event('tool/call', { callId: 'call-read', name: 'read_file', arguments: '{}' }),
+      event('tool/call', { callId: 'call-propose', name: 'propose_novel_result_packet', arguments: '{}' }),
+      event('tool/call', { callId: 'call-search', name: 'grep', arguments: '{}' }),
+    ])
+
+    expect(proposalCallIds(lines)).toEqual(['call-propose'])
+  })
+
+  it('names every filing, in the order they happened', () => {
+    const lines = transcriptOf([
+      event('tool/call', { callId: 'call-a', name: 'propose_novel_result_packet', arguments: '{}' }),
+      event('tool/call', { callId: 'call-b', name: 'propose_novel_result_packet', arguments: '{}' }),
+    ])
+
+    expect(proposalCallIds(lines)).toEqual(['call-a', 'call-b'])
+  })
+
+  it('says nothing when the thread has filed nothing', () => {
+    const lines = transcriptOf([
+      event('tool/call', { callId: 'call-1', name: 'read_file', arguments: '{}' }),
+      event('assistant/message', { turn: 1, step: 1, message: { content: [{ type: 'text', text: '写好了。' }] } }),
+    ])
+
+    expect(proposalCallIds(lines)).toEqual([])
   })
 })
 

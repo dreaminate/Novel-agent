@@ -111,6 +111,35 @@ export function refineRequest(
 }
 
 /**
+ * What 让 AI 规划第一章 asks the agent to do.
+ *
+ * The third sentence in this product whose effect can reach Canon, and the one
+ * an author reaches for when a work has nothing in it yet. Two things it has to
+ * carry, both learned from how the other two requests fail without them:
+ *
+ * 1. **Name the skill.** `novel-architect` owns the book / volume / arc / chapter
+ *    shapes. Unnamed, the run invents its own and the strict parser rejects them.
+ * 2. **Ask for one chapter, not a book.** A model asked to plan will plan
+ *    everything, and an author who sat down to write the first chapter ends up
+ *    reviewing fifteen chapter contracts before typing a word.
+ *
+ * The boundary is the same as the others: a proposal the author accepts, never a
+ * write.
+ */
+export function planChapterRequest(revision: number): string {
+  return [
+    '请为这部作品规划第一章，用 novel-architect 技能。',
+    '',
+    '- 只规划到「作者可以动手写第一章」为止：从现有的叙事层级往下补齐到第一章的章节合同。',
+    '- 不要一次规划整本书的章节：后面的事等这一章写完、作者再决定。',
+    `- expectedRevision：${String(revision)}`,
+    '',
+    '用 propose_novel_result_packet 产出一份提案，放进提案收件箱等作者逐条审阅：',
+    '只产出提案，不要直接改动 Canon，也不要顺手改动已有章节。',
+  ].join('\n')
+}
+
+/**
  * How much new prose earns a while-writing refinement.
  *
  * Deliberately large. Every refinement is an agent turn that can file several

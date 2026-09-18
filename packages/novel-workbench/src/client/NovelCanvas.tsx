@@ -8,7 +8,7 @@ import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { NovelResultItemDecision } from '@novel-agent/novel-project/types'
 import { useWorkbenchState, workbenchActions } from './store.js'
 import { NovelEditor } from './NovelEditor.js'
-import type { ChapterIdentity } from './chapter-files.js'
+import { planChapterRequest, type ChapterIdentity } from './chapter-files.js'
 import {
   resolveCurrentWork,
   type NovelReviewDeck,
@@ -24,6 +24,7 @@ import {
   type NovelMemoryBoard,
   type NovelTimeline,
   type NovelWorkFace,
+  type NovelWorkOutline,
 } from './novel-data.js'
 import { AdvancedView } from './AdvancedView.js'
 import { CastView } from './CastView.js'
@@ -32,6 +33,7 @@ import { ClueBoardView } from './ClueBoardView.js'
 import { DebtBoardView } from './DebtBoardView.js'
 import { MemoryView } from './MemoryView.js'
 import { MissingPluginCard, missingDomainPlugin } from './MissingPluginCard.js'
+import { NovelLanding } from './NovelLanding.js'
 import { NovelWelcome } from './NovelWelcome.js'
 import { SimulationView } from './SimulationView.js'
 import { TimelineView } from './TimelineView.js'
@@ -89,8 +91,16 @@ const VIEW_HEAD: Readonly<Record<string, { readonly title: string; readonly sub:
   simulation: { title: '推演', sub: '读者反应与人物压力实验 · 只作创作参考' },
   review: { title: '提案审阅', sub: '作者是决策者，AI 是稿手：逐条决定，再写入故事事实' },
   history: { title: '版本历史', sub: '每个已接受版本一句人话摘要 · 回滚会停用其后的变更' },
-  editor: { title: '写作', sub: '这一章的草稿文件 · 自动保存到你自己的 workdir，接受后才进 Canon' },
+  editor: { title: '写作', sub: '这一章的稿子 · 自动保存在你自己的文件夹里' },
   advanced: { title: '进阶面', sub: '内核 / Agent / 插件 / 任务 / 诊断 · 默认关闭，关闭后整组消失' },
+}
+
+/**
+ * A canvas's own name, for anything outside the seat that has to talk about it —
+ * the error boundary says "故事地图打不开" rather than naming a view id.
+ */
+export function canvasTitle(view: string): string {
+  return VIEW_HEAD[view]?.title ?? view
 }
 
 /** The novel canvas occupant. */
@@ -127,6 +137,25 @@ export function NovelCanvas(props: NovelCanvasProps): ReactNode {
   const [history, setHistory] = useState<readonly NovelRevisionRow[]>([])
   /** The chapter the writing surface is editing, named the way its draft file is. */
   const [editorChapter, setEditorChapter] = useState<ChapterIdentity | undefined>(undefined)
+  /**
+   * The work's outline, read for the writing view whether or not a chapter is
+   * open. Without it there is nothing to offer an author who has not picked one,
+   * and a work with no chapters has no way to get its first.
+   */
+  const [editorOutline, setEditorOutline] = useState<NovelWorkOutline | undefined>(undefined)
+  /** True while the author is confirming a request to plan the first chapter. */
+  const [planning, setPlanning] = useState(false)
+  /**
+   * Why the writing surface has no chapter: the outline read failed, which is a
+   * different thing from the author never having picked one.
+   */
+  const [editorProblem, setEditorProblem] = useState<string | undefined>(undefined)
+  /**
+   * What Canon holds for the chapter being written. The draft file is not Canon
+   * and accepting never writes it, so the editor needs both to say when they have
+   * parted ways.
+   */
+  const [acceptedText, setAcceptedText] = useState<string | undefined>(undefined)
   const [diagnostics, setDiagnostics] = useState<NovelDiagnostics | undefined>(undefined)
   const [panels, setPanels] = useState<NovelAdvancedPanels | undefined>(undefined)
   const [busy, setBusy] = useState(false)
@@ -361,36 +390,77 @@ export function NovelCanvas(props: NovelCanvasProps): ReactNode {
   /**
    * The writing surface names its draft file after the chapter, so it needs the
    * chapter's number and title rather than the id the tree carries. The outline
-   * is the only place that has both, and it is one read for the whole view.
+   * is the only place that has both — and it is also what 写作 has to offer an
+   * author who has not picked a chapter yet, so it is read whether or not one is
+   * open. The chapter id is therefore a branch inside the read, not a gate on it.
+   *
+   * What the read says when it fails is stated as itself. Leaving the chapter
+   * undefined instead made the editor say "先在左栏选一章" — telling the author
+   * they had not done something they had, and hiding the actual failure.
    */
   useEffect(() => {
-    if (state.view !== 'editor' || workId === undefined || state.chapterId === undefined) {
+    if (state.view !== 'editor' || workId === undefined) {
       setEditorChapter(undefined)
+      setEditorProblem(undefined)
+      setEditorOutline(undefined)
+      setAcceptedText(undefined)
       return
     }
     let live = true
+    setEditorProblem(undefined)
+    // The accepted manuscript is what 读已接受正文 shows and what 写回稿子 writes
+    // back. It is a second read, not a field of the outline.
+    if (state.chapterId === undefined) setAcceptedText(undefined)
+    else {
+      void props.loadManuscriptText(workId, state.chapterId).then(
+        manuscript => {
+          if (live) setAcceptedText(manuscript?.text)
+        },
+        () => {
+          // A chapter Canon has never accepted is the normal first case, and a
+          // read that fails is not worth a card of its own: the editor simply
+          // has no accepted version to compare against.
+          if (live) setAcceptedText(undefined)
+        },
+      )
+    }
     props.loadOutline(workId).then(
       outline => {
         if (!live) return
-        const chapter = outline.groups
-          .flatMap(group => group.chapters)
-          .find(candidate => candidate.id === state.chapterId)
-        setEditorChapter(
-          chapter === undefined ? undefined : { number: chapter.number, title: chapter.title },
-        )
+        setEditorOutline(outline)
         // 提交本章 proposes against the accepted revision, and this read is where
         // the writing surface learns it. (The simulation view reads it too, but
         // only when it is showing.)
         setAcceptedRevision(outline.revision)
+        if (state.chapterId === undefined) {
+          setEditorChapter(undefined)
+          return
+        }
+        const chapter = outline.groups
+          .flatMap(group => group.chapters)
+          .find(candidate => candidate.id === state.chapterId)
+        if (chapter === undefined) {
+          // The remembered chapter is not in this work — most often a pick left
+          // over from a work the author has since moved away from. Holding on to
+          // it would leave the canvas waiting for a chapter that is not coming,
+          // so the pick is dropped and the author is asked which one instead.
+          setEditorChapter(undefined)
+          workbenchActions.openChapter(undefined)
+          return
+        }
+        setEditorChapter({ number: chapter.number, title: chapter.title })
       },
-      () => {
-        if (live) setEditorChapter(undefined)
+      (failure: unknown) => {
+        if (!live) return
+        setEditorChapter(undefined)
+        setEditorOutline(undefined)
+        setEditorProblem(message(failure))
       },
     )
     return () => {
       live = false
     }
-  }, [state.view, state.chapterId, workId, props.loadOutline, state.revision])
+  }, [state.view, state.chapterId, workId, props.loadOutline, props.loadManuscriptText, state.revision])
 
   const proposal = deck?.proposals.find(
     candidate => candidate.unitId !== undefined && candidate.unitId === state.chapterId,
@@ -420,6 +490,29 @@ export function NovelCanvas(props: NovelCanvasProps): ReactNode {
     } finally {
       setBusy(false)
     }
+  }
+
+  /**
+   * 让 AI 规划第一章. A request runs *in* a thread, so an author who has none is
+   * given one first — that is what they wanted anyway — and the confirmation
+   * waits until there is somewhere for the request to go.
+   */
+  const planFirstChapter = (): void => {
+    if (sessionId === undefined) {
+      if (workId !== undefined) props.newThread(workId)
+      workbenchActions.openDetails()
+      return
+    }
+    setPlanning(true)
+  }
+
+  const confirmPlan = (): void => {
+    setPlanning(false)
+    if (sessionId === undefined || acceptedRevision === undefined) return
+    void run(async () => {
+      await props.sendToThread(sessionId, planChapterRequest(acceptedRevision))
+      return '已请 AI 规划这一章。提案到了会显示在右栏的待审里。'
+    })
   }
 
   // No work yet: the canvas owns the first step, so an author never has to hunt
@@ -464,6 +557,7 @@ export function NovelCanvas(props: NovelCanvasProps): ReactNode {
           <StoryMapView
             map={map}
             onOpenPerson={openPerson}
+            onOpenCast={() => { workbenchActions.setView('cast') }}
           />
         )}
       </Shell>
@@ -608,8 +702,21 @@ export function NovelCanvas(props: NovelCanvasProps): ReactNode {
             busy={busy}
             notice={notice}
             onDecisions={stageImpact}
+            sessionless={sessionId === undefined}
+            onOpenThread={() => {
+              if (workId === undefined) return
+              props.newThread(workId)
+              workbenchActions.openDetails()
+            }}
             onAccept={decisions => {
-              if (sessionId === undefined || workId === undefined) return
+              if (sessionId === undefined) {
+                // Accepting is a request into a thread. Without one there is
+                // nowhere for the decision to go, and doing nothing at all is
+                // how the author concluded the button was broken.
+                setNotice('要先开一条线程，才能把接受的决定交给 AI。')
+                return
+              }
+              if (workId === undefined) return
               void run(async () => {
                 const outcome = await submitReview(sessionId, workId, proposal.packet, decisions)
                 workbenchActions.refresh()
@@ -662,34 +769,76 @@ export function NovelCanvas(props: NovelCanvasProps): ReactNode {
     return (
       <Shell view="editor" tools={null}>
         <style>{CANVAS_CSS}</style>
-        <NovelEditor
-          workId={workId}
-          chapter={editorChapter}
-          loadChapterDraft={props.loadChapterDraft}
-          saveChapterDraft={props.saveChapterDraft}
-          readingSize={state.settings.readingSize}
-          readingMeasure={state.settings.readingMeasure}
-          readingIndent={state.settings.readingIndent}
-          readingLeading={state.settings.readingLeading}
-          sessionId={sessionId}
-          revision={acceptedRevision}
-          submitChapterProposal={props.submitChapterProposal}
-          completionEnabled={state.settings.completionEnabled}
-          completionDelayMs={state.settings.completionDelayMs}
-          requestCompletion={async (before: string) => {
-            if (workId === undefined || sessionId === undefined) return undefined
-            const text = await props.completeSentence(sessionId, workId, before, new AbortController().signal)
-            return text === '' ? undefined : text
-          }}
-          requestContinuation={async (before, inspiration, signal) => {
-            if (workId === undefined || sessionId === undefined) {
-              return { state: 'failed', message: '还没有选定线程，先在左栏开一条线再续写。' }
-            }
-            return await props.continueWriting(sessionId, workId, { inspiration, before }, signal)
-          }}
-          requestRefine={props.refineChapter}
-          refineMode={state.settings.refineMode}
-        />
+        {editorProblem !== undefined && (
+          <div className="nw-canvas-error" data-novel-editor-outline-error="" role="alert">
+            <p>{`这一章读不出来：${editorProblem}`}</p>
+            <button
+              type="button"
+              className="btn sm"
+              data-novel-editor-outline-retry=""
+              onClick={() => { workbenchActions.refresh() }}
+            >
+              重试
+            </button>
+          </div>
+        )}
+        {editorProblem === undefined && notice !== undefined && (
+          <p className="nw-note" role="status">{notice}</p>
+        )}
+        {editorProblem === undefined && editorChapter === undefined && editorOutline === undefined && (
+          // The catalogue is read for both cases below, so this is what the author
+          // sees for the moment it takes — not a claim about what they did.
+          <p className="nw-note">正在读取作品目录…</p>
+        )}
+        {editorProblem === undefined && editorChapter === undefined && editorOutline !== undefined && (
+          // No chapter open. This screen owns both of the ways in: the chapters
+          // to open, and — when there are none — asking for a first one.
+          <NovelLanding
+            outline={editorOutline}
+            onOpenChapter={id => { workbenchActions.openChapter(id) }}
+            onPlan={planFirstChapter}
+            planning={planning}
+            onConfirmPlan={confirmPlan}
+            onCancelPlan={() => { setPlanning(false) }}
+          />
+        )}
+        {editorProblem === undefined && editorChapter !== undefined && (
+          <NovelEditor
+            workId={workId}
+            chapter={editorChapter}
+            loadChapterDraft={props.loadChapterDraft}
+            saveChapterDraft={props.saveChapterDraft}
+            readingSize={state.settings.readingSize}
+            readingMeasure={state.settings.readingMeasure}
+            readingIndent={state.settings.readingIndent}
+            readingLeading={state.settings.readingLeading}
+            sessionId={sessionId}
+            revision={acceptedRevision}
+            submitChapterProposal={props.submitChapterProposal}
+            completionEnabled={state.settings.completionEnabled}
+            completionDelayMs={state.settings.completionDelayMs}
+            requestCompletion={async (before: string) => {
+              if (workId === undefined || sessionId === undefined) return undefined
+              const text = await props.completeSentence(sessionId, workId, before, new AbortController().signal)
+              return text === '' ? undefined : text
+            }}
+            requestContinuation={async (before, inspiration, signal) => {
+              if (workId === undefined || sessionId === undefined) {
+                return { state: 'failed', message: '还没有选定线程，先在左栏开一条线再续写。' }
+              }
+              return await props.continueWriting(sessionId, workId, { inspiration, before }, signal)
+            }}
+            requestRefine={props.refineChapter}
+            refineMode={state.settings.refineMode}
+            onOpenInbox={() => { workbenchActions.setView('review') }}
+            onOpenThread={() => {
+              if (workId === undefined) return
+              props.newThread(workId)
+              workbenchActions.openDetails()
+            }}
+            acceptedText={acceptedText}
+          />
+        )}
       </Shell>
     )
   }

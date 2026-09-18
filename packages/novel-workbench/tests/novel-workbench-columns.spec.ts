@@ -196,3 +196,58 @@ describe('novel-mode frame columns in the frame', () => {
     await act(async () => { root.unmount() })
   })
 })
+
+/**
+ * The empty thread is the case the frame got wrong.
+ *
+ * With no lines, the shipped conversation surface renders its own welcome page
+ * instead of a transcript. That page claims the whole column, so the frame's own
+ * empty state was squeezed to a strip at the top and the author was left clicking
+ * a dead scroll body. The frame already knows the thread is empty — it holds the
+ * transcript — so it publishes that, and the stylesheet answers it.
+ */
+describe('the empty thread', () => {
+  beforeEach(() => {
+    localStorage.clear()
+    resetWorkbench()
+  })
+
+  it('publishes the empty state on the conversation column', async () => {
+    workbenchActions.resize(1440)
+    const { container, root } = await mountFrame()
+
+    expect(container.querySelector('[data-novel-conversation-column]')
+      ?.getAttribute('data-novel-thread-state')).toBe('empty')
+
+    await act(async () => { root.unmount() })
+  })
+
+  it('stops publishing it once the thread has a line', async () => {
+    workbenchActions.resize(1440)
+    const { container, root } = await mountFrame()
+
+    await act(async () => {
+      workbenchActions.setTranscript([{ kind: 'user', id: 'u1', text: '写一段开场。' }])
+    })
+    expect(container.querySelector('[data-novel-conversation-column]')
+      ?.getAttribute('data-novel-thread-state')).toBeNull()
+
+    await act(async () => { root.unmount() })
+  })
+
+  it('answers that state in the stylesheet, so the shipped welcome page cannot claim the column', async () => {
+    workbenchActions.resize(1440)
+    const { container, root } = await mountFrame()
+    const styles = Array.from(container.querySelectorAll('style'))
+      .map(node => node.textContent ?? '')
+      .join('\n')
+
+    // Every child of the shipped composer stack but the composer bar is the
+    // welcome page — the bar is the only slot the frame still needs from it.
+    expect(styles).toContain('data-novel-thread-state="empty"')
+    expect(styles).toContain('_composerHero')
+    expect(styles).toContain('conversation.composer.bar')
+
+    await act(async () => { root.unmount() })
+  })
+})

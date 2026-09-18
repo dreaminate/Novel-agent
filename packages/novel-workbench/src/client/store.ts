@@ -260,6 +260,7 @@ export function hydrateWorkbench(raw: string | null, base: WorkbenchState = DEFA
     ...base,
     view: oneOf(stored?.['view'], WORKBENCH_VIEWS.map(entry => entry.id), base.view),
     theme: oneOf(stored?.['theme'], THEMES, base.theme),
+    chapterId: textOr(stored?.['chapterId'], base.chapterId),
     panels: {
       sidebar: panelWidthOr(panels['sidebar'], RAIL_MIN, RAIL_MAX, base.panels.sidebar),
       details: panelWidthOr(panels['details'], SIDE_MIN, SIDE_MAX, base.panels.details),
@@ -282,6 +283,10 @@ export function dehydrateWorkbench(state: WorkbenchState): string {
   return JSON.stringify({
     view: state.view,
     theme: state.theme,
+    // The chapter is where the author was working, not which thread they had
+    // open: reloading into "pick a chapter" makes them find their place again,
+    // which reads as lost work even when the prose is safe on disk.
+    chapterId: state.chapterId,
     panels: { sidebar: state.panels.sidebar, details: state.panels.details },
     settings: state.settings,
   })
@@ -336,6 +341,15 @@ function booleanOr(value: unknown, fallback: boolean): boolean {
 }
 
 /**
+ * A stored string that only means something when it has content — a chapter id,
+ * which this build cannot check against anything until the outline arrives, but
+ * which is never empty. Anything else falls back rather than being rendered.
+ */
+function textOr(value: unknown, fallback: string | undefined): string | undefined {
+  return typeof value === 'string' && value !== '' ? value : fallback
+}
+
+/**
  * The author's storage, or nothing.
  *
  * A browser can refuse storage outright (private mode, a blocked origin), and
@@ -373,6 +387,7 @@ function saveWorkbench(state: WorkbenchState): void {
 function prefsChanged(before: WorkbenchState, after: WorkbenchState): boolean {
   return before.view !== after.view
     || before.theme !== after.theme
+    || before.chapterId !== after.chapterId
     || before.panels !== after.panels
     || before.settings !== after.settings
 }

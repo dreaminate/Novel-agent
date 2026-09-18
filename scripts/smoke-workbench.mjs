@@ -202,6 +202,12 @@ async function main() {
     '--no-first-run',
     '--no-default-browser-check',
     '--hide-scrollbars',
+    // The author's browser asks for Chinese, and the shipped locale runtime
+    // resolves to English for one that asks for nothing. Without this the sweep
+    // measures a browser the author does not have — which is how the official
+    // composer came to look untranslated when it never was. See
+    // docs/evidence/2026-09-18/composer-locale/findings.md.
+    '--accept-lang=zh-CN,zh;q=0.9',
     // sigma paints through WebGL; without a software rasterizer the story map
     // is a blank rectangle in headless mode.
     '--use-angle=swiftshader',
@@ -313,6 +319,10 @@ async function main() {
     console.log(`cast board: canon keys leaked ${String(cast.cast.leaks.length)}`
       + ` · zero chips ${String(cast.cast.zeroChips)}`)
   }
+  const authorCopy = authorCopyLeaks(report.screens)
+  console.log(`author copy: ${authorCopy.leaks.length === 0
+    ? 'no plumbing words on our lines'
+    : authorCopy.leaks.join(' / ')} · composer ${JSON.stringify(authorCopy.composer.slice(0, 48))}`)
   console.log(`out: ${outDir}`)
   const failures = report.failures
   // A skip is a truthful record (no proposal, no accepted chapter), not a
@@ -327,7 +337,7 @@ async function main() {
   if (skipped.length > 0) {
     console.log(`skipped: ${skipped.map(screen => `${screen.view} (${screen.state})`).join(', ')}`)
   }
-  process.exitCode = broken.length === 0 && noise === 0 ? 0 : 1
+  process.exitCode = broken.length === 0 && noise === 0 && authorCopy.leaks.length === 0 ? 0 : 1
 }
 
 /** Click one rail view and record what its canvas renders. */
@@ -404,6 +414,8 @@ async function sweepMap(session, screen) {
       axis: (document.querySelector('[data-novel-story-map-axis]') ?? { getAttribute: () => null })
         .getAttribute('data-novel-story-map-axis'),
       canvases: document.querySelectorAll('[data-novel-story-map-canvas] canvas').length,
+      degraded: document.querySelector('[data-novel-story-map-degraded]') !== null,
+      canvasHost: stage !== null,
       overlayCoversStage: box !== null && paint !== null
         && Math.abs(paint.width - box.width) < 2 && Math.abs(paint.height - box.height) < 2,
       discInsideOverlay: disc === null || paint === null ? null
@@ -435,6 +447,11 @@ async function sweepMap(session, screen) {
   // does not cover the stage puts every one of them somewhere the author cannot see.
   if (!before.overlayCoversStage) screen.state = 'map-overlay-misplaced'
   if (before.discInsideOverlay === false) screen.state = 'map-disc-off-overlay'
+  // A1: this sweep runs on a GPU, so the map is expected to paint. A degraded card
+  // here means the probe said "no" to a machine that can — a regression, not the
+  // feature. The card is the right answer only under the walkthrough's --disable-gpu.
+  if (before.degraded) screen.state = 'map-degraded-on-good-gpu'
+  else if (before.people > 0 && !before.canvasHost) screen.state = 'map-no-canvas-host'
   const first = before.bubbles[0]
   if (first === undefined) return
   // Opening a `+N` has to bring its cast back, in the real browser, not just in
@@ -511,21 +528,36 @@ async function sweepChapterRead(session) {
 }
 
 /**
- * 提案审阅 is reached from the waiting-proposal entry in the context column. A
- * work with nothing pending is a real state, so the script records it as
- * skipped instead of inventing a proposal (it never writes to Canon).
+ * 提案审阅 is reached from the waiting-proposal badge in the thread header, which
+ * is also the only place that says how many are waiting. A work with nothing
+ * pending is a real state, so the script records it as skipped instead of
+ * inventing a proposal (it never writes to Canon).
+ *
+ * The selector here used to name `[data-novel-proposal]`, which the product has
+ * never rendered — so this screen reported "nothing pending" on every run,
+ * including the runs where something was waiting.
  */
 async function sweepProposal(session) {
-  const packet = await session.evaluate(
-    `(() => { const node = document.querySelector('[data-novel-proposal]')
-      return node === null ? null : node.getAttribute('data-novel-proposal') })()`)
-  if (packet === null) return { view: 'review', label: '提案审阅', state: 'skipped-no-proposal', head: '' }
-  await session.evaluate(`document.querySelector('[data-novel-proposal]').click()`)
+  // The badge lives in the conversation column, so the column has to be open
+  // before the question "is anything waiting?" can be asked at all.
+  if (await session.evaluate(`document.querySelector('[data-novel-thread-pending]') === null`)) {
+    await session.evaluate(
+      `(() => { const toggle = document.querySelector('[data-novel-topbar-details]')
+        if (toggle !== null) toggle.click() })()`)
+    await sleep(600)
+  }
+  const pending = await session.evaluate(
+    `(() => { const node = document.querySelector('[data-novel-thread-pending]')
+      return node === null ? 0 : Number(node.getAttribute('data-novel-thread-pending') ?? '0') })()`)
+  if (!Number.isFinite(pending) || pending <= 0) {
+    return { view: 'review', label: '提案审阅', state: 'skipped-no-proposal', head: '' }
+  }
+  await session.evaluate(`document.querySelector('[data-novel-thread-pending]').click()`)
   const painted = await session.until(`document.querySelector('[data-novel-canvas="review"]') !== null`)
   if (!painted) return { view: 'review', label: '提案审阅', state: 'canvas-missing', head: '' }
   await sleep(settleMs)
   const screen = await record(session, 'review', '提案审阅')
-  screen.packetId = packet
+  screen.pending = pending
   return screen
 }
 
@@ -790,10 +822,51 @@ async function record(session, id, label, selector = `[data-novel-canvas=${JSON.
   const body = await session.evaluate(
     `(() => { const node = document.querySelector(${JSON.stringify(selector)})
       return node === null ? '' : node.innerText.trim() })()`)
+  // The line under the title is entirely ours — the canvases below carry the
+  // author's own prose and the model's, so a word found in them proves nothing.
+  const sub = await session.evaluate(
+    `(() => { const node = document.querySelector(${JSON.stringify(selector)} + ' .main-head .sub')
+      return node === null ? '' : node.innerText.trim() })()`)
+  // The composer is the shipped conversation surface, so its words come from the
+  // shipped locale dictionaries — read here, while the page is alive, and judged
+  // with the rest of the author copy once the sweep is over.
+  const composer = await session.evaluate(
+    `(() => { const slot = document.querySelector('[data-slot="conversation.composer"]')
+      const node = (slot ?? document).querySelector('[placeholder], [data-placeholder]')
+      return node === null ? '' : (node.getAttribute('placeholder') ?? node.getAttribute('data-placeholder') ?? '') })()`)
   const shot = await session.send('Page.captureScreenshot', { format: 'png' })
   const file = join(outDir, `${id}.png`)
   writeFileSync(file, Buffer.from(shot.data, 'base64'))
-  return { view: id, label, state: 'rendered', head, bodyChars: body.length, body: body.slice(0, 600), screenshot: file }
+  return { view: id, label, state: 'rendered', head, sub, composer, bodyChars: body.length, body: body.slice(0, 600), screenshot: file }
+}
+
+/**
+ * Words that belong to the plumbing, not to the author.
+ *
+ * Looked for on the lines this product writes — the canvas title, the line under
+ * it, and the composer's own placeholder — because the canvases below them carry
+ * the author's prose and the model's, and a word found there is somebody else
+ * talking. 进阶面 is excluded outright: the brief puts the machine room outside
+ * the author's surface.
+ */
+const AUTHOR_LEAKS = ['Canon', 'workdir', 'Describe what you want to build']
+
+function authorCopyLeaks(screens) {
+  const leaks = []
+  let composer = ''
+  for (const screen of screens) {
+    if (screen.view === 'advanced') continue
+    if (typeof screen.composer === 'string' && screen.composer !== '') composer = screen.composer
+    for (const word of AUTHOR_LEAKS) {
+      if (`${screen.head ?? ''}\n${screen.sub ?? ''}`.includes(word)) {
+        leaks.push(`${screen.view} 标题:${word}`)
+      }
+    }
+  }
+  for (const word of AUTHOR_LEAKS) {
+    if (composer.includes(word)) leaks.push(`composer:${word}`)
+  }
+  return { leaks, composer }
 }
 
 const pad = (value, width) => String(value).padEnd(width)

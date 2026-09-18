@@ -459,6 +459,31 @@ const chainNarrative = {
 } as unknown as NovelNarrativeProjection
 
 describe('novel-mode work tree', () => {
+  it('lets no unaccepted proposal rename a chapter the author is writing', () => {
+    // A chapter's title is what names its draft file (第N章《title》.草稿.md), so a
+    // title that a *pending* proposal can set moves the author's prose to a file
+    // the editor then opens as empty: the agent proposes the title, the author
+    // pays for it. Only an accepted manuscript may name a chapter.
+    const outline = buildWorkOutline({
+      project: { acceptedRevision: 2 } as never,
+      narrative: chainNarrative,
+      manuscripts: [{
+        manuscript: { unitId: 'chapter-1', title: '开篇章', text: '正文', format: 'txt' },
+      }],
+      proposals: [{
+        packetId: 'p-1',
+        packet: {
+          manuscript: { unitId: 'chapter-1', title: '第1章《开篇章》', text: '别的正文', format: 'txt' },
+        },
+      }],
+    } as never)
+
+    const chapters = outline.groups.flatMap(group => group.chapters)
+    expect(chapters.find(chapter => chapter.id === 'chapter-1')?.title).toBe('开篇章')
+    // The wait itself stays visible — that is what 待审 is for.
+    expect(chapters.find(chapter => chapter.id === 'chapter-1')?.status).toBe('pending')
+  })
+
   it('groups chapters by their Volume and names the heading after it', () => {
     const outline = buildWorkOutline({
       project: { acceptedRevision: 1 } as never,

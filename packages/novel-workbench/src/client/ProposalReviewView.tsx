@@ -21,6 +21,13 @@ export interface ProposalReviewViewProps {
   readonly onDecisions: (decisions: readonly NovelResultItemDecision[]) => void
   readonly onAccept: (decisions: readonly NovelResultItemDecision[]) => void
   readonly onDiscard: () => void
+  /**
+   * No thread is serving this work. Accepting is a request *into* a thread, so
+   * without one the decision has nowhere to go — the view says that and offers
+   * the way to supply it rather than leaving the one deciding button inert.
+   */
+  readonly sessionless?: boolean
+  readonly onOpenThread?: () => void
 }
 
 interface Staged {
@@ -33,6 +40,18 @@ const REVIEW_CSS = `
 [data-novel-review] .nw-review-head { display: flex; flex-direction: column; gap: 4px; }
 [data-novel-review] .nw-review-route { display: flex; align-items: baseline; gap: 8px; font-size: 13px; color: hsl(var(--text-200)); font-variant-numeric: tabular-nums; }
 [data-novel-review] h2 { margin: 0; font-size: 18px; }
+[data-novel-review] .nw-review-sessionless {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 10px 14px;
+  border: 1px solid hsl(var(--accent-brand) / .45);
+  border-radius: 10px;
+  background: hsl(var(--accent-brand) / .08);
+  font-size: 13px;
+  color: hsl(var(--text-100));
+}
 [data-novel-review] .nw-review-body { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 18px; flex: 1 1 auto; min-height: 0; }
 [data-novel-review] .nw-review-column { display: flex; flex-direction: column; gap: 12px; min-height: 0; overflow: auto; padding-right: 4px; }
 [data-novel-review] .nw-card { border: 1px solid hsl(var(--border-100)); border-radius: 10px; background: hsl(var(--bg-000)); padding: 14px 16px; }
@@ -151,6 +170,20 @@ export function ProposalReviewView(props: ProposalReviewViewProps): ReactNode {
   return (
     <div data-novel-review={proposal.packetId}>
       <style>{REVIEW_CSS}</style>
+      {props.sessionless === true && (
+        <div className="nw-review-sessionless" data-novel-review-sessionless="" role="status">
+          <span>接受要交给一条线程去做，现在还没有选。</span>
+          {props.onOpenThread !== undefined && (
+            <button
+              type="button"
+              data-novel-review-open-thread=""
+              onClick={props.onOpenThread}
+            >
+              开一条线程
+            </button>
+          )}
+        </div>
+      )}
       <header className="nw-review-head">
         <span className="nw-review-route">
           {`R${String(proposal.expectedRevision)} → R${String(props.acceptedRevision + 1)} · ${proposal.chapterTitle} · 约 ${String(proposal.words)} 字`}

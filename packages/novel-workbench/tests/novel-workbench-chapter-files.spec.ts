@@ -3,6 +3,7 @@ import {
   WHILE_WRITING_MIN_CHARS,
   chapterDraftPath,
   draftFromRead,
+  planChapterRequest,
   proposalRequest,
   refineRequest,
   saveResultFromWrite,
@@ -87,6 +88,33 @@ describe('the chapter proposal request', () => {
     // The boundary is the whole reason this sentence exists: the draft reaches
     // Canon through a proposal the author reviews, never through this request.
     expect(text).toContain('不要直接改动 Canon')
+  })
+})
+
+/**
+ * A work with no chapters has nothing for the author to open, so 写作 offers to
+ * plan the first one. This is the third sentence the product sends to the agent,
+ * and it carries the same boundary as the other two: the architect proposes
+ * structure, and the author accepting it is what puts it in Canon.
+ */
+describe('the first-chapter planning request', () => {
+  it('names the architect, the lineage, and the boundary the agent must respect', () => {
+    const text = planChapterRequest(5)
+
+    // The skill that owns structure — without naming it the run invents shapes
+    // the strict parser then rejects.
+    expect(text).toContain('novel-architect')
+    expect(text).toContain('propose_novel_result_packet')
+    expect(text).toContain('expectedRevision：5')
+    expect(text).toContain('不要直接改动 Canon')
+  })
+
+  it('asks for a first chapter to write, not for the whole book at once', () => {
+    const text = planChapterRequest(5)
+
+    // Planning everything is how an author ends up with fifteen chapters they
+    // did not agree to before writing a word of the first one.
+    expect(text).toContain('第一章')
   })
 })
 

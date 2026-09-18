@@ -188,6 +188,12 @@ export interface NovelWorkFace {
     revision: number,
   ) => Promise<void>
   /**
+   * Send one sentence into a thread, queued, for the agent to work on. The same
+   * transport the submit and refine requests use — the sentence is the caller's,
+   * not a second way into an agent.
+   */
+  readonly sendToThread: (sessionId: SessionId, text: string) => Promise<void>
+  /**
    * Ask for the next stretch of prose, from the author's beats and the draft so
    * far. Unlike the sentence suggestion, a failure comes back as a state the
    * panel can say out loud — the author asked for this one.
@@ -1145,12 +1151,15 @@ export function buildWorkOutline(input: NovelOutlineInput): NovelWorkOutline {
     accepted.add(projected.manuscript.unitId)
     titles.set(projected.manuscript.unitId, projected.manuscript.title)
   }
+  // A pending proposal marks its chapter as waiting. It does not *name* it: the
+  // title reaches the author's screen, and it is what the draft file is called,
+  // so a title an unaccepted proposal can set is a title that moves the file the
+  // author is writing in. Names come from accepted manuscripts only.
   const pending = new Set<string>()
   for (const proposal of input.proposals) {
     const manuscript = proposal.packet.manuscript
     if (manuscript === undefined) continue
     pending.add(manuscript.unitId)
-    if (manuscript.title.trim().length > 0) titles.set(manuscript.unitId, manuscript.title)
   }
 
   const debts = new Map<string, number>()
@@ -1476,6 +1485,24 @@ export function createNovelWorkFace(deps: NovelFaceDeps): NovelWorkFace {
       const handle = session.beginSubmission({ mode: 'queue', text, images: [] })
       const result = await session.prompt([{ type: 'text', text }], 'queue', undefined, handle.requestId)
       if (!result.ok) throw new Error(`提交失败：${result.error.message}`)
+    },
+    /**
+     * Send one sentence into a thread and let the agent work on it.
+     *
+     * Deliberately the same transport as the submit and refine requests — a
+     * queued prompt into the thread — so this is not a second way to reach an
+     * agent, it is that one with the sentence supplied by the caller. What the
+     * caller must not do is use it to write Canon: the boundary is the same, and
+     * everything the agent produces still arrives as a proposal to review.
+     */
+    async sendToThread(sessionId, text) {
+      const session = deps.sessions.binding(sessionId)?.session
+      if (session === undefined) {
+        throw new Error('这条线程在 Host 上没有可用的会话绑定，没法把这句话交给 AI。')
+      }
+      const handle = session.beginSubmission({ mode: 'queue', text, images: [] })
+      const result = await session.prompt([{ type: 'text', text }], 'queue', undefined, handle.requestId)
+      if (!result.ok) throw new Error(`发送失败：${result.error.message}`)
     },
     /**
      * Refinement asks the agent to read the accepted chapter and propose the

@@ -195,9 +195,56 @@ const FRAME_CSS = `
  * reading. The shipped conversation surface is left mounted because it still
  * owns what the novel mode has not replaced yet — the composer, the input
  * menus, the approval panel — so only its own transcript region is hidden.
+ *
+ * It is kept for that region, but it is not what an empty thread needs: with no
+ * lines the shipped surface draws its *welcome page* instead of a transcript,
+ * and a welcome page is not a region this rule can reach.
  */
 [data-novel-workbench="frame"] [data-slot="conversation.session"] {
   display: none;
+}
+/*
+ * An empty thread, answered by name.
+ *
+ * With nothing to show, the shipped surface renders a brand headline and a
+ * workspace row — the page it shows when a session has no messages — and that
+ * page claims the whole column height. The frame's own empty state was left an
+ * 80px strip above 390px of scroll body, and that body takes no clicks at all:
+ * measured, the centre and the lower third of the column both left focus on the
+ * document body.
+ *
+ * Two rules fix it, and both are keyed on the state the frame publishes on the
+ * column. The composer stack keeps only its composer bar — every sibling of that
+ * bar is the welcome page. And the shipped root stops claiming the column, so
+ * the empty state gets the room to sit in.
+ *
+ * The stack is matched by the semantic tail of its own class rather than by a
+ * slot, because the welcome page's headline carries no slot of its own; the build
+ * hash in front of the "composerHero" tail turns over, the tail does not. An
+ * upgrade that renames it will show up as the welcome page returning on an empty
+ * thread.
+ */
+[data-novel-workbench="frame"] [data-novel-conversation-column][data-novel-thread-state="empty"] [data-slot="conversation"] > * {
+  flex: 0 0 auto;
+  height: auto;
+  min-height: 0;
+}
+[data-novel-workbench="frame"] [data-novel-conversation-column][data-novel-thread-state="empty"] [class*="_composerHero"] > *:not([data-slot="conversation.composer.bar"]) {
+  display: none;
+}
+/*
+ * The empty state is the only thing in the column, so it is centred in it rather
+ * than pinned under the header, and it pays the column a gutter: the reading
+ * measure is wider than this column is, so a line that needed no gutter at 640px
+ * ran edge to edge at 296.
+ */
+[data-novel-workbench="frame"] [data-novel-conversation-column][data-novel-thread-state="empty"] [data-novel-transcript-seat] {
+  display: flex;
+  padding: 0 20px;
+}
+[data-novel-workbench="frame"] [data-novel-conversation-column][data-novel-thread-state="empty"] .novel-transcript {
+  margin: auto;
+  padding: 0;
 }
 `
 
@@ -293,6 +340,10 @@ export function WorkbenchFrame(props: WorkbenchFrameProps): ReactNode {
             className: viewport.nearLimit ? 'side open' : 'side',
             'data-novel-shell': 'right',
             'data-novel-conversation-column': 'true',
+            // The one case where the shipped surface draws something the frame has
+            // replaced: with no lines it renders its own welcome page, and the
+            // stylesheet needs to be told which thread that is.
+            ...(transcript.length === 0 ? { 'data-novel-thread-state': 'empty' } : {}),
           },
           createElement(
             'div',

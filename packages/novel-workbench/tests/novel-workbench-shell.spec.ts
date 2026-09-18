@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import './webgl-env.js'
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { createElement } from 'react'
 import { createRoot } from 'react-dom/client'
@@ -14,9 +14,26 @@ import { WorkbenchStyleSheet } from '../src/client/WorkbenchStyleSheet.js'
  * The prototype is the design source of truth: the product frame keeps its token
  * sheet and its three-section geometry verbatim, so this spec compares the two
  * sheets instead of restating the values.
+ *
+ * The prototype lives at the repository root (`docs/prototypes/...`), but this
+ * spec may be invoked from either the repo root or `packages/novel-workbench`
+ * depending on the test runner's filter. Walk up from `process.cwd()` until the
+ * workspace manifest is found, so the lookup does not depend on whichever
+ * directory the runner happened to start in.
  */
+function findRepoRoot(from: string): string {
+  let dir = from
+  for (let i = 0; i < 10; i++) {
+    if (existsSync(resolve(dir, 'pnpm-workspace.yaml'))) return dir
+    const parent = resolve(dir, '..')
+    if (parent === dir) break
+    dir = parent
+  }
+  throw new Error(`could not find pnpm-workspace.yaml starting from ${from}`)
+}
+
 const prototypePath = resolve(
-  process.cwd(),
+  findRepoRoot(process.cwd()),
   'docs/prototypes/2026-09-16-novel-mode/novel-mode-workbench.html',
 )
 

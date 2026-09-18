@@ -46,11 +46,19 @@ const TRANSCRIPT_CSS = `
   content: '▍';
   margin-left: 2px;
 }
+/*
+ * A signpost, not prose. The reading face belongs to what the author reads at
+ * length; this is one sentence, read at a glance, in a column that is often
+ * ~300px wide — where 17px serif on a 31px leading ran edge to edge in lines of
+ * six or seven words. It speaks in the interface face, at the size the rest of
+ * the frame's secondary text uses.
+ */
 .novel-transcript-empty {
   margin: 0;
-  font-family: var(--font-serif);
-  font-size: var(--read-size);
-  line-height: var(--read-lh);
+  font-family: var(--font-ui);
+  font-size: var(--fs-13);
+  line-height: 1.7;
+  text-align: center;
   color: hsl(var(--text-200));
 }
 `

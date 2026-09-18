@@ -172,4 +172,29 @@ describe('workbench preferences across a reload', () => {
     workbenchActions.setTranscript([{ id: 'x', kind: 'user', text: '正文', streaming: false }])
     expect(writes).not.toHaveBeenCalled()
   })
+
+  it('comes back to the chapter the author was writing', () => {
+    // F2c: losing the chapter on reload sends the author back to the rail to
+    // find their place again, which reads as work lost even when the prose is
+    // safe on disk.
+    workbenchActions.openChapter('vol01-ch0001')
+
+    resetWorkbench()
+    expect(getWorkbenchState().chapterId).toBe('vol01-ch0001')
+  })
+
+  it('falls back when the stored chapter is not a chapter id', () => {
+    expect(hydrateWorkbench(JSON.stringify({ chapterId: 42 })).chapterId).toBeUndefined()
+    expect(hydrateWorkbench(JSON.stringify({ chapterId: { id: 'vol01-ch0001' } })).chapterId)
+      .toBeUndefined()
+    expect(hydrateWorkbench(JSON.stringify({ chapterId: '' })).chapterId).toBeUndefined()
+    expect(hydrateWorkbench(JSON.stringify({ chapterId: 'vol01-ch0002' })).chapterId)
+      .toBe('vol01-ch0002')
+  })
+
+  it('writes the chapter down, and keeps nothing else about the thread', () => {
+    workbenchActions.openChapter('vol01-ch0001')
+    expect(stored()).toMatchObject({ chapterId: 'vol01-ch0001' })
+    expect(localStorage.getItem(WORKBENCH_PREFS_KEY) ?? '').not.toContain('session-1')
+  })
 })

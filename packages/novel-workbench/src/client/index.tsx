@@ -14,6 +14,7 @@
  *    seats, so a slow or missing novel backend never leaves the shell blank.
  */
 import type { Context as ClientContext } from '@deepseek-ai/cordis'
+import type { ReactNode } from 'react'
 import type {} from '@deepseek-ai/dsh-api-workspace-controller/client'
 import type {} from '@deepseek-ai/dsh-client-locale/client'
 import type {} from '@deepseek-ai/dsh-client-ui-input-trigger/client'
@@ -27,7 +28,8 @@ import type {} from '@deepseek-ai/dsh-client-ui-workspace/client'
 import type {} from '@novel-agent/novel-project/remote'
 import { createNovelWorkFace } from './novel-data.js'
 import { createNovelReferenceSource } from './novel-input-source.js'
-import { NovelCanvas } from './NovelCanvas.js'
+import { CanvasBoundary } from './canvas-boundary.js'
+import { NovelCanvas, canvasTitle, type NovelCanvasProps } from './NovelCanvas.js'
 import { NovelRail } from './NovelRail.js'
 import { NovelSettings } from './NovelSettings.js'
 import { PersonFileSeat } from './PersonFileSeat.js'
@@ -39,10 +41,11 @@ import {
   type WorkbenchPanelActions,
 } from './WorkbenchFrame.js'
 import { ThemePresenter } from './theme-presenter.js'
-import { transcriptOf } from './transcript-data.js'
+import { proposalCallIds, transcriptOf } from './transcript-data.js'
 import {
   getWorkbenchState,
   resetWorkbench,
+  useWorkbenchState,
   workbenchActions,
   type WorkbenchTheme,
 } from './store.js'
@@ -90,6 +93,21 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
       scope: 'root'
     }
   }
+}
+
+/**
+ * The canvas seat, plus the one thing the occupant cannot do for itself: survive
+ * its own crash. The boundary is keyed by the view, so switching canvas remounts
+ * it — an author who lands on a broken 故事地图 and moves on is never stuck with
+ * the card, and never has to find 重试 to get the rest of the workbench back.
+ */
+function CanvasSeat(props: NovelCanvasProps): ReactNode {
+  const state = useWorkbenchState()
+  return (
+    <CanvasBoundary key={state.view} label={canvasTitle(state.view)}>
+      <NovelCanvas {...props} />
+    </CanvasBoundary>
+  )
 }
 
 /** Required services (cordis fiber inject — the loader passes all exports as a plugin). */
@@ -175,6 +193,19 @@ export function apply(ctx: ClientContext): () => void {
    * `turn/end`. This mirror keeps the novel strip honest across reloads.
    */
   let stopFailureFollow: (() => void) | undefined
+  /**
+   * The proposal calls this thread's log has already shown us, and whether the
+   * first pass has run. That first pass is history rather than news, so it is
+   * seeded silently — otherwise a reload would fire one refresh for every
+   * proposal the thread has ever filed.
+   *
+   * They live out here, not inside `followTurnFailure`, because that function is
+   * re-entered on every session-list change — precisely when a turn is starting
+   * or ending, which is when an agent files a proposal. A set rebuilt there would
+   * seed the proposal it had just missed and never call it news at all.
+   */
+  const seenProposalCalls = new Set<string>()
+  let primedProposalCalls = false
   const followTurnFailure = (sessionId: string | undefined): void => {
     stopFailureFollow?.()
     stopFailureFollow = undefined
@@ -200,6 +231,22 @@ export function apply(ctx: ClientContext): () => void {
       // store drops it when the result is unchanged.
       const transcript = transcriptOf(entries)
       workbenchActions.setTranscript(transcript)
+      // An agent filing a proposal is visible from this bundle only as the tool
+      // call that filed it — the packet goes to the host, not to us. A call we
+      // have not seen means the inbox has something new, so re-read it. This is
+      // the whole reason the waiting-proposal badge follows the agent without a
+      // single poll.
+      const filed = proposalCallIds(transcript)
+      if (primedProposalCalls) {
+        for (const callId of filed) {
+          if (seenProposalCalls.has(callId)) continue
+          seenProposalCalls.add(callId)
+          workbenchActions.refresh()
+        }
+      } else {
+        for (const callId of filed) seenProposalCalls.add(callId)
+        primedProposalCalls = true
+      }
       // What the author last submitted, read off the log rather than captured
       // from a composer this bundle no longer owns: the newest user line is the
       // newest submission. The failed-turn strip resends exactly this sentence.
@@ -282,7 +329,7 @@ export function apply(ctx: ClientContext): () => void {
       surfaceCtx.effect(() => surfaceCtx.slots.inject('novel.canvas', () => surfaceCtx.slots.register({
         name: 'novel.canvas',
         inject: () => face,
-      }, NovelCanvas)), 'novel-mode canvas')
+      }, CanvasSeat)), 'novel-mode canvas')
       // There is no novel composer row. The composer belongs to the shipped
       // conversation surface, which owns the input machine, the slash and at
       // menus, the model / permission / plan controls and the approval panel.

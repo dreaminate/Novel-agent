@@ -75,6 +75,17 @@ const EDITOR_CSS = `
 }
 .novel-editor-confirm p { margin: 0; }
 .novel-editor-confirm-note { color: hsl(var(--text-200)); font-size: 12px; }
+/* The draft and the accepted chapter are two documents now. This is a statement,
+   not an alarm: nothing is wrong, there are just two things and one screen. */
+.novel-editor-diverged {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 8px 14px;
+  border: 1px solid hsl(var(--border-100));
+  border-radius: 10px;
+  background: hsl(var(--bg-100));
+  font-family: var(--font-ui); font-size: 12px;
+  color: hsl(var(--text-200));
+}
 `
 
 /** Everything the writing surface needs. */
@@ -137,6 +148,25 @@ export interface NovelEditorProps {
    * both modes refine on submit.
    */
   readonly refineMode?: 'on-submit' | 'while-writing'
+  /**
+   * Where the author goes after submitting. The canvas owns which view that is,
+   * so the editor asks rather than reaching for the store itself.
+   */
+  readonly onOpenInbox?: () => void
+  /**
+   * Where the author goes to open the thread this surface needs. Submitting and
+   * refining both run *in* a thread, so without one those two actions can only
+   * fail — and naming the missing thing without offering it is a dead end.
+   */
+  readonly onOpenThread?: () => void
+  /**
+   * The accepted manuscript for this chapter, when Canon has one.
+   *
+   * Accepting writes Canon and does not write the draft file, so the two part
+   * ways at that moment. Without this the editor cannot tell the author that
+   * their draft is no longer what the story says.
+   */
+  readonly acceptedText?: string | undefined
 }
 
 /** ProseMirror blocks back to the file's shape: blank line between paragraphs. */
@@ -151,6 +181,10 @@ export function NovelEditor(props: NovelEditorProps): ReactNode {
   const [problem, setProblem] = useState<string | undefined>(undefined)
   const [conflict, setConflict] = useState<string | undefined>(undefined)
   const [chars, setChars] = useState(0)
+  /** The draft as text, kept for the one question "is this still what Canon has". */
+  const [draftText, setDraftText] = useState('')
+  /** Reading the accepted manuscript rather than the draft, after a divergence. */
+  const [readingAccepted, setReadingAccepted] = useState(false)
   /** Writing or reading: one document, two states — not two screens. */
   const [mode, setMode] = useState<'write' | 'read'>('write')
   /**
@@ -173,6 +207,12 @@ export function NovelEditor(props: NovelEditorProps): ReactNode {
    */
   const [refineState, setRefineState] = useState<'idle' | 'asking' | 'asked'>('idle')
   const [refineProblem, setRefineProblem] = useState<string | undefined>(undefined)
+  /**
+   * The last refusal was "there is no thread", so the author is offered one.
+   * Tracked separately from the message because a real failure says something
+   * else, and a button that opened a thread for that would be the wrong answer.
+   */
+  const [needsThread, setNeedsThread] = useState(false)
 
   // Refs, not state: the debounce timer and the newest version must be readable
   // from the timer callback without re-registering it on every keystroke.
@@ -180,6 +220,31 @@ export function NovelEditor(props: NovelEditorProps): ReactNode {
   const versionRef = useRef('')
   const chapterRef = useRef<ChapterIdentity | undefined>(chapter)
   chapterRef.current = chapter
+  /**
+   * What the pending debounce is going to write, pinned when it was scheduled.
+   *
+   * The timer fires up to 700ms later, and by then the author may be in another
+   * chapter with another version token and a document holding that chapter's
+   * prose. Reading any of the three at fire time files this chapter's work under
+   * the next one — which is how the last paragraph of a chapter used to be
+   * written into the file of the chapter its author had just moved to.
+   */
+  const pendingRef = useRef<{
+    readonly chapter: ChapterIdentity
+    readonly version: string
+    readonly text: string
+  } | undefined>(undefined)
+  /**
+   * How many edits the author has made, and how many of them the draft file has.
+   *
+   * This exists for one question — "is there work to lose" — which the status
+   * line cannot answer: a save that lands while newer keystrokes are already
+   * queued must not call the chapter clean just yet.
+   */
+  const editCount = useRef(0)
+  const editsOnFile = useRef(0)
+  /** False after unmount: a save that lands late must not setState on a dead tree. */
+  const mountedRef = useRef(true)
   /**
    * The draft length at the last refinement, and the length now. Read from refs
    * because the throttle decision is made from a timer-ish effect, where the
@@ -280,7 +345,13 @@ export function NovelEditor(props: NovelEditorProps): ReactNode {
     },
     onUpdate: ({ editor: live }) => {
       setChars(countCharacters(live.getText()))
+      setDraftText(serialize(live))
       setStatus('dirty')
+      editCount.current += 1
+      // Submitting is about the text that was submitted. The moment the author
+      // writes more, there is a new chapter to submit: the badge goes and the
+      // button comes back, instead of the action disappearing after one use.
+      setSubmitState(current => (current === 'sent' ? 'idle' : current))
       scheduleSave(live)
       // A suggestion only ever describes the text it was asked for, so any edit
       // invalidates it — and composition must not see one at all.
@@ -290,44 +361,138 @@ export function NovelEditor(props: NovelEditorProps): ReactNode {
   })
   editRef.current = editor
 
+  /**
+   * Whether a save is still about the chapter the author is looking at.
+   *
+   * The leaving flush and the next chapter's read are two requests in flight at
+   * once and they can answer in either order, so a save can land after its
+   * chapter is gone. The draft file is named after the chapter, which makes its
+   * number and title its identity — not the object, which is rebuilt on every
+   * outline read.
+   */
+  const stillOnScreen = useCallback((target: ChapterIdentity): boolean => {
+    const current = chapterRef.current
+    return current !== undefined
+      && current.number === target.number
+      && current.title === target.title
+  }, [])
+
+  /**
+   * Write one chapter's draft, and say what happened.
+   *
+   * Every path that can carry the author's work to disk — the debounce, the
+   * submit flush, leaving a chapter, the page going away — comes through here, so
+   * the version guard, the status line and the failure handling exist once.
+   */
+  const writeDraft = useCallback(async (
+    text: string,
+    target: ChapterIdentity,
+    version: string,
+  ): Promise<void> => {
+    if (workId === undefined) return
+    const mark = editCount.current
+    // Only the chapter on screen owns the status line; a write on the way out
+    // still happens, it just does not narrate itself to a surface that is gone.
+    if (mountedRef.current && stillOnScreen(target)) setStatus('saving')
+    try {
+      const result = await saveChapterDraft(workId, target, text, version)
+      if (!mountedRef.current) return
+      // A save for a chapter the author has left must not speak for the one they
+      // are in now: not its version token, not its "saved" line, not its errors.
+      if (!stillOnScreen(target)) return
+      if (result.state === 'saved') {
+        versionRef.current = result.version
+        // Only the edits this save actually wrote are on disk. Keystrokes that
+        // arrived while it was in flight are still the author's to lose.
+        if (mark <= editCount.current) editsOnFile.current = Math.max(editsOnFile.current, mark)
+        setProblem(undefined)
+        setConflict(undefined)
+        setStatus('clean')
+        return
+      }
+      if (result.state === 'conflict') {
+        // The author's text stays exactly where it is. Only the state line
+        // changes: overwriting here is how a draft gets eaten.
+        setConflict(result.message)
+        setStatus('failed')
+        return
+      }
+      setProblem(result.message)
+      setStatus('failed')
+    } catch (failure) {
+      if (!mountedRef.current) return
+      if (!stillOnScreen(target)) return
+      setProblem(failure instanceof Error ? failure.message : String(failure))
+      setStatus('failed')
+    }
+  }, [saveChapterDraft, stillOnScreen, workId])
+
   const scheduleSave = useCallback((live: { getText(options: { blockSeparator: string }): string }) => {
+    const target = chapterRef.current
+    if (workId === undefined || target === undefined) return
     if (timer.current !== undefined) clearTimeout(timer.current)
+    // Pin the chapter, the version token and the prose *now*: this work belongs
+    // to the chapter that was open at this keystroke, whatever is open when the
+    // timer fires.
+    const pending = { chapter: target, version: versionRef.current, text: serialize(live) }
+    pendingRef.current = pending
     timer.current = setTimeout(() => {
       timer.current = undefined
-      const target = chapterRef.current
-      if (workId === undefined || target === undefined) return
-      const text = serialize(live)
-      setStatus('saving')
-      void saveChapterDraft(workId, target, text, versionRef.current).then(
-        result => {
-          if (result.state === 'saved') {
-            versionRef.current = result.version
-            setProblem(undefined)
-            setConflict(undefined)
-            setStatus('clean')
-            return
-          }
-          if (result.state === 'conflict') {
-            // The author's text stays exactly where it is. Only the state line
-            // changes: overwriting here is how a draft gets eaten.
-            setConflict(result.message)
-            setStatus('failed')
-            return
-          }
-          setProblem(result.message)
-          setStatus('failed')
-        },
-        (failure: unknown) => {
-          setProblem(failure instanceof Error ? failure.message : String(failure))
-          setStatus('failed')
-        },
-      )
+      pendingRef.current = undefined
+      void writeDraft(pending.text, pending.chapter, pending.version)
     }, AUTOSAVE_MS)
-  }, [saveChapterDraft, workId])
+  }, [writeDraft, workId])
 
-  // Unmount must not cancel a pending save.
+  /**
+   * Write whatever the debounce still owes, and nothing when it owes nothing.
+   *
+   * This is the *leaving* path — unmount, switching chapter, the page going away
+   * — so it writes the pinned text rather than reading the document: by the time
+   * some of those run, the document already belongs to the next chapter, or to no
+   * chapter at all.
+   */
+  const flushPending = useCallback(async (): Promise<void> => {
+    if (timer.current !== undefined) {
+      clearTimeout(timer.current)
+      timer.current = undefined
+    }
+    const pending = pendingRef.current
+    pendingRef.current = undefined
+    if (pending === undefined) return
+    await writeDraft(pending.text, pending.chapter, pending.version)
+  }, [writeDraft])
+
+  // Leaving is not a reason to drop the author's last paragraph, so the way out
+  // pays whatever the debounce still owes. The ref keeps the cleanup attached to
+  // *unmount* rather than to `flushPending`'s identity — a cleanup that re-ran on
+  // a re-render would both flush the wrong moment and mark the editor dead.
+  const leaving = useRef(flushPending)
+  leaving.current = flushPending
   useEffect(() => () => {
-    if (timer.current !== undefined) clearTimeout(timer.current)
+    mountedRef.current = false
+    void leaving.current()
+  }, [])
+
+  /**
+   * The two ways a page ends. `pagehide` is the one that fires on a real close
+   * and when the page enters the back/forward cache, so it is where the debt gets
+   * paid; `beforeunload` is where the browser asks, and there the only honest
+   * answer is whether there is prose the file does not have yet.
+   */
+  useEffect(() => {
+    const onPageHide = (): void => { void leaving.current() }
+    const onBeforeUnload = (event: BeforeUnloadEvent): void => {
+      if (editCount.current === editsOnFile.current) return
+      event.preventDefault()
+      // Older engines read this property instead of the cancelled event.
+      event.returnValue = ''
+    }
+    window.addEventListener('pagehide', onPageHide)
+    window.addEventListener('beforeunload', onBeforeUnload)
+    return () => {
+      window.removeEventListener('pagehide', onPageHide)
+      window.removeEventListener('beforeunload', onBeforeUnload)
+    }
   }, [])
 
   /** Save right now, cancelling the debounce: submitting must not race the file. */
@@ -336,24 +501,12 @@ export function NovelEditor(props: NovelEditorProps): ReactNode {
       clearTimeout(timer.current)
       timer.current = undefined
     }
+    pendingRef.current = undefined
     const target = chapterRef.current
-    if (editor === null || editor === undefined || workId === undefined || target === undefined) return
-    const result = await saveChapterDraft(workId, target, serialize(editor), versionRef.current)
-    if (result.state === 'saved') {
-      versionRef.current = result.version
-      setProblem(undefined)
-      setConflict(undefined)
-      setStatus('clean')
-      return
-    }
-    if (result.state === 'conflict') {
-      setConflict(result.message)
-      setStatus('failed')
-      return
-    }
-    setProblem(result.message)
-    setStatus('failed')
-  }, [editor, saveChapterDraft, workId])
+    const live = editRef.current
+    if (workId === undefined || target === undefined || live === null) return
+    await writeDraft(serialize(live), target, versionRef.current)
+  }, [workId, writeDraft])
 
   /**
    * Ask the agent to refine the accepted chapter into setting proposals.
@@ -371,8 +524,10 @@ export function NovelEditor(props: NovelEditorProps): ReactNode {
     if (seam === undefined || workId === undefined || target === undefined) return
     if (sessionId === undefined || revision === undefined) {
       setRefineProblem('还没有选定线程，先在左栏开一条线再提炼。')
+      setNeedsThread(true)
       return
     }
+    setNeedsThread(false)
     setRefineState('asking')
     setRefineProblem(undefined)
     // Whichever trigger asked, this is the length that has now been refined —
@@ -394,8 +549,10 @@ export function NovelEditor(props: NovelEditorProps): ReactNode {
     if (workId === undefined || target === undefined) return
     if (sessionId === undefined || revision === undefined) {
       setSubmitProblem('还没有选定线程，先在左栏开一条线再提交。')
+      setNeedsThread(true)
       return
     }
+    setNeedsThread(false)
     setSubmitState('sending')
     setSubmitProblem(undefined)
     // The agent is asked to read the file, so the file has to be current first.
@@ -461,6 +618,19 @@ export function NovelEditor(props: NovelEditorProps): ReactNode {
     setStatus('loading')
     setProblem(undefined)
     setConflict(undefined)
+    // Everything the previous chapter had to say about itself goes with it. A
+    // card left open, a "已交给 AI" badge or a failure message from the chapter
+    // before describes a chapter the author is no longer looking at.
+    setConfirming(false)
+    setContinuing(false)
+    // Reading the *accepted* manuscript is a statement about one chapter's
+    // divergence; it does not carry to the next one.
+    setReadingAccepted(false)
+    setNeedsThread(false)
+    setSubmitState('idle')
+    setSubmitProblem(undefined)
+    setRefineState('idle')
+    setRefineProblem(undefined)
     void loadChapterDraft(workId, target).then(
       draft => {
         if (draft.state === 'unreadable') {
@@ -472,6 +642,10 @@ export function NovelEditor(props: NovelEditorProps): ReactNode {
         versionRef.current = draft.state === 'loaded' ? draft.version : ''
         editor?.commands.setContent(text === '' ? '' : text.split(/\n{2,}/).map(paragraph => `<p>${escapeHtml(paragraph)}</p>`).join(''))
         setChars(countCharacters(text))
+        setDraftText(text)
+        // A freshly loaded chapter has nothing unsaved in it, by definition.
+        editCount.current = 0
+        editsOnFile.current = 0
         setStatus('clean')
       },
       (failure: unknown) => {
@@ -483,11 +657,43 @@ export function NovelEditor(props: NovelEditorProps): ReactNode {
 
   useEffect(() => {
     if (editor === undefined || editor === null || chapter === undefined) return
+    // Pay the previous chapter's debt before the document is replaced. `load`
+    // overwrites the editor's content, so a debounce still in flight would
+    // otherwise carry the new chapter's prose into the old chapter's file.
+    void flushPending()
     load(chapter)
     // Deliberately not keyed on `load`: it changes when the editor instance does,
     // and re-loading on every keystroke would fight the author's cursor.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editor, chapter?.number, chapter?.title, workId])
+
+  /**
+   * Canon holds a version of this chapter that the draft no longer matches.
+   *
+   * Accepting writes Canon and never writes the draft file, so the two part ways
+   * exactly when a proposal is accepted — and an author looking at their draft
+   * has no way to tell. Comparing trimmed text keeps a stray newline from
+   * reading as a divergence.
+   */
+  const acceptedText = props.acceptedText?.trim() ?? ''
+  const diverged = acceptedText !== '' && acceptedText !== draftText.trim()
+
+  /**
+   * Put the accepted manuscript into the draft file, under the version that file
+   * already has — the same conflict guard typing goes through, so a draft edited
+   * in another window is refused rather than overwritten.
+   */
+  const writeBackAccepted = useCallback(async (): Promise<void> => {
+    const target = chapterRef.current
+    if (acceptedText === '' || target === undefined) return
+    editor?.commands.setContent(
+      paragraphsOf(acceptedText).map(paragraph => `<p>${escapeHtml(paragraph)}</p>`).join(''),
+    )
+    setChars(countCharacters(acceptedText))
+    setDraftText(acceptedText)
+    editCount.current += 1
+    await writeDraft(acceptedText, target, versionRef.current)
+  }, [acceptedText, editor, writeDraft])
 
   /**
    * 边写边提炼: refine while the author writes, without interrupting them.
@@ -555,7 +761,12 @@ export function NovelEditor(props: NovelEditorProps): ReactNode {
             type="button"
             className={continuing ? 'btn sm on' : 'btn sm'}
             data-novel-editor-continue="true"
-            onClick={() => { setContinuing(open => !open) }}
+            onClick={() => {
+              // Only one of the two panels is open at a time: they answer
+              // different questions and would otherwise stack on one bar.
+              setConfirming(false)
+              setContinuing(open => !open)
+            }}
           >
             续写
           </button>
@@ -565,13 +776,32 @@ export function NovelEditor(props: NovelEditorProps): ReactNode {
             type="button"
             className="btn sm"
             data-novel-editor-submit="true"
-            onClick={() => { setConfirming(true); setSubmitState('idle'); setSubmitProblem(undefined) }}
+            onClick={() => {
+              setContinuing(false) // the one-panel rule, stated at the other toggle
+              setConfirming(true)
+              setSubmitState('idle')
+              setSubmitProblem(undefined)
+            }}
           >
             提交本章
           </button>
         )}
         {submitState === 'sent' && (
-          <span className="novel-editor-state" data-novel-editor-submitted="true">已交给 AI 起草提案</span>
+          <>
+            <span className="novel-editor-state" data-novel-editor-submitted="true">
+              已交给 AI 起草提案
+            </span>
+            {props.onOpenInbox !== undefined && (
+              <button
+                type="button"
+                className="btn sm"
+                data-novel-editor-inbox="true"
+                onClick={() => { props.onOpenInbox?.() }}
+              >
+                去收件箱
+              </button>
+            )}
+          </>
         )}
         {props.requestRefine !== undefined && (
           <button
@@ -590,20 +820,67 @@ export function NovelEditor(props: NovelEditorProps): ReactNode {
         {refineProblem !== undefined && (
           <span className="novel-editor-state" role="alert">{refineProblem}</span>
         )}
+        {needsThread && props.onOpenThread !== undefined && (
+          <button
+            type="button"
+            className="btn sm"
+            data-novel-editor-open-thread="true"
+            onClick={props.onOpenThread}
+          >
+            开一条线程
+          </button>
+        )}
       </div>
+      {diverged && (
+        // The draft and the story have parted ways. Saying so is the whole point:
+        // the author is looking at one of them and assuming it is both.
+        <div className="novel-editor-diverged" data-novel-editor-diverged="" role="status">
+          <span>这一章已经接受过一版，稿子和它不一样了。</span>
+          <button
+            type="button"
+            className="btn sm"
+            data-novel-editor-read-accepted="true"
+            onClick={() => {
+              setReadingAccepted(true)
+              setMode('read')
+            }}
+          >
+            读已接受正文
+          </button>
+          <button
+            type="button"
+            className="btn sm"
+            data-novel-editor-write-back="true"
+            onClick={() => { void writeBackAccepted() }}
+          >
+            写回稿子
+          </button>
+        </div>
+      )}
       {confirming && (
         // The one action here that can reach Canon gets said out loud first.
         <div className="novel-editor-confirm" data-novel-editor-confirm="true">
           <p>
-            {`把第${String(chapter.number)}章《${chapter.title}》的草稿（${String(chars)} 字）作为一份提案提交，`}
-            {`和已接受版本 R${String(props.revision ?? 0)} 对齐。`}
+            {`把第${String(chapter.number)}章《${chapter.title}》的草稿（${String(chars)} 字）交给 AI 整理成一份提案。`}
           </p>
           <p className="novel-editor-confirm-note">
-            草稿先存盘，再由 AI 读它、产出提案放进提案收件箱。
-            Canon 不会因为这一步改变 —— 只有你在审阅里逐条接受，它才动。
+            草稿先存盘。AI 会把这一章的设定变化整理成一条条建议，放进提案收件箱。
+            <strong>在你逐条接受之前，故事内容不会有任何变化。</strong>
           </p>
           {submitProblem !== undefined && (
             <p className="novel-editor-state" role="alert">{submitProblem}</p>
+          )}
+          {needsThread && props.onOpenThread !== undefined && (
+            <p>
+              <button
+                type="button"
+                className="btn sm"
+                data-novel-editor-open-thread="true"
+                onClick={props.onOpenThread}
+              >
+                开一条线程
+              </button>
+            </p>
           )}
           <div className="novel-editor-toggle">
             <button
@@ -643,9 +920,10 @@ export function NovelEditor(props: NovelEditorProps): ReactNode {
             ...(props.readingIndent === 0 ? {} : { textIndent: `${String(props.readingIndent)}em` }),
           }}
         >
-          {readParagraphs(editor).map((paragraph, index) => (
-            <p key={`${String(index)}-${paragraph.slice(0, 8)}`}>{paragraph}</p>
-          ))}
+          {(readingAccepted && acceptedText !== '' ? paragraphsOf(acceptedText) : readParagraphs(editor))
+            .map((paragraph, index) => (
+              <p key={`${String(index)}-${paragraph.slice(0, 8)}`}>{paragraph}</p>
+            ))}
         </article>
       ) : (
         <div
@@ -674,11 +952,15 @@ function tailBeforeCaret(editor: Editor): string {
 }
 
 /** The draft's paragraphs, for the reading state. */
-function readParagraphs(editor: { getText(options: { blockSeparator: string }): string } | null): readonly string[] {
-  if (editor === null) return []
-  return editor
-    .getText({ blockSeparator: '\n\n' })
+/** Split a manuscript into the paragraphs the reading state draws. */
+function paragraphsOf(text: string): readonly string[] {
+  return text
     .split(/\n+/)
     .map(paragraph => paragraph.trim())
     .filter(paragraph => paragraph !== '')
+}
+
+function readParagraphs(editor: { getText(options: { blockSeparator: string }): string } | null): readonly string[] {
+  if (editor === null) return []
+  return paragraphsOf(editor.getText({ blockSeparator: '\n\n' }))
 }

@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
 import './webgl-env.js'
 import { createElement } from 'react'
-import { createRoot } from 'react-dom/client'
+import { createRoot, type Root } from 'react-dom/client'
 import { act } from 'react-dom/test-utils'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { NovelPendingProposal, NovelResultItemDecision } from '@novel-agent/novel-project/types'
 import { buildReviewProposal } from '../src/client/novel-data.js'
 
@@ -55,7 +55,73 @@ const works = [{
   updatedAt: '2026-02-01T00:00:00.000Z',
 }]
 
+/** Roots this file mounts directly, so each case tears its own down. */
+const mounted: { root: Root; container: HTMLElement }[] = []
+
+afterEach(async () => {
+  for (const entry of mounted.splice(0)) {
+    await act(async () => { entry.root.unmount() })
+    entry.container.remove()
+  }
+})
+
 describe('novel-mode proposal review', () => {
+  /**
+   * F3c: with no thread selected, 接受本章 used to return in silence — the author
+   * pressed the one button that decides, and nothing at all happened. The view
+   * now says what is missing and offers the way to supply it.
+   */
+  async function mountReview(overrides: Record<string, unknown> = {}) {
+    const { ProposalReviewView } = await import('../src/client/ProposalReviewView.js') as {
+      ProposalReviewView: (props: Record<string, unknown>) => unknown
+    }
+    const container = document.createElement('div')
+    document.body.append(container)
+    const root = createRoot(container)
+    const accepted: unknown[][] = []
+    await act(async () => {
+      root.render(createElement(ProposalReviewView as never, {
+        proposal: buildReviewProposal(pending),
+        acceptedRevision: 5,
+        impact: undefined,
+        busy: false,
+        notice: undefined,
+        onDecisions: () => {},
+        onAccept: (...args: unknown[]) => { accepted.push(args) },
+        onDiscard: () => {},
+        ...overrides,
+      } as never))
+    })
+    await act(async () => {})
+    mounted.push({ root, container })
+    return { container, root, accepted }
+  }
+
+  it('says which thread is missing, and offers to open one, instead of a dead 接受本章', async () => {
+    let opened = 0
+    const { container, accepted } = await mountReview({
+      sessionless: true,
+      onOpenThread: () => { opened += 1 },
+    })
+
+    const banner = container.querySelector('[data-novel-review-sessionless]')
+    expect(banner).not.toBeNull()
+    expect(banner?.textContent).toContain('开一条线程')
+
+    await act(async () => {
+      banner?.querySelector<HTMLButtonElement>('[data-novel-review-open-thread]')?.click()
+    })
+    expect(opened).toBe(1)
+    // The banner is not a way to accept without a thread; it is a way to get one.
+    expect(accepted).toHaveLength(0)
+  })
+
+  it('shows no such banner once a thread is serving this work', async () => {
+    const { container } = await mountReview({ sessionless: false, onOpenThread: () => {} })
+
+    expect(container.querySelector('[data-novel-review-sessionless]')).toBeNull()
+  })
+
   it('maps one pending proposal to author-facing rows', () => {
     const review = buildReviewProposal(pending)
 
@@ -70,6 +136,55 @@ describe('novel-mode proposal review', () => {
       suggestion: '改成他扶墙走。',
       anchorCount: 1,
     }])
+  })
+
+  it('refuses to accept without a thread, and says what is missing instead of doing nothing', async () => {
+    const { NovelCanvas } = await import('../src/client/NovelCanvas.js') as {
+      NovelCanvas: (props: Record<string, unknown>) => unknown
+    }
+    const { workbenchActions } = await import('../src/client/store.js') as {
+      workbenchActions: { setView(view: string): void }
+    }
+    workbenchActions.setView('review')
+
+    const submitReview = vi.fn(async () => ({ revision: 6, acceptedSettings: 0, manuscriptAccepted: false }))
+    const container = document.createElement('div')
+    document.body.append(container)
+    const root = createRoot(container)
+    await act(async () => {
+      root.render(createElement(NovelCanvas as never, {
+        // No thread is selected. 提案审阅 is reachable this way on purpose — the
+        // author can walk in from 本章合同 — so the one button that decides has to
+        // say what is missing rather than return in silence.
+        sessionId: undefined,
+        useWorkspaces: (selector: (value: unknown) => unknown) => selector({ items: works }),
+        useSessions: (selector: (value: unknown) => unknown) => selector({
+          jobsBySession: {},
+          subagentsByParent: {},
+        }),
+        loadOutline: vi.fn(),
+        loadStoryMap: vi.fn(),
+        loadReviews: vi.fn(async () => ({ acceptedRevision: 5, proposals: [buildReviewProposal(pending)] })),
+        previewReview: vi.fn(),
+        submitReview,
+        discardProposal: vi.fn(),
+        newThread: vi.fn(),
+        openThread: vi.fn(),
+      } as never))
+    })
+    await act(async () => {})
+    mounted.push({ root, container })
+
+    await act(async () => {
+      container.querySelector<HTMLButtonElement>('[data-novel-review-accept]')?.click()
+    })
+    await act(async () => {
+      container.querySelector<HTMLButtonElement>('[data-novel-review-confirm-yes]')?.click()
+    })
+    await act(async () => {})
+
+    expect(submitReview).not.toHaveBeenCalled()
+    expect(container.textContent).toContain('要先开一条线程')
   })
 
   it('stages per-item decisions, previews them and writes only on 接受本章', async () => {

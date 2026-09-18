@@ -26,6 +26,7 @@ import { UndirectedGraph } from 'graphology'
 import Sigma from 'sigma'
 import type { NovelStoryMap } from './novel-data.js'
 import { probeWebGL } from './webgl-probe.js'
+import { useWorkbenchState, workbenchActions } from './store.js'
 import {
   MAP_CANVAS,
   clusterKeyOf,
@@ -232,6 +233,7 @@ const MAP_CSS = `
 
 /** The story map canvas. */
 export function StoryMapView({ map, onOpenPerson, onOpenCast }: StoryMapViewProps): ReactNode {
+  const workbench = useWorkbenchState()
   const host = useRef<HTMLDivElement | null>(null)
   const overlay = useRef<SVGSVGElement | null>(null)
   const renderer = useRef<Sigma | null>(null)
@@ -239,10 +241,22 @@ export function StoryMapView({ map, onOpenPerson, onOpenCast }: StoryMapViewProp
   /** The layout the live graph was built from, so an unchanged one is not reapplied. */
   const applied = useRef<MapLayout | null>(null)
   const [selected, setSelected] = useState<string | undefined>(undefined)
+  /**
+   * The node the pointer is hovering over, if any. Obsidian's graph view
+   * highlights a node's neighbourhood on hover — the gesture an author makes
+   * *before* they decide to click — and the map now does the same.
+   */
+  const [hovered, setHovered] = useState<string | undefined>(undefined)
   const [search, setSearch] = useState('')
   const [axis, setAxis] = useState<ClusterAxis>('faction')
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(() => new Set<string>())
-  const [pins, setPins] = useState<ReadonlyMap<string, MapPoint>>(() => new Map<string, MapPoint>())
+  /**
+   * Pins come from the workbench store now, so they survive a reload: "this is
+   * where it belongs" is the author's edit to the map, not a transient view
+   * state. The canvas reads the slice the store owns and writes back through
+   * {@link workbenchActions.setMapPin}.
+   */
+  const pins: ReadonlyMap<string, MapPoint> = workbench.mapPins
   // Asking the machine is a render-time question, and 重试 is the author asking
   // again — so the answer is memoised against an attempt counter, not cached for
   // the life of the view.
@@ -379,12 +393,15 @@ export function StoryMapView({ map, onOpenPerson, onOpenCast }: StoryMapViewProp
     instance.on('doubleClickNode', ({ node }) => { onOpenPerson?.(node) })
     instance.on('clickStage', () => { setSelected(undefined) })
     // Dropping a character is how the author says "this is where it belongs":
-    // the position becomes a pin, and the ring stops moving it.
+    // the position becomes a pin, and the ring stops moving it. The pin is
+    // written to the workbench store, so it outlives a reload.
     instance.on('upNode', ({ node }) => {
       const dropped = instance.getGraph().getNodeAttributes(node) as { x: number; y: number }
       if (typeof dropped.x !== 'number' || typeof dropped.y !== 'number') return
-      setPins(current => new Map(current).set(node, { x: dropped.x, y: dropped.y }))
+      workbenchActions.setMapPin(node, { x: dropped.x, y: dropped.y })
     })
+    instance.on('enterNode', ({ node }) => { setHovered(node) })
+    instance.on('leaveNode', () => { setHovered(undefined) })
     instance.on('afterRender', () => { syncOverlay.current() })
     renderer.current = instance
     applied.current = latest.current
@@ -426,26 +443,31 @@ export function StoryMapView({ map, onOpenPerson, onOpenCast }: StoryMapViewProp
   useEffect(() => {
     const instance = renderer.current
     if (instance === null) return
-    if (selected === undefined) {
+    // Hover takes precedence over click: the author's pointer is the gesture
+    // they make before they decide, and Obsidian's graph view highlights a
+    // node's neighbourhood on hover. A click still holds when the pointer
+    // leaves — selection is a state, hover is a moment.
+    const focus = hovered ?? selected
+    if (focus === undefined) {
       instance.setSetting('nodeReducer', null)
       instance.setSetting('edgeReducer', null)
       return
     }
-    const related = new Set<string>([selected])
+    const related = new Set<string>([focus])
     for (const edge of map.edges) {
-      if (edge.source === selected) related.add(edge.target)
-      if (edge.target === selected) related.add(edge.source)
+      if (edge.source === focus) related.add(edge.target)
+      if (edge.target === focus) related.add(edge.source)
     }
     const faded = document.body.dataset['dsDarkTheme'] === undefined ? FADED : FADED_DARK
     instance.setSetting('nodeReducer', (node, data) =>
       related.has(node) ? { ...data, zIndex: 2 } : { ...data, color: faded, label: '' })
     instance.setSetting('edgeReducer', (edge, data) => {
       const [source, target] = instance.getGraph().extremities(edge)
-      return source === selected || target === selected
+      return source === focus || target === focus
         ? { ...data, zIndex: 2 }
         : { ...data, color: faded, label: '' }
     })
-  }, [selected, map])
+  }, [hovered, selected, map])
 
   const chosen = map.nodes.find(node => node.id === selected)
   const folded = layout.hidden.length
@@ -529,12 +551,12 @@ export function StoryMapView({ map, onOpenPerson, onOpenCast }: StoryMapViewProp
                   </button>
                 </div>
                 {pins.size > 0 && (
-                  <button
-                    type="button"
-                    className="nw-map-unpin"
-                    data-novel-story-map-unpin=""
-                    onClick={() => { setPins(new Map<string, MapPoint>()) }}
-                  >
+                <button
+                  type="button"
+                  className="nw-map-unpin"
+                  data-novel-story-map-unpin=""
+                  onClick={() => { workbenchActions.clearMapPins() }}
+                >
                     {`解除全部钉位（${String(pins.size)}）`}
                   </button>
                 )}
@@ -640,12 +662,22 @@ function drawCluster(
 
 const SVG_NS = 'http://www.w3.org/2000/svg'
 
-/** How far outside the drawn dot the focus ring sits, in screen pixels. */
+/**
+ * How far outside the drawn dot the focus ring sits, in screen pixels.
+ */
 const FOCUS_RING_GAP = 5
 
-/** A drawn character's dot radius in graph units, sized by its open debts. */
+/**
+ * A drawn character's dot radius in graph units, sized by its open debts.
+ *
+ * The degree scales the radius so a character who carries the web reads larger
+ * than a leaf: Obsidian's graph view does the same, and the cluster-disc
+ * detour's cap (13px for a degree-3 node against 7px for a leaf) left the
+ * headline of the cast barely twice the footnote. The multiplier is chosen so
+ * a degree-3 centre is at least twice a degree-0 leaf.
+ */
 function nodeRadius(debts: number): number {
-  return 7 + Math.min(debts, 3) * 2
+  return 5 + Math.min(debts, 3) * 3
 }
 
 interface DrawnCharacter {

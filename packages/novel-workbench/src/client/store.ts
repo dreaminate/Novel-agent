@@ -74,6 +74,19 @@ export interface WorkbenchWindow {
   nearLimit: boolean
 }
 
+/**
+ * A place the author dragged a story-map character to and left there.
+ *
+ * Pins outlive a reload because "this is where it belongs" is the author's
+ * edit to the map's layout, not a transient view state. The key is the
+ * character id; the store owns one map per work, and the canvas reads the
+ * slice that belongs to the work it is showing.
+ */
+export interface MapPin {
+  readonly x: number
+  readonly y: number
+}
+
 /** Every canvas the workbench can show in the main column. */
 export type WorkbenchViewId =
   | 'editor'
@@ -168,6 +181,12 @@ export interface WorkbenchState {
   readonly sessionId: SessionId | undefined
   /** Bumped whenever accepted Canon moved, so the tree and canvases reload. */
   readonly revision: number
+  /**
+   * Characters the author pinned on the story map, keyed by character id.
+   * The canvas applies these after the force layout settles, so a pin holds
+   * its place across a reload instead of being re-laid-out.
+   */
+  readonly mapPins: ReadonlyMap<string, MapPin>
 }
 
 /** Default geometry: the prototype's 248 / 296 columns. */
@@ -224,6 +243,7 @@ const DEFAULT_STATE: WorkbenchState = {
   newThreadToken: 0,
   sessionId: undefined,
   revision: 0,
+  mapPins: new Map<string, MapPin>(),
 }
 
 /**
@@ -275,6 +295,7 @@ export function hydrateWorkbench(raw: string | null, base: WorkbenchState = DEFA
       toolActivity: booleanOr(settings['toolActivity'], base.settings.toolActivity),
       refineMode: oneOf(settings['refineMode'], REFINE_MODES, base.settings.refineMode),
     },
+    mapPins: mapPinsOr(stored?.['mapPins'], base.mapPins),
   }
 }
 
@@ -289,6 +310,10 @@ export function dehydrateWorkbench(state: WorkbenchState): string {
     chapterId: state.chapterId,
     panels: { sidebar: state.panels.sidebar, details: state.panels.details },
     settings: state.settings,
+    // Map pins are the author's edit to the story map's layout; losing them on
+    // reload reads as the map forgetting what the author told it. The Map is
+    // serialised as a plain object so JSON can carry it.
+    mapPins: Object.fromEntries(state.mapPins),
   })
 }
 
@@ -350,6 +375,27 @@ function textOr(value: unknown, fallback: string | undefined): string | undefine
 }
 
 /**
+ * Read the author's map pins back from storage.
+ *
+ * Each pin is a `{ x, y }` pair keyed by character id. A pin with non-finite
+ * coordinates or the wrong shape is dropped rather than coerced, because a pin
+ * the renderer cannot place is worse than no pin at all.
+ */
+function mapPinsOr(value: unknown, fallback: ReadonlyMap<string, MapPin>): ReadonlyMap<string, MapPin> {
+  if (!isRecord(value)) return fallback
+  const pins = new Map<string, MapPin>()
+  for (const [id, raw] of Object.entries(value)) {
+    if (!isRecord(raw)) continue
+    const x = raw['x']
+    const y = raw['y']
+    if (typeof x !== 'number' || !Number.isFinite(x)) continue
+    if (typeof y !== 'number' || !Number.isFinite(y)) continue
+    pins.set(id, { x, y })
+  }
+  return pins.size === 0 ? fallback : pins
+}
+
+/**
  * The author's storage, or nothing.
  *
  * A browser can refuse storage outright (private mode, a blocked origin), and
@@ -385,11 +431,18 @@ function saveWorkbench(state: WorkbenchState): void {
  * append or a Canon refresh must not rewrite anything.
  */
 function prefsChanged(before: WorkbenchState, after: WorkbenchState): boolean {
-  return before.view !== after.view
-    || before.theme !== after.theme
-    || before.chapterId !== after.chapterId
-    || before.panels !== after.panels
-    || before.settings !== after.settings
+  if (before.view !== after.view) return true
+  if (before.theme !== after.theme) return true
+  if (before.chapterId !== after.chapterId) return true
+  if (before.panels !== after.panels) return true
+  if (before.settings !== after.settings) return true
+  // Map pins: compare by content, because every write produces a new Map.
+  if (before.mapPins.size !== after.mapPins.size) return true
+  for (const [id, pin] of after.mapPins) {
+    const old = before.mapPins.get(id)
+    if (old === undefined || old.x !== pin.x || old.y !== pin.y) return true
+  }
+  return false
 }
 
 let state: WorkbenchState = loadWorkbench()
@@ -634,6 +687,22 @@ export const workbenchActions = {
     if (width <= 0) return
     if (state.window.width === width) return
     publish({ ...state, window: { width, nearLimit: narrowAt(width) } })
+  },
+
+  /**
+   * Pin a story-map character where the author dropped it. The pin outlives a
+   * reload; clearing it is {@link clearMapPins}.
+   */
+  setMapPin(personId: string, pin: MapPin): void {
+    const next = new Map(state.mapPins)
+    next.set(personId, pin)
+    publish({ ...state, mapPins: next })
+  },
+
+  /** Remove every pin the author set, the way 「解除全部钉位」 does. */
+  clearMapPins(): void {
+    if (state.mapPins.size === 0) return
+    publish({ ...state, mapPins: new Map<string, MapPin>() })
   },
 }
 

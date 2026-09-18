@@ -65,6 +65,8 @@
     "@tiptap/starter-kit": "3.31.3",
     "events": "3.3.0",
     "graphology": "0.26.0",
+    "graphology-layout": "0.6.1",
+    "graphology-layout-forceatlas2": "0.10.1",
     "react": "18.3.1",
     "sigma": "3.0.3"
   },

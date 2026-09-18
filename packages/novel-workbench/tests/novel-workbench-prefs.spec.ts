@@ -54,6 +54,8 @@ describe('workbench preferences across a reload', () => {
         toolActivity: true,
         refineMode: 'on-submit',
       },
+      // No pin has been set, so the map's pin store is empty.
+      mapPins: {},
     })
   })
 

@@ -1,0 +1,40 @@
+{
+  "product": "Obsidian backlinks panel",
+  "surface": "写作记忆 (MemoryView)",
+  "date": "2026-09-19",
+  "increment": "I-P5f",
+  "purpose": "视觉参数参照 for bespoke CSS (handoff §1 标杆: Obsidian backlinks panel)",
+
+  "source": {
+    "primary": "Obsidian 的反向链接面板是闭源产品；其公开文档描述该面板的形态（一条引用一行、密集列出、每行指向来源）。参数取自该公开描述，未复制任何资产。",
+    "note": "未复制任何受版权保护的资产。"
+  },
+
+  "visualParams": {
+    "reverseTimeline": {
+      "rule": "按新到旧排列；顺序本身就是「新鲜度」。",
+      "currentProduct": "沿用数据面给的顺序（未排序），并用一根 mem-band 进度条表达新鲜度",
+      "usage": "视图内按 revision 降序排序；实测 2 行 [2,2] newestFirst: true"
+    },
+    "denseListNotCards": {
+      "rule": "面板是一份密集清单，行与行之间一条细线；不是一份卡片文档。",
+      "currentProduct": "每行一张 .card（各自有边框、圆角、投影、12px 外边距）",
+      "usage": ".nw-memory-list > .nw-memory-row，行距 10px，行间 hairline；不再用 .card"
+    },
+    "anchorsAsChips": {
+      "rule": "每行的来源与生效版本以 chip 形式挂在行尾，作为指回来源的锚。",
+      "currentProduct": "三个无标签的 .note 平铺（新鲜度 / 来源：… / 详情）",
+      "usage": ".nw-memory-meta 里两个 chip（来源、R{n} 起生效）+ 一条 note。实测首行 chip = [故事事件, R2 起生效]"
+    },
+    "bandRemoved": {
+      "rule": "没有进度条。",
+      "currentProduct": ".mem-band 宽度 = revision / acceptedRevision —— 那不是任何东西的比例；在一个已按新到旧排好的列表里，顺序就是新鲜度",
+      "usage": "模板与样式表里一并移除（样式表由原型重生成，原型里的演示代码也同步改掉）"
+    }
+  },
+
+  "honestAssessment": {
+    "doubleScreenshotRule": "handoff §5.3 要求双截图（当前 vs Obsidian 面板对照）。Obsidian 桌面应用无法在沙箱 Chrome 里截图；参数文字化落盘，真机验证截当前实现（i-p5f-memory.png）。与 I-P1 的 Obsidian 图谱同一处理。",
+    "dataOverlap": "真机上 detail 字段（「写入于 R2 · …」）与行文本、与 R 版本 chip 有重复。那是数据面给的 detail，不是这次改版引入的；裁剪它属于数据面的决定，本增量没动。"
+  }
+}

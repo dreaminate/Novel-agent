@@ -21,6 +21,10 @@ export interface MemoryViewProps {
 /** The board. */
 export function MemoryView(props: MemoryViewProps): ReactNode {
   const { memory } = props
+  // Newest first, sorted here rather than trusted from the caller: the order of
+  // the list *is* the recency, which is what the bar that used to live on each
+  // row was trying to draw.
+  const rows = [...memory.rows].sort((a, b) => b.revision - a.revision)
   return createElement(
     'section',
     { 'data-novel-memory': 'true' },
@@ -34,42 +38,30 @@ export function MemoryView(props: MemoryViewProps): ReactNode {
         `AI 写作前会读到的 ${String(memory.rows.length)} 条摘要；来源与写入版本都写在下面。`,
       ),
     ),
-    memory.rows.length === 0
+    rows.length === 0
       ? createElement('p', { className: 'note' }, '还没有可被 AI 读到的写作记忆。')
-      : memory.rows.map(row => createElement(
-          'div',
-          { className: 'card', key: row.id, style: { marginBottom: '12px' }, 'data-novel-memory-row': row.id },
-          createElement(
-            'div',
-            { className: 'row', style: { display: 'flex', alignItems: 'center' } },
-            createElement('span', { style: { fontSize: '14px' } }, row.text),
+      : createElement(
+          'ul',
+          { className: 'nw-memory-list' },
+          rows.map(row => createElement(
+            'li',
+            { className: 'nw-memory-row', key: row.id, 'data-novel-memory-row': row.id },
+            createElement('div', { className: 'nw-memory-text' }, row.text),
+            // Where the line came from, and from which revision it has been in
+            // force — anchors, the way a backlinks panel carries them.
             createElement(
-              'span',
-              {
-                className: `chip${row.revision >= memory.revision ? ' accent' : ''}`,
-                style: { marginLeft: 'auto' },
-              },
-              `R${String(row.revision)} 起生效`,
+              'div',
+              { className: 'nw-memory-meta' },
+              createElement('span', { className: 'chip' }, row.sourceLabel),
+              createElement(
+                'span',
+                { className: `chip${row.revision >= memory.revision ? ' accent' : ''}` },
+                `R${String(row.revision)} 起生效`,
+              ),
+              createElement('span', { className: 'note' }, row.detail),
             ),
-          ),
-          createElement(
-            'div',
-            { className: 'mem-band' },
-            createElement('i', {
-              style: {
-                left: 0,
-                width: `${String(Math.min(100, Math.max(12, (row.revision / Math.max(memory.revision, 1)) * 100)))}%`,
-              },
-            }),
-          ),
-          createElement(
-            'div',
-            { className: 'row', style: { gap: '12px', display: 'flex' } },
-            createElement('span', { className: 'note' }, `新鲜度：基于 R${String(memory.revision)}，最新`),
-            createElement('span', { className: 'note' }, `来源：${row.sourceLabel}`),
-            createElement('span', { className: 'note' }, row.detail),
-          ),
-        )),
+          )),
+        ),
     createElement(
       'div',
       { className: 'row', style: { gap: '8px', marginTop: '16px', display: 'flex' } },

@@ -491,8 +491,28 @@ svg { display: block; }
 .tl-item.now .day { color: hsl(var(--accent-text)); font-weight: 600; }
 .tl-item .t { margin-top: 2px; font-size: var(--fs-14); color: hsl(var(--text-000)); }
 .tl-item .d { margin-top: 3px; font-size: var(--fs-13); color: hsl(var(--text-200) / .82); }
-.mem-band { position: relative; height: 6px; border-radius: 999px; background: hsl(var(--bg-300)); margin: 8px 0 6px; }
-.mem-band > i { position: absolute; top: 0; height: 100%; border-radius: 999px; background: hsl(var(--accent-brand) / .65); }
+/*
+ * 写作记忆 的反向时间线：一条记忆是一行，不是一张卡片。每行的职责是「AI 下次会
+ * 记得这句话，以及它来自哪里」，所以行与行之间一条细线就够了，来源与版本做成
+ * chip 挂在行尾 —— 这正是 Obsidian 反向链接面板读起来的样子。
+ *
+ * 这里原来是一个 mem-band 进度条，宽度是 revision / acceptedRevision。那不是任何
+ * 东西的比例：它是一个「新鲜度」条，而在一个已经按新到旧排好的列表里，顺序本身就是
+ * 新鲜度。
+ */
+.nw-memory-list { margin: 0; padding: 0; list-style: none; }
+.nw-memory-row { padding: 10px 0; }
+.nw-memory-row + .nw-memory-row { border-top: 1px solid hsl(var(--border-100) / .6); }
+.nw-memory-text { font-size: var(--fs-13); color: hsl(var(--text-000)); line-height: 1.65; }
+.nw-memory-meta { display: flex; align-items: center; gap: var(--s2); flex-wrap: wrap; margin-top: 6px; }
+/*
+ * 人物卡 的属性区：键占一列、值占一列，所以两张卡可以对着看。原来这三条是
+ * 三句松散的句子（摘要、带「情绪：」前缀的一行、若干方面词用点连起来），没有任何
+ * 东西对齐，比较两个人就得把两张卡整个读完。Notion 的数据库卡就是一张属性表。
+ */
+.nw-cast-fields { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px var(--s3); margin-top: 8px; }
+.nw-cast-key { font-size: var(--fs-12); color: hsl(var(--text-200) / .8); }
+.nw-cast-value { font-size: var(--fs-12); color: hsl(var(--text-100) / .9); }
 .char-card { display: flex; gap: var(--s3); align-items: flex-start; text-align: left; width: 100%; padding: var(--s3); border: 1px solid hsl(var(--border-100)); border-radius: var(--r-card); background: hsl(var(--bg-200)); transition: background var(--t-fast), border-color var(--t-fast); }
 .char-card:hover { background: hsl(var(--bg-300)); border-color: hsl(var(--border-200)); }
 .seal { flex: none; width: 34px; height: 34px; border-radius: 8px; display: grid; place-items: center; font-family: var(--font-serif); font-size: var(--fs-16); color: hsl(var(--on-accent)); background: hsl(var(--accent-brand) / .85); }

@@ -9,7 +9,7 @@
  */
 import { createElement, type ReactNode } from 'react'
 import { aspectLabel, personLabel } from './novel-copy.js'
-import type { NovelCastBoard } from './novel-data.js'
+import type { NovelCastBoard, NovelCastPerson } from './novel-data.js'
 
 /** Keep one aspect line inside a column card. */
 function truncate(text: string, limit: number): string {
@@ -23,6 +23,21 @@ function truncate(text: string, limit: number): string {
  */
 function personAspectLabels(names: readonly string[]): readonly string[] {
   return names.map(name => aspectLabel(name)).filter((label): label is string => label !== undefined)
+}
+
+/**
+ * One card's facts, as the property list a Notion database card carries. Only
+ * the fields Canon actually holds appear; a person with none gets no rows
+ * rather than three empty ones.
+ */
+function personFields(person: NovelCastPerson): readonly { readonly key: string; readonly value: string }[] {
+  const aspects = personAspectLabels(person.aspectNames)
+  const fields: ({ readonly key: string; readonly value: string } | undefined)[] = [
+    person.summary === undefined ? undefined : { key: '设定', value: truncate(person.summary, 72) },
+    person.emotion === undefined ? undefined : { key: '情绪', value: person.emotion },
+    aspects.length === 0 ? undefined : { key: '方面', value: aspects.join(' · ') },
+  ]
+  return fields.filter((field): field is { readonly key: string; readonly value: string } => field !== undefined)
 }
 
 /** Everything the board receives: the mapped cast plus the node actions. */
@@ -75,20 +90,18 @@ export function CastView(props: CastViewProps): ReactNode {
                 : createElement('span', { className: 'chip info' }, person.faction),
               createElement('span', { className: 'chip num' }, `${String(person.aspects)} 条设定`),
             ),
-            person.summary !== undefined && createElement(
+            // The card's facts as a property list, the way a Notion database card
+            // carries them: the key holds its own column, so comparing two people
+            // does not mean reading both cards in full.
+            personFields(person).length > 0 && createElement(
               'div',
-              { className: 'note', style: { marginTop: '6px' } },
-              truncate(person.summary, 72),
-            ),
-            person.emotion !== undefined && createElement(
-              'div',
-              { className: 'note' },
-              `情绪：${person.emotion}`,
-            ),
-            personAspectLabels(person.aspectNames).length > 0 && createElement(
-              'div',
-              { className: 'note', style: { marginTop: '4px' } },
-              personAspectLabels(person.aspectNames).join(' · '),
+              { className: 'nw-cast-fields' },
+              personFields(person).map(field => createElement(
+                'div',
+                { className: 'nw-cast-field', key: field.key, style: { display: 'contents' } },
+                createElement('span', { className: 'nw-cast-key' }, field.key),
+                createElement('span', { className: 'nw-cast-value' }, field.value),
+              )),
             ),
             createElement(
               'div',
@@ -98,6 +111,7 @@ export function CastView(props: CastViewProps): ReactNode {
                 {
                   type: 'button',
                   className: 'btn sm',
+                  'data-novel-person-open': 'true',
                   onClick: () => { props.onOpenPerson?.(person.id) },
                 },
                 '看档案',

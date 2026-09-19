@@ -1,0 +1,40 @@
+{
+  "product": "Notion database card",
+  "surface": "人物卡 (CastView)",
+  "date": "2026-09-19",
+  "increment": "I-P5e",
+  "purpose": "视觉参数参照 for bespoke CSS (handoff §1 标杆: Notion database card)",
+
+  "source": {
+    "primary": "Notion 的数据库卡是闭源产品的公开设计语言：一卡一条记录，记录的性质以「属性」形式逐行列出，键在左、值在右、各占一列。参数取自该公开语言的描述，未复制任何资产。",
+    "note": "未复制任何受版权保护的资产（图标、字体、原版设计资源）。"
+  },
+
+  "visualParams": {
+    "propertiesNotSentences": {
+      "rule": "一条记录的若干性质是「键 + 值」的属性行，不是若干句散文。",
+      "currentProduct": "摘要一行、`情绪：…` 一行、若干方面词用点连成一行 —— 三句松散文字，键有时有有时无",
+      "usage": "personFields() 产出 {key,value}；行渲染为 .nw-cast-field > .nw-cast-key + .nw-cast-value"
+    },
+    "keysShareAColumn": {
+      "rule": "键占固定的一列，值在第二列；同一张卡内所有值左边缘对齐，跨卡也对齐。",
+      "currentProduct": "没有列，靠文字长度自然错开",
+      "usage": ".nw-cast-fields { display: grid; grid-template-columns: max-content minmax(0,1fr) }，行用 display: contents 摊进网格。实测 键 x=265、值 x=301，两条属性共用同一列"
+    },
+    "emptyFieldIsAbsent": {
+      "rule": "没有值的属性不出现，不留空行。",
+      "currentProduct": "三个条件渲染，本来就是缺则不出",
+      "usage": "personFields() 过滤掉 undefined；一个人没有任何字段时整块不渲染"
+    },
+    "oneCardPerPerson": {
+      "rule": "一卡一人；卡片本身是一个可点对象。",
+      "currentProduct": "已是（.card + 卡内「看档案」按钮）",
+      "usage": "保持；「看档案」本增量补上 data-novel-person-open 供探针使用"
+    }
+  },
+
+  "honestAssessment": {
+    "doubleScreenshotRule": "handoff §5.3 要求双截图（当前 vs Notion 数据库卡对照）。Notion 需登录、无公开可截 demo；参数文字化落盘，真机验证截当前实现（i-p5e-cast.png）并逐行量了几何（键列/值列是否真的对齐），而不是只读 CSS。",
+    "notChanged": "没有引入 Notion 的属性类型（select / multi-select 的彩色 pill）。产品的 chip 已经是同一件事，再加一层属性类型是增加而不是减少。"
+  }
+}

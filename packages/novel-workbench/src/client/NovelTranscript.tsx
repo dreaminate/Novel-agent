@@ -32,8 +32,30 @@ const TRANSCRIPT_CSS = `
   color: hsl(var(--text-000));
   white-space: pre-wrap;
 }
-.novel-transcript-line.is-user .novel-transcript-text {
-  color: hsl(var(--text-100));
+/*
+ * The author's own line, marked as theirs.
+ *
+ * What stood here was \`color: var(--text-100)\` against the model's
+ * \`var(--text-000)\` — and in both the day and the night sheet those two tokens
+ * are the same value, so the rule did nothing at all. Measured on a real
+ * 77-line thread, the author's two lines were pixel-identical to the model's
+ * twenty. A mark has to be structural to survive that: a rule down the side and
+ * the word 你.
+ *
+ * Only the author's line is marked. Labelling each of the twenty answers as the
+ * model's would say nothing the column does not already say by being almost
+ * entirely answers.
+ */
+.novel-transcript-line.is-user {
+  border-left: 2px solid hsl(var(--accent-brand) / .45);
+  padding-left: 12px;
+}
+.novel-transcript-speaker {
+  margin: 0 0 4px;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  letter-spacing: .04em;
+  color: hsl(var(--accent-text));
 }
 .novel-transcript-tool {
   margin: 0;
@@ -41,6 +63,19 @@ const TRANSCRIPT_CSS = `
   font-size: 12px;
   line-height: 1.6;
   color: hsl(var(--text-200));
+}
+/*
+ * A run of tool lines is one stretch of work, so it is set as one block: tight
+ * inside, and ruled down the side to show where the stretch begins and ends.
+ * Spaced at the paragraph gap instead — which is what it was — an eleven-line
+ * run cost 198px of blank column to say what a list says in 40.
+ */
+.novel-transcript-tools {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-left: 2px solid hsl(var(--border-100));
+  padding-left: 12px;
 }
 .novel-transcript-streaming::after {
   content: '▍';
@@ -100,6 +135,73 @@ export function NovelTranscript(props: NovelTranscriptProps): ReactNode {
   const lines = props.showTools === false
     ? entries.filter(entry => entry.kind !== 'tool')
     : entries
+
+  /**
+   * Consecutive tool lines become one block. Only tools group: two assistant
+   * lines are two answers, and folding them would join paragraphs that merely
+   * arrived next to each other.
+   */
+  const blocks: { readonly key: string; readonly tool: boolean; readonly lines: TranscriptEntry[] }[] = []
+  for (const entry of lines) {
+    const last = blocks[blocks.length - 1]
+    if (entry.kind === 'tool' && last?.tool === true) last.lines.push(entry)
+    else blocks.push({ key: entry.id, tool: entry.kind === 'tool', lines: [entry] })
+  }
+
+  const renderLine = (entry: TranscriptEntry): ReactNode => createElement(
+    'article',
+    {
+      key: entry.id,
+      className: `novel-transcript-line is-${entry.kind}`,
+      'data-novel-transcript-entry': entry.kind,
+      ...(entry.streaming === true ? { 'data-novel-transcript-streaming': 'true' } : {}),
+    },
+    entry.kind === 'tool'
+      // Phrase and detail are separate nodes on purpose: the phrase is ours and
+      // must stay in the author's language, while the detail can be the model's
+      // own sentence — which may name a tool, and that is the model talking, not
+      // our rendering.
+      ? createElement(
+          'p',
+          { className: 'novel-transcript-tool' },
+          createElement(
+            'span',
+            { 'data-novel-transcript-tool-phrase': 'true' },
+            toolLine(entry).lead,
+          ),
+          toolLine(entry).detail === undefined
+            ? null
+            : createElement(
+                'span',
+                { 'data-novel-transcript-tool-detail': 'true' },
+                ` · ${toolLine(entry).detail as string}`,
+              ),
+        )
+      : [
+          entry.kind === 'user'
+            ? createElement(
+                'p',
+                {
+                  key: 'speaker',
+                  className: 'novel-transcript-speaker',
+                  'data-novel-transcript-speaker': 'true',
+                },
+                '你',
+              )
+            : null,
+          createElement(
+            'p',
+            {
+              key: 'text',
+              className: entry.streaming === true
+                ? 'novel-transcript-text novel-transcript-streaming'
+                : 'novel-transcript-text',
+            },
+            entry.text,
+          ),
+        ],
+  )
+
   return createElement(
     'div',
     { className: 'novel-transcript', 'data-novel-transcript': entries.length === 0 ? 'empty' : 'true' },
@@ -110,46 +212,12 @@ export function NovelTranscript(props: NovelTranscriptProps): ReactNode {
           { key: 'empty', className: 'novel-transcript-empty' },
           '这个线程还没有对话。写下第一句，或者从右栏挑一条待审提案。',
         )
-      : lines.map(entry =>
-          createElement(
-            'article',
-            {
-              key: entry.id,
-              className: `novel-transcript-line is-${entry.kind}`,
-              'data-novel-transcript-entry': entry.kind,
-              ...(entry.streaming === true ? { 'data-novel-transcript-streaming': 'true' } : {}),
-            },
-            entry.kind === 'tool'
-              // Phrase and detail are separate nodes on purpose: the phrase is
-              // ours and must stay in the author's language, while the detail can
-              // be the model's own sentence — which may name a tool, and that is
-              // the model talking, not our rendering.
-              ? createElement(
-                  'p',
-                  { className: 'novel-transcript-tool' },
-                  createElement(
-                    'span',
-                    { 'data-novel-transcript-tool-phrase': 'true' },
-                    toolLine(entry).lead,
-                  ),
-                  toolLine(entry).detail === undefined
-                    ? null
-                    : createElement(
-                        'span',
-                        { 'data-novel-transcript-tool-detail': 'true' },
-                        ` · ${toolLine(entry).detail as string}`,
-                      ),
-                )
-              : createElement(
-                  'p',
-                  {
-                    className: entry.streaming === true
-                      ? 'novel-transcript-text novel-transcript-streaming'
-                      : 'novel-transcript-text',
-                  },
-                  entry.text,
-                ),
-          ),
-        ),
+      : blocks.map(block => block.tool
+          ? createElement(
+              'div',
+              { key: block.key, className: 'novel-transcript-tools' },
+              block.lines.map(renderLine),
+            )
+          : renderLine(block.lines[0] as TranscriptEntry)),
   )
 }

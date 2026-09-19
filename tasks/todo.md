@@ -1,5 +1,38 @@
 # Execution checklist
 
+## Front-end Phase 2 polish — I-P5d, 2026-09-19
+
+**Work order of record:** [`frontend-polish-handoff-2026-09-19.md`](frontend-polish-handoff-2026-09-19.md) §I-P5d (transcript → Linear thread).
+
+This was the increment that could not be verified: an isolated home has no conversation, and the author's
+host on 4780 serves the previously installed bundle. It is verified now, without touching the author's data —
+see the last bullet.
+
+- [x] **The defect, measured before anything changed.** On a real 77-line thread (2 author lines, 20 model
+      lines, 55 tool lines) the transcript stylesheet distinguished the author's line with
+      `color: var(--text-100)` against the model's `var(--text-000)` — and in **both** the day and the night
+      sheet those two tokens are the same value. The rule was a no-op: `userDistinctFromAssistant: false`, and
+      the author could not see which lines were theirs.
+- [x] **A mark that survives that.** The author's line gets a rule down the side in the accent's muted tone and
+      the word 你. Deliberately *not* on the model's lines: labelling each of twenty answers says nothing the
+      column does not already say, and it would fight the component's own decision to set the model's prose in
+      the manuscript face.
+- [x] **A run of tool lines is one block.** An eleven-line run was spaced like eleven paragraphs. Consecutive
+      tool lines now sit in one tight block with its own rule. In-situ A/B on the same thread: **518px** saved
+      (12,669px against 13,187px), 18 blocks, longest 11 lines. The paragraph rhythm of the prose is untouched.
+- [x] **Time grouping was considered and refused, with the reason recorded.** `SessionLogEntry` is
+      `{ type, event }` and carries no time; the log *file* has one, but plumbing it means changing this
+      component's data contract for a thread that spans one sitting, where every line would read 「刚刚」.
+      Linear groups by day because its threads span days. A spec assertion pins the decision.
+- [x] **Verified without touching the author's data.** A full **read-only copy** of the author's `dsh-home`
+      (no `.credentials.yaml`, no `.env`) at `/tmp/nw-copy-home` runs on its own Host on `:4782` with the new
+      bundle packed into *its* profile; the Host writes to the copy, and the author's home and workdir are
+      untouched. This also corrects the earlier finding: the sessions were never pruned by the Host — the
+      earlier attempt lost them because the copy was partial. A full copy brings all five threads and this
+      77-line conversation back.
+- [x] **Evidence.** `probe-i-p5d-transcript.mjs` + three screenshots + summary; 541 tests, typecheck,
+      lint and `git diff --check` clean; 0 console errors.
+
 ## Front-end Phase 2 polish — I-P6, 2026-09-19
 
 **Work order of record:** [`frontend-polish-handoff-2026-09-19.md`](frontend-polish-handoff-2026-09-19.md) §I-P6 (A12).

@@ -1,0 +1,49 @@
+{
+  "product": "Linear thread",
+  "surface": "对话线程 (NovelTranscript)",
+  "date": "2026-09-19",
+  "increment": "I-P5d",
+  "purpose": "视觉参数参照 for bespoke CSS (handoff §1 标杆: Linear thread)",
+
+  "source": {
+    "primary": "Linear 是闭源商业产品，其 issue 线程的公开设计语言是：发言按人说、消息紧凑、按时间分组。参数取自该公开语言，未复制任何资产。",
+    "note": "未复制任何受版权保护的资产（图标、字体、原版设计资源）。"
+  },
+
+  "measured_before": {
+    "thread": "作者 home 的整份只读副本上的一条真实线程（77 行：2 条作者、20 条模型、55 条工具调用）",
+    "columnHeightPx": 13187,
+    "userDistinctFromAssistant": false,
+    "speakersLabelled": 0,
+    "longestToolRun": 11,
+    "why_userDistinct_was_false": "样式表用 color: var(--text-100) 区分作者行、模型行用 var(--text-000)，而日间与夜间两套 token 里这两个值完全相同 —— 那条规则是个空操作。"
+  },
+
+  "visualParams": {
+    "speakerDistinction": {
+      "rule": "发言的人分得清，而且靠结构而非颜色深浅。",
+      "adopted": ".novel-transcript-line.is-user 加 border-left: 2px solid hsl(var(--accent-brand) / .45) + padding-left: 12px，并在行首加一个 .novel-transcript-speaker「你」。",
+      "deliberatelyNot": "没有给模型的回答也加标签。这一列几乎全是回答，把二十条各标一次「AI」是在说这一列本来就在说的事 —— 而且它和本组件既有的「模型的话按稿子字体呈现」这一决定相冲突。"
+    },
+    "compactRuns": {
+      "rule": "成串的行为读成一整块，不是一串各自独立的段落。",
+      "adopted": "连续的工具行包进一个 .novel-transcript-tools（flex column, gap 4px, border-left: 2px --border-100），行内紧、块外保持 18px 段落间距。",
+      "measured": "同一条线程：块内 4px 时为 12,669px，改回段落间距 18px 时为 13,187px —— 省 518px（18 个工具块，最长 11 行）。"
+    },
+    "paragraphRhythmKept": {
+      "rule": "散文的节奏不动：这是阅读面，不是聊天记录。",
+      "adopted": ".novel-transcript 保持 gap: 18px，正文保持 --font-serif / --read-size / --read-lh / --read-measure。"
+    },
+    "timeGrouping": {
+      "rule": "Linear 按时间分组。",
+      "adopted": "**没有采纳。** transcript 的输入契约（SessionLogEntry = { type, event }）里没有时间戳；日志文件里确实有 `time` 字段，但把它接到归约器上要改这个组件的数据契约，而收益很低 —— 作者的一条线程是「一次坐下来」的几十分钟，每一行都会显示成「刚刚」。Linear 按天分组，是因为它的线程跨天。",
+      "spec": "novel-workbench-transcript-thread.spec.ts 里有一条断言把这个决定钉住（不得出现 [data-novel-transcript-time]）。"
+    }
+  },
+
+  "honestAssessment": {
+    "doubleScreenshotRule": "handoff §5.3 要求双截图（当前 vs Linear 线程对照）。Linear 应用需登录、无公开可截 demo；参数文字化落盘，真机验证截当前实现三张（i-p5d-transcript / -author / -tools）。",
+    "verificationHost": "这一条此前一直无法验证：隔离 home 没有会话数据。现在用**作者 home 的整份只读副本**（/tmp/nw-copy-home，不含凭据、不含 .env）起一个隔离 Host，里面有他真实的 5 条线程；Host 写的是副本，作者的数据一个字节都没被碰。",
+    "notChanged": "没有加消息气泡。本组件有意把模型的回答按稿子的字体与字号呈现（「作者不该用另一种声音读它」），加气泡会推翻这个决定而不是改善它。"
+  }
+}

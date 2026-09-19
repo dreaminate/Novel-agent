@@ -1,0 +1,75 @@
+{
+  "purpose": "I-P5d transcript Linear 化真机验证",
+  "date": "2026-09-19T08:51:21.528Z",
+  "port": "4782",
+  "threads": 5,
+  "opened": {
+    "row": "session-0f1a0bca-cf4a-44a1-957f-e09c016d1483",
+    "count": 77
+  },
+  "transcript": {
+    "listPresent": true,
+    "listGap": "18px",
+    "listMaxWidth": "520px",
+    "lines": 77,
+    "users": 2,
+    "assistants": 20,
+    "tools": 55,
+    "user": {
+      "className": "novel-transcript-line is-user",
+      "fontSize": "17px",
+      "lineHeight": "29.75px",
+      "color": "rgb(20, 20, 19)",
+      "fontFamily": "\"Source Han Serif SC\"",
+      "box": {
+        "x": 1145,
+        "y": 2563,
+        "w": 295,
+        "h": 884
+      },
+      "marginBottom": "0px"
+    },
+    "assistant": {
+      "className": "novel-transcript-line is-assistant",
+      "fontSize": "17px",
+      "lineHeight": "29.75px",
+      "color": "rgb(20, 20, 19)",
+      "fontFamily": "\"Source Han Serif SC\"",
+      "box": {
+        "x": 1145,
+        "y": 110,
+        "w": 295,
+        "h": 119
+      },
+      "marginBottom": "0px"
+    },
+    "tool": {
+      "className": "novel-transcript-line is-tool",
+      "fontSize": "12px",
+      "lineHeight": "19.2px",
+      "color": "rgb(20, 20, 19)",
+      "fontFamily": "\"PingFang SC\"",
+      "box": {
+        "x": 1159,
+        "y": 247,
+        "w": 281,
+        "h": 19
+      },
+      "marginBottom": "0px"
+    },
+    "userDistinctFromAssistant": true,
+    "speakersLabelled": 2,
+    "seatScrolls": "auto"
+  },
+  "screenshot": "i-p5d-transcript",
+  "authorLineVisible": true,
+  "authorShot": "i-p5d-transcript-author",
+  "toolBlock": {
+    "gap": "4px",
+    "bordered": "2px",
+    "lines": 1
+  },
+  "toolShot": "i-p5d-transcript-tools",
+  "consoleErrors": 0,
+  "consoleErrorSamples": []
+}

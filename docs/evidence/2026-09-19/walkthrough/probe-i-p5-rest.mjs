@@ -166,6 +166,9 @@ try {
   findings.advancedScreenshot = await s.shot('i-p5g-advanced')
 
   // ── I-P6: day and night, whole page ──────────────────────────────────────
+  // 进阶 off first: the whole-page shot is meant to be the frame as an author
+  // meets it, not with the diagnostic rail still expanded by this probe.
+  await s.ev(`(() => { const b = document.querySelector('[data-novel-advanced-toggle="true"]'); if (b && b.getAttribute('aria-pressed') === 'true') b.click() })()`)
   await goTo('editor')
   findings.dayScreenshot = await s.shot('i-p6-whole-day')
   const themeText = `(() => document.querySelector('[data-novel-topbar-theme]')?.innerText.trim() ?? '')()`

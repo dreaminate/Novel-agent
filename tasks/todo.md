@@ -1,5 +1,40 @@
 # Execution checklist
 
+## Front-end Phase 2 polish — I-P6, 2026-09-19
+
+**Work order of record:** [`frontend-polish-handoff-2026-09-19.md`](frontend-polish-handoff-2026-09-19.md) §I-P6 (A12).
+
+- [x] **One token sheet, and it is enforced.** `novel-workbench-tokens.spec.ts` reads every `*.tsx` in the client,
+      strips comments, and fails on any colour written as a value. It found one on its first run:
+      `ProposalReviewView.tsx` set `color: #fff` on the primary button while the prototype's `.btn.primary` used
+      `hsl(var(--on-accent))` — the same accent with two different foreground decisions in one product, and the
+      white one had about 3:1 contrast where the token gives about 7:1. Now the token.
+- [x] **The one exception is named, not excused.** `StoryMapView.tsx` draws Canon's factions, and a faction's
+      colour belongs to the faction; the allowed set is a one-line constant with the benchmark file cited beside it.
+- [x] **Type and spacing hold the same line.** The spec also pins the font, size, spacing, radius, shadow and
+      timing tokens, so a future surface cannot quietly invent its own.
+- [x] **Whole-page evidence, in both themes.** `probe-i-p5-rest.mjs` captures `i-p6-whole-day.png` and
+      `i-p6-whole-night.png`; the night frame reports `data-nw-theme="night"` and the sweep restores 跟随系统.
+
+## Front-end Phase 2 polish — I-P5c / I-P5e / I-P5f / I-P5g, 2026-09-19
+
+- [x] **I-P5c landing → Heptabase.** The ways in were a sentence with three rows under it and a button below that —
+      a table of contents, leaving the author to find where the doing was. They are a card grid now, and the plan
+      action is a card in the same grid (dashed edge, not a different shape).
+- [x] **I-P5e cast → Notion.** Each card's facts were three loose sentences with no alignment; comparing two people
+      meant reading both cards in full. They are property rows now, keys in their own column — measured live: keys
+      at x=265, values at x=301, all rows sharing the column.
+- [x] **I-P5f memory → Obsidian backlinks.** Cards became a dense reverse timeline with the origin and revision as
+      chips, newest first, and the `mem-band` bar is gone — its width was `revision / acceptedRevision`, which is
+      not a proportion of anything, and in a list already ordered newest-first the order *is* the recency. Removed
+      from the prototype too, demo code included.
+- [x] **I-P5g advanced → VSCode settings.json.** The raw projection sits on a code surface with a ceiling and a
+      scrollbar, wraps at boundaries instead of `break-all` (which split `character-state` across two lines), and
+      names the product's `--font-mono` token instead of its own font stack.
+- [x] **Evidence.** `probe-i-p5-rest.mjs` + five screenshots + summary on the isolated Host, 0 console errors; four
+      benchmark files under `docs/evidence/2026-09-19/benchmarks/`. 534 tests, typecheck/lint clean.
+- **Parity matrix** updated in this pass, as promised at I-P5a.
+
 ## Blocked items cleared — 人物措辞 + 草稿残留, 2026-09-19
 
 Two things the Phase 2 polish could not do on its own authority, cleared after the user said to.

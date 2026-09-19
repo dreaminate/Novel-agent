@@ -86,7 +86,7 @@ const REVIEW_CSS = `
   color: hsl(var(--accent-text));
   background: hsl(var(--accent-brand) / .10);
 }
-[data-novel-review] .nw-primary { border-color: hsl(var(--accent-brand)); background: hsl(var(--accent-brand)); color: #fff; }
+[data-novel-review] .nw-primary { border-color: hsl(var(--accent-brand)); background: hsl(var(--accent-brand)); color: hsl(var(--on-accent)); }
 [data-novel-review] .nw-primary:hover:not(:disabled) { filter: brightness(.95); }
 [data-novel-review] .nw-issue { display: flex; flex-direction: column; gap: 4px; padding: 8px 0; border-top: 1px solid hsl(var(--border-100)); }
 [data-novel-review] .nw-issue:first-of-type { border-top: none; }

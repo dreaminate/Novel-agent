@@ -1,0 +1,57 @@
+{
+  "purpose": "作者 workdir 的探针打字残留清理（Phase 1 W4 / I-W5 遗留）",
+  "date": "2026-09-19",
+  "authorisedBy": "用户 2026-09-19「先把上面两件卡住的事处理掉」",
+  "workdir": "/private/tmp/nw-workspace/天机阁主",
+
+  "removed": {
+    "path": "/private/tmp/nw-workspace/天机阁主/第1章《开篇章》.草稿.md",
+    "bytes": 54,
+    "sha256Before": "c2d819ea19922c09e177037777c8af465fb8b3013aa3725970e991ad988dd2f9",
+    "contentText": "测测试试夜里风大，吹得窗纸哗哗作响。\n",
+    "contentBase64": "5rWL5rWL6K+V6K+V5aSc6YeM6aOO5aSn77yM5ZC55b6X56qX57q45ZOX5ZOX5L2c5ZON44CC",
+    "sha256After": null,
+    "recovery": "内容逐字记在本文件的 contentText / contentBase64 里；把 contentBase64 解回该路径即可完全还原。文件本身是历次真机探针（I3.3/I4.1b/I5.2）打字打出来的，不含作者文字。"
+  },
+
+  "whyRemoveRatherThanEmpty": "文件里 54 字节全部是探针打字，没有一行作者文字。删掉恢复的是「这一章还没有草稿」这个真实状态，也正是探针动手之前的状态；留一个空文件反而是在作者目录里留一件探针遗物。",
+
+  "verification": {
+    "probe": "probe-draft-hygiene.mjs（真机，隔离 Host 127.0.0.1:4781）",
+    "summary": "i-p5-draft-hygiene-summary.json",
+    "screenshot": "i-p5-draft-blank.png",
+    "result": {
+      "chapter": "第1章《开篇章》",
+      "chars": "0",
+      "surfaceText": "",
+      "hasResidue": false,
+      "openedBlank": true,
+      "consoleErrors": 0
+    },
+    "notReCreated": "打开一个没有草稿的章节不会把文件写回来 —— 验证探针跑完后再查，路径仍然不存在。"
+  },
+
+  "blastRadius": {
+    "otherWorkdirFiles": "清理前后对 workdir 全部 .md 取 sha256 并逐行 diff：除被删的草稿外，**全部逐字节一致**（含 12-创作中枢/ 与 outputs/ 下的作者资料）。",
+    "canonUntouched": "作者 Canon（.novel-agent/dsh-home/storages/novel_project.json）只读检查，未写入。",
+    "pendingProposalsClean": "Canon 的 6 条 pendingProposals 逐条检查，**没有一条含「测测试试」**——提案收件箱本来就是干净的。"
+  },
+
+  "reportedNotTouched": {
+    "reason": "这两个文件在作者自己的脚本目录 .novel-project-proposal/ 下，产品不读它（Canon 的提案状态在 novel_project.json 的 pendingProposals 里，与它们无关）。它们属于作者自己的工具产物，未经点名不动。",
+    "files": [
+      {
+        "path": "/private/tmp/nw-workspace/天机阁主/.novel-project-proposal/ch1-draft/packet.json",
+        "occurrencesOfResidue": 2,
+        "mtime": "2026-09-18"
+      },
+      {
+        "path": "/private/tmp/nw-workspace/天机阁主/.novel-project-proposal/ch1-draft-r6-2026-09-18/packet.json",
+        "occurrencesOfResidue": 2,
+        "mtime": "2026-09-18"
+      }
+    ]
+  },
+
+  "processNote": "Phase 1 的 I-W5 已经写进规约的是「探针产生的草稿文件，探针结尾必须删除或还原，并在 summary 里记录 before/after sha256」。本轮探针（I-P1..I-P5b）复跑时都没有再往草稿里打字，所以这一条从本轮起不再产生新的残留；本次清理的是 I-W5 之前那几轮留下的。"
+}

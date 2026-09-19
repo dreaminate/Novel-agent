@@ -1,0 +1,45 @@
+{
+  "product": "Heptabase welcome",
+  "surface": "写作 落地页 (NovelLanding)",
+  "date": "2026-09-19",
+  "increment": "I-P5c",
+  "purpose": "视觉参数参照 for bespoke CSS (handoff §1 标杆: Heptabase welcome)",
+
+  "source": {
+    "primary": "Heptabase 是闭源商业产品，其公开站点与公开产品材料展示同一套 welcome 设计语言（卡片即入口）。参数取自该语言的公开描述，未复制任何资产。",
+    "note": "未复制任何受版权保护的资产（图标、字体、原版设计资源）。"
+  },
+
+  "visualParams": {
+    "cardsNotRows": {
+      "rule": "欢迎页是一组可整体按下的卡片，不是一个句子加一列行。行是目录，卡片是去处。",
+      "currentProduct": "一段引导语 + 最多 3 行横向条目（编号/标题/状态一行排开）+ 底下单独一个按钮",
+      "usage": ".nw-landing-cards 网格，每项是 .nw-landing-card"
+    },
+    "grid": {
+      "rule": "卡片按最小宽度自动成列；条目少时不留空轨道。",
+      "currentProduct": "单列堆叠，max-width 420px",
+      "usage": "grid-template-columns: repeat(auto-fill, minmax(200px, 1fr))；容器 max-width 720px。实测 1 章时 232px 单元成 3 列轨道、只用 1 格"
+    },
+    "cardAnatomy": {
+      "rule": "卡片自上而下三行：一行小字说明这是什么、一行主文、一行次要元数据。",
+      "currentProduct": "三者横向挤在一行，主次不分",
+      "usage": ".nw-landing-eyebrow（11px 等宽）/ .nw-landing-card-title（14px 主色）/ .nw-landing-card-meta（12px 次要色）"
+    },
+    "actionIsACard": {
+      "rule": "唯一的前进动作和其他入口长得一样，只是边线不同；不能是一条网格之外的按钮。",
+      "currentProduct": "「让 AI 规划第一章」是网格下的一个 .btn",
+      "usage": ".nw-landing-card-add：同尺寸同圆角，虚线边 + 透明底"
+    },
+    "cardIsOneControl": {
+      "rule": "整张卡是一个可点对象，卡内不再嵌按钮。",
+      "currentProduct": "整行是一个 <button>（已经是）",
+      "usage": "保持；写进 spec"
+    }
+  },
+
+  "honestAssessment": {
+    "doubleScreenshotRule": "handoff §5.3 要求双截图（当前 vs Heptabase welcome 对照）。Heptabase 需登录，无公开可截 demo；本文件把参数文字化落盘，真机验证截当前实现（i-p5c-landing.png）。与 I-P1/I-P3/I-P5a 同样的处理。",
+    "oneCardOnly": "这份作品只有 1 章，所以真机截图里网格只有一格 —— 网格本身实测是三列轨道（232px 单元），没有第二格可看。"
+  }
+}

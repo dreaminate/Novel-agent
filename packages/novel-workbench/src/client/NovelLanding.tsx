@@ -40,36 +40,46 @@ const STATUS_LABEL: Readonly<Record<string, string>> = {
 const OFFERED = 3
 
 const LANDING_CSS = `
-[data-novel-landing] { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+[data-novel-landing] { display: flex; flex-direction: column; align-items: flex-start; gap: var(--s4); }
 [data-novel-landing] .nw-landing-lead {
   margin: 0;
-  font-size: 13px;
+  font-size: var(--fs-13);
   line-height: 1.8;
   color: hsl(var(--text-200));
   max-width: 52ch;
 }
-[data-novel-landing] .nw-landing-chapters {
-  display: flex; flex-direction: column; gap: 6px;
-  margin: 0; padding: 0; list-style: none;
-  width: 100%; max-width: 420px;
+/*
+ * The ways in are cards, the way Heptabase's welcome is cards: a small grid of
+ * places to start, each pressable as a whole. What this replaced was a sentence
+ * with a stack of rows under it, which is a table of contents — the author read
+ * down it and still had to find where the doing was.
+ */
+[data-novel-landing] .nw-landing-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--s3);
+  width: 100%; max-width: 720px;
 }
-[data-novel-landing] .nw-landing-chapter {
-  display: flex; align-items: baseline; gap: 10px;
-  width: 100%;
-  padding: 10px 14px;
+[data-novel-landing] .nw-landing-card {
+  display: flex; flex-direction: column; gap: 6px;
+  padding: 14px 16px;
   border: 1px solid hsl(var(--border-100));
-  border-radius: 10px;
+  border-radius: var(--r-card);
   background: hsl(var(--bg-000));
   color: inherit;
   font: inherit;
-  font-size: 13px;
   text-align: left;
   cursor: pointer;
 }
-[data-novel-landing] .nw-landing-chapter:hover { border-color: hsl(var(--border-200)); }
-[data-novel-landing] .nw-landing-ord { color: hsl(var(--text-200)); font-variant-numeric: tabular-nums; }
-[data-novel-landing] .nw-landing-title { flex: 1 1 auto; color: hsl(var(--text-000)); }
-[data-novel-landing] .nw-landing-status { color: hsl(var(--text-200)); font-size: 12px; }
+[data-novel-landing] .nw-landing-card:hover { border-color: hsl(var(--border-200)); background: hsl(var(--bg-100)); }
+[data-novel-landing] .nw-landing-eyebrow {
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: .04em;
+  color: hsl(var(--text-200) / .8);
+}
+[data-novel-landing] .nw-landing-card-title { font-size: var(--fs-14); color: hsl(var(--text-000)); }
+[data-novel-landing] .nw-landing-card-meta { font-size: var(--fs-12); color: hsl(var(--text-200)); }
+/* The one card that is not a chapter says so by its edge, not by a different shape. */
+[data-novel-landing] .nw-landing-card-add { border-style: dashed; background: transparent; }
 [data-novel-landing] .nw-landing-confirm {
   display: flex; flex-direction: column; gap: 8px;
   padding: 12px 14px;
@@ -102,29 +112,41 @@ export function NovelLanding(props: NovelLandingProps): ReactNode {
           : '选一章开始写。'
             + (allAccepted ? '这一部现有的章节都写完了，也可以让 AI 接着往下规划。' : '')}
       </p>
-      {chapters.slice(0, OFFERED).map(chapter => createElement(
-        'button',
-        {
-          key: chapter.id,
-          type: 'button',
-          className: 'nw-landing-chapter',
-          'data-novel-landing-chapter': chapter.id,
-          onClick: () => { props.onOpenChapter(chapter.id) },
-        },
-        createElement('span', { className: 'nw-landing-ord' }, `第${String(chapter.number)}章`),
-        createElement('span', { className: 'nw-landing-title' }, chapter.title),
-        createElement('span', { className: 'nw-landing-status' }, STATUS_LABEL[chapter.status] ?? ''),
-      ))}
-      {(chapters.length === 0 || allAccepted) && (
-        <button
-          type="button"
-          className="btn sm"
-          data-novel-landing-plan="true"
-          onClick={props.onPlan}
-        >
-          {chapters.length === 0 ? '让 AI 规划第一章' : '让 AI 规划下一章'}
-        </button>
-      )}
+      <div className="nw-landing-cards">
+        {chapters.slice(0, OFFERED).map(chapter => createElement(
+          'button',
+          {
+            key: chapter.id,
+            type: 'button',
+            className: 'nw-landing-card',
+            'data-novel-landing-chapter': chapter.id,
+            onClick: () => { props.onOpenChapter(chapter.id) },
+          },
+          createElement('span', { className: 'nw-landing-eyebrow' }, `第${String(chapter.number)}章`),
+          createElement('span', { className: 'nw-landing-card-title' }, chapter.title),
+          createElement('span', { className: 'nw-landing-card-meta' }, STATUS_LABEL[chapter.status] ?? ''),
+        ))}
+        {(chapters.length === 0 || allAccepted) && createElement(
+          'button',
+          {
+            type: 'button',
+            className: 'nw-landing-card nw-landing-card-add',
+            'data-novel-landing-plan': 'true',
+            onClick: props.onPlan,
+          },
+          createElement(
+            'span',
+            { className: 'nw-landing-eyebrow' },
+            chapters.length === 0 ? '还没有章节' : '这一部写完了',
+          ),
+          createElement(
+            'span',
+            { className: 'nw-landing-card-title' },
+            chapters.length === 0 ? '让 AI 规划第一章' : '让 AI 规划下一章',
+          ),
+          createElement('span', { className: 'nw-landing-card-meta' }, '产出提案，你逐条接受'),
+        )}
+      </div>
       {props.planning === true && (
         <div className="nw-landing-confirm" data-novel-landing-confirm="true" role="dialog">
           <p>规划也只产出提案：AI 会把结构整理成一条条待你决定的建议，放进提案收件箱。</p>

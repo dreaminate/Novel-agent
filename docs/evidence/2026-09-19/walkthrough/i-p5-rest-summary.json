@@ -1,0 +1,66 @@
+{
+  "purpose": "I-P5c/e/f/g + I-P6 真机验证",
+  "date": "2026-09-19T08:16:42.972Z",
+  "landing": {
+    "present": true,
+    "gridDisplay": "grid",
+    "columns": "232px 232px 232px",
+    "cells": 1,
+    "cards": 1,
+    "planIsACard": null,
+    "text": "选一章开始写。 第1章 开篇章 待审"
+  },
+  "landingScreenshot": "i-p5c-landing",
+  "cast": {
+    "present": true,
+    "rows": [
+      {
+        "key": "设定",
+        "value": "阁主初立",
+        "keyLeft": 265,
+        "valueLeft": 301
+      },
+      {
+        "key": "方面",
+        "value": "状态",
+        "keyLeft": 265,
+        "valueLeft": 301
+      }
+    ],
+    "valuesShareOneColumn": true,
+    "valuesRightOfKeys": true
+  },
+  "castScreenshot": "i-p5e-cast",
+  "memory": {
+    "listPresent": true,
+    "rows": 2,
+    "revisions": [
+      2,
+      2
+    ],
+    "newestFirst": true,
+    "bandGone": true,
+    "firstRowChips": [
+      "故事事件",
+      "R2 起生效"
+    ]
+  },
+  "memoryScreenshot": "i-p5f-memory",
+  "advanced": {
+    "present": true,
+    "isCodeSurface": true,
+    "background": "rgb(245, 244, 237)",
+    "radius": "6px",
+    "maxHeight": "320px",
+    "overflow": "auto",
+    "wordBreak": "normal",
+    "fontFamily": "\"JetBrains Mono\", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
+    "sample": "{\n  \"projectId\": \"9dd94176-ed3e-4630-a374-72258673546f\",\n  \""
+  },
+  "advancedScreenshot": "i-p5g-advanced",
+  "dayScreenshot": "i-p6-whole-day",
+  "nightFrame": "night",
+  "nightScreenshot": "i-p6-whole-night",
+  "consoleErrors": 0,
+  "consoleErrorSamples": []
+}

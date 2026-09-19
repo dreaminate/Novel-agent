@@ -143,6 +143,24 @@ export function aspectLabel(field: string): string | undefined {
   return ASPECT_LABELS[field]
 }
 
+/**
+ * What to call a character on a card or in an archive, and whether that is
+ * really their name.
+ *
+ * The data face already prefers a `name` aspect and falls back to the entity id
+ * when Canon has none — and on this work it has none for anybody, so every card
+ * shows a slug. A slug where a name belongs is not neutral: it reads as though
+ * the tool believed `sumubai` was what the author calls them. Saying 未命名人物
+ * is the truth, and the id stays beside it, so seven unnamed characters are
+ * still seven cards the author can tell apart — and the gap is plain enough to
+ * be worth asking the agent to close.
+ */
+export function personLabel(name: string, id: string): { readonly label: string; readonly unnamed: boolean } {
+  const trimmed = name.trim()
+  if (trimmed !== '' && trimmed !== id) return { label: trimmed, unnamed: false }
+  return { label: '未命名人物', unnamed: true }
+}
+
 const ASPECT_LABELS: Readonly<Record<string, string>> = {
   name: '名字',
   faction: '势力',

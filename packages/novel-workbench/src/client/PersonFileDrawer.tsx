@@ -8,7 +8,7 @@
  */
 import { createElement, type ReactNode } from 'react'
 import { NovelDialog } from './novel-dialog.js'
-import { aspectLabel } from './novel-copy.js'
+import { aspectLabel, personLabel } from './novel-copy.js'
 import type { NovelPersonFile } from './novel-data.js'
 
 /**
@@ -45,19 +45,27 @@ export interface PersonFileDrawerProps {
 export function PersonFileDrawer(props: PersonFileDrawerProps): ReactNode {
   const { file } = props
   if (file === undefined) return null
+  const title = personLabel(file.name, file.id)
 
   return createElement(
     NovelDialog,
     {
       open: true,
       onClose: props.onClose,
-      label: `人物档案 ${file.name}`,
-      title: file.name,
+      label: `人物档案 ${title.label}`,
+      title: title.label,
       shape: 'drawer',
       closeLabel: '关闭',
-      badge: file.faction === undefined
-        ? createElement('span', { className: 'chip' }, '无势力')
-        : createElement('span', { className: 'chip info' }, file.faction),
+      badge: createElement(
+        'span',
+        { className: 'row', style: { gap: '6px', display: 'flex', alignItems: 'center' } },
+        // The id beside 未命名人物, so the archive of an unnamed character is
+        // still the archive of a particular one.
+        title.unnamed ? createElement('span', { className: 'chip mono' }, file.id) : null,
+        file.faction === undefined
+          ? createElement('span', { className: 'chip' }, '无势力')
+          : createElement('span', { className: 'chip info' }, file.faction),
+      ),
       surfaceAttrs: { 'data-novel-person-file': file.id },
       closeAttrs: { 'data-novel-person-close': 'true' },
     },

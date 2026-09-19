@@ -30,6 +30,7 @@ import Sigma from 'sigma'
 import { circular } from 'graphology-layout'
 import forceAtlas2 from 'graphology-layout-forceatlas2'
 import type { NovelStoryMap } from './novel-data.js'
+import { personLabel } from './novel-copy.js'
 import { probeWebGL } from './webgl-probe.js'
 import { useWorkbenchState, workbenchActions } from './store.js'
 
@@ -449,6 +450,11 @@ export function StoryMapView({ map, onOpenPerson, onOpenCast }: StoryMapViewProp
   }, [hovered])
 
   const chosen = map.nodes.find(node => node.id === selected)
+  // The node labels stay entity ids: on a graph a label's job is to tell one
+  // node from another, and seven nodes all reading 未命名人物 would tell the
+  // author nothing. Where a person is *read out* — here, and on the card and in
+  // the 人物档案 — the wording is the honest one, with the id kept beside it.
+  const chosenTitle = chosen === undefined ? undefined : personLabel(chosen.label, chosen.id)
   const hits = search.trim() === '' ? [] : matches(map, search)
 
   return (
@@ -529,7 +535,10 @@ export function StoryMapView({ map, onOpenPerson, onOpenCast }: StoryMapViewProp
                 />
                 {chosen !== undefined && (
                   <div className="nw-map-selection" data-novel-story-map-selection={chosen.id}>
-                    <strong>{chosen.label}</strong>
+                    <strong>{chosenTitle?.label}</strong>
+                    {chosenTitle?.unnamed === true && (
+                      <span className="chip mono">{chosen.id}</span>
+                    )}
                     <span>
                       {chosen.group === undefined ? ' · 无势力' : ` · ${chosen.group}`}
                       {chosen.place === undefined ? '' : ` · ${chosen.place}`}

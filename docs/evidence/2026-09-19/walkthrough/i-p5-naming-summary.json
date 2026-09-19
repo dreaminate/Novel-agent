@@ -1,0 +1,67 @@
+{
+  "purpose": "人物措辞（未命名人物 + 副显 id）真机验证",
+  "date": "2026-09-19T05:26:30.194Z",
+  "cast": [
+    {
+      "id": "guchen",
+      "unnamed": true,
+      "keepsId": true,
+      "head": "未命名人物"
+    },
+    {
+      "id": "junlinyuan",
+      "unnamed": true,
+      "keepsId": true,
+      "head": "未命名人物"
+    },
+    {
+      "id": "linxuan",
+      "unnamed": true,
+      "keepsId": true,
+      "head": "未命名人物"
+    },
+    {
+      "id": "qingshuying",
+      "unnamed": true,
+      "keepsId": true,
+      "head": "未命名人物"
+    },
+    {
+      "id": "sumubai",
+      "unnamed": true,
+      "keepsId": true,
+      "head": "未命名人物"
+    },
+    {
+      "id": "xiaoyuan",
+      "unnamed": true,
+      "keepsId": true,
+      "head": "未命名人物"
+    }
+  ],
+  "castAllUnnamedWithId": true,
+  "castScreenshot": "i-p5-naming-cast",
+  "drawer": {
+    "id": "guchen",
+    "title": "未命名人物",
+    "unnamed": true,
+    "keepsId": true
+  },
+  "drawerSaysUnnamedAndKeepsId": true,
+  "drawerScreenshot": "i-p5-naming-drawer",
+  "map": {
+    "nodeCount": 7,
+    "nodeLabelsAreIds": true
+  },
+  "mapUp": true,
+  "mapSelection": {
+    "id": "guchen",
+    "text": "未命名人物guchen · 无势力",
+    "unnamed": true,
+    "keepsId": true
+  },
+  "mapReadoutSaysUnnamedAndKeepsId": true,
+  "mapScreenshot": "i-p5-naming-map",
+  "consoleErrors": 0,
+  "consoleErrorSamples": []
+}

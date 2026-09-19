@@ -1,5 +1,35 @@
 # Execution checklist
 
+## Blocked items cleared — 人物措辞 + 草稿残留, 2026-09-19
+
+Two things the Phase 2 polish could not do on its own authority, cleared after the user said to.
+
+- [x] **人物不再拿实体 id 当名字。** This work's Canon carries no `name` aspect for anyone, so the data face fell
+      back to the entity id and every card was titled `guchen`. A slug where a name belongs reads as though the
+      tool believed it *was* the name. The cast card, the 人物档案 and the map's selection readout now say
+      **未命名人物** and keep the id beside it as a tag, so seven unnamed characters are still seven
+      distinguishable cards. The map's *node* labels stay ids on purpose — on a graph a label's job is to tell
+      one node from another, and seven nodes reading 未命名人物 would tell the author nothing.
+- [x] **The gap can now close, without touching Canon.** `refineRequest` asks the organizer to add a `name`
+      aspect for each character named in the chapter. Its output is a proposal the author accepts item by item,
+      so this is the proposal path, not a Canon-semantics change — the root fix in the organizer contract is
+      still D6's to decide.
+- [x] **A layout regression the screenshot caught.** The first cut squeezed 未命名人物 into a one-character-wide
+      vertical column behind three chips. No jsdom assertion could see it; the real-machine screenshot showed it
+      immediately. The chips now wrap and the name does not.
+- [x] **草稿残留已清。** `第1章《开篇章》.草稿.md` (54 B, entirely probe typing — `测测试试夜里风大…`) is removed. The
+      chapter now opens blank: verified on a real Host, `chars 0`, empty surface, and opening an empty chapter
+      does not write the file back. Full before/after in
+      [`docs/evidence/2026-09-19/draft-hygiene-2026-09-19.json`](docs/evidence/2026-09-19/draft-hygiene-2026-09-19.json),
+      with the exact bytes recorded so it is recoverable.
+- [x] **Blast radius checked, not assumed.** Every other file in the workdir is byte-identical (sha256 diff of
+      all `.md`); the author's Canon was read but not written; and all six of Canon's `pendingProposals` were
+      checked for the residue — none has it. Two packet.json files under the author's own
+      `.novel-project-proposal/` scratch dir do contain it; they are the author's own tooling output, the
+      product does not read that directory, and so they were reported rather than touched.
+- **Evidence.** `probe-naming.mjs` + three screenshots + summary; `probe-draft-hygiene.mjs` + screenshot +
+  summary; 514 tests, typecheck/lint clean.
+
 ## Front-end Phase 2 polish — I-P5b, 2026-09-19
 
 **Work order of record:** [`frontend-polish-handoff-2026-09-19.md`](frontend-polish-handoff-2026-09-19.md) §I-P5b (settings → macOS System Settings).

@@ -101,6 +101,12 @@ export function refineRequest(
     '',
     '按该技能的章节后写回约定，产出一份提案，用 propose_novel_result_packet：',
     '- chapter-state / post-check：本章实际造成的变化、付过的代价、新可行与新不可行、读者已知与可疑、角色携带、债务转变；',
+    // The one place a character can be given a name without touching Canon
+    // semantics: the organizer proposes it and the author accepts it item by
+    // item. Until one lands the cast, the map and the 人物档案 have nothing but
+    // the entity id — `guchen` is all this Canon holds.
+    '- character-state：人物在本章第一次被具名称呼时，给 TA 补一个 name 方面（值就是正文里怎么称呼这个人）；',
+    '  这一部的人物目前只有实体 id，界面只能显示 guchen 这样的 slug，补上 name 之后才显示成名字。',
     '- narrative-debt、relationship、knowledge、character-state / arc-hypothesis：',
     '  post-check 之外的真实变化各自用它自己的严格 contract，不要塞进 post-check 的自由文本。',
     '',

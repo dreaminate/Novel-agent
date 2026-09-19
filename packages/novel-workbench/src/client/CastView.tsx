@@ -8,7 +8,7 @@
  * so the board shows both.
  */
 import { createElement, type ReactNode } from 'react'
-import { aspectLabel } from './novel-copy.js'
+import { aspectLabel, personLabel } from './novel-copy.js'
 import type { NovelCastBoard } from './novel-data.js'
 
 /** Keep one aspect line inside a column card. */
@@ -55,17 +55,21 @@ export function CastView(props: CastViewProps): ReactNode {
       : createElement(
           'div',
           { className: 'grid g3', 'data-novel-cast-people': 'true' },
-          board.people.map(person => createElement(
+          board.people.map(person => {
+            const title = personLabel(person.name, person.id)
+            return createElement(
             'div',
             { className: 'card', key: person.id, 'data-novel-person': person.id },
             createElement(
               'div',
-              { className: 'row', style: { gap: '6px', display: 'flex', alignItems: 'center' } },
-              createElement(
-                'span',
-                { style: { fontWeight: 600, fontFamily: person.name === person.id ? 'var(--font-mono)' : undefined } },
-                person.name,
-              ),
+              // The chips may wrap to a second line; the name may not. Without
+              // this the three chips squeeze 未命名人物 into a vertical column
+              // one character wide, which is what the card did until a real
+              // screenshot caught it.
+              { className: 'row', style: { gap: '6px', display: 'flex', alignItems: 'center', flexWrap: 'wrap' } },
+              createElement('span', { style: { fontWeight: 600, whiteSpace: 'nowrap' } }, title.label),
+              // The id stays, so 未命名人物 is still seven distinguishable cards.
+              title.unnamed ? createElement('span', { className: 'chip mono' }, person.id) : null,
               person.faction === undefined
                 ? createElement('span', { className: 'chip' }, '无势力')
                 : createElement('span', { className: 'chip info' }, person.faction),
@@ -108,7 +112,8 @@ export function CastView(props: CastViewProps): ReactNode {
                 '让 AI 从这里继续写',
               ),
             ),
-          )),
+            )
+          }),
         ),
     board.factions.length > 0 && [
       createElement('div', { className: 'side-title', key: 'factions-title', style: { marginTop: '18px' } }, '势力'),

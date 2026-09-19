@@ -168,4 +168,60 @@ describe('novel-mode author-facing naming', () => {
 
     await act(async () => { root.unmount() })
   })
+
+  it('says a character Canon never named is unnamed, and keeps the id beside it', async () => {
+    // This work's Canon carries no `name` aspect for anyone: every character
+    // would show a slug where a name belongs, and a slug reads as though the
+    // tool believed it was one. Saying 未命名人物 is the truth, and the id stays
+    // beside it so seven unnamed people are still seven distinguishable cards —
+    // and so the gap is visible enough to be worth closing.
+    const board = buildCastBoard({ canon, relationships })
+    const container = document.createElement('div')
+    document.body.append(container)
+    const root = createRoot(container)
+    await act(async () => { root.render(createElement(CastView as never, { board })) })
+
+    const named = container.querySelector('[data-novel-person="guchen"]')
+    expect(named?.textContent).toContain('顾尘')
+    expect(named?.textContent).not.toContain('未命名人物')
+
+    const unnamed = container.querySelector('[data-novel-person="sumubai"]')
+    expect(unnamed?.textContent).toContain('未命名人物')
+    // Still identifiable: the id is there, just not posing as a name.
+    expect(unnamed?.textContent).toContain('sumubai')
+
+    await act(async () => { root.unmount() })
+  })
+
+  it('opens the 人物档案 of an unnamed character under the same wording', async () => {
+    const container = document.createElement('div')
+    document.body.append(container)
+    const root = createRoot(container)
+    await act(async () => {
+      root.render(createElement(PersonFileDrawer as never, {
+        file: {
+          id: 'sumubai', name: 'sumubai', faction: undefined,
+          aspects: [{ field: 'realm', value: '归道·归一境' }],
+          relations: [], appearances: [],
+        },
+        onClose: () => {}, onContinueFrom: () => {},
+      }))
+    })
+
+    const drawer = container.querySelector('[data-novel-person-file]')
+    expect(drawer?.textContent).toContain('未命名人物')
+    expect(drawer?.textContent).toContain('sumubai')
+
+    await act(async () => { root.unmount() })
+  })
+
+  it('asks the agent for the name, so the gap can actually close', async () => {
+    // The display can only be honest; it cannot fix the data. The one path that
+    // can is the refinement the author already runs — and its output is a
+    // proposal the author accepts item by item, so Canon is not touched by this.
+    const { refineRequest } = await import('../src/client/chapter-files.js')
+    const prompt = refineRequest({ number: 1, title: '开篇章' }, 5)
+    expect(prompt).toContain('name')
+    expect(prompt).toMatch(/名字|姓名/u)
+  })
 })

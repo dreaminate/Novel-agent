@@ -40,11 +40,28 @@ const ADVANCED_CSS = `
 }
 [data-novel-advanced] h3 { margin: 0 0 8px; font-size: 13px; color: hsl(var(--text-200)); }
 [data-novel-advanced] .nw-mono {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   line-height: 1.6;
   white-space: pre-wrap;
-  word-break: break-all;
+  /* Wrap at boundaries. break-all split character-state across two lines,
+     which is not JSON anyone can read. */
+  word-break: normal;
+  overflow-wrap: break-word;
+}
+/*
+ * The raw projection, on an editor surface rather than loose on the panel. A
+ * projection runs long, so it gets a ceiling and scrolls — the way a settings
+ * pane does — instead of pushing the sections below it off the page.
+ */
+[data-novel-advanced] .nw-code {
+  margin: 8px 0 0;
+  padding: 10px 12px;
+  border: 1px solid hsl(var(--border-100));
+  border-radius: var(--r-ctl);
+  background: hsl(var(--bg-200));
+  max-height: 320px;
+  overflow: auto;
 }
 [data-novel-advanced] .nw-facts { display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; margin: 0; }
 [data-novel-advanced] .nw-facts dt { color: hsl(var(--text-200)); }
@@ -168,7 +185,7 @@ export function AdvancedView(props: AdvancedViewProps): ReactNode {
           : (
               <details data-novel-advanced-canon="">
                 <summary>已接受作品事实（原始结构）</summary>
-                <div className="nw-mono">{props.diagnostics.canonJson}</div>
+                <div className="nw-mono nw-code">{props.diagnostics.canonJson}</div>
               </details>
             )}
       </section>

@@ -1,0 +1,40 @@
+{
+  "product": "VSCode settings.json",
+  "surface": "进阶面 (AdvancedView)",
+  "date": "2026-09-19",
+  "increment": "I-P5g",
+  "purpose": "视觉参数参照 for bespoke CSS (handoff §1 标杆: VSCode settings.json)",
+
+  "source": {
+    "primary": "VSCode 是开源编辑器（MIT）；其 settings.json 编辑器是公开、可合法查看的形态：等宽字体、编辑器底色、按边界折行、长内容自己滚动。参数取自该公开形态，未复制任何资产。",
+    "note": "未复制任何受版权保护的资产。"
+  },
+
+  "visualParams": {
+    "codeSurface": {
+      "rule": "原始 JSON 待在一个编辑器面上：自己的底色、自己的圆角、自己的内边距，而不是散在面板上。",
+      "currentProduct": "裸 .nw-mono 直接铺在 section 卡片里",
+      "usage": ".nw-code：background --bg-200、border-radius --r-ctl、padding 10px 12px、border --border-100。实测底色 rgb(245,244,237)、圆角 6px"
+    },
+    "wrapAtBoundaries": {
+      "rule": "按词边界折行；不把标识符从中间劈开。",
+      "currentProduct": "word-break: break-all —— `character-state` 会被拆到两行",
+      "usage": "word-break: normal + overflow-wrap: break-word。实测计算值 wordBreak: normal"
+    },
+    "ceilingAndScroll": {
+      "rule": "长内容有自己的上限并自己滚动，不把下面的内容推出页面。",
+      "currentProduct": "无上限，投影多长页面就多长",
+      "usage": "max-height 320px + overflow: auto。实测 maxHeight 320px、overflow auto"
+    },
+    "productMonoToken": {
+      "rule": "等宽字体用产品自己的 token，不另起一套字体栈。",
+      "currentProduct": "写死 ui-monospace, SFMono-Regular, Menlo, monospace —— 与界面里其它等宽文字不是同一套",
+      "usage": "font-family: var(--font-mono)。实测计算值以 \"JetBrains Mono\" 开头（即该 token 的第一顺位）"
+    }
+  },
+
+  "honestAssessment": {
+    "doubleScreenshotRule": "handoff §5.3 要求双截图（当前 vs VSCode settings.json 对照）。VSCode 无法在沙箱里截到同规模对照；参数文字化落盘，真机验证截当前实现（i-p5g-advanced.png）。",
+    "notChanged": "没有加行号、没有加语法着色。VSCode 默认的 settings.json 也没有行号；着色是一整套主题工程，超出一个 polish 增量的边界，且会给进阶面引入它自己没有的 token 体系。"
+  }
+}

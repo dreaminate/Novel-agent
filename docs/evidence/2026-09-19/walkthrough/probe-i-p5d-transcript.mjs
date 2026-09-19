@@ -156,13 +156,17 @@ try {
   await sleep(600)
   findings.authorLineVisible = scrolled
   findings.authorShot = await s.shot('i-p5d-transcript-author')
-  // The tool block right after it, which is the other half of the increment.
+  // The tool block that actually shows the compaction: the longest run, which is
+  // mid-thread. The first block sits at the very top, where scrolling to it is
+  // the same as not scrolling and the screenshot comes out identical to the one
+  // above.
   const tools = await s.ev(`(() => {
-    const block = document.querySelector('.novel-transcript-tools')
-    if (block === null) return null
-    block.scrollIntoView({ block: 'center' })
-    const cs = getComputedStyle(block)
-    return { gap: cs.rowGap || cs.gap, bordered: cs.borderLeftWidth, lines: block.children.length } })()`)
+    const blocks = [...document.querySelectorAll('.novel-transcript-tools')]
+    if (blocks.length === 0) return null
+    const longest = blocks.reduce((a, b) => (b.children.length > a.children.length ? b : a))
+    longest.scrollIntoView({ block: 'center' })
+    const cs = getComputedStyle(longest)
+    return { gap: cs.rowGap || cs.gap, bordered: cs.borderLeftWidth, lines: longest.children.length } })()`)
   await sleep(600)
   findings.toolBlock = tools
   findings.toolShot = tools === null ? null : await s.shot('i-p5d-transcript-tools')

@@ -1,6 +1,6 @@
 {
   "purpose": "I-P5d transcript Linear 化真机验证",
-  "date": "2026-09-19T08:51:21.528Z",
+  "date": "2026-09-19T08:54:48.266Z",
   "port": "4782",
   "threads": 5,
   "opened": {
@@ -67,7 +67,7 @@
   "toolBlock": {
     "gap": "4px",
     "bordered": "2px",
-    "lines": 1
+    "lines": 11
   },
   "toolShot": "i-p5d-transcript-tools",
   "consoleErrors": 0,
